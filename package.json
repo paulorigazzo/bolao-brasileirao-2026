@@ -1,11 +1,12 @@
 {
   "name": "bolao-br-2026",
-  "version": "6.2.2a",
+  "version": "6.3.0a",
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node scripts/check-project.mjs",
-    "check:syntax": "node --check js/app.js && node --check js/motion.js && node --check netlify/functions/_api-helpers.mjs && node --check netlify/functions/_constants.mjs && node --check netlify/functions/_sync-shared.mjs && node --check netlify/functions/classificacao-brasileirao.mjs && node --check netlify/functions/diagnostico-sistema.mjs && node --check netlify/functions/sincronizar-jogos.mjs && node --check netlify/functions/sincronizar-jogos-agendado.mjs"
+    "check": "node scripts/check-project.mjs && npm run check:syntax && npm run test:stats",
+    "check:syntax": "node --check js/app.js && node --check js/statistics-engine.js && node --check js/motion.js && node --check netlify/functions/_api-helpers.mjs && node --check netlify/functions/_constants.mjs && node --check netlify/functions/_sync-shared.mjs && node --check netlify/functions/classificacao-brasileirao.mjs && node --check netlify/functions/diagnostico-sistema.mjs && node --check netlify/functions/sincronizar-jogos.mjs && node --check netlify/functions/sincronizar-jogos-agendado.mjs",
+    "test:stats": "node scripts/test-statistics-engine.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4"
