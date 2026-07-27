@@ -1,7 +1,11 @@
-# Bolão Brasileirão 2026 — v6.3.0c
+# Bolão Brasileirão 2026 — v6.3.0c1
 
+## v6.3.0c1 — Hotfix da Auditoria
 
-
+- alertas de integridade agora identificam visualmente a partida;
+- placares incompatíveis são removidos também de jogos adiados e cancelados;
+- detalhes exibidos: times, placar, rodada, data, local, status e ID;
+- teste automatizado cobre a política de status e placar.
 
 ## v6.2.2 — Refinamento da Área Administrativa
 

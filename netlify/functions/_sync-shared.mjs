@@ -1,5 +1,6 @@
 import { serviceClient, isMissingTableError, requireEnv } from "./_api-helpers.mjs";
 import { FOOTBALL_API_BASE, COMPETITION_CODE, SEASON_YEAR, MAX_API_CALLS_PER_SYNC } from "./_constants.mjs";
+import { sanitizeGameForStatus } from "./_sync-policy.mjs";
 
 
 const HOME_STADIUMS = [
@@ -106,6 +107,7 @@ function normalizeMatch(match) {
     sincronizado_em: new Date().toISOString(),
   };
 }
+
 
 export async function syncGames(options = {}) {
   const startedAt = Date.now();
@@ -238,49 +240,7 @@ export async function syncGames(options = {}) {
   const repairs = [];
   const merged = valid.map((game) => {
     const previous = existingById.get(Number(game.id_jogo));
-    const previousHasScore = previous?.gols_casa != null && previous?.gols_fora != null;
-    const apiHasScore = game.gols_casa != null && game.gols_fora != null;
-
-    // A resposta atual da API é a fonte de verdade para o status. Partidas
-    // futuras não podem conservar um placar antigo ou parcial. Status e placar
-    // são enviados no mesmo objeto do upsert, evitando gravações intermediárias.
-    if (game.status === "agendado") {
-      if (previousHasScore || apiHasScore) {
-        repairs.push({
-          id_jogo: game.id_jogo,
-          previousStatus: previous?.status ?? null,
-          apiStatus: game.status,
-          previousScore: previousHasScore ? `${previous.gols_casa} × ${previous.gols_fora}` : null,
-          reason: "placar incompatível removido de partida futura",
-        });
-      }
-      return { ...game, gols_casa: null, gols_fora: null };
-    }
-
-    // Durante uma partida ao vivo, uma resposta pontual sem score pode reutilizar
-    // o último placar ao vivo conhecido.
-    if (game.status === "em_andamento" && !apiHasScore && previousHasScore) {
-      return { ...game, gols_casa: Number(previous.gols_casa), gols_fora: Number(previous.gols_fora) };
-    }
-
-    // Um placar parcial nunca pode virar "resultado final" apenas porque o status
-    // mudou de ao vivo para encerrado. Só preservamos o placar anterior quando ele
-    // já pertencia a uma partida anteriormente encerrada. Caso contrário, limpamos
-    // o score e aguardamos a confirmação oficial na próxima sincronização.
-    if (game.status === "encerrado" && !apiHasScore) {
-      if (previous?.status === "encerrado" && previousHasScore) {
-        return { ...game, gols_casa: Number(previous.gols_casa), gols_fora: Number(previous.gols_fora) };
-      }
-      repairs.push({
-        id_jogo: game.id_jogo,
-        previousStatus: previous?.status ?? null,
-        apiStatus: game.status,
-        previousScore: previousHasScore ? `${previous.gols_casa} × ${previous.gols_fora}` : null,
-        reason: "placar parcial não promovido a resultado final",
-      });
-      return { ...game, gols_casa: null, gols_fora: null };
-    }
-    return game;
+    return sanitizeGameForStatus(game, previous, repairs);
   });
 
   const batchSize = 100;

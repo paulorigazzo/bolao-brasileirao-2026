@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeRoundPerformance, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.3.0c";
+const APP_VERSION = "6.3.0c1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1789,6 +1789,26 @@ function renderAdminRoundStatus(){
   $("adminRoundContent").innerHTML=`${metrics}${progressHtml}${nextHtml}<details class="admin-round-details"><summary>Ver todos os jogos <span>${total}</span></summary><div class="admin-round-games">${gameRows||'<p class="muted-note">Nenhum jogo disponível.</p>'}</div></details>`;
 }
 
+function auditGameContext(game){
+  if(!game) return null;
+  const kickoff=new Date(game.inicio);
+  return {
+    id:String(game.id_jogo??"—"),
+    home:String(game.time_casa||"Mandante a definir"),
+    away:String(game.time_fora||"Visitante a definir"),
+    round:Number.isFinite(Number(game.rodada))?Number(game.rodada):null,
+    kickoff:Number.isFinite(kickoff.getTime())?formatDate(game.inicio):"Data inválida",
+    venue:String(game.local_partida||game.local||"Local não informado"),
+    rawStatus:String(game.status||"Sem status"),
+    status:gameStatusDisplay(game).label,
+    score:hasValidScore(game)?`${Number(game.gols_casa)} × ${Number(game.gols_fora)}`:"Sem placar válido",
+  };
+}
+
+function auditFinding(text,{game=null,code="generic"}={}){
+  return {text,code,game:auditGameContext(game)};
+}
+
 function buildAuditReport(){
   const issues=[];
   const warnings=[];
@@ -1800,24 +1820,25 @@ function buildAuditReport(){
   for(const game of games){
     const id=String(game.id_jogo);
     gameIds.set(id,(gameIds.get(id)||0)+1);
-    if(!Number.isFinite(new Date(game.inicio).getTime())) issues.push(`Jogo ${id}: data ou horário inválido.`);
+    if(!Number.isFinite(new Date(game.inicio).getTime())) issues.push(auditFinding("Data ou horário inválido.",{game,code:"invalid-date"}));
     const displayStatus=gameStatusDisplay(game);
     const validScore=hasValidScore(game);
-    if(isFinished(game) && !isCancelled(game) && !validScore) issues.push(`Jogo ${id}: finalizado sem placar válido.`);
+    if(isFinished(game) && !isCancelled(game) && !validScore) issues.push(auditFinding("Partida finalizada sem placar válido.",{game,code:"finished-without-score"}));
     // Placar parcial é esperado em partidas ao vivo e não constitui inconsistência.
     // Alertamos apenas quando o placar está associado a um estado incompatível.
-    if(validScore && displayStatus.key==="future") warnings.push(`Jogo ${id}: possui placar, mas está classificado como Futura.`);
-    if(validScore && displayStatus.key==="postponed") warnings.push(`Jogo ${id}: possui placar, mas está classificado como Adiada.`);
+    if(validScore && displayStatus.key==="future") warnings.push(auditFinding("Possui placar, mas está classificada como Futura.",{game,code:"future-with-score"}));
+    if(validScore && displayStatus.key==="postponed") warnings.push(auditFinding("Possui placar, mas está classificada como Adiada.",{game,code:"postponed-with-score"}));
+    if(validScore && displayStatus.key==="cancelled") warnings.push(auditFinding("Possui placar, mas está classificada como Cancelada.",{game,code:"cancelled-with-score"}));
   }
-  for(const [id,count] of gameIds) if(count>1) issues.push(`Jogo ${id}: registro duplicado (${count} ocorrências).`);
+  for(const [id,count] of gameIds) if(count>1) issues.push(auditFinding(`Jogo ${id}: registro duplicado (${count} ocorrências).`,{code:"duplicate-game"}));
 
   for(const pick of picks){
     const key=`${pick.usuario||"?"}:${pick.id_jogo}`;
     pickKeys.set(key,(pickKeys.get(key)||0)+1);
-    if(!gameIds.has(String(pick.id_jogo))) issues.push(`Palpite de ${pick.usuario||"participante"}: jogo ${pick.id_jogo} não encontrado.`);
-    if(!hasScoreValue(pick.gols_casa) || !hasScoreValue(pick.gols_fora)) issues.push(`Palpite de ${pick.usuario||"participante"} no jogo ${pick.id_jogo}: placar inválido.`);
+    if(!gameIds.has(String(pick.id_jogo))) issues.push(auditFinding(`Palpite de ${pick.usuario||"participante"}: jogo ${pick.id_jogo} não encontrado.`,{code:"orphan-pick"}));
+    if(!hasScoreValue(pick.gols_casa) || !hasScoreValue(pick.gols_fora)) issues.push(auditFinding(`Palpite de ${pick.usuario||"participante"} no jogo ${pick.id_jogo}: placar inválido.`,{code:"invalid-pick"}));
   }
-  for(const [key,count] of pickKeys) if(count>1) issues.push(`Palpite duplicado: ${key} (${count} ocorrências).`);
+  for(const [key,count] of pickKeys) if(count>1) issues.push(auditFinding(`Palpite duplicado: ${key} (${count} ocorrências).`,{code:"duplicate-pick"}));
 
   const scoredGames=games.filter(isScorableGame).length;
   const liveGames=games.filter(game=>gameStatusDisplay(game).key==="live").length;
@@ -1827,9 +1848,27 @@ function buildAuditReport(){
   const cancelledGames=games.filter(game=>gameStatusDisplay(game).key==="cancelled").length;
   const rankedPoints=(state.ranking||[]).reduce((sum,item)=>sum+(Number(item.total)||0),0);
   const invalidRanking=(state.ranking||[]).filter(item=>item.total<0 || item.exact<0 || item.scored<0);
-  if(invalidRanking.length) issues.push('Ranking contém valores negativos.');
+  if(invalidRanking.length) issues.push(auditFinding('Ranking contém valores negativos.',{code:"negative-ranking"}));
 
   return {issues,warnings,summary:{games:games.length,scoredGames,liveGames,liveGamesWithScore,futureGames,postponedGames,cancelledGames,picks:picks.length,participants:(state.ranking||[]).length,rankedPoints}};
+}
+
+function auditFindingHtml(row){
+  if(!row.game) return `<div class="admin-audit-item ${row.type}"><span>${row.icon}</span><p>${escapeHtml(row.text)}</p></div>`;
+  const game=row.game;
+  const round=game.round?`Rodada ${game.round}`:"Rodada não informada";
+  return `<article class="admin-audit-item admin-audit-game ${row.type}" data-audit-code="${escapeHtml(row.code)}">
+    <span class="admin-audit-icon">${row.icon}</span>
+    <div class="admin-audit-game-content">
+      <div class="admin-audit-game-title"><strong>${escapeHtml(game.home)} <b>${escapeHtml(game.score)}</b> ${escapeHtml(game.away)}</strong><span>${escapeHtml(game.status)}</span></div>
+      <p>${escapeHtml(row.text)}</p>
+      <div class="admin-audit-game-meta">
+        <span>🏁 ${escapeHtml(round)}</span><span>📅 ${escapeHtml(game.kickoff)}</span><span>🏟 ${escapeHtml(game.venue)}</span>
+      </div>
+      <div class="admin-audit-technical"><span>Status gravado: <strong>${escapeHtml(game.rawStatus)}</strong></span><span>ID: <code>${escapeHtml(game.id)}</code></span></div>
+      ${row.code==="postponed-with-score"?'<small class="admin-audit-guidance">A próxima sincronização removerá automaticamente o placar incompatível e manterá a partida fora da pontuação.</small>':''}
+    </div>
+  </article>`;
 }
 
 function renderAdminAudit(){
@@ -1838,13 +1877,12 @@ function renderAdminAudit(){
   if(!target) return;
   calculateRanking();
   const report=buildAuditReport();
-  const total=report.issues.length+report.warnings.length;
   if(badge){
     badge.textContent=report.issues.length?`${report.issues.length} erro${report.issues.length===1?'':'s'}`:report.warnings.length?`${report.warnings.length} alerta${report.warnings.length===1?'':'s'}`:'Tudo consistente';
     badge.className=`admin-audit-badge ${report.issues.length?'has-errors':report.warnings.length?'has-warnings':'is-ok'}`;
   }
   const s=report.summary;
-  const rows=[...report.issues.map(text=>({type:'error',icon:'❌',text})),...report.warnings.map(text=>({type:'warning',icon:'⚠️',text}))];
+  const rows=[...report.issues.map(item=>({...item,type:'error',icon:'❌'})),...report.warnings.map(item=>({...item,type:'warning',icon:'⚠️'}))];
   target.innerHTML=`
     <div class="admin-audit-summary">
       <article><span>Jogos</span><strong>${s.games}</strong><small>${s.scoredGames} finalizados válidos</small></article>
@@ -1854,8 +1892,8 @@ function renderAdminAudit(){
     </div>
     <div class="admin-audit-rule"><strong>Regra crítica aplicada:</strong> somente partidas oficialmente finalizadas, não canceladas e com placar válido geram pontos e estatísticas. Placar parcial em jogo ao vivo é uma condição normal e não gera alerta.</div>
     ${state.lastSyncReport?.repairedCount?`<div class="admin-audit-ok">🔧 Última sincronização corrigiu automaticamente <strong>${state.lastSyncReport.repairedCount}</strong> registro${state.lastSyncReport.repairedCount===1?'':'s'}. ${escapeHtml((state.lastSyncReport.repairs||[]).slice(0,4).map(item=>`Jogo ${item.id_jogo}: ${item.reason}`).join(' • '))}</div>`:''}
-    ${rows.length?`<div class="admin-audit-list">${rows.map(row=>`<div class="admin-audit-item ${row.type}"><span>${row.icon}</span><p>${escapeHtml(row.text)}</p></div>`).join('')}</div>`:`<div class="admin-audit-ok">✅ Nenhuma inconsistência estrutural encontrada nos dados carregados.</div>`}
-    <small class="muted-note">Auditoria executada com os dados atuais do Supabase. A sincronização grava status e placar juntos e remove automaticamente placares incompatíveis de partidas futuras.</small>`;
+    ${rows.length?`<div class="admin-audit-list">${rows.map(auditFindingHtml).join('')}</div>`:`<div class="admin-audit-ok">✅ Nenhuma inconsistência estrutural encontrada nos dados carregados.</div>`}
+    <small class="muted-note">Auditoria executada com os dados atuais do Supabase. Status e placar são atualizados juntos; partidas futuras, adiadas ou canceladas não conservam placares incompatíveis após a sincronização.</small>`;
 }
 
 function renderAdminExecutiveDashboard(){
