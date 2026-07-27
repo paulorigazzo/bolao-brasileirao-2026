@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.3.0a";
+const APP_VERSION = "6.3.0b";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1246,15 +1246,32 @@ function renderStats(){
   const maxPossible=finished*10;
   const overallRate=maxPossible?Math.round(totalPoints/maxPossible*100):0;
   const averagePerGame=finished?totalPoints/finished:0;
+  const exactRate=finished?Math.round(counts.exact/finished*100):0;
+
+  const classification=classifyStatisticsGames({
+    games:state.games,
+    picks:state.ownPicks,
+    isScorableGame,
+    isLocked:locked,
+    gameStatusDisplay,
+  });
+  const progress=classification.metrics;
+  const quality=classification.dataQuality;
 
   const ring=$("statsOverallRing");
   if(ring){
     ring.style.setProperty("--progress",overallRate);
-    ring.innerHTML=`<strong>${overallRate}%</strong><span>aproveitamento</span>`;
+    ring.innerHTML=finished
+      ? `<strong>${overallRate}%</strong><span>eficiência</span>`
+      : `<strong>—</strong><span>sem dados</span>`;
+    ring.setAttribute("aria-label",finished?`Eficiência de ${overallRate}% nos palpites avaliados`:"Eficiência ainda indisponível");
   }
+
   if($("statsSummaryText")) $("statsSummaryText").textContent=finished
-    ? `${totalPoints} pontos em ${finished} jogos pontuados · ${hitRate}% dos resultados renderam pontos.`
-    : "Suas estatísticas aparecerão assim que houver jogos finalizados.";
+    ? `${totalPoints} pontos em ${finished} palpites avaliados · participação de ${progress.participationRate}% nos jogos encerrados.`
+    : progress.completedEligible
+      ? `Ainda não há palpites avaliados. ${progress.missedCompleted} jogo${progress.missedCompleted===1?" foi encerrado":"s foram encerrados"} sem palpite.`
+      : "Suas estatísticas aparecerão assim que houver jogos finalizados.";
 
   const byRound=new Map();
   entries.forEach(({pick,game})=>{
@@ -1276,40 +1293,67 @@ function renderStats(){
   entries.forEach(({pick,game})=>{ if(points(pick,game)>0){current++;bestStreak=Math.max(bestStreak,current);}else current=0; });
 
   if($("statsHighlights")) $("statsHighlights").innerHTML=`
-    <article><span>Acertos</span><strong>${hitRate}%</strong><small>${scored} de ${finished||0} jogos</small></article>
-    <article><span>Placares exatos</span><strong>${counts.exact}</strong><small>${finished?Math.round(counts.exact/finished*100):0}% dos jogos</small></article>
-    <article><span>Melhor rodada</span><strong>${bestRound?`R${bestRound[0]}`:"—"}</strong><small>${bestRound?`${bestRound[1].points} pontos`:"Sem dados"}</small></article>
-    <article><span>Média por jogo</span><strong>${averagePerGame.toFixed(1)}</strong><small>pontos por partida</small></article>`;
+    <article><span>Acertos</span><strong>${finished?`${hitRate}%`:"—"}</strong><small>${finished?`${scored} de ${finished} palpites renderam pontos`:"Aguardando resultados"}</small></article>
+    <article><span>Placares exatos</span><strong>${finished?counts.exact:"—"}</strong><small>${finished?`${exactRate}% dos palpites avaliados`:"Nenhum palpite avaliado"}</small></article>
+    <article><span>Participação</span><strong>${progress.completedEligible?`${progress.participationRate}%`:"—"}</strong><small>${progress.completedEligible?`${progress.completedWithPick} de ${progress.completedEligible} jogos encerrados`:"Sem jogos encerrados"}</small></article>
+    <article><span>Média por jogo</span><strong>${finished?averagePerGame.toFixed(1):"—"}</strong><small>${finished?`${totalPoints} pontos em ${finished} jogos`:"Aguardando resultados"}</small></article>`;
 
-  const max=Math.max(1,...Object.values(counts));
-  const labels=[['exact','Placar exato','10 pts'],['difference','Diferença exata','5 pts'],['winner','Vencedor','3 pts'],['draw','Empate','1 pt'],['miss','Sem pontos','0 pt']];
-  $("hitBreakdown").innerHTML=labels.map(([key,label,value])=>`<div class="breakdown-row"><div><span>${label}<small>${value}</small></span><strong>${counts[key]}</strong></div><div class="mini-track"><div style="width:${counts[key]/max*100}%"></div></div></div>`).join("");
+  if($("hitBreakdown")){
+    const max=Math.max(1,...Object.values(counts));
+    const labels=[['exact','Placar exato','10 pts'],['difference','Diferença exata','5 pts'],['winner','Vencedor','3 pts'],['draw','Empate','1 pt'],['miss','Sem pontos','0 pt']];
+    $("hitBreakdown").innerHTML=finished
+      ? labels.map(([key,label,value])=>`<div class="breakdown-row"><div><span>${label}<small>${value} · ${Math.round(counts[key]/finished*100)}%</small></span><strong>${counts[key]}</strong></div><div class="mini-track"><div style="width:${counts[key]/max*100}%"></div></div></div>`).join("")
+      : '<div class="stats-empty-state"><span aria-hidden="true">🎯</span><strong>Nenhum palpite avaliado</strong><p>Os tipos de acerto serão detalhados após o encerramento dos primeiros jogos com palpite.</p></div>';
+  }
 
-  const progress=classifyStatisticsGames({
-    games:state.games,
-    picks:state.ownPicks,
-    isScorableGame,
-    isLocked:locked,
-    gameStatusDisplay,
-  }).metrics;
-  $("seasonProgress").innerHTML=`<div class="season-ring" style="--progress:${progress.participationRate}"><strong>${progress.participationRate}%</strong><span>participação</span></div><div class="season-list"><p><strong>${progress.registeredPicks}</strong> palpites registrados</p><p><strong>${progress.completedWithPick}</strong> jogos encerrados com palpite</p><p><strong>${progress.missedCompleted}</strong> jogos encerrados sem palpite</p><p><strong>${progress.openAvailable}</strong> disponíveis para palpitar agora</p>${progress.awaitingResult?`<p><strong>${progress.awaitingResult}</strong> aguardando resultado oficial</p>`:""}${progress.excluded?`<p><strong>${progress.excluded}</strong> adiados ou cancelados fora do cálculo</p>`:""}</div>`;
+  if($("seasonProgress")) $("seasonProgress").innerHTML=`
+    <div class="season-ring" style="--progress:${progress.participationRate}">
+      <strong>${progress.completedEligible?`${progress.participationRate}%`:"—"}</strong><span>participação</span>
+    </div>
+    <div class="season-progress-content">
+      <div class="season-progress-head"><div><span>Cobertura da temporada</span><strong>${progress.seasonCoverageRate}%</strong></div><small>${progress.coveredSeasonGames} de ${progress.activeSeasonGames||0} jogos elegíveis têm palpite</small></div>
+      <div class="season-coverage-track" role="progressbar" aria-label="Cobertura da temporada" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress.seasonCoverageRate}"><i style="width:${progress.seasonCoverageRate}%"></i></div>
+      <div class="season-metrics">
+        <p><span>Encerrados com palpite</span><strong>${progress.completedWithPick}</strong></p>
+        <p><span>Encerrados sem palpite</span><strong>${progress.missedCompleted}</strong></p>
+        <p><span>Abertos pendentes</span><strong>${progress.openAvailable}</strong></p>
+        <p><span>Palpites registrados</span><strong>${progress.registeredPicks}</strong></p>
+      </div>
+    </div>`;
+
+  const qualityPanel=$("statsDataQuality");
+  if(qualityPanel){
+    const reasons=[];
+    if(quality.awaitingResult) reasons.push(`<li><strong>${quality.awaitingResult}</strong> aguardando resultado oficial</li>`);
+    if(quality.postponed) reasons.push(`<li><strong>${quality.postponed}</strong> adiado${quality.postponed===1?"":"s"} fora dos cálculos</li>`);
+    if(quality.cancelled) reasons.push(`<li><strong>${quality.cancelled}</strong> cancelado${quality.cancelled===1?"":"s"} fora dos cálculos</li>`);
+    if(quality.invalid) reasons.push(`<li><strong>${quality.invalid}</strong> com dados incompletos para revisão</li>`);
+    qualityPanel.classList.toggle("hidden",!quality.hasAttention);
+    qualityPanel.classList.toggle("is-warning",quality.level==="warning");
+    qualityPanel.innerHTML=quality.hasAttention?`
+      <div class="stats-quality-icon" aria-hidden="true">${quality.level==="warning"?"⚠️":"ℹ️"}</div>
+      <div><span class="eyebrow">QUALIDADE DAS ESTATÍSTICAS</span><h2>${quality.level==="warning"?"Alguns dados precisam de atenção":"Números calculados com ressalvas"}</h2>
+      <p>Os indicadores exibidos consideram somente partidas com situação e resultado válidos.</p><ul>${reasons.join("")}</ul></div>`:"";
+  }
 
   const validPlayers=state.ranking.filter(player=>player.scored>0);
   const groupAverage=validPlayers.length?validPlayers.reduce((sum,player)=>sum+(player.total/player.scored),0)/validPlayers.length:0;
   const comparisonMax=Math.max(1,averagePerGame,groupAverage);
   const difference=averagePerGame-groupAverage;
-  if($("groupComparison")) $("groupComparison").innerHTML=`
+  if($("groupComparison")) $("groupComparison").innerHTML=finished?`
     <div class="comparison-row"><div><span>Você</span><strong>${averagePerGame.toFixed(1)} pts/jogo</strong></div><div class="comparison-track"><i style="width:${averagePerGame/comparisonMax*100}%"></i></div></div>
     <div class="comparison-row"><div><span>Média do grupo</span><strong>${groupAverage.toFixed(1)} pts/jogo</strong></div><div class="comparison-track group"><i style="width:${groupAverage/comparisonMax*100}%"></i></div></div>
-    <p class="comparison-note ${difference>=0?'positive':'negative'}">${finished?`${difference>=0?'▲':'▼'} ${Math.abs(difference).toFixed(1)} ponto por jogo ${difference>=0?'acima':'abaixo'} da média do grupo.`:'A comparação aparecerá após os primeiros resultados.'}</p>`;
+    <p class="comparison-note ${difference>=0?'positive':'negative'}">${difference>=0?'▲':'▼'} ${Math.abs(difference).toFixed(1)} ponto por jogo ${difference>=0?'acima':'abaixo'} da média do grupo.</p>`
+    : '<div class="stats-empty-state compact"><span aria-hidden="true">⚖️</span><strong>Comparação ainda indisponível</strong><p>Ela será calculada quando houver palpites pontuados no grupo.</p></div>';
 
-  if($("currentStreak")) $("currentStreak").innerHTML=`
+  if($("currentStreak")) $("currentStreak").innerHTML=finished?`
     <div class="streak-number"><strong>${streak}</strong><span>${streak===1?'jogo pontuando':'jogos pontuando'}</span></div>
-    <div class="streak-details"><p><span>Melhor sequência</span><strong>${bestStreak}</strong></p><p><span>Jogos com pontos</span><strong>${scored}</strong></p><p><span>Sem pontuar</span><strong>${counts.miss}</strong></p></div>`;
+    <div class="streak-details"><p><span>Melhor sequência</span><strong>${bestStreak}</strong></p><p><span>Jogos com pontos</span><strong>${scored}</strong></p><p><span>Sem pontuar</span><strong>${counts.miss}</strong></p></div>`
+    : '<div class="stats-empty-state compact"><span aria-hidden="true">🔥</span><strong>Nenhuma sequência iniciada</strong><p>O histórico começa após o primeiro palpite avaliado.</p></div>';
 
   const top=Math.max(1,...rounds.map(([,data])=>data.points));
   if($("bestRoundBadge")) $("bestRoundBadge").textContent=bestRound?`Melhor rodada: R${bestRound[0]} · ${bestRound[1].points} pts`:"Melhor rodada: —";
-  $("roundHistory").innerHTML=rounds.length?rounds.map(([round,data])=>`<div class="round-history-item ${bestRound&&round===bestRound[0]?'best':''}"><span>R${round}</span><div class="history-track"><div style="width:${data.points/top*100}%"></div></div><strong>${data.points} pts</strong><small>${data.hits}/${data.games} acertos</small></div>`).join(""):'<p class="muted-note">O histórico aparecerá quando houver jogos finalizados.</p>';
+  $("roundHistory").innerHTML=rounds.length?rounds.map(([round,data])=>`<div class="round-history-item ${bestRound&&round===bestRound[0]?'best':''}"><span>R${round}</span><div class="history-track"><div style="width:${data.points/top*100}%"></div></div><strong>${data.points} pts</strong><small>${data.hits}/${data.games} acertos</small></div>`).join(""):'<div class="stats-empty-state"><span aria-hidden="true">📈</span><strong>Sem evolução por rodada ainda</strong><p>O gráfico será exibido após os primeiros jogos finalizados com palpite.</p></div>';
 }
 
 function standingsZone(position, totalTeams){

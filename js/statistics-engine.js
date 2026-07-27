@@ -9,6 +9,8 @@ const hasStatus = (game, terms) => {
   return terms.some(term => status.includes(term));
 };
 
+const percent = (value, total) => total ? Math.round((value / total) * 100) : 0;
+
 export function classifyStatisticsGames({
   games = [],
   picks = [],
@@ -86,16 +88,48 @@ export function classifyStatisticsGames({
   }
 
   const completedEligible = groups.completedWithPick.length + groups.completedWithoutPick.length;
-  const participationRate = completedEligible
-    ? Math.round((groups.completedWithPick.length / completedEligible) * 100)
-    : 0;
+  const activeSeasonGames =
+    completedEligible +
+    groups.openWithPick.length +
+    groups.openWithoutPick.length +
+    groups.liveWithPick.length +
+    groups.liveWithoutPick.length +
+    groups.lockedAwaitingResultWithPick.length +
+    groups.lockedAwaitingResultWithoutPick.length;
 
+  const coveredSeasonGames =
+    groups.completedWithPick.length +
+    groups.openWithPick.length +
+    groups.liveWithPick.length +
+    groups.lockedAwaitingResultWithPick.length;
+
+  const awaitingResult =
+    groups.liveWithPick.length +
+    groups.liveWithoutPick.length +
+    groups.lockedAwaitingResultWithPick.length +
+    groups.lockedAwaitingResultWithoutPick.length;
+
+  const excluded = groups.postponed.length + groups.cancelled.length;
   const knownGameIds = new Set(games.map(game => Number(game?.id_jogo)).filter(Number.isFinite));
   const registeredPicks = new Set(
     picks
       .map(pick => Number(pick?.id_jogo))
       .filter(gameId => Number.isFinite(gameId) && knownGameIds.has(gameId))
   ).size;
+
+  const dataQuality = {
+    postponed: groups.postponed.length,
+    cancelled: groups.cancelled.length,
+    invalid: groups.invalid.length,
+    awaitingResult,
+  };
+  dataQuality.totalAttention =
+    dataQuality.postponed +
+    dataQuality.cancelled +
+    dataQuality.invalid +
+    dataQuality.awaitingResult;
+  dataQuality.hasAttention = dataQuality.totalAttention > 0;
+  dataQuality.level = dataQuality.invalid > 0 ? "warning" : dataQuality.hasAttention ? "info" : "ok";
 
   return {
     groups,
@@ -106,13 +140,14 @@ export function classifyStatisticsGames({
       missedCompleted: groups.completedWithoutPick.length,
       openAvailable: groups.openWithoutPick.length,
       openAlreadyPicked: groups.openWithPick.length,
-      awaitingResult:
-        groups.liveWithPick.length +
-        groups.liveWithoutPick.length +
-        groups.lockedAwaitingResultWithPick.length +
-        groups.lockedAwaitingResultWithoutPick.length,
-      excluded: groups.postponed.length + groups.cancelled.length,
-      participationRate,
+      awaitingResult,
+      excluded,
+      invalid: groups.invalid.length,
+      activeSeasonGames,
+      coveredSeasonGames,
+      participationRate: percent(groups.completedWithPick.length, completedEligible),
+      seasonCoverageRate: percent(coveredSeasonGames, activeSeasonGames),
     },
+    dataQuality,
   };
 }
