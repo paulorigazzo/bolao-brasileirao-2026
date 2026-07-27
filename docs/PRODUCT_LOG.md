@@ -1,0 +1,31 @@
+# Registro de Decisões do Produto
+
+## 27 de julho de 2026 — Documentação viva no GitHub
+
+**Decisão:** adotar uma pasta `docs` como fonte oficial da visão, roadmap, releases, arquitetura e decisões.
+
+**Motivo:** preservar o contexto entre conversas, facilitar rastreabilidade e evitar divergência entre planos e código.
+
+## 27 de julho de 2026 — IA como fase formal do produto
+
+**Decisão:** consolidar a Inteligência Artificial como uma fase do roadmap, dividida em Copiloto, IA Estatística, Administrativa, Narrativa, Preditiva e Personalizada.
+
+**Motivo:** impedir que as melhorias de IA desapareçam das listas futuras e preparar sua implementação por etapas.
+
+## Julho de 2026 — Personalização por time favorito
+
+**Decisão:** personalizar a Home e os jogos com base no time favorito sem retirar a neutralidade das demais telas.
+
+**Motivo:** aumentar relevância pessoal sem transformar o produto em uma aplicação exclusiva de um clube.
+
+## Julho de 2026 — Cards expansíveis
+
+**Decisão:** utilizar cards de jogos compactos que podem ser expandidos.
+
+**Motivo:** melhorar leitura e navegação em telas pequenas.
+
+## Julho de 2026 — Migração para GitHub e Netlify
+
+**Decisão:** substituir gradualmente o fluxo baseado apenas em arquivos ZIP por versionamento no GitHub e publicação integrada ao Netlify.
+
+**Motivo:** melhorar histórico, segurança, colaboração e implantação.
