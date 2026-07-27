@@ -1,8 +1,8 @@
 import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
-import { analyzeRoundPerformance, classifyStatisticsGames } from "./statistics-engine.js";
+import { analyzePredictionProfile, analyzeRoundPerformance, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.3.0c1";
+const APP_VERSION = "6.3.0d";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1258,6 +1258,7 @@ function renderStats(){
   const progress=classification.metrics;
   const quality=classification.dataQuality;
   const roundAnalysis=analyzeRoundPerformance({entries,pointsForEntry:({pick,game})=>points(pick,game)});
+  const predictionProfile=analyzePredictionProfile({entries,pointsForEntry:({pick,game})=>points(pick,game)});
   const rounds=roundAnalysis.rounds;
   const bestRound=roundAnalysis.bestRound;
 
@@ -1369,6 +1370,25 @@ function renderStats(){
       insightCards.push(`<article class="stats-insight-card"><span class="stats-insight-icon">🏆</span><div><small>MELHOR RODADA</small><strong>Rodada ${bestRound.round} · ${bestRound.points} pts</strong><p>${bestRound.hits} acerto${bestRound.hits===1?"":"s"} em ${bestRound.games} jogo${bestRound.games===1?"":"s"}${bestRound.exact?` · ${bestRound.exact} placar${bestRound.exact===1?"":"es"} exato${bestRound.exact===1?"":"s"}`:""}.</p></div></article>`);
     }
     insightPanel.innerHTML=insightCards.join("");
+  }
+
+  const profilePanel=$("statsPredictionProfile");
+  if(profilePanel){
+    const scenarioIcons={home:"🏠",draw:"⚖️",away:"✈️"};
+    const scenarioRows=predictionProfile.scenarios.map(item=>`<div class="stats-scenario-row"><span class="stats-scenario-icon" aria-hidden="true">${scenarioIcons[item.key]}</span><div><span>${item.shortLabel}</span><small>${item.hits} acerto${item.hits===1?"":"s"} em ${item.games} jogo${item.games===1?"":"s"}</small></div><div class="stats-scenario-track"><i style="width:${item.rate}%"></i></div><strong>${item.games?`${item.rate}%`:"—"}</strong></div>`).join("");
+    const strongest=predictionProfile.strongestScenario;
+    const scenarioSummary=predictionProfile.hasEnoughData&&strongest
+      ? `Seu melhor cenário até aqui é <strong>${escapeHtml(strongest.label.toLowerCase())}</strong>, com ${strongest.rate}% de acertos.`
+      : "A leitura por resultado ficará mais precisa após pelo menos três palpites avaliados.";
+    profilePanel.innerHTML=`<div class="stats-profile-head"><div><span class="eyebrow">CENÁRIOS DE RESULTADO</span><h2>Onde você acerta mais</h2></div><span class="stats-profile-chip">${finished} avaliados</span></div><div class="stats-scenario-list">${scenarioRows}</div><p class="stats-profile-note">${scenarioSummary}</p>`;
+  }
+
+  const affinityPanel=$("statsTeamAffinity");
+  if(affinityPanel){
+    const best=predictionProfile.bestTeam;
+    const challenge=predictionProfile.challengeTeam;
+    const teamItem=(type,icon,title,item,empty)=>item?`<article class="stats-team-affinity-item ${type}"><span class="stats-team-affinity-icon" aria-hidden="true">${icon}</span><div><small>${title}</small><strong>${escapeHtml(item.name)}</strong><p>${item.points} ponto${item.points===1?"":"s"} em ${item.games} jogo${item.games===1?"":"s"} · ${item.hitRate}% com pontos</p></div></article>`:`<article class="stats-team-affinity-item is-empty"><span class="stats-team-affinity-icon" aria-hidden="true">${icon}</span><div><small>${title}</small><strong>Em formação</strong><p>${empty}</p></div></article>`;
+    affinityPanel.innerHTML=`<div class="stats-profile-head"><div><span class="eyebrow">AFINIDADE COM CLUBES</span><h2>Times no seu radar</h2></div><span class="stats-profile-chip">mín. 2 jogos</span></div><div class="stats-team-affinity-list">${teamItem("best","⭐","MAIS PONTOS",best,"Os resultados indicarão os clubes em que você mais pontua.")}${teamItem("challenge","🧩","MAIOR DESAFIO",challenge,"Ainda não há erros suficientes para identificar um desafio recorrente.")}</div><p class="stats-profile-note">A análise considera os dois clubes de cada partida e não interfere na pontuação oficial.</p>`;
   }
 
   const top=Math.max(1,...rounds.map(item=>item.points));

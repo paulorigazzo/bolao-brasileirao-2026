@@ -1,6 +1,14 @@
-# Bolão Brasileirão 2026 — v6.3.0c1
+# Bolão Brasileirão 2026 — v6.3.0d
 
-## v6.3.0c1 — Hotfix da Auditoria
+## v6.3.0d — Perfil inteligente de palpites
+
+- Taxa de acerto por vitórias de mandante, empates e vitórias de visitante.
+- Identificação dos clubes em que o participante mais pontua.
+- Identificação do clube que representa o maior desafio recorrente.
+- Novos painéis analíticos restritos à tela Estatísticas.
+- Testes automatizados do perfil de palpites e afinidade com clubes.
+
+## v6.3.0d — Hotfix da Auditoria
 
 - alertas de integridade agora identificam visualmente a partida;
 - placares incompatíveis são removidos também de jogos adiados e cancelados;

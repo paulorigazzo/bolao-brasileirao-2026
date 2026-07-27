@@ -196,3 +196,78 @@ export function analyzeRoundPerformance({ entries = [], pointsForEntry } = {}) {
   };
 }
 
+
+
+const outcomeKey = game => {
+  const home = Number(game?.gols_casa);
+  const away = Number(game?.gols_fora);
+  if (!Number.isFinite(home) || !Number.isFinite(away)) return null;
+  if (home === away) return "draw";
+  return home > away ? "home" : "away";
+};
+
+export function analyzePredictionProfile({ entries = [], pointsForEntry } = {}) {
+  if (typeof pointsForEntry !== "function") throw new TypeError("pointsForEntry é obrigatório.");
+
+  const scenarioDirectory = {
+    home: { key: "home", label: "Vitória do mandante", shortLabel: "Mandante", games: 0, hits: 0, points: 0, rate: 0 },
+    draw: { key: "draw", label: "Empate", shortLabel: "Empate", games: 0, hits: 0, points: 0, rate: 0 },
+    away: { key: "away", label: "Vitória do visitante", shortLabel: "Visitante", games: 0, hits: 0, points: 0, rate: 0 },
+  };
+  const teamMap = new Map();
+
+  for (const entry of entries.filter(Boolean)) {
+    const game = entry.game || {};
+    const points = Math.max(0, Number(pointsForEntry(entry)) || 0);
+    const outcome = outcomeKey(game);
+    if (outcome) {
+      const scenario = scenarioDirectory[outcome];
+      scenario.games += 1;
+      scenario.points += points;
+      if (points > 0) scenario.hits += 1;
+    }
+
+    for (const teamName of [game.time_casa, game.time_fora]) {
+      const name = String(teamName || "").trim();
+      if (!name) continue;
+      const key = fold(name);
+      const item = teamMap.get(key) || { key, name, games: 0, hits: 0, misses: 0, points: 0, average: 0, hitRate: 0 };
+      item.games += 1;
+      item.points += points;
+      if (points > 0) item.hits += 1;
+      else item.misses += 1;
+      teamMap.set(key, item);
+    }
+  }
+
+  const scenarios = Object.values(scenarioDirectory).map(item => ({
+    ...item,
+    rate: percent(item.hits, item.games),
+    average: item.games ? item.points / item.games : 0,
+  }));
+  const scenariosWithData = scenarios.filter(item => item.games > 0);
+  const strongestScenario = [...scenariosWithData].sort((a, b) => b.rate - a.rate || b.average - a.average || b.games - a.games)[0] || null;
+  const weakestScenario = [...scenariosWithData].sort((a, b) => a.rate - b.rate || a.average - b.average || b.games - a.games)[0] || null;
+
+  const teams = [...teamMap.values()].map(item => ({
+    ...item,
+    average: item.games ? item.points / item.games : 0,
+    hitRate: percent(item.hits, item.games),
+  }));
+  const eligibleTeams = teams.filter(item => item.games >= 2);
+  const comparisonTeams = eligibleTeams.length ? eligibleTeams : teams;
+  const bestTeam = [...comparisonTeams].sort((a, b) => b.points - a.points || b.average - a.average || b.hits - a.hits)[0] || null;
+  const challengeTeam = [...comparisonTeams]
+    .filter(item => item.misses > 0)
+    .sort((a, b) => b.misses - a.misses || a.average - b.average || b.games - a.games)[0] || null;
+
+  return {
+    scenarios,
+    strongestScenario,
+    weakestScenario,
+    teams,
+    bestTeam,
+    challengeTeam,
+    hasEnoughData: entries.length >= 3,
+  };
+}
