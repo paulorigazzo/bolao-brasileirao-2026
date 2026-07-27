@@ -1,0 +1,10 @@
+export const APP_VERSION = "6.2.2a";
+export const FOOTBALL_API_BASE = "https://api.football-data.org/v4";
+export const COMPETITION_CODE = "BSA";
+export const SEASON_YEAR = "2026";
+export const CLASSIFICATION_SNAPSHOT_ID = `${COMPETITION_CODE}-${SEASON_YEAR}`;
+export const MAX_API_CALLS_PER_SYNC = 8;
+export const SCHEDULE_CHECK_MINUTES = 5;
+export const MAINTENANCE_INTERVAL_MS = 6 * 60 * 60 * 1000;
+export const CACHE_FRESH_MS = 6 * 60 * 60 * 1000;
+export const CACHE_STALE_MS = 24 * 60 * 60 * 1000;

@@ -1,0 +1,9 @@
+{
+  "name": "Bolão Brasileirão 2026",
+  "short_name": "Bolão 2026",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#06160f",
+  "theme_color": "#071a12",
+  "icons": [{"src":"./assets/favicon.svg","sizes":"any","type":"image/svg+xml"}]
+}

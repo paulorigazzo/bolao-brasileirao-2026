@@ -1,0 +1,8 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+# A função desperta a cada 5 minutos, mas consulta a API apenas em janela de jogo
+# (4h anteriores até 90 min futuros) ou na manutenção periódica de 6 horas.
+[functions."sincronizar-jogos-agendado"]
+  schedule = "*/5 * * * *"

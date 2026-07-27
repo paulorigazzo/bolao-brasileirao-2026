@@ -1,0 +1,15 @@
+BOLÃO BRASILEIRÃO 2026 — v6.2.0
+PACOTE LIMPO PARA NETLIFY DROP
+
+Este ZIP contém index.html, netlify.toml, css/, js/, assets/ e netlify/functions/ diretamente na raiz do arquivo.
+
+No celular:
+1. Abra o projeto bolaorigazzo2026 no Netlify.
+2. Entre em Deploys / Production deploys.
+3. Use a área de deploy manual e selecione este ZIP.
+4. Não envie o ZIP pela tela Agent runs.
+5. Aguarde a publicação e teste a URL do site.
+
+Se o Netlify voltar a publicar zero arquivos, extraia o ZIP e envie a pasta extraída pelo computador. A documentação atual do Netlify apresenta orientações divergentes para ZIP; o envio da pasta é a alternativa mais segura.
+
+Nenhuma alteração de SQL, Supabase ou variáveis de ambiente é necessária.

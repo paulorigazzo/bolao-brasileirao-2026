@@ -1,0 +1,16 @@
+BOLÃO BRASILEIRÃO 2026 — v6.2.1
+PENDÊNCIAS DA RODADA
+
+NOVIDADES
+- Filtros Todos, Pendentes e Concluídos na Central de Atenção.
+- Contadores automáticos em cada filtro.
+- Contagem regressiva até o fechamento do próximo palpite.
+- Exibição do dia e horário exatos do fechamento.
+- Destaque de urgência quando faltam até duas horas.
+- Cards mantêm quantidade de palpites e última atualização.
+- Toque no participante abre os jogos preenchidos e pendentes.
+
+DEPLOY
+- Não requer SQL novo.
+- Não requer alteração de variáveis do Netlify.
+- Publique o conteúdo do ZIP com index.html e netlify.toml na raiz.

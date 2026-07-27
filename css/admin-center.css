@@ -1,0 +1,216 @@
+/* v6.2.0 — Centro de Controle do Administrador */
+.admin-control-center{position:relative;overflow:hidden;margin:16px 0 18px;padding:18px;border:1px solid color-mix(in srgb,var(--color-brand-500,#1f8f55) 34%,transparent);border-radius:22px;background:linear-gradient(145deg,rgba(9,43,29,.97),rgba(10,61,39,.93));box-shadow:0 18px 45px rgba(2,18,11,.2);color:#fff}
+.admin-control-center::after{content:"";position:absolute;right:-60px;top:-90px;width:210px;height:210px;border-radius:50%;background:radial-gradient(circle,rgba(255,213,79,.18),transparent 68%);pointer-events:none}
+.admin-control-center-head,.admin-control-center-footer{position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.admin-control-center-head h2{margin:3px 0 5px;color:#fff;font-size:clamp(1.22rem,4vw,1.62rem)}
+.admin-control-center-head p{margin:0;color:rgba(255,255,255,.72);font-size:.9rem}
+.admin-control-center .eyebrow{color:#a9e9c4}
+.admin-control-center-badge{flex:0 0 auto;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.11);font-size:.72rem;font-weight:800;letter-spacing:.02em}
+.admin-control-center-badge.is-ok{background:rgba(57,211,125,.17);color:#bdf8d2}.admin-control-center-badge.is-warning{background:rgba(255,194,71,.18);color:#ffe0a0}.admin-control-center-badge.is-error{background:rgba(255,91,91,.18);color:#ffc0c0}
+.admin-control-center-grid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}
+.admin-control-metric{display:flex;align-items:center;gap:10px;min-width:0;min-height:88px;padding:12px;text-align:left;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(255,255,255,.075);color:#fff;transition:transform .18s ease,border-color .18s ease,background .18s ease}
+.admin-control-metric:hover,.admin-control-metric:focus-visible{transform:translateY(-2px);border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.12)}
+.admin-control-icon{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.1);font-size:1.1rem}
+.admin-control-metric span:last-child{min-width:0}.admin-control-metric small,.admin-control-metric em{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.admin-control-metric small{color:rgba(255,255,255,.62);font-size:.7rem;text-transform:uppercase;letter-spacing:.04em}.admin-control-metric strong{display:block;margin:3px 0;color:#fff;font-size:1.05rem}.admin-control-metric em{color:rgba(255,255,255,.68);font-size:.72rem;font-style:normal}
+.admin-control-center-footer{align-items:center;padding-top:2px}.admin-control-center-footer small{color:rgba(255,255,255,.62)}.admin-control-center-footer .primary{min-height:42px;background:#f0c94b;color:#152419;border-color:transparent;box-shadow:none}.admin-control-center-footer .primary:hover{filter:brightness(1.04)}
+@media(max-width:780px){.admin-control-center-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.admin-control-center{padding:15px;border-radius:19px}.admin-control-center-head{align-items:flex-start}.admin-control-center-head p{font-size:.82rem}.admin-control-center-grid{gap:8px;margin:14px 0}.admin-control-metric{min-height:82px;padding:10px}.admin-control-center-footer{align-items:stretch;flex-direction:column}.admin-control-center-footer .primary{width:100%}}
+
+/* v6.2.1 — Pendências da Rodada */
+.admin-pending-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0 16px;padding:10px;border:1px solid var(--color-border,rgba(22,52,38,.12));border-radius:16px;background:color-mix(in srgb,var(--color-brand-50,#eef9f2) 68%,white)}
+.admin-pending-filters{display:flex;flex-wrap:wrap;gap:7px}.admin-pending-filter{min-height:38px;padding:8px 11px;border:1px solid transparent;border-radius:999px;background:transparent;color:var(--color-text-muted,#5d6c63);font-size:.78rem;font-weight:800}.admin-pending-filter span{display:inline-grid;place-items:center;min-width:21px;height:21px;margin-left:4px;padding:0 6px;border-radius:999px;background:rgba(20,74,45,.08);font-size:.68rem}.admin-pending-filter.active{border-color:color-mix(in srgb,var(--color-brand-500,#1f8f55) 32%,transparent);background:#fff;color:var(--color-brand-700,#14643b);box-shadow:0 5px 15px rgba(13,65,38,.08)}
+.admin-pick-deadline{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px;padding:7px 10px;border-radius:12px;background:#fff}.admin-pick-deadline span{font-size:.66rem;text-transform:uppercase;letter-spacing:.04em;color:var(--color-text-muted,#66736b)}.admin-pick-deadline strong{font-size:.82rem;color:var(--color-text,#173326)}.admin-pick-deadline.is-urgent{background:#fff2e5}.admin-pick-deadline.is-urgent strong{color:#a8470b}.admin-pick-deadline.is-closed{background:#f1f3f2}.admin-pick-deadline.is-ready{background:#eaf8ef}.admin-pick-deadline.is-ready strong{color:#176438}
+.admin-filter-empty{padding:20px;text-align:center;border:1px dashed rgba(25,77,48,.2);border-radius:14px;color:var(--color-text-muted,#66736b);background:rgba(255,255,255,.55)}
+@media(max-width:620px){.admin-pending-toolbar{align-items:stretch;flex-direction:column}.admin-pending-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.admin-pending-filter{padding-inline:6px}.admin-pick-deadline{align-items:flex-start}}
+@media(max-width:390px){.admin-pending-filters{grid-template-columns:1fr}.admin-pending-filter{display:flex;justify-content:space-between}}
+
+/* =========================================================
+   v6.2.2 — Refinamento visual da Área Administrativa
+   Menos contraste cromático, mais hierarquia por profundidade.
+   ========================================================= */
+#adminTab{
+  --admin-surface:color-mix(in srgb,var(--color-surface,#0d2519) 94%,#fff 6%);
+  --admin-surface-soft:color-mix(in srgb,var(--color-surface-2,#123521) 88%,var(--color-surface,#0d2519));
+  --admin-surface-raised:color-mix(in srgb,var(--color-surface-3,#173d28) 80%,var(--color-surface,#0d2519));
+  --admin-line:rgba(167,213,184,.13);
+  --admin-line-strong:rgba(167,213,184,.21);
+  --admin-muted:#a7b9ad;
+  --admin-active:#64d994;
+}
+
+/* Cards principais: uma única linguagem visual. */
+#adminTab>.card,
+.admin-control-center{
+  background:linear-gradient(180deg,rgba(17,50,32,.96),rgba(10,34,21,.98));
+  border:1px solid var(--admin-line);
+  box-shadow:0 12px 30px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.025);
+}
+#adminTab>.card{padding:20px;border-radius:22px}
+#adminTab>.card [data-admin-card-header]{align-items:flex-start}
+#adminTab>.card [data-admin-card-header] h2{margin:5px 0 0;color:var(--color-text);line-height:1.2}
+#adminTab>.card .eyebrow{color:#80c79d;letter-spacing:.09em}
+#adminTab>.card p,
+#adminTab>.card .muted-note{color:var(--admin-muted)}
+
+/* Centro de Controle: remove brilho e gradiente excessivos. */
+.admin-control-center{overflow:hidden}
+.admin-control-center::after{opacity:.32;background:radial-gradient(circle,rgba(100,217,148,.11),transparent 70%)}
+.admin-control-center .eyebrow{color:#80c79d}
+.admin-control-center-head p,
+.admin-control-center-footer small{color:var(--admin-muted)}
+.admin-control-metric{
+  border-color:var(--admin-line);
+  background:rgba(255,255,255,.032);
+  box-shadow:none;
+}
+.admin-control-metric:hover,.admin-control-metric:focus-visible{
+  transform:translateY(-1px);
+  border-color:var(--admin-line-strong);
+  background:rgba(255,255,255,.052);
+}
+.admin-control-icon{background:rgba(255,255,255,.055)}
+.admin-control-center-footer .primary{background:#d3b85d;color:#16251b}
+
+/* Navegação rápida: estado ativo mais sóbrio. */
+.admin-quick-nav{background:rgba(5,25,15,.72);border-color:var(--admin-line)}
+.admin-quick-nav-button{color:#aabbb0}
+.admin-quick-nav-button.active{
+  background:rgba(100,217,148,.14);
+  color:#eafff1;
+  border-color:rgba(100,217,148,.22);
+  box-shadow:none;
+}
+
+/* Filtros de pendências: elimina o grande bloco claro. */
+.admin-pending-toolbar{
+  padding:12px;
+  border-color:var(--admin-line);
+  background:rgba(4,27,16,.35);
+}
+.admin-pending-filter{color:#9fb1a5}
+.admin-pending-filter span{background:rgba(255,255,255,.06);color:#b9c8be}
+.admin-pending-filter.active{
+  border-color:rgba(100,217,148,.26);
+  background:rgba(100,217,148,.10);
+  color:#d9fbe6;
+  box-shadow:none;
+}
+.admin-pending-filter.active span{background:rgba(100,217,148,.16);color:#ddfce8}
+.admin-pick-deadline{
+  border:1px solid var(--admin-line);
+  background:rgba(255,255,255,.035);
+}
+.admin-pick-deadline span{color:#8fa398}
+.admin-pick-deadline strong{color:#dce8e0}
+.admin-pick-deadline.is-urgent{background:rgba(255,173,79,.09);border-color:rgba(255,173,79,.20)}
+.admin-pick-deadline.is-urgent strong{color:#ffd08c}
+.admin-pick-deadline.is-closed{background:rgba(255,255,255,.025)}
+.admin-pick-deadline.is-ready{background:rgba(100,217,148,.08);border-color:rgba(100,217,148,.18)}
+.admin-pick-deadline.is-ready strong{color:#9ce9b9}
+.admin-filter-empty{background:rgba(255,255,255,.025);border-color:var(--admin-line);color:var(--admin-muted)}
+
+/* Painéis e linhas internas: somente borda OU mudança sutil de superfície. */
+#adminTab .admin-attention-content article,
+#adminTab .admin-round-content article,
+#adminTab .admin-participant-row,
+#adminTab .admin-quick-action,
+#adminTab .admin-executive-content article,
+#adminTab .diagnostic-health-grid article,
+#adminTab .diagnostic-metrics>div,
+#adminTab .diagnostic-checks>div,
+#adminTab .diagnostic-log-list>div,
+#adminTab .admin-audit-summary article,
+#adminTab .admin-audit-item{
+  border:1px solid var(--admin-line);
+  background:rgba(255,255,255,.028);
+  box-shadow:none;
+}
+
+/* Central de Diagnóstico: abandona o antigo azul e entra no padrão geral. */
+.admin-diagnostic-card{
+  background:linear-gradient(180deg,rgba(17,50,32,.96),rgba(10,34,21,.98))!important;
+  border-color:var(--admin-line)!important;
+}
+.admin-diagnostic-badge,
+.admin-audit-badge,
+.admin-status-badge,
+.admin-round-badge,
+.admin-participants-badge,
+.admin-executive-badge,
+.admin-quick-actions-badge{
+  border:1px solid var(--admin-line);
+  background:rgba(255,255,255,.04);
+  color:#bfd0c5;
+  box-shadow:none;
+}
+.admin-diagnostic-badge.is-ok,.admin-audit-badge.is-ok{
+  color:#9ce9b9;background:rgba(100,217,148,.09);border-color:rgba(100,217,148,.20)
+}
+.admin-diagnostic-badge.is-warning,.admin-audit-badge.has-warnings{
+  color:#ffd08c;background:rgba(255,173,79,.08);border-color:rgba(255,173,79,.18)
+}
+.admin-diagnostic-badge.is-error,.admin-audit-badge.has-errors{
+  color:#ffaaaa;background:rgba(255,112,112,.08);border-color:rgba(255,112,112,.18)
+}
+.diagnostic-section{border-top-color:var(--admin-line)}
+.diagnostic-cache-warning{background:rgba(255,173,79,.07)!important;border-color:rgba(255,173,79,.18)!important;color:#ffd08c!important}
+.diagnostic-error{background:rgba(255,112,112,.06);border-color:rgba(255,112,112,.17)}
+
+/* Integridade dos Dados: mesmo cabeçalho, mesma superfície e leitura mais enxuta. */
+.admin-audit-card{
+  border-color:var(--admin-line)!important;
+  background:linear-gradient(180deg,rgba(17,50,32,.96),rgba(10,34,21,.98))!important;
+}
+.admin-audit-intro{margin:12px 0 18px;color:var(--admin-muted)}
+.admin-audit-summary{gap:8px;margin:16px 0}
+.admin-audit-summary article{padding:12px 13px;border-radius:14px}
+.admin-audit-summary span,.admin-audit-summary small{color:#91a69a}
+.admin-audit-summary strong{font-size:1.22rem;color:#edf8f1}
+.admin-audit-rule{
+  padding:12px 13px;
+  border:1px solid var(--admin-line);
+  border-radius:14px;
+  background:rgba(100,217,148,.055);
+  color:#c9d8cf;
+}
+.admin-audit-list{gap:8px}
+.admin-audit-item{border-radius:13px}
+.admin-audit-item.error{background:rgba(255,112,112,.055)!important;border-color:rgba(255,112,112,.15)!important}
+.admin-audit-item.warning{background:rgba(255,173,79,.055)!important;border-color:rgba(255,173,79,.15)!important}
+.admin-audit-ok{
+  margin-top:14px;padding:13px;border:1px solid rgba(100,217,148,.17);border-radius:14px;
+  background:rgba(100,217,148,.065);color:#a8eac0
+}
+
+@media(max-width:620px){
+  #adminTab>.card{padding:17px;border-radius:20px}
+  .admin-pending-toolbar{padding:10px}
+}
+
+
+/* v6.2.2a — correção tipográfica do cabeçalho Integridade dos Dados */
+.admin-audit-header h2{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:5px 0 0;
+  font-size:1.35rem;
+  line-height:1.2;
+  letter-spacing:-.02em;
+}
+.admin-audit-header .admin-card-title-block{min-width:0;flex:1 1 auto}
+.admin-audit-header .admin-card-title-icon{
+  flex:0 0 auto;
+  font-size:1.05em;
+  line-height:1;
+}
+.admin-audit-header .admin-card-header-actions{flex:0 0 auto}
+@media(max-width:600px){
+  .admin-audit-header h2{font-size:1.12rem;gap:6px}
+  .admin-audit-header .admin-card-title-icon{font-size:1em}
+  .admin-audit-badge{font-size:.66rem;padding:6px 9px;min-height:32px}
+}
+@media(max-width:390px){
+  .admin-audit-header h2{font-size:1.02rem}
+  .admin-audit-badge{max-width:86px;text-align:center;line-height:1.1;white-space:normal}
+}

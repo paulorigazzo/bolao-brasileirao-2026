@@ -1,0 +1,17 @@
+BOLÃO BRASILEIRÃO 2026 — v6.1.1b
+
+CORREÇÃO DO BUILD NETLIFY
+
+1. Corrigidos os imports de classificacao-brasileirao.mjs:
+   - FOOTBALL_API_BASE
+   - COMPETITION_CODE
+   - SEASON_YEAR
+   - CLASSIFICATION_SNAPSHOT_ID
+
+2. Removidos os identificadores inválidos gerados por substituição duplicada.
+
+3. Adicionada validação automática entre imports nomeados e exports dos módulos locais.
+
+4. Mantidos integralmente os componentes da v6.1.1 e a exceção de altura dinâmica dos cards da tela Tabela.
+
+5. Não exige SQL, novas variáveis de ambiente ou alterações no Supabase.
