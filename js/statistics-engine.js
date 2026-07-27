@@ -151,3 +151,48 @@ export function classifyStatisticsGames({
     dataQuality,
   };
 }
+
+export function analyzeRoundPerformance({ entries = [], pointsForEntry } = {}) {
+  if (typeof pointsForEntry !== "function") throw new TypeError("pointsForEntry é obrigatório.");
+
+  const byRound = new Map();
+  for (const entry of entries.filter(Boolean)) {
+    const round = Number(entry?.game?.rodada);
+    if (!Number.isFinite(round)) continue;
+    const points = Number(pointsForEntry(entry)) || 0;
+    const item = byRound.get(round) || { round, points: 0, games: 0, hits: 0, exact: 0, average: 0 };
+    item.points += points;
+    item.games += 1;
+    if (points > 0) item.hits += 1;
+    if (points === 10) item.exact += 1;
+    byRound.set(round, item);
+  }
+
+  const rounds = [...byRound.values()]
+    .map(item => ({ ...item, average: item.games ? item.points / item.games : 0 }))
+    .sort((a, b) => a.round - b.round);
+
+  const bestRound = rounds.reduce((best, current) => {
+    if (!best) return current;
+    if (current.points !== best.points) return current.points > best.points ? current : best;
+    if (current.exact !== best.exact) return current.exact > best.exact ? current : best;
+    return current.round > best.round ? current : best;
+  }, null);
+
+  const recent = rounds.slice(-3);
+  const previous = rounds.slice(-6, -3);
+  const recentAverage = recent.length ? recent.reduce((sum, item) => sum + item.average, 0) / recent.length : 0;
+  const previousAverage = previous.length ? previous.reduce((sum, item) => sum + item.average, 0) / previous.length : 0;
+  const delta = previous.length ? recentAverage - previousAverage : 0;
+  const trend = rounds.length < 4 ? "insufficient" : Math.abs(delta) < 0.35 ? "stable" : delta > 0 ? "up" : "down";
+
+  return {
+    rounds,
+    bestRound,
+    trend,
+    recentAverage,
+    previousAverage,
+    delta,
+  };
+}
+

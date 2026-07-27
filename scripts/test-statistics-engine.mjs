@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { classifyStatisticsGames } from "../js/statistics-engine.js";
+import { analyzeRoundPerformance, classifyStatisticsGames } from "../js/statistics-engine.js";
 
 const games = [
   { id_jogo: 1, status: "encerrado", inicio: "2026-01-01T10:00:00Z", gols_casa: 1, gols_fora: 0 },
@@ -38,4 +38,26 @@ assert.equal(result.dataQuality.cancelled, 1);
 assert.equal(result.dataQuality.invalid, 0);
 assert.equal(result.dataQuality.hasAttention, true);
 assert.equal(result.dataQuality.level, "info");
+
+
+const roundAnalysis = analyzeRoundPerformance({
+  entries: [
+    { game: { rodada: 1 }, score: 0 },
+    { game: { rodada: 1 }, score: 0 },
+    { game: { rodada: 2 }, score: 0 },
+    { game: { rodada: 2 }, score: 5 },
+    { game: { rodada: 3 }, score: 10 },
+    { game: { rodada: 3 }, score: 10 },
+    { game: { rodada: 4 }, score: 10 },
+    { game: { rodada: 4 }, score: 5 },
+  ],
+  pointsForEntry: entry => entry.score,
+});
+assert.equal(roundAnalysis.rounds.length, 4);
+assert.equal(roundAnalysis.bestRound.round, 3);
+assert.equal(roundAnalysis.bestRound.points, 20);
+assert.equal(roundAnalysis.bestRound.exact, 2);
+assert.equal(roundAnalysis.trend, "up");
+assert.ok(roundAnalysis.recentAverage > roundAnalysis.previousAverage);
+
 console.log("Motor estatístico verificado com sucesso.");

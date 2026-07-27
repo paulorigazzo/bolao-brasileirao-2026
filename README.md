@@ -1,4 +1,4 @@
-# Bolão Brasileirão 2026 — v6.3.0b
+# Bolão Brasileirão 2026 — v6.3.0c
 
 
 

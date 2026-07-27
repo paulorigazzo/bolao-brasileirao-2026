@@ -1,8 +1,8 @@
 import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
-import { classifyStatisticsGames } from "./statistics-engine.js";
+import { analyzeRoundPerformance, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.3.0b";
+const APP_VERSION = "6.3.0c";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1257,6 +1257,9 @@ function renderStats(){
   });
   const progress=classification.metrics;
   const quality=classification.dataQuality;
+  const roundAnalysis=analyzeRoundPerformance({entries,pointsForEntry:({pick,game})=>points(pick,game)});
+  const rounds=roundAnalysis.rounds;
+  const bestRound=roundAnalysis.bestRound;
 
   const ring=$("statsOverallRing");
   if(ring){
@@ -1272,17 +1275,6 @@ function renderStats(){
     : progress.completedEligible
       ? `Ainda não há palpites avaliados. ${progress.missedCompleted} jogo${progress.missedCompleted===1?" foi encerrado":"s foram encerrados"} sem palpite.`
       : "Suas estatísticas aparecerão assim que houver jogos finalizados.";
-
-  const byRound=new Map();
-  entries.forEach(({pick,game})=>{
-    const round=Number(game.rodada);
-    const item=byRound.get(round)||{points:0,games:0,hits:0};
-    const pts=points(pick,game);
-    item.points+=pts; item.games++; if(pts>0) item.hits++;
-    byRound.set(round,item);
-  });
-  const rounds=[...byRound.entries()].sort((a,b)=>a[0]-b[0]);
-  const bestRound=rounds.reduce((best,current)=>!best||current[1].points>best[1].points?current:best,null);
 
   let streak=0;
   for(let i=entries.length-1;i>=0;i--){
@@ -1351,9 +1343,43 @@ function renderStats(){
     <div class="streak-details"><p><span>Melhor sequência</span><strong>${bestStreak}</strong></p><p><span>Jogos com pontos</span><strong>${scored}</strong></p><p><span>Sem pontuar</span><strong>${counts.miss}</strong></p></div>`
     : '<div class="stats-empty-state compact"><span aria-hidden="true">🔥</span><strong>Nenhuma sequência iniciada</strong><p>O histórico começa após o primeiro palpite avaliado.</p></div>';
 
-  const top=Math.max(1,...rounds.map(([,data])=>data.points));
-  if($("bestRoundBadge")) $("bestRoundBadge").textContent=bestRound?`Melhor rodada: R${bestRound[0]} · ${bestRound[1].points} pts`:"Melhor rodada: —";
-  $("roundHistory").innerHTML=rounds.length?rounds.map(([round,data])=>`<div class="round-history-item ${bestRound&&round===bestRound[0]?'best':''}"><span>R${round}</span><div class="history-track"><div style="width:${data.points/top*100}%"></div></div><strong>${data.points} pts</strong><small>${data.hits}/${data.games} acertos</small></div>`).join(""):'<div class="stats-empty-state"><span aria-hidden="true">📈</span><strong>Sem evolução por rodada ainda</strong><p>O gráfico será exibido após os primeiros jogos finalizados com palpite.</p></div>';
+  const insightPanel=$("statsInsights");
+  if(insightPanel){
+    const specialtyCandidates=[
+      {key:"exact",label:"Placar exato",value:counts.exact,icon:"🎯",detail:"10 pontos"},
+      {key:"difference",label:"Diferença exata",value:counts.difference,icon:"📐",detail:"5 pontos"},
+      {key:"winner",label:"Vencedor correto",value:counts.winner,icon:"🏁",detail:"3 pontos"},
+      {key:"draw",label:"Empates",value:counts.draw,icon:"⚖️",detail:"1 ponto"},
+    ].sort((a,b)=>b.value-a.value);
+    const specialty=specialtyCandidates[0];
+    const trendMeta={
+      up:{icon:"↗",title:"Momento de alta",text:`Sua média recente subiu ${Math.abs(roundAnalysis.delta).toFixed(1)} ponto por jogo.`},
+      down:{icon:"↘",title:"Momento de atenção",text:`Sua média recente caiu ${Math.abs(roundAnalysis.delta).toFixed(1)} ponto por jogo.`},
+      stable:{icon:"→",title:"Desempenho estável",text:"Sua média recente está próxima das rodadas anteriores."},
+      insufficient:{icon:"·",title:"Tendência em formação",text:"São necessárias mais rodadas completas para identificar uma tendência."},
+    }[roundAnalysis.trend];
+    const insightCards=[];
+    insightCards.push(`<article class="stats-insight-card trend-${roundAnalysis.trend}"><span class="stats-insight-icon">${trendMeta.icon}</span><div><small>TENDÊNCIA RECENTE</small><strong>${trendMeta.title}</strong><p>${trendMeta.text}</p></div></article>`);
+    if(finished&&specialty?.value){
+      insightCards.push(`<article class="stats-insight-card"><span class="stats-insight-icon">${specialty.icon}</span><div><small>SEU DESTAQUE</small><strong>${specialty.label}</strong><p>${specialty.value} ocorrência${specialty.value===1?"":"s"} · ${Math.round(specialty.value/finished*100)}% dos palpites avaliados.</p></div></article>`);
+    }else{
+      insightCards.push('<article class="stats-insight-card"><span class="stats-insight-icon">✨</span><div><small>SEU DESTAQUE</small><strong>Especialidade em formação</strong><p>Os primeiros resultados revelarão seu tipo de acerto mais frequente.</p></div></article>');
+    }
+    if(bestRound){
+      insightCards.push(`<article class="stats-insight-card"><span class="stats-insight-icon">🏆</span><div><small>MELHOR RODADA</small><strong>Rodada ${bestRound.round} · ${bestRound.points} pts</strong><p>${bestRound.hits} acerto${bestRound.hits===1?"":"s"} em ${bestRound.games} jogo${bestRound.games===1?"":"s"}${bestRound.exact?` · ${bestRound.exact} placar${bestRound.exact===1?"":"es"} exato${bestRound.exact===1?"":"s"}`:""}.</p></div></article>`);
+    }
+    insightPanel.innerHTML=insightCards.join("");
+  }
+
+  const top=Math.max(1,...rounds.map(item=>item.points));
+  if($("bestRoundBadge")) $("bestRoundBadge").textContent=bestRound?`Melhor rodada: R${bestRound.round} · ${bestRound.points} pts`:"Melhor rodada: —";
+  if($("roundHistory")) $("roundHistory").innerHTML=rounds.length?rounds.map((data,index)=>{
+    const previous=index?rounds[index-1]:null;
+    const change=!previous?null:data.average-previous.average;
+    const changeLabel=change===null?"início":Math.abs(change)<.05?"estável":change>0?`+${change.toFixed(1)}`:change.toFixed(1);
+    const changeClass=change===null||Math.abs(change)<.05?"stable":change>0?"up":"down";
+    return `<div class="round-history-item ${bestRound&&data.round===bestRound.round?'best':''}"><span>R${data.round}</span><div class="history-track"><div style="width:${data.points/top*100}%"></div></div><strong>${data.points} pts</strong><small>${data.hits}/${data.games} acertos · ${data.average.toFixed(1)} pts/jogo</small><em class="round-change ${changeClass}">${changeLabel}</em></div>`;
+  }).join(""):'<div class="stats-empty-state"><span aria-hidden="true">📈</span><strong>Sem evolução por rodada ainda</strong><p>O gráfico será exibido após os primeiros jogos finalizados com palpite.</p></div>';
 }
 
 function standingsZone(position, totalTeams){
