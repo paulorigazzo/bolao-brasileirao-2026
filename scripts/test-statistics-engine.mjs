@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { analyzeRoundPerformance, classifyStatisticsGames } from "../js/statistics-engine.js";
+import { analyzePredictionProfile, analyzeRoundPerformance, classifyStatisticsGames } from "../js/statistics-engine.js";
 
 const games = [
   { id_jogo: 1, status: "encerrado", inicio: "2026-01-01T10:00:00Z", gols_casa: 1, gols_fora: 0 },
@@ -59,5 +59,24 @@ assert.equal(roundAnalysis.bestRound.points, 20);
 assert.equal(roundAnalysis.bestRound.exact, 2);
 assert.equal(roundAnalysis.trend, "up");
 assert.ok(roundAnalysis.recentAverage > roundAnalysis.previousAverage);
+
+
+const predictionProfile = analyzePredictionProfile({
+  entries: [
+    { game: { gols_casa: 2, gols_fora: 0, time_casa: "Palmeiras", time_fora: "Santos" }, score: 10 },
+    { game: { gols_casa: 1, gols_fora: 1, time_casa: "Santos", time_fora: "Bahia" }, score: 0 },
+    { game: { gols_casa: 0, gols_fora: 2, time_casa: "Bahia", time_fora: "Palmeiras" }, score: 5 },
+    { game: { gols_casa: 3, gols_fora: 1, time_casa: "Palmeiras", time_fora: "Bahia" }, score: 3 },
+  ],
+  pointsForEntry: entry => entry.score,
+});
+assert.equal(predictionProfile.scenarios.find(item => item.key === "home").games, 2);
+assert.equal(predictionProfile.scenarios.find(item => item.key === "home").rate, 100);
+assert.equal(predictionProfile.scenarios.find(item => item.key === "draw").rate, 0);
+assert.equal(predictionProfile.strongestScenario.key, "home");
+assert.equal(predictionProfile.bestTeam.name, "Palmeiras");
+assert.equal(predictionProfile.bestTeam.points, 18);
+assert.equal(predictionProfile.challengeTeam.name, "Bahia");
+assert.equal(predictionProfile.hasEnoughData, true);
 
 console.log("Motor estatístico verificado com sucesso.");
