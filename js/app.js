@@ -1,7 +1,8 @@
 import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
+import { classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.2.2a";
+const APP_VERSION = "6.3.0a";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1284,9 +1285,14 @@ function renderStats(){
   const labels=[['exact','Placar exato','10 pts'],['difference','Diferença exata','5 pts'],['winner','Vencedor','3 pts'],['draw','Empate','1 pt'],['miss','Sem pontos','0 pt']];
   $("hitBreakdown").innerHTML=labels.map(([key,label,value])=>`<div class="breakdown-row"><div><span>${label}<small>${value}</small></span><strong>${counts[key]}</strong></div><div class="mini-track"><div style="width:${counts[key]/max*100}%"></div></div></div>`).join("");
 
-  const total=state.games.length||380, picks=state.ownPicks.length;
-  const coverage=Math.round(picks/total*100);
-  $("seasonProgress").innerHTML=`<div class="season-ring" style="--progress:${coverage}"><strong>${coverage}%</strong><span>preenchido</span></div><div class="season-list"><p><strong>${picks}</strong> palpites registrados</p><p><strong>${finished}</strong> já pontuados</p><p><strong>${Math.max(0,total-picks)}</strong> ainda disponíveis</p></div>`;
+  const progress=classifyStatisticsGames({
+    games:state.games,
+    picks:state.ownPicks,
+    isScorableGame,
+    isLocked:locked,
+    gameStatusDisplay,
+  }).metrics;
+  $("seasonProgress").innerHTML=`<div class="season-ring" style="--progress:${progress.participationRate}"><strong>${progress.participationRate}%</strong><span>participação</span></div><div class="season-list"><p><strong>${progress.registeredPicks}</strong> palpites registrados</p><p><strong>${progress.completedWithPick}</strong> jogos encerrados com palpite</p><p><strong>${progress.missedCompleted}</strong> jogos encerrados sem palpite</p><p><strong>${progress.openAvailable}</strong> disponíveis para palpitar agora</p>${progress.awaitingResult?`<p><strong>${progress.awaitingResult}</strong> aguardando resultado oficial</p>`:""}${progress.excluded?`<p><strong>${progress.excluded}</strong> adiados ou cancelados fora do cálculo</p>`:""}</div>`;
 
   const validPlayers=state.ranking.filter(player=>player.scored>0);
   const groupAverage=validPlayers.length?validPlayers.reduce((sum,player)=>sum+(player.total/player.scored),0)/validPlayers.length:0;
