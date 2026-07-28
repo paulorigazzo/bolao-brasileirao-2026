@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.5.0b";
+const APP_VERSION = "6.5.0c";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -501,37 +501,64 @@ function renderEditableProfile(){
 async function saveOwnProfile(event){
   event?.preventDefault();
   event?.stopPropagation();
+  event?.stopImmediatePropagation?.();
+  if(saveOwnProfile.busy) return;
+
   const name=$("profileNameInput")?.value.trim();
   const phone=normalizeBrazilPhone($("profilePhoneInput")?.value);
   const status=$("profileFormStatus");
   const button=$("saveProfileBtn");
   if(!name || name.length<2){ if(status) status.textContent="Informe um nome com pelo menos 2 caracteres."; return; }
   if(phone && (phone.length<12 || phone.length>13)){ if(status) status.textContent="Confira o DDD e o número do celular."; return; }
-  button.disabled=true; button.textContent="Salvando…";
+
+  saveOwnProfile.busy=true;
+  button.disabled=true;
+  button.textContent="Salvando…";
+  if(status) status.textContent="Salvando seus dados…";
+
   try{
-    const previousName=state.participant?.nome;
-    const {data,error}=await sb.rpc("atualizar_meu_perfil",{p_nome:name,p_celular:phone||null});
+    const previousName=state.participant?.nome || "";
+    const {data,error}=await sb.rpc("atualizar_meu_perfil_v2",{p_nome:name,p_celular:phone||null});
     if(error) throw error;
+
     const updated=Array.isArray(data)?data[0]:data;
-    state.participant={...state.participant,...updated,nome:name,celular:phone};
+    if(!updated?.user_id) throw new Error("O servidor não confirmou a gravação do perfil. Execute a migração v6.5.0c no Supabase.");
+
+    const {data:confirmed,error:confirmError}=await sb.from("participantes")
+      .select("*")
+      .eq("user_id",state.user.id)
+      .single();
+    if(confirmError) throw confirmError;
+    if(String(confirmed?.nome||"").trim()!==name) throw new Error("A alteração não foi persistida no banco. Execute novamente a migração v6.5.0c no Supabase.");
+
+    state.participant={...state.participant,...confirmed,nome:name,celular:phone};
     state.membership={...state.membership,nome:name,celular:phone};
-    if(previousName!==name){
-      state.ownPicks=state.ownPicks.map(item=>({...item,usuario:name}));
-      state.publicPicks=state.publicPicks.map(item=>String(item.user_id)===String(state.user.id)?{...item,usuario:name}:item);
-    }
+    state.participants=state.participants.map(item=>String(item.user_id)===String(state.user.id)?{...item,...confirmed,nome:name,celular:phone}:item);
+    state.ownPicks=state.ownPicks.map(item=>({...item,usuario:name}));
+    state.publicPicks=state.publicPicks.map(item=>String(item.user_id)===String(state.user.id)?{...item,usuario:name}:item);
+    state.pickCounts=state.pickCounts.map(item=>item.usuario===previousName?{...item,usuario:name}:item);
+
     renderEditableProfile();
     $("headerUserName").textContent=name.split(/\s+/)[0];
     $("userMenuBtn").setAttribute("aria-label",`Perfil de ${name}. Abrir menu da conta`);
+    $("userMenuBtn").setAttribute("title",name);
     applyFavoriteTeamIdentity();
     renderRanking(); renderHome(); renderStats(); renderMyTeam();
-    if(status) status.textContent="Dados atualizados com sucesso.";
-    message("Seu perfil foi atualizado.");
+    if(isAdminUser()) renderAdminParticipants();
+    if(status) status.textContent="Dados atualizados e confirmados no banco.";
+    message("Seu perfil foi atualizado com sucesso.");
   }catch(err){
-    if(status) status.textContent=err.message||"Não foi possível atualizar seus dados.";
+    console.error("Falha ao salvar perfil",err);
+    const detail=err?.message||"Não foi possível atualizar seus dados.";
+    if(status) status.textContent=detail;
+    message(detail,true);
   }finally{
-    button.disabled=false; button.textContent="Salvar dados";
+    saveOwnProfile.busy=false;
+    button.disabled=false;
+    button.textContent="Salvar dados";
   }
 }
+saveOwnProfile.busy=false;
 
 function renderMembershipStatus(){
   const status=state.membership?.status || "pending";
@@ -3289,8 +3316,8 @@ $("standingsMobileList")?.addEventListener("click",async event=>{
 });
 $("loginBtn").onclick=login; $("heroLoginBtn").onclick=login; $("logoutBtn").onclick=logout; $("membershipLogoutBtn")?.addEventListener("click",logout); $("refreshBtn").onclick=refresh; $("refreshStandingsBtn").onclick=()=>loadStandings(true); $("syncGamesBtn").onclick=syncGames;
 $("saveFavoriteTeamBtn").onclick=saveFavoriteTeam;
-$("profileDataForm")?.addEventListener("submit",saveOwnProfile);
-$("saveProfileBtn")?.addEventListener("click",event=>{ event.stopPropagation(); });
+$("profileDataForm")?.addEventListener("submit",event=>{ event.preventDefault(); event.stopImmediatePropagation(); saveOwnProfile(event); });
+$("saveProfileBtn")?.addEventListener("click",saveOwnProfile);
 $("profilePhoneInput")?.addEventListener("input",event=>{ event.target.value=formatBrazilPhone(event.target.value); });
 $("copyRegistrationLinkBtn")?.addEventListener("click",copyRegistrationLink);
 $("adminRefreshBtn").onclick=refreshAllAdminData;

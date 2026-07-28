@@ -1,4 +1,4 @@
-## [6.5.0b] - 2026-07-28
+## [6.5.0c] - 2026-07-28
 
 ### Corrigido
 - Força contraste escuro nos campos Nome e Celular, inclusive no autofill do navegador.
