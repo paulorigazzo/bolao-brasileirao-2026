@@ -1,3 +1,11 @@
+# v6.5.3 — Comunicação individual via WhatsApp
+
+- Adiciona botão **WhatsApp** à gestão de cada participante com celular válido.
+- Inclui modelos de lembrete de palpites, fechamento da rodada, aprovação e boas-vindas.
+- Permite editar livremente a mensagem antes de abrir o WhatsApp.
+- Mantém o envio individual, manual e sob confirmação do administrador.
+- Não cria histórico, automações, disparos em massa ou novos campos de consentimento.
+
 # v6.5.2 — Simplificação do menu do usuário
 
 ## 6.5.2 — Auditoria de identidade dos participantes

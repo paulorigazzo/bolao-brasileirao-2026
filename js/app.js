@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.5.2";
+const APP_VERSION = "6.5.3";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2358,14 +2358,84 @@ function renderAdminParticipants(){
     const requested=item.solicitado_em?new Date(item.solicitado_em).toLocaleDateString("pt-BR"):"";
     const isCurrentUser=String(item.email||"").toLowerCase()===String(state.user?.email||"").toLowerCase();
     const canDelete=!item.administrador && !isCurrentUser;
-    const pendingActions=status==="pending"?`<div class="admin-member-actions"><button type="button" class="primary" data-membership-decision="approve" data-participant-id="${escapeHtml(item.id)}">Aprovar</button><button type="button" class="secondary" data-membership-decision="reject" data-participant-id="${escapeHtml(item.id)}">Recusar</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`:
-      `<div class="admin-member-actions"><button type="button" class="secondary admin-member-toggle" data-participant-id="${escapeHtml(item.id)}" data-participant-active="${item.ativo!==false}">${item.ativo===false?"Reativar":"Desativar"}</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`;
+    const hasPhone=Boolean(normalizeWhatsAppPhone(item.celular));
+    const whatsappButton=`<button type="button" class="whatsapp admin-member-whatsapp" data-participant-whatsapp="${escapeHtml(item.id)}" ${hasPhone?"":"disabled"} title="${hasPhone?"Enviar mensagem individual pelo WhatsApp":"Cadastre o celular do participante para habilitar"}">WhatsApp</button>`;
+    const pendingActions=status==="pending"?`<div class="admin-member-actions">${whatsappButton}<button type="button" class="primary" data-membership-decision="approve" data-participant-id="${escapeHtml(item.id)}">Aprovar</button><button type="button" class="secondary" data-membership-decision="reject" data-participant-id="${escapeHtml(item.id)}">Recusar</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`:
+      `<div class="admin-member-actions">${whatsappButton}<button type="button" class="secondary admin-member-toggle" data-participant-id="${escapeHtml(item.id)}" data-participant-active="${item.ativo!==false}">${item.ativo===false?"Reativar":"Desativar"}</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`;
     return `<div class="admin-member-row status-${escapeHtml(status)}">
       <div class="admin-member-avatar">${escapeHtml(initials(item.nome).slice(0,2))}</div>
       <div class="admin-member-copy"><strong>${escapeHtml(item.nome)}</strong><span>${escapeHtml(item.email)}</span><small>${escapeHtml(phone)}${requested&&status==="pending"?` • solicitado em ${escapeHtml(requested)}`:""}</small><small>${membershipStatusLabel(item)}</small></div>
       ${pendingActions}
     </div>`;
   }).join(""):`<p class="muted-note">Nenhum participante cadastrado.</p>`;
+}
+
+
+function normalizeWhatsAppPhone(value){
+  let digits=String(value||"").replace(/\D/g,"");
+  if(!digits) return "";
+  if(digits.startsWith("00")) digits=digits.slice(2);
+  if(digits.startsWith("55")) return digits.length>=12 && digits.length<=13?digits:"";
+  if(digits.length===10 || digits.length===11) return `55${digits}`;
+  return "";
+}
+
+function whatsappTemplateText(type,participant){
+  const snapshot=state.adminSnapshot || buildAdminSnapshot();
+  const round=snapshot.round || currentRoundNumber();
+  const name=String(participant.nome||"Participante").trim().split(/\s+/)[0];
+  const progress=snapshot.participants?.find(item=>item.email===String(participant.email||"").toLowerCase());
+  const remaining=progress?Math.max(0,(Number(progress.total)||0)-(Number(progress.count)||0)):null;
+  const close=snapshot.closeAt?new Date(snapshot.closeAt).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"em breve";
+  const templates={
+    picks:`Olá, ${name}! 👋\n\nVocê ainda tem ${remaining==null?"palpites pendentes":`${remaining} palpite${remaining===1?"":"s"} pendente${remaining===1?"":"s"}`} na Rodada ${round} do Bolão Brasileirão 2026. Complete antes do prazo. Boa sorte! ⚽`,
+    closes:`Olá, ${name}! ⏰\n\nA Rodada ${round} fecha hoje. O próximo prazo é ${close}. Confira se todos os seus palpites estão preenchidos. ⚽`,
+    approved:`Olá, ${name}! ✅\n\nSua inscrição no Bolão Brasileirão 2026 foi aprovada. Você já pode entrar com sua conta Google e preencher os palpites.`,
+    welcome:`Olá, ${name}! 🏆\n\nBem-vindo ao Bolão Brasileirão 2026! Faça seus palpites, acompanhe o ranking e boa sorte na disputa.`,
+  };
+  return templates[type]||"";
+}
+
+function selectWhatsAppTemplate(type){
+  const participant=state.whatsappParticipant;
+  if(!participant) return;
+  const text=whatsappTemplateText(type,participant);
+  if($("adminWhatsAppMessage")) $("adminWhatsAppMessage").value=text;
+  document.querySelectorAll("[data-whatsapp-template]").forEach(button=>button.classList.toggle("active",button.dataset.whatsappTemplate===type));
+}
+
+function openParticipantWhatsApp(id){
+  const participant=(state.authorizedParticipants||[]).find(item=>String(item.id)===String(id));
+  if(!participant) return message("Participante não encontrado.",true);
+  if(!normalizeWhatsAppPhone(participant.celular)) return message("Este participante não possui um celular válido cadastrado.",true);
+  state.whatsappParticipant=participant;
+  $("adminWhatsAppParticipantName").textContent=participant.nome||"Participante";
+  $("adminWhatsAppParticipantPhone").textContent=formatBrazilPhone(participant.celular);
+  selectWhatsAppTemplate("picks");
+  show("adminWhatsAppModal",true);
+  document.body.classList.add("modal-open");
+  setTimeout(()=>$('adminWhatsAppMessage')?.focus(),60);
+}
+
+function closeParticipantWhatsApp(){
+  show("adminWhatsAppModal",false);
+  document.body.classList.remove("modal-open");
+  state.whatsappParticipant=null;
+}
+
+function sendParticipantWhatsApp(){
+  const participant=state.whatsappParticipant;
+  if(!participant) return;
+  const phone=normalizeWhatsAppPhone(participant.celular);
+  const text=String($("adminWhatsAppMessage")?.value||"").trim();
+  if(!phone) return message("Celular inválido para WhatsApp.",true);
+  if(!text) return message("Escolha um modelo ou escreva uma mensagem.",true);
+  if(!confirm(`Abrir o WhatsApp para enviar esta mensagem individual a ${participant.nome}?`)) return;
+  const url=`https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+  const opened=window.open(url,"_blank","noopener,noreferrer");
+  if(!opened) window.location.href=url;
+  closeParticipantWhatsApp();
+  message(`Mensagem preparada para ${participant.nome}. Revise e toque em enviar no WhatsApp.`);
 }
 
 async function decideMembership(id,decision){
@@ -3429,6 +3499,8 @@ $("adminParticipantManagerClose")?.addEventListener("click",closeParticipantMana
 $("cancelParticipantBtn")?.addEventListener("click",closeParticipantManager);
 $("adminParticipantForm")?.addEventListener("submit",saveAuthorizedParticipant);
 $("adminParticipantsList")?.addEventListener("click",event=>{
+  const whatsapp=event.target.closest("[data-participant-whatsapp]");
+  if(whatsapp){ openParticipantWhatsApp(whatsapp.dataset.participantWhatsapp); return; }
   const decision=event.target.closest("[data-membership-decision]");
   if(decision){ decideMembership(decision.dataset.participantId,decision.dataset.membershipDecision); return; }
   const deleteButton=event.target.closest("[data-participant-delete]");
@@ -3437,6 +3509,11 @@ $("adminParticipantsList")?.addEventListener("click",event=>{
   if(button) toggleAuthorizedParticipant(button.dataset.participantId,button.dataset.participantActive==="true");
 });
 $("adminParticipantManagerModal")?.addEventListener("click",event=>{if(event.target===$("adminParticipantManagerModal")) closeParticipantManager();});
+$("adminWhatsAppModal")?.addEventListener("click",event=>{if(event.target===$("adminWhatsAppModal")) closeParticipantWhatsApp();});
+$("adminWhatsAppClose")?.addEventListener("click",closeParticipantWhatsApp);
+$("adminWhatsAppCancel")?.addEventListener("click",closeParticipantWhatsApp);
+$("adminWhatsAppSend")?.addEventListener("click",sendParticipantWhatsApp);
+$("adminWhatsAppTemplates")?.addEventListener("click",event=>{const button=event.target.closest("[data-whatsapp-template]");if(button) selectWhatsAppTemplate(button.dataset.whatsappTemplate);});
 $("adminAttentionContent").onclick=event=>{
   const card=event.target.closest("[data-admin-participant]");
   if(card) openAdminParticipantDetail(card.dataset.adminParticipant);
