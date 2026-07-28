@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.3.0";
+const APP_VERSION = "6.4.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1133,6 +1133,119 @@ function renderFavoriteTeamPredictionCard(team){
   </article>`;
 }
 
+
+function favoriteTeamContext(team){
+  if(!team) return null;
+  const row=favoriteTeamStandingsRow(team);
+  const games=favoriteTeamGames(team).slice().sort((a,b)=>new Date(a.inicio)-new Date(b.inicio));
+  const completed=games.filter(isScorableGame);
+  const future=games.filter(game=>!isFinished(game) && new Date(game.inicio).getTime()>Date.now());
+  const recent=completed.slice(-5);
+  const next=future[0] || null;
+  const stats=favoriteTeamPredictionStats(team);
+  const key=normalizeTeamKey(team.name);
+  const relatedPicks=state.ownPicks.map(pick=>({pick,game:state.games.find(game=>Number(game.id_jogo)===Number(pick.id_jogo))})).filter(item=>item.game && (normalizeTeamKey(item.game.time_casa)===key || normalizeTeamKey(item.game.time_fora)===key) && isScorableGame(item.game));
+  let predictedWins=0, objectiveReads=0, exactSequence=0, bestSequence=0, currentSequence=0;
+  const timeline=[];
+  relatedPicks.sort((a,b)=>Number(a.game.rodada)-Number(b.game.rodada)).forEach(({pick,game})=>{
+    const favoriteHome=normalizeTeamKey(game.time_casa)===key;
+    const ownPick=Number(favoriteHome?pick.gols_casa:pick.gols_fora);
+    const opponentPick=Number(favoriteHome?pick.gols_fora:pick.gols_casa);
+    const predicted=ownPick>opponentPick?'V':ownPick<opponentPick?'D':'E';
+    const actual=favoriteTeamResult(game,team);
+    if(predicted==='V') predictedWins++;
+    if(predicted===actual) objectiveReads++;
+    const earned=points(pick,game);
+    if(earned>0){ currentSequence++; bestSequence=Math.max(bestSequence,currentSequence); } else currentSequence=0;
+    if(earned===10){
+      exactSequence++;
+      timeline.push({round:Number(game.rodada),icon:'🎯',title:'Placar exato',text:`Você cravou ${game.time_casa} ${game.gols_casa} × ${game.gols_fora} ${game.time_fora}.`});
+    }
+  });
+  completed.slice(-4).forEach(game=>{
+    const result=favoriteTeamResult(game,team);
+    if(result==='V') timeline.push({round:Number(game.rodada),icon:'🏟️',title:'Vitória do seu time',text:`${team.name} venceu ${normalizeTeamKey(game.time_casa)===key?game.time_fora:game.time_casa}.`});
+  });
+  timeline.sort((a,b)=>b.round-a.round);
+  const accuracy=relatedPicks.length?Math.round(objectiveReads/relatedPicks.length*100):0;
+  const confidence=relatedPicks.length?Math.round(predictedWins/relatedPicks.length*100):0;
+  const exactRate=relatedPicks.length?Math.round(stats.exact/relatedPicks.length*100):0;
+  const trendScore=recent.reduce((sum,game)=>sum+({V:3,E:1,D:0}[favoriteTeamResult(game,team)]||0),0);
+  const formScore=recent.length?Math.round(trendScore/(recent.length*3)*100):50;
+  const synergy=Math.max(0,Math.min(100,Math.round(accuracy*.55+exactRate*.2+formScore*.15+(bestSequence?Math.min(bestSequence*10,100):0)*.1)));
+  let profile={icon:'⚖️',name:'O Equilibrado',text:'Você combina emoção e leitura do momento do clube.'};
+  if(stats.games>=3 && stats.rate>=70) profile={icon:'🎯',name:'O Especialista',text:`Seus melhores palpites aparecem com frequência nos jogos do ${team.name}.`};
+  else if(confidence>=80 && accuracy<60) profile={icon:'❤️',name:'O Apaixonado',text:'Você acredita no seu time até quando o cenário pede cautela.'};
+  else if(accuracy>=65 && confidence<80) profile={icon:'🧠',name:'O Estratégico',text:'Você ajusta os palpites de acordo com a fase da equipe.'};
+  else if(confidence>=70) profile={icon:'🔥',name:'O Confiante',text:'Você mantém a confiança no seu time ao longo da temporada.'};
+  const achievements=[];
+  if(stats.games>=5) achievements.push({icon:'🏅',title:'Especialista do Clube',text:`Palpitou em ${stats.games} jogos concluídos do ${team.name}.`});
+  if(stats.exact>=2) achievements.push({icon:'🎯',title:'Profeta',text:`Já acertou ${stats.exact} placares exatos envolvendo seu time.`});
+  if(bestSequence>=3) achievements.push({icon:'🔥',title:'Leitor de Momento',text:`Alcançou ${bestSequence} acertos seguidos nos jogos do clube.`});
+  if(accuracy>=70 && relatedPicks.length>=5) achievements.push({icon:'🧠',title:'Sintonia Fina',text:'Sua leitura de resultado está acima de 70%.'});
+  return {team,row,games,completed,recent,next,stats,accuracy,confidence,synergy,profile,timeline:timeline.slice(0,6),achievements,bestSequence};
+}
+
+function favoriteFormMarkup(context){
+  if(!context?.recent?.length) return '<span class="my-team-empty-inline">Aguardando resultados</span>';
+  return `<div class="my-team-form" aria-label="Forma nos últimos jogos">${context.recent.map(game=>{const result=favoriteTeamResult(game,context.team);return `<span class="result-${String(result).toLowerCase()}" title="Rodada ${Number(game.rodada)}">${result}</span>`;}).join('')}</div>`;
+}
+
+function favoriteSynergyLabel(value){
+  if(value>=85) return 'Sintonia excepcional';
+  if(value>=70) return 'Muito conectado';
+  if(value>=55) return 'Boa leitura';
+  if(value>=40) return 'Em construção';
+  return 'Em fase de ajuste';
+}
+
+function renderMyTeam(){
+  const host=$("myTeamContent");
+  if(!host || !state.participant) return;
+  const team=findTeam(state.participant.time_favorito);
+  if(!team){
+    host.innerHTML=`<article class="card my-team-empty-state"><span aria-hidden="true">♡</span><h1>Escolha o seu time</h1><p>Defina seu clube favorito no Perfil para ativar a experiência Meu Time 2.0.</p><button class="primary" type="button" data-my-team-action="profile">Escolher meu time</button></article>`;
+    return;
+  }
+  const context=favoriteTeamContext(team);
+  const {row,next,stats,profile,synergy,achievements,timeline}=context;
+  const crest=team.logo?`<img src="${escapeHtml(team.logo)}" alt="Escudo do ${escapeHtml(team.name)}">`:`<span>${escapeHtml(initials(team.name).slice(0,3))}</span>`;
+  const nextOpponent=next?(normalizeTeamKey(next.time_casa)===team.key?next.time_fora:next.time_casa):null;
+  const nextVenue=next?(normalizeTeamKey(next.time_casa)===team.key?'Casa':'Fora'):'';
+  const nextDate=next?new Date(next.inicio):null;
+  const maxPoints=Math.max(1,stats.games*10);
+  const stars=Math.max(1,Math.min(5,Math.round(synergy/20)));
+  const formPoints=context.recent.reduce((sum,game)=>sum+({V:3,E:1,D:0}[favoriteTeamResult(game,team)]||0),0);
+  host.innerHTML=`
+    <article class="my-team-hero card">
+      <div class="my-team-hero-main"><span class="my-team-crest">${crest}</span><div><span class="eyebrow">MEU TIME 2.0</span><h1 id="myTeamPageTitle">${escapeHtml(team.name)}</h1><p>${row?`${row.position}º colocado · ${row.points} pontos · ${Number(row.goalDifference)>0?'+':''}${row.goalDifference} de saldo`:'Classificação em atualização'}</p></div></div>
+      <div class="my-team-hero-form"><span>Momento recente</span>${favoriteFormMarkup(context)}<small>${formPoints} ponto${formPoints===1?'':'s'} nos últimos ${context.recent.length} jogos</small></div>
+    </article>
+
+    <section class="my-team-grid my-team-grid-primary">
+      <article class="card my-team-next-card"><span class="eyebrow">PRÓXIMO JOGO</span>${next?`<div class="my-team-next-opponent"><span>${crest}</span><b>×</b><span>${teamLogo(normalizeTeamKey(next.time_casa)===team.key?next.time_fora_logo:next.time_casa_logo,nextOpponent)}</span></div><h2>${escapeHtml(team.name)} × ${escapeHtml(nextOpponent)}</h2><p>${escapeHtml(nextDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'}))} · ${escapeHtml(nextDate.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}))}</p><span class="my-team-venue">${nextVenue}${next.local?` · ${escapeHtml(next.local)}`:''}</span><button class="secondary" type="button" data-my-team-action="games">Abrir jogos</button>`:'<div class="my-team-no-next"><span>📅</span><strong>Próxima partida a definir</strong><p>Aguardando atualização da tabela.</p></div>'}</article>
+      <article class="card my-team-synergy-card"><span class="eyebrow">ÍNDICE DE SINTONIA</span><div class="my-team-synergy-score"><strong>${synergy}%</strong><span>${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</span></div><h2>${favoriteSynergyLabel(synergy)}</h2><p>Mede sua leitura dos resultados, placares exatos, regularidade e o momento recente do clube.</p><div class="my-team-progress"><i style="width:${synergy}%"></i></div></article>
+    </section>
+
+    <section class="my-team-section"><div class="my-team-section-heading"><div><span class="eyebrow">VOCÊ E O CLUBE</span><h2>Meu desempenho com o ${escapeHtml(team.name)}</h2></div></div>
+      <div class="my-team-metrics">
+        <article class="card"><span>Jogos analisados</span><strong>${stats.games}</strong><small>palpites concluídos</small></article>
+        <article class="card"><span>Resultados certos</span><strong>${stats.hits}</strong><small>${stats.games?Math.round(stats.hits/stats.games*100):0}% dos jogos</small></article>
+        <article class="card"><span>Placares exatos</span><strong>${stats.exact}</strong><small>10 pontos cada</small></article>
+        <article class="card"><span>Pontos conquistados</span><strong>${stats.points}</strong><small>de ${maxPoints} possíveis</small></article>
+      </div>
+    </section>
+
+    <section class="my-team-grid">
+      <article class="card my-team-profile-card"><span class="eyebrow">PERFIL DO TORCEDOR</span><div class="my-team-profile-icon">${profile.icon}</div><h2>${profile.name}</h2><p>${escapeHtml(profile.text)}</p><div class="my-team-profile-stats"><span><b>${context.confidence}%</b> confiança</span><span><b>${context.accuracy}%</b> leitura correta</span></div></article>
+      <article class="card my-team-club-card"><span class="eyebrow">DESEMPENHO DO CLUBE</span><div class="my-team-club-stats">${row?`<span><b>${row.playedGames}</b> jogos</span><span><b>${row.won}</b> vitórias</span><span><b>${row.draw}</b> empates</span><span><b>${row.lost}</b> derrotas</span><span><b>${row.goalsFor}</b> gols pró</span><span><b>${row.goalsAgainst}</b> gols contra</span>`:'<p>Classificação oficial em atualização.</p>'}</div><button class="secondary" type="button" data-my-team-action="standings">Ver tabela completa</button></article>
+    </section>
+
+    <section class="my-team-section"><div class="my-team-section-heading"><div><span class="eyebrow">HISTÓRIA DA TEMPORADA</span><h2>Momentos com o seu time</h2></div></div>${timeline.length?`<div class="my-team-timeline">${timeline.map(item=>`<article class="card"><span class="my-team-timeline-round">R${item.round}</span><i>${item.icon}</i><div><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.text)}</p></div></article>`).join('')}</div>`:'<article class="card my-team-empty-block">Os principais momentos aparecerão aqui conforme a temporada avançar.</article>'}</section>
+
+    <section class="my-team-section"><div class="my-team-section-heading"><div><span class="eyebrow">CONQUISTAS</span><h2>Marcos do Meu Time</h2></div></div>${achievements.length?`<div class="my-team-achievements">${achievements.map(item=>`<article class="card"><span>${item.icon}</span><div><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.text)}</p></div></article>`).join('')}</div>`:'<article class="card my-team-empty-block">Continue palpitando nos jogos do ${escapeHtml(team.name)} para desbloquear conquistas.</article>'}</section>`;
+}
+
 function renderHomeFavoriteTeam(){
   const host=$("homeFavoriteTeamSection");
   if(!host || !state.participant) return;
@@ -1168,7 +1281,7 @@ function renderHomeFavoriteTeam(){
   const contextBadge=isToday?'<span class="favorite-context-badge is-today">● Joga hoje</span>':isNextChampionshipGame?'<span class="favorite-context-badge">Próximo jogo do campeonato</span>':'';
 
   host.innerHTML=`<article class="premium-feature-card favorite-home-card">
-    <div class="favorite-home-overview home-navigable-card" role="button" tabindex="0" data-home-action="standings-favorite" aria-label="Abrir a tabela do Brasileirão e localizar o ${escapeHtml(team.name)}">
+    <div class="favorite-home-overview home-navigable-card" role="button" tabindex="0" data-home-action="myTeam" aria-label="Abrir Meu Time e ver detalhes do ${escapeHtml(team.name)}">
       <header class="premium-card-header favorite-home-header">
         <div><span class="premium-kicker">MEU TIME</span><h2>${escapeHtml(team.name)}</h2></div>
         <span class="favorite-home-crest">${crest}</span>
@@ -2791,15 +2904,16 @@ function updateBottomNavigationMotion(tabName){
 }
 
 function applyNavigationState(tabName){
-  const primaryTabs=["home","games","ranking","stats","admin"];
+  const primaryTabs=["home","games","myTeam","ranking","stats","admin"];
   show("participantDashboardSummary",false);
   document.querySelectorAll(".bottom-nav-item").forEach(item=>{
     const active=item.dataset.tab===tabName;
     item.classList.toggle("active",active);
     if(active) item.setAttribute("aria-current","page"); else item.removeAttribute("aria-current");
   });
-  ["home","games","ranking","standings","stats","admin","rules","profile"].forEach(name=>show(`${name}Tab`,name===tabName));
+  ["home","games","myTeam","ranking","standings","stats","admin","rules","profile"].forEach(name=>show(`${name}Tab`,name===tabName));
   if(tabName==="home") renderHome();
+  if(tabName==="myTeam") renderMyTeam();
   if(tabName==="ranking") renderRanking();
   if(tabName==="standings") loadStandings();
   if(tabName==="stats") renderStats();
@@ -2877,6 +2991,7 @@ async function refreshLiveScoresSilently(){
       renderSyncStatus();
       renderGames();
       renderRanking();
+      renderMyTeam();
       renderStats();
       if(!$("adminTab")?.classList.contains("hidden")) renderAdminRoundStatus();
     }
@@ -2901,7 +3016,7 @@ async function initialize(session){
   renderFavoriteTeamSelector();
   show("welcome",false); show("app",true); show("loginBtn",false); show("headerUser",true);
   const isAdmin=isAdminUser(); show("adminPanel",isAdmin); show("adminMenuShortcut",isAdmin);
-  renderRounds(); renderGames(); renderRanking(); renderStats(); renderHome(); startMatchClockRefresh(); startLiveScoreRefresh(); refreshLiveScoresSilently(); if(isAdmin){ renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminDiagnostic(); renderAdminExecutiveDashboard(); renderAdminAudit(); }
+  renderRounds(); renderGames(); renderRanking(); renderStats(); renderHome(); renderMyTeam(); startMatchClockRefresh(); startLiveScoreRefresh(); refreshLiveScoresSilently(); if(isAdmin){ renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminDiagnostic(); renderAdminExecutiveDashboard(); renderAdminAudit(); }
 }
 
 
@@ -3088,6 +3203,14 @@ $("homeTab")?.addEventListener("keydown",event=>{
   if(!target) return;
   event.preventDefault();
   target.click();
+});
+
+$("myTeamTab")?.addEventListener("click",event=>{
+  const target=event.target.closest("[data-my-team-action]");
+  if(!target) return;
+  const action=target.dataset.myTeamAction;
+  if(action==="standings"){ navigateTo("standings"); setTimeout(()=>focusFavoriteTeamInStandings(),140); return; }
+  navigateTo(action);
 });
 setupAdminQuickNavigation();
 setupAdminCollapsibleCards();

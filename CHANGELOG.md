@@ -1,3 +1,13 @@
+## v6.4.0 — Meu Time 2.0
+
+- Nova tela dedicada **Meu Time** na navegação principal.
+- Contexto compartilhado do clube favorito com classificação, forma e próximo jogo.
+- Estatísticas pessoais completas nos jogos do clube.
+- Índice de Sintonia e Perfil do Torcedor.
+- História da Temporada e conquistas contextuais.
+- Card da Home passa a direcionar para a experiência Meu Time.
+- Personalização permanece informativa e não altera pontuação ou vantagem competitiva.
+
 ## v6.3.0 — Final — Polimento da Experiência
 
 - Novo card Momento do Participante.

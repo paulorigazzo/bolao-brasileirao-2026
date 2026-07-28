@@ -4,7 +4,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 
 ## Versão atual
 
-`v6.3.0 — Histórico do Ranking`
+`v6.4.0 — Meu Time 2.0`
 
 O desenvolvimento atual está concentrado na Tela de Estatísticas. A Tela de Jogos está congelada momentaneamente na `v6.3.0d5`, salvo correção crítica.
 
@@ -43,3 +43,8 @@ npm run check
 ## Fluxo oficial
 
 `feature branch → VS Code → netlify dev → testes → commit → push → Pull Request → main → Netlify`
+
+
+## Meu Time 2.0
+
+A v6.4.0 transforma o time favorito em uma experiência transversal, com tela dedicada, forma recente, próximo jogo, desempenho pessoal, sintonia, perfil e história da temporada.
