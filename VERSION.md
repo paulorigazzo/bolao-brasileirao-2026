@@ -2,7 +2,7 @@
 
 ## Aplicação
 
-- **Versão:** `v6.3.0f`
+- **Versão:** `v6.3.0f11`
 - **Nome:** Dashboard Analítico — Estatísticas Avançadas
 - **Status:** pacote pronto para validação
 - **Base oficial anterior:** `v6.3.0e`
