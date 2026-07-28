@@ -3745,3 +3745,14 @@ button,.chip,.filter-chip,.bottom-nav-item,.card[role="button"]{-webkit-tap-high
 @media(max-width:760px){.my-team-hero{align-items:flex-start;flex-direction:column}.my-team-hero-form{text-align:left}.my-team-form{justify-content:flex-start}.my-team-grid,.my-team-grid-primary{grid-template-columns:1fr}.my-team-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.my-team-timeline,.my-team-achievements{grid-template-columns:1fr}.my-team-club-stats{grid-template-columns:repeat(2,1fr)}.bottom-nav-item{font-size:.68rem}.bottom-nav-icon{font-size:1.15rem}}
 @media(max-width:410px){.my-team-crest{width:62px;height:62px}.my-team-crest img{width:48px;height:48px}.my-team-metrics{grid-template-columns:1fr 1fr}.my-team-synergy-score{align-items:flex-start;flex-direction:column;gap:.6rem}}
 @media(prefers-reduced-motion:reduce){.my-team-progress i{transition:none}}
+
+
+/* v6.4.0a — Ajustes de navegação e Meu Time */
+@media(max-width:680px){
+  .bottom-nav{grid-template-columns:repeat(5,minmax(0,1fr));}
+  .bottom-nav-item>span:last-child{white-space:nowrap;font-size:clamp(.56rem,2.45vw,.68rem);}
+}
+.my-team-hero-link,.favorite-predictions-card.home-navigable-card{cursor:pointer;}
+.my-team-hero-link:focus-visible,.favorite-predictions-card.home-navigable-card:focus-visible{outline:3px solid color-mix(in srgb,var(--fan-primary,#39c879) 65%,white);outline-offset:3px;}
+.my-team-hero-link:hover,.favorite-predictions-card.home-navigable-card:hover{transform:translateY(-1px);}
+@media(prefers-reduced-motion:reduce){.my-team-hero-link:hover,.favorite-predictions-card.home-navigable-card:hover{transform:none;}}

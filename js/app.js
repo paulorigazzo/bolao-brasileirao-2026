@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.4.0";
+const APP_VERSION = "6.4.0a";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1117,7 +1117,7 @@ function renderFavoriteTeamPredictionCard(team){
   const stats=favoriteTeamPredictionStats(team);
   const plural=stats.games===1?'jogo analisado':'jogos analisados';
   const aria=`${stats.rate}% de aproveitamento`;
-  return `<article class="premium-feature-card favorite-predictions-card">
+  return `<article class="premium-feature-card favorite-predictions-card home-navigable-card" data-home-action="myTeam" role="button" tabindex="0" aria-label="Abrir Meu Time 2.0">
     <header class="premium-card-header favorite-predictions-header"><div><span class="premium-kicker">MEUS PALPITES</span><h2>🎯 Meu desempenho com o ${escapeHtml(team.name)}</h2></div></header>
     ${stats.games?`<div class="favorite-predictions-metrics">
       <div><strong>${stats.games}</strong><span>${plural}</span></div>
@@ -1217,7 +1217,7 @@ function renderMyTeam(){
   const stars=Math.max(1,Math.min(5,Math.round(synergy/20)));
   const formPoints=context.recent.reduce((sum,game)=>sum+({V:3,E:1,D:0}[favoriteTeamResult(game,team)]||0),0);
   host.innerHTML=`
-    <article class="my-team-hero card">
+    <article class="my-team-hero card my-team-hero-link" data-my-team-action="standings" role="button" tabindex="0" aria-label="Abrir tabela completa do campeonato">
       <div class="my-team-hero-main"><span class="my-team-crest">${crest}</span><div><span class="eyebrow">MEU TIME 2.0</span><h1 id="myTeamPageTitle">${escapeHtml(team.name)}</h1><p>${row?`${row.position}º colocado · ${row.points} pontos · ${Number(row.goalDifference)>0?'+':''}${row.goalDifference} de saldo`:'Classificação em atualização'}</p></div></div>
       <div class="my-team-hero-form"><span>Momento recente</span>${favoriteFormMarkup(context)}<small>${formPoints} ponto${formPoints===1?'':'s'} nos últimos ${context.recent.length} jogos</small></div>
     </article>
@@ -1243,7 +1243,7 @@ function renderMyTeam(){
 
     <section class="my-team-section"><div class="my-team-section-heading"><div><span class="eyebrow">HISTÓRIA DA TEMPORADA</span><h2>Momentos com o seu time</h2></div></div>${timeline.length?`<div class="my-team-timeline">${timeline.map(item=>`<article class="card"><span class="my-team-timeline-round">R${item.round}</span><i>${item.icon}</i><div><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.text)}</p></div></article>`).join('')}</div>`:'<article class="card my-team-empty-block">Os principais momentos aparecerão aqui conforme a temporada avançar.</article>'}</section>
 
-    <section class="my-team-section"><div class="my-team-section-heading"><div><span class="eyebrow">CONQUISTAS</span><h2>Marcos do Meu Time</h2></div></div>${achievements.length?`<div class="my-team-achievements">${achievements.map(item=>`<article class="card"><span>${item.icon}</span><div><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.text)}</p></div></article>`).join('')}</div>`:'<article class="card my-team-empty-block">Continue palpitando nos jogos do ${escapeHtml(team.name)} para desbloquear conquistas.</article>'}</section>`;
+    <section class="my-team-section"><div class="my-team-section-heading"><div><span class="eyebrow">CONQUISTAS</span><h2>Marcos do Meu Time</h2></div></div>${achievements.length?`<div class="my-team-achievements">${achievements.map(item=>`<article class="card"><span>${item.icon}</span><div><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.text)}</p></div></article>`).join('')}</div>`:`<article class="card my-team-empty-block">Continue palpitando nos jogos do ${escapeHtml(team.name)} para desbloquear conquistas.</article>`}</section>`;
 }
 
 function renderHomeFavoriteTeam(){
@@ -3211,6 +3211,13 @@ $("myTeamTab")?.addEventListener("click",event=>{
   const action=target.dataset.myTeamAction;
   if(action==="standings"){ navigateTo("standings"); setTimeout(()=>focusFavoriteTeamInStandings(),140); return; }
   navigateTo(action);
+});
+$("myTeamTab")?.addEventListener("keydown",event=>{
+  if(event.key!=="Enter" && event.key!==" ") return;
+  const target=event.target.closest('[role="button"][data-my-team-action]');
+  if(!target) return;
+  event.preventDefault();
+  target.click();
 });
 setupAdminQuickNavigation();
 setupAdminCollapsibleCards();
