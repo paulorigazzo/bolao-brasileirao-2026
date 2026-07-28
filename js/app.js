@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.5.1a";
+const APP_VERSION = "6.5.2";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -625,7 +625,7 @@ function applyCanonicalParticipantNames(){
   const validNames=new Set((state.participants||[]).map(item=>String(item?.nome||'').trim()).filter(Boolean));
   state.pickCounts=[...countsByName.entries()]
     .filter(([name])=>validNames.has(name))
-    .map(([usuario,quantidade])=>({usuario,quantidade}));
+    .map(([usuario,quantidade])=>({usuario,quantidade,user_id:(state.participants||[]).find(item=>String(item?.nome||'').trim()===usuario)?.user_id||null}));
 }
 
 async function loadData(){
@@ -633,7 +633,7 @@ async function loadData(){
     sb.from("jogos").select("*").order("rodada").order("inicio"),
     sb.from("palpites").select("*").eq("user_id",state.user.id),
     sb.from("palpites_publicos").select("*"),
-    sb.from("contagem_palpites_participantes").select("usuario,quantidade"),
+    sb.from("contagem_palpites_participantes").select("*"),
     sb.from("participantes").select("user_id,nome,email,time_favorito"),
     isAdminUser() ? sb.from("progresso_palpites_adm").select("user_id,usuario,id_jogo,atualizado_em") : Promise.resolve({data:[],error:null}),
     sb.from("participantes_autorizados").select("id,nome,email,celular,ativo,administrador,status,solicitado_em,aprovado_em,criado_em,atualizado_em").order("nome")
@@ -1138,7 +1138,7 @@ async function saveAllPicks(){
   const ids=new Set(payloads.map(payload=>Number(payload.id_jogo)));
   state.ownPicks=state.ownPicks.filter(pick=>!ids.has(Number(pick.id_jogo))).concat(data||payloads);
   clearPickDrafts([...ids]);
-  state.pickCounts=state.pickCounts.filter(item=>item.usuario!==state.participant.nome).concat({usuario:state.participant.nome,quantidade:state.ownPicks.length});
+  state.pickCounts=state.pickCounts.filter(item=>item?.user_id ? String(item.user_id)!==String(state.user.id) : item.usuario!==state.participant.nome).concat({user_id:state.user.id,usuario:state.participant.nome,quantidade:state.ownPicks.length});
   message(`${payloads.length} palpite${payloads.length===1?"":"s"} salvo${payloads.length===1?"":"s"} com sucesso.`);
   renderGames();renderRanking();renderStats();renderHome();
 }
@@ -1160,7 +1160,7 @@ async function savePick(event){
   if(error){button.dataset.busy="false";button.disabled=false;button.textContent="Tentar novamente";return message(error.message,true);}
   state.ownPicks=state.ownPicks.filter(pick=>Number(pick.id_jogo)!==id).concat(data||payload);
   clearPickDrafts([id]);
-  state.pickCounts=state.pickCounts.filter(item=>item.usuario!==state.participant.nome).concat({usuario:state.participant.nome,quantidade:state.ownPicks.length});
+  state.pickCounts=state.pickCounts.filter(item=>item?.user_id ? String(item.user_id)!==String(state.user.id) : item.usuario!==state.participant.nome).concat({user_id:state.user.id,usuario:state.participant.nome,quantidade:state.ownPicks.length});
   state.openGameId=id;
   updateCardDraftUi(card);
   button.dataset.busy="false";button.disabled=true;button.textContent="✓ Palpite salvo";
@@ -1171,36 +1171,63 @@ async function savePick(event){
 }
 
 function calculateRanking(){
-  const players={};
-  Object.values(participantDirectory()).forEach(name=>players[name]={name,total:0,exact:0,count:0,scored:0});
+  // A identidade canônica do ranking é user_id. O nome permanece somente como
+  // informação de exibição e como fallback temporário para registros legados.
+  const players=new Map();
+  const profilesByEmail=new Map((state.participants||[]).map(item=>[String(item?.email||"").toLowerCase(),item]));
+  const profilesByName=new Map((state.participants||[]).map(item=>[String(item?.nome||"").trim().toLowerCase(),item]));
+  const identityFor=(userId,name)=>userId ? `id:${String(userId)}` : `legacy:${String(name||"").trim().toLowerCase()}`;
+  const ensurePlayer=(userId,name)=>{
+    const displayName=String(name||"").trim();
+    if(!displayName && !userId) return null;
+    const key=identityFor(userId,displayName);
+    if(!players.has(key)) players.set(key,{key,userId:userId||null,name:displayName||"Participante",total:0,exact:0,count:0,scored:0});
+    else if(displayName) players.get(key).name=displayName;
+    return players.get(key);
+  };
 
-  for(const item of state.pickCounts){
-    const name=item.usuario;
-    if(!name) continue;
-    if(!players[name]) players[name]={name,total:0,exact:0,count:0,scored:0};
-    players[name].count=Number(item.quantidade)||0;
+  for(const [email,name] of Object.entries(participantDirectory())){
+    const profile=profilesByEmail.get(String(email).toLowerCase()) || profilesByName.get(String(name||"").trim().toLowerCase());
+    ensurePlayer(profile?.user_id||null,profile?.nome||name);
+  }
+  for(const profile of state.participants||[]) ensurePlayer(profile?.user_id||null,profile?.nome);
+
+  for(const item of state.pickCounts||[]){
+    const profile=item?.user_id
+      ? (state.participants||[]).find(candidate=>String(candidate?.user_id)===String(item.user_id))
+      : profilesByName.get(String(item?.usuario||"").trim().toLowerCase());
+    const player=ensurePlayer(profile?.user_id||item?.user_id||null,profile?.nome||item?.usuario);
+    if(player) player.count=Math.max(player.count,Number(item?.quantidade)||0);
   }
 
-  // Mantém a contagem do usuário logado imediatamente atualizada após salvar,
-  // mesmo antes de uma nova consulta ao banco.
   if(state.participant?.nome){
-    if(!players[state.participant.nome]) players[state.participant.nome]={name:state.participant.nome,total:0,exact:0,count:0,scored:0};
-    players[state.participant.nome].count=Math.max(players[state.participant.nome].count,state.ownPicks.length);
+    const player=ensurePlayer(state.participant?.user_id||state.user?.id||null,state.participant.nome);
+    if(player) player.count=Math.max(player.count,state.ownPicks.length);
   }
 
-  for(const p of state.publicPicks){
-    if(!players[p.usuario]) players[p.usuario]={name:p.usuario,total:0,exact:0,count:0,scored:0};
-    const game=state.games.find(g=>Number(g.id_jogo)===Number(p.id_jogo)), pts=points(p,game);
-    players[p.usuario].total+=pts;
-    if(isScorableGame(game)) players[p.usuario].scored++;
-    if(pts===10) players[p.usuario].exact++;
+  for(const pick of state.publicPicks||[]){
+    const profile=pick?.user_id
+      ? (state.participants||[]).find(candidate=>String(candidate?.user_id)===String(pick.user_id))
+      : profilesByName.get(String(pick?.usuario||"").trim().toLowerCase());
+    const player=ensurePlayer(profile?.user_id||pick?.user_id||null,profile?.nome||pick?.usuario);
+    if(!player) continue;
+    const game=state.games.find(item=>Number(item.id_jogo)===Number(pick.id_jogo));
+    const pts=points(pick,game);
+    player.total+=pts;
+    if(isScorableGame(game)) player.scored++;
+    if(pts===10) player.exact++;
   }
-  state.ranking=Object.values(players).sort((a,b)=>b.total-a.total||b.exact-a.exact||a.name.localeCompare(b.name));
+  state.ranking=[...players.values()].sort((a,b)=>b.total-a.total||b.exact-a.exact||a.name.localeCompare(b.name));
+}
+
+function isCurrentRankingParticipant(item){
+  if(item?.userId && state.user?.id) return String(item.userId)===String(state.user.id);
+  return String(item?.name||"").trim().toLowerCase()===String(state.participant?.nome||"").trim().toLowerCase();
 }
 
 function renderDashboard(){
-  const me=state.ranking.find(r=>r.name===state.participant.nome)||{total:0,exact:0,count:state.ownPicks.length,scored:0};
-  const pos=state.ranking.findIndex(r=>r.name===state.participant.nome), totalGames=state.games.length||380;
+  const me=state.ranking.find(isCurrentRankingParticipant)||{total:0,exact:0,count:state.ownPicks.length,scored:0};
+  const pos=state.ranking.findIndex(isCurrentRankingParticipant), totalGames=state.games.length||380;
   $("myPosition").textContent=pos>=0?`${pos+1}º`:"—"; $("myPoints").textContent=me.total; $("myExact").textContent=me.exact; $("myPickCount").textContent=state.ownPicks.length;
   $("averagePoints").textContent=`${me.scored? (me.total/me.scored).toFixed(1):"0"} por jogo finalizado`;
   $("exactRate").textContent=`${me.scored?Math.round(me.exact/me.scored*100):0}% de precisão`;
@@ -1497,7 +1524,7 @@ function renderHome(){
   const now=Date.now();
   const round=currentRoundNumber();
   const roundGames=homeRoundGames().sort((a,b)=>new Date(a.inicio)-new Date(b.inicio));
-  const meIndex=state.ranking.findIndex(item=>item.name===state.participant.nome);
+  const meIndex=state.ranking.findIndex(isCurrentRankingParticipant);
   const me=meIndex>=0?state.ranking[meIndex]:{total:0,exact:0,count:state.ownPicks.length,scored:0};
   const leader=state.ranking[0];
   const gapToLeader=leader && meIndex>0 ? Math.max(0,leader.total-me.total) : 0;
@@ -1584,7 +1611,7 @@ function renderHome(){
   const medals=["🥇","🥈","🥉"];
   $("homeRankingSection").innerHTML=`<article class="premium-feature-card premium-ranking-card home-navigable-card" role="button" tabindex="0" data-home-action="ranking" aria-label="Abrir ranking completo">
     <header class="premium-card-header"><div><span class="premium-kicker">🏆 CLASSIFICAÇÃO</span><h2>Top 3 do bolão</h2></div><span class="premium-inline-action">Ver ranking completo <b>›</b></span></header>
-    <div class="home-ranking-list">${state.ranking.slice(0,3).map((item,index)=>`<div class="home-ranking-row ${item.name===state.participant.nome?"is-me":""}"><span class="home-medal">${medals[index]}</span>${rankingAvatar(item.name)}<div><strong>${escapeHtml(item.name)}${item.name===state.participant.nome?' <em class="home-you-badge">VOCÊ</em>':''}</strong><small>${item.name===state.participant.nome?"Sua posição atual":"Participante"}</small></div><b>${item.total} pts</b><span class="row-chevron" aria-hidden="true">›</span></div>`).join("")||'<p class="muted-note">A classificação aparecerá após os primeiros resultados.</p>'}</div>
+    <div class="home-ranking-list">${state.ranking.slice(0,3).map((item,index)=>`<div class="home-ranking-row ${isCurrentRankingParticipant(item)?"is-me":""}"><span class="home-medal">${medals[index]}</span>${rankingAvatar(item.name)}<div><strong>${escapeHtml(item.name)}${isCurrentRankingParticipant(item)?' <em class="home-you-badge">VOCÊ</em>':''}</strong><small>${isCurrentRankingParticipant(item)?"Sua posição atual":"Participante"}</small></div><b>${item.total} pts</b><span class="row-chevron" aria-hidden="true">›</span></div>`).join("")||'<p class="muted-note">A classificação aparecerá após os primeiros resultados.</p>'}</div>
   </article>`;
 
   renderHomeFavoriteTeam();
@@ -1648,7 +1675,7 @@ function renderRanking(){
   calculateRanking();
   updateRankingMovement();
   const leader=state.ranking[0];
-  const meIndex=state.ranking.findIndex(r=>r.name===state.participant.nome);
+  const meIndex=state.ranking.findIndex(isCurrentRankingParticipant);
   const me=meIndex>=0?state.ranking[meIndex]:null;
   const completedRound=rankingCompletedRound();
   const updatedLabel=completedRound ? `Atualizado após a rodada ${completedRound}` : "Aguardando os primeiros resultados";
@@ -1690,7 +1717,7 @@ function renderRanking(){
     </div>`:'<p class="muted-note">Sua posição aparecerá quando você entrar na classificação.</p>';
 
   $('rankingBody').innerHTML=state.ranking.map((r,i)=>{
-    const isMe=r.name===state.participant.nome, rate=r.scored?Math.round(r.total/(r.scored*10)*100):0;
+    const isMe=isCurrentRankingParticipant(r), rate=r.scored?Math.round(r.total/(r.scored*10)*100):0;
     const team=participantTeam(r.name);
     const placeClass=i<3?` top-${i+1}`:"";
     const medal=i===0?'gold':i===1?'silver':i===2?'bronze':'';
@@ -1708,12 +1735,12 @@ function renderRanking(){
   $('podium').innerHTML=state.ranking.slice(0,3).map((r,i)=>{
     const rate=r.scored?Math.round(r.total/(r.scored*10)*100):0;
     const team=participantTeam(r.name);
-    return `<article class="podium-card card place-${i+1} ${r.name===state.participant.nome?"is-me":""}">
+    return `<article class="podium-card card place-${i+1} ${isCurrentRankingParticipant(r)?"is-me":""}">
       <div class="podium-crown">${medals[i]}</div>
       <div class="podium-top"><span class="podium-place">${i+1}º lugar</span>${movementBadge(r.name)}</div>
       ${rankingAvatar(r.name,"podium-avatar")}
       <strong>${escapeHtml(r.name)}</strong>
-      ${r.name===state.participant.nome?'<span class="podium-you">VOCÊ</span>':""}
+      ${isCurrentRankingParticipant(r)?'<span class="podium-you">VOCÊ</span>':""}
       <span class="podium-points">${r.total} pontos</span>
       <small>${team?escapeHtml(team.name):`${r.exact} exato${r.exact===1?"":"s"}`}</small>
       <div class="podium-rate"><span style="width:${rate}%"></span></div><em>${rate}% de aproveitamento</em>
@@ -1956,7 +1983,7 @@ function renderStats(){
     }).join("");
     const comparisonRows=participantSeries.slice(0,8).map(item=>{
       const latest=item.series.at(-1);
-      const isMe=item.name===state.participant?.nome;
+      const isMe=isCurrentRankingParticipant(item);
       const width=summary.currentPoints||latest.points?Math.max(6,(latest.points/Math.max(1,...participantSeries.map(row=>row.series.at(-1)?.points||0)))*100):0;
       return `<div class="ranking-history-competitor ${isMe?'is-me':''}"><span>${latest.position}º</span><div><strong>${escapeHtml(item.name)}${isMe?' <small>VOCÊ</small>':''}</strong><div><i style="width:${width}%"></i></div></div><b>${latest.points} pts</b></div>`;
     }).join("");
