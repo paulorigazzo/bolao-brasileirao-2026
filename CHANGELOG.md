@@ -1,3 +1,15 @@
+## [6.5.1] - 2026-07-28
+
+### Adicionado
+- Botão **Deletar** ao lado da ação de ativação/desativação na gestão de participantes.
+- Confirmação em duas etapas, incluindo digitação exata do nome do participante.
+- Função segura no Supabase para apagar perfil, autorização e palpites do participante.
+
+### Segurança
+- A exclusão é restrita ao administrador autenticado.
+- O administrador não pode excluir o próprio cadastro nem outro administrador por essa tela.
+- A conta Google/Supabase Auth não é apagada; apenas os dados do usuário dentro do bolão.
+
 ## [6.5.0e] - 2026-07-28
 
 ### Corrigido

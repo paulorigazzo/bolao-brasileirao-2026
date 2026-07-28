@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.5.0e";
+const APP_VERSION = "6.5.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -522,14 +522,14 @@ async function saveOwnProfile(event){
     if(error) throw error;
 
     const updated=Array.isArray(data)?data[0]:data;
-    if(!updated?.user_id) throw new Error("O servidor não confirmou a gravação do perfil. Execute a migração v6.5.0e no Supabase.");
+    if(!updated?.user_id) throw new Error("O servidor não confirmou a gravação do perfil. Execute a migração v6.5.0d no Supabase.");
 
     const {data:confirmed,error:confirmError}=await sb.from("participantes")
       .select("*")
       .eq("user_id",state.user.id)
       .single();
     if(confirmError) throw confirmError;
-    if(String(confirmed?.nome||"").trim()!==name) throw new Error("A alteração não foi persistida no banco. Execute novamente a migração v6.5.0e no Supabase.");
+    if(String(confirmed?.nome||"").trim()!==name) throw new Error("A alteração não foi persistida no banco. Execute novamente a migração v6.5.0d no Supabase.");
 
     state.participant={...state.participant,...confirmed,nome:name,celular:phone};
     state.membership={...state.membership,nome:name,celular:phone};
@@ -2329,8 +2329,10 @@ function renderAdminParticipants(){
     const status=item.status || (item.ativo===false?"inactive":"approved");
     const phone=item.celular?formatBrazilPhone(item.celular):"Celular não informado";
     const requested=item.solicitado_em?new Date(item.solicitado_em).toLocaleDateString("pt-BR"):"";
-    const pendingActions=status==="pending"?`<div class="admin-member-actions"><button type="button" class="primary" data-membership-decision="approve" data-participant-id="${escapeHtml(item.id)}">Aprovar</button><button type="button" class="secondary" data-membership-decision="reject" data-participant-id="${escapeHtml(item.id)}">Recusar</button></div>`:
-      `<button type="button" class="secondary admin-member-toggle" data-participant-id="${escapeHtml(item.id)}" data-participant-active="${item.ativo!==false}">${item.ativo===false?"Reativar":"Desativar"}</button>`;
+    const isCurrentUser=String(item.email||"").toLowerCase()===String(state.user?.email||"").toLowerCase();
+    const canDelete=!item.administrador && !isCurrentUser;
+    const pendingActions=status==="pending"?`<div class="admin-member-actions"><button type="button" class="primary" data-membership-decision="approve" data-participant-id="${escapeHtml(item.id)}">Aprovar</button><button type="button" class="secondary" data-membership-decision="reject" data-participant-id="${escapeHtml(item.id)}">Recusar</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`:
+      `<div class="admin-member-actions"><button type="button" class="secondary admin-member-toggle" data-participant-id="${escapeHtml(item.id)}" data-participant-active="${item.ativo!==false}">${item.ativo===false?"Reativar":"Desativar"}</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`;
     return `<div class="admin-member-row status-${escapeHtml(status)}">
       <div class="admin-member-avatar">${escapeHtml(initials(item.nome).slice(0,2))}</div>
       <div class="admin-member-copy"><strong>${escapeHtml(item.nome)}</strong><span>${escapeHtml(item.email)}</span><small>${escapeHtml(phone)}${requested&&status==="pending"?` • solicitado em ${escapeHtml(requested)}`:""}</small><small>${membershipStatusLabel(item)}</small></div>
@@ -2396,6 +2398,25 @@ async function toggleAuthorizedParticipant(id,isActive){
     await loadData(); renderAdminParticipants(); renderAdminAttention(); renderAdminExecutiveDashboard();
     message(isActive?"Acesso desativado. Histórico preservado.":"Participante reativado.");
   }catch(err){ message(err.message||"Não foi possível alterar o participante.",true); }
+}
+
+async function deleteParticipantPermanently(id,name){
+  const participantName=name||"este participante";
+  const first=confirm(`Deletar permanentemente ${participantName}? Todos os palpites, pontos, perfil e cadastro no bolão serão apagados. Esta ação não pode ser desfeita.`);
+  if(!first) return;
+  const typed=prompt(`Para confirmar, digite exatamente o nome do participante:
+${participantName}`);
+  if(typed!==participantName){
+    message("Exclusão cancelada: o nome informado não confere.",true);
+    return;
+  }
+  try{
+    const {error}=await sb.rpc("deletar_participante_bolao",{p_id:id});
+    if(error) throw error;
+    await loadData();
+    renderAdminParticipants(); renderAdminAttention(); renderAdminExecutiveDashboard(); renderRanking(); renderHome(); renderStatistics(); renderMyTeam();
+    message(`${participantName} e todos os dados do bolão foram excluídos.`);
+  }catch(err){ message(err.message||"Não foi possível excluir o participante.",true); }
 }
 
 function adminGamePhase(game){
@@ -3383,6 +3404,8 @@ $("adminParticipantForm")?.addEventListener("submit",saveAuthorizedParticipant);
 $("adminParticipantsList")?.addEventListener("click",event=>{
   const decision=event.target.closest("[data-membership-decision]");
   if(decision){ decideMembership(decision.dataset.participantId,decision.dataset.membershipDecision); return; }
+  const deleteButton=event.target.closest("[data-participant-delete]");
+  if(deleteButton){ deleteParticipantPermanently(deleteButton.dataset.participantDelete,deleteButton.dataset.participantName); return; }
   const button=event.target.closest("[data-participant-active]");
   if(button) toggleAuthorizedParticipant(button.dataset.participantId,button.dataset.participantActive==="true");
 });
