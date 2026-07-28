@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { analyzePredictionProfile, analyzeRoundPerformance, classifyStatisticsGames } from "../js/statistics-engine.js";
+import { analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, classifyStatisticsGames } from "../js/statistics-engine.js";
 
 const games = [
   { id_jogo: 1, status: "encerrado", inicio: "2026-01-01T10:00:00Z", gols_casa: 1, gols_fora: 0 },
@@ -78,5 +78,35 @@ assert.equal(predictionProfile.bestTeam.name, "Palmeiras");
 assert.equal(predictionProfile.bestTeam.points, 18);
 assert.equal(predictionProfile.challengeTeam.name, "Bahia");
 assert.equal(predictionProfile.hasEnoughData, true);
+
+
+const rankingHistory = analyzeRankingHistory({
+  games: [
+    { id_jogo: 11, rodada: 1, status: "encerrado" },
+    { id_jogo: 12, rodada: 2, status: "encerrado" },
+    { id_jogo: 13, rodada: 3, status: "encerrado" },
+  ],
+  picks: [
+    { id_jogo: 11, usuario: "Paulo", score: 3 },
+    { id_jogo: 11, usuario: "Gustavo", score: 10 },
+    { id_jogo: 12, usuario: "Paulo", score: 10 },
+    { id_jogo: 12, usuario: "Gustavo", score: 0 },
+    { id_jogo: 13, usuario: "Paulo", score: 0 },
+    { id_jogo: 13, usuario: "Gustavo", score: 5 },
+  ],
+  participantNames: ["Paulo", "Gustavo", "Guilherme"],
+  selectedParticipant: "Paulo",
+  isScorableGame: game => game.status === "encerrado",
+  pointsForPick: pick => pick.score,
+});
+assert.equal(rankingHistory.rounds.length, 3);
+assert.equal(rankingHistory.selectedSeries.length, 3);
+assert.equal(rankingHistory.selectedSeries[0].position, 2);
+assert.equal(rankingHistory.selectedSeries[1].position, 1);
+assert.equal(rankingHistory.summary.bestPosition, 1);
+assert.equal(rankingHistory.summary.worstPosition, 2);
+assert.equal(rankingHistory.summary.biggestClimb.places, 1);
+assert.equal(rankingHistory.summary.currentPoints, 13);
+assert.equal(rankingHistory.summary.participantCount, 3);
 
 console.log("Motor estatístico verificado com sucesso.");

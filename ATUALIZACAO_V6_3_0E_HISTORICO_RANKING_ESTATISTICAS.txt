@@ -1,0 +1,28 @@
+BOLÃO BRASILEIRÃO 2026 — v6.3.0e
+
+SPRINT E — HISTÓRICO DO RANKING
+
+Implementado exclusivamente na Tela de Estatísticas:
+- posição acumulada do participante após cada rodada encerrada;
+- melhor e pior posição;
+- maior subida e maior queda entre rodadas;
+- pontos acumulados por rodada;
+- comparação compacta com os demais participantes;
+- estados vazios seguros para campeonatos sem histórico suficiente;
+- layout responsivo para celular.
+
+Arquivos funcionais alterados:
+- js/statistics-engine.js
+- js/app.js (trechos exclusivos de Estatísticas e versão)
+- css/styles.css (bloco exclusivo de Estatísticas)
+- index.html (seção de Estatísticas e versão)
+- scripts/test-statistics-engine.mjs
+
+Arquivos preservados funcionalmente:
+- Tela de Jogos
+- Home
+- Ranking principal
+- Área ADM
+- Login
+- navegação global
+- regras de pontuação
