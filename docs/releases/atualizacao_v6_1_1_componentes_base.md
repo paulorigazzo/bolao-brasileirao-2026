@@ -1,0 +1,24 @@
+# Bolão Brasileirão 2026 — V6.1.1
+
+COMPONENTES BASE REUTILIZÁVEIS
+
+IMPLEMENTADO
+1. Nova camada css/components.css carregada após o CSS histórico.
+2. Padrão compartilhado para cards, botões, chips, badges, alertas, formulários, modais e skeletons.
+3. Estados normal, hover, active/focus, disabled e loading preparados pelos componentes.
+4. Grades de cards passam a alinhar irmãos pela altura do maior conteúdo, sem altura fixa que corte informações.
+5. Cards continuam fluidos: o padrão usa min-height e height:100% somente em grades estáticas.
+6. A tela Tabela permanece uma exceção explícita e protegida:
+   - standings-mobile-card com height:auto;
+   - min-height:0 e max-height:none;
+   - linhas da grade com max-content;
+   - painéis expansíveis sem contenção de altura.
+7. Versão atualizada para v6.1.1 em frontend, funções, documentação e package.json.
+8. Nenhuma alteração de banco de dados, Supabase ou variáveis do Netlify.
+
+VALIDAÇÃO RECOMENDADA APÓS PUBLICAR
+- Home: conferir alinhamento dos três cards-resumo.
+- Jogos: testar filtros, salvar palpites e estados disabled.
+- Ranking e Estatísticas: conferir cards lado a lado.
+- Tabela no celular: expandir um clube, depois “Desempenho recente” e “Ver jogos”. Todo o conteúdo deve permanecer visível.
+- Administração: abrir e fechar cards, modais e executar o diagnóstico.

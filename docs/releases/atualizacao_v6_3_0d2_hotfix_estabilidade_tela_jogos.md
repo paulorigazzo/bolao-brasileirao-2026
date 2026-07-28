@@ -1,0 +1,17 @@
+# Bolão Brasileirão 2026 — V6.3.0D2
+
+HOTFIX — ESTABILIDADE VISUAL DA TELA DE JOGOS
+
+Problema corrigido:
+- O refresh de 30 segundos reconstruía toda a lista de jogos, retraía o card aberto e alterava a posição da tela durante a digitação.
+
+Solução:
+- O refresh periódico passou a atualizar apenas relógios, prazos e indicadores de status quando não houve mudança estrutural nos jogos.
+- A lista completa só é reconstruída quando ocorre uma mudança real de estado, como início, encerramento, alteração de placar ou bloqueio de um jogo.
+- O card expandido, o foco do usuário e a posição da tela permanecem estáveis durante atualizações normais de 30 segundos.
+
+Arquivos alterados:
+- js/app.js
+- index.html
+- netlify/functions/_constants.mjs
+- package.json

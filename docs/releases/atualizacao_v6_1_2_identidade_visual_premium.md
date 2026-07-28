@@ -1,0 +1,21 @@
+# Bolão Brasileirão 2026 — V6.1.2
+
+IDENTIDADE VISUAL PREMIUM
+
+IMPLEMENTADO
+1. Cabeçalho premium com gradiente, profundidade e melhor hierarquia.
+2. Navegação, cards, botões, badges, chips, tabelas, menus e modais refinados.
+3. Microinterações discretas, foco visível e suporte a movimento reduzido.
+4. Refino mobile-first para áreas de toque e leitura em telas pequenas.
+5. Nova camada reutilizável css/identity-premium.css.
+
+PROTEÇÃO DA TELA TABELA
+- Cards da classificação mantêm height:auto, min-height:0 e max-height:none.
+- Grade mantém linhas max-content.
+- Painéis Desempenho recente e Ver jogos permanecem sem contenção de altura.
+- Nenhuma equalização de altura é aplicada aos cards da classificação.
+
+INFRAESTRUTURA
+- Não exige SQL.
+- Não exige novas variáveis de ambiente.
+- Não altera regras do bolão, banco, sincronização ou APIs.
