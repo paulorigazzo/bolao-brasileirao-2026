@@ -1,4 +1,4 @@
-## v6.4.0 — Meu Time 2.0
+## v6.4.0a — Meu Time 2.0
 
 - Nova tela dedicada **Meu Time** na navegação principal.
 - Contexto compartilhado do clube favorito com classificação, forma e próximo jogo.

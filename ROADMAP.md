@@ -61,7 +61,7 @@
 - Tela de Jogos: ⏸️ congelada momentaneamente na `v6.3.0d5`, salvo bug crítico.
 
 
-## v6.4.0 — Meu Time 2.0
+## v6.4.0a — Meu Time 2.0
 
 - [x] Home integrada ao Meu Time.
 - [x] Tela dedicada na navegação.
