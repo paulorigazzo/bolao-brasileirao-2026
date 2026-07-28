@@ -1,0 +1,16 @@
+BOLÃO BRASILEIRÃO 2026 — v6.3.0d5
+
+MELHORIA: BOTÃO CONTEXTUAL DE SALVAMENTO
+
+- Exibe “Salvar e próximo →” quando existe outro card vazio após o atual.
+- Exibe “Salvar palpite” no último jogo pendente.
+- Mantém “✓ Palpite salvo” após a confirmação do Supabase.
+- Não altera o fluxo de avanço automático implementado na v6.3.0d4.
+- A decisão considera apenas cards editáveis, vazios e disponíveis no filtro atual.
+
+REFINAMENTO ADICIONAL — LOCAL DA PARTIDA
+- O local nos cards recolhidos agora pode ocupar até duas linhas.
+- O texto deixa de ser ocultado em telas de até 380 px.
+- A coluna de horário/local recebeu mais espaço no mobile.
+- O nome completo permanece disponível no atributo title para acessibilidade e consulta no desktop.
+- A versão permanece v6.3.0d5 por integrar o mesmo pacote de refinamentos de UX da tela Jogos.

@@ -3687,3 +3687,28 @@ button,.chip,.filter-chip,.bottom-nav-item,.card[role="button"]{-webkit-tap-high
   .premium-game-actions{padding-top:2px}
   .premium-save-pick{width:100%;min-width:0}
 }
+
+
+/* v6.3.0d5 — refinamento do local da partida nos cards recolhidos */
+.premium-toggle-time small{
+  display:-webkit-box;
+  overflow:hidden;
+  min-height:2.25em;
+  color:var(--muted);
+  font-size:.62rem;
+  line-height:1.12;
+  overflow-wrap:anywhere;
+  text-overflow:ellipsis;
+  white-space:normal;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  line-clamp:2;
+}
+@media(max-width:520px){
+  .premium-game-toggle{grid-template-columns:68px minmax(0,1fr) auto!important}
+  .premium-toggle-time small{font-size:.6rem}
+}
+@media(max-width:380px){
+  .premium-game-toggle{grid-template-columns:64px minmax(0,1fr) 22px!important}
+  .premium-toggle-time small{display:-webkit-box;font-size:.57rem}
+}
