@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.5.0c";
+const APP_VERSION = "6.5.0d";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -522,14 +522,14 @@ async function saveOwnProfile(event){
     if(error) throw error;
 
     const updated=Array.isArray(data)?data[0]:data;
-    if(!updated?.user_id) throw new Error("O servidor não confirmou a gravação do perfil. Execute a migração v6.5.0c no Supabase.");
+    if(!updated?.user_id) throw new Error("O servidor não confirmou a gravação do perfil. Execute a migração v6.5.0d no Supabase.");
 
     const {data:confirmed,error:confirmError}=await sb.from("participantes")
       .select("*")
       .eq("user_id",state.user.id)
       .single();
     if(confirmError) throw confirmError;
-    if(String(confirmed?.nome||"").trim()!==name) throw new Error("A alteração não foi persistida no banco. Execute novamente a migração v6.5.0c no Supabase.");
+    if(String(confirmed?.nome||"").trim()!==name) throw new Error("A alteração não foi persistida no banco. Execute novamente a migração v6.5.0d no Supabase.");
 
     state.participant={...state.participant,...confirmed,nome:name,celular:phone};
     state.membership={...state.membership,nome:name,celular:phone};
@@ -576,6 +576,23 @@ function renderMembershipStatus(){
 }
 
 
+function applyCanonicalParticipantNames(){
+  const byUserId=new Map((state.participants||[])
+    .filter(item=>item?.user_id && item?.nome)
+    .map(item=>[String(item.user_id),item.nome]));
+
+  const canonicalize=pick=>{
+    const canonical=pick?.user_id ? byUserId.get(String(pick.user_id)) : null;
+    return canonical && canonical!==pick.usuario ? {...pick,usuario:canonical} : pick;
+  };
+
+  state.ownPicks=(state.ownPicks||[]).map(canonicalize);
+  state.publicPicks=(state.publicPicks||[]).map(canonicalize);
+
+  const validNames=new Set((state.participants||[]).map(item=>item?.nome).filter(Boolean));
+  state.pickCounts=(state.pickCounts||[]).filter(item=>validNames.has(item?.usuario));
+}
+
 async function loadData(){
   const [{data:games,error:gErr},{data:picks,error:pErr},{data:pub,error:pubErr},{data:counts,error:countsErr},{data:participants,error:participantsErr},{data:adminProgress,error:adminProgressErr},{data:authorized,error:authorizedErr}] = await Promise.all([
     sb.from("jogos").select("*").order("rodada").order("inicio"),
@@ -592,6 +609,7 @@ async function loadData(){
   if(adminProgressErr) console.warn("O progresso administrativo não pôde ser carregado. Execute o SQL da versão 4.4.1.", adminProgressErr);
   if(authorizedErr) console.warn("O cadastro dinâmico de participantes ainda não está disponível. Execute o SQL da versão 4.7.0.",authorizedErr);
   state.games=games||[]; state.ownPicks=picks||[]; state.publicPicks=pub||[]; state.pickCounts=counts||[]; state.participants=participants||[]; state.adminPickProgress=adminProgress||[]; state.authorizedParticipants=authorized||[];
+  applyCanonicalParticipantNames();
   renderSyncStatus();
 }
 

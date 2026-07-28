@@ -1,9 +1,10 @@
-## [6.5.0c] - 2026-07-28
+## [6.5.0d] - 2026-07-28
 
 ### Corrigido
-- Força contraste escuro nos campos Nome e Celular, inclusive no autofill do navegador.
-- Adiciona cache busting aos arquivos CSS e JavaScript para impedir carregamento da versão anterior.
-- Isola o botão Salvar dados do manipulador de palpites e adiciona proteção defensiva em savePick.
+- Remove a atualização retroativa da coluna `usuario` em palpites encerrados, que acionava a proteção de prazo e abortava a alteração do nome.
+- Mantém os palpites históricos intactos e resolve o nome atual do participante pelo `user_id`.
+- Normaliza, após cada carregamento, os nomes usados em Ranking, Home, Estatísticas e demais telas.
+- Preserva a alteração de celular e a confirmação real da persistência no Supabase.
 
 ## v6.4.0b — Meu Time 2.0
 
