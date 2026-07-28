@@ -27,7 +27,7 @@
       <span class="brand-mark">⚽</span>
       <div>
         <h1>Bolão Brasileirão</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.4.0b</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.5.0</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -63,9 +63,19 @@
         <span class="eyebrow">BOLÃO ENTRE AMIGOS</span>
         <h2>Quem entende mais de Brasileirão?</h2>
         <p>Registre seus placares, acompanhe os resultados e dispute a liderança rodada a rodada.</p>
+        <div id="registrationInviteHint" class="registration-invite-hint hidden"><strong>Você recebeu um convite para participar.</strong><span>Entre com sua conta Google e envie seu cadastro para aprovação do administrador.</span></div>
         <button id="heroLoginBtn" class="primary big" type="button">Entrar com Google</button>
       </div>
       <div class="hero-ball">🏆</div>
+    </section>
+
+    <section id="membershipStatus" class="membership-status card hidden" aria-live="polite">
+      <span id="membershipStatusIcon" class="membership-status-icon" aria-hidden="true">⏳</span>
+      <span class="eyebrow">ACESSO AO BOLÃO</span>
+      <h2 id="membershipStatusTitle">Cadastro aguardando aprovação</h2>
+      <p id="membershipStatusText"></p>
+      <div class="membership-status-account"><span>Conta utilizada</span><strong id="membershipStatusEmail"></strong></div>
+      <button id="membershipLogoutBtn" class="secondary" type="button">Sair desta conta</button>
     </section>
 
     <section id="app" class="hidden">
@@ -401,10 +411,13 @@
         <article id="adminParticipantsCard" class="card admin-participants-card" aria-live="polite">
           <div class="admin-participants-header" data-admin-card-header>
             <div><span class="eyebrow">ACESSO AO BOLÃO</span><h2>👥 Participantes</h2></div>
-            <div class="admin-card-header-actions"><span id="adminParticipantsCount" class="admin-participants-badge">Carregando…</span><button class="admin-card-toggle" type="button" data-admin-collapse="adminParticipantsCard" aria-expanded="true" aria-label="Recolher Participantes">⌃</button></div>
+            <div class="admin-card-header-actions"><span id="adminPendingRequestsBadge" class="admin-pending-requests-badge hidden" title="Solicitações pendentes">0</span><span id="adminParticipantsCount" class="admin-participants-badge">Carregando…</span><button class="admin-card-toggle" type="button" data-admin-collapse="adminParticipantsCard" aria-expanded="true" aria-label="Recolher Participantes">⌃</button></div>
           </div>
           <p class="admin-participants-intro">Autorize novas contas Google ou desative acessos sem apagar o histórico.</p>
-          <button id="openParticipantManagerBtn" class="primary admin-add-participant" type="button">➕ Adicionar participante</button>
+          <div class="admin-participant-actions">
+            <button id="copyRegistrationLinkBtn" class="primary admin-add-participant" type="button">🔗 Copiar link de cadastro</button>
+            <button id="openParticipantManagerBtn" class="secondary admin-add-participant" type="button">➕ Adicionar manualmente</button>
+          </div>
           <div id="adminParticipantsList" class="admin-participants-list"><p class="muted-note">Carregando participantes…</p></div>
           <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
         </article>
@@ -461,7 +474,16 @@
 
       <section id="profileTab" class="tab-content hidden">
         <div class="profile-layout">
-          <div class="card profile-card"><div id="avatar" class="avatar"><span id="profileInitials">P</span></div><div><span class="eyebrow">PARTICIPANTE</span><h2 id="profileName"></h2><p id="profileEmail"></p><p id="favoriteTeamSummary" class="favorite-team-summary">Time do coração: não escolhido</p></div></div>
+          <div class="card profile-card profile-edit-card">
+            <div class="profile-summary"><div id="avatar" class="avatar"><span id="profileInitials">P</span></div><div><span class="eyebrow">PARTICIPANTE</span><h2 id="profileName"></h2><p id="profileEmail"></p><p id="favoriteTeamSummary" class="favorite-team-summary">Time do coração: não escolhido</p></div></div>
+            <form id="profileDataForm" class="profile-data-form">
+              <div><span class="eyebrow">MEUS DADOS</span><h3>Editar perfil</h3><p class="muted-note">Seu e-mail está vinculado ao login Google e não pode ser alterado aqui.</p></div>
+              <label>Nome de exibição<input id="profileNameInput" type="text" maxlength="80" autocomplete="name" required></label>
+              <label>Celular com WhatsApp <span class="optional-label">opcional</span><input id="profilePhoneInput" type="tel" inputmode="tel" maxlength="16" autocomplete="tel" placeholder="(16) 99999-9999"><small>Será visível somente para você e para o administrador, preparando futuros avisos do bolão.</small></label>
+              <small id="profileFormStatus" class="profile-form-status" aria-live="polite"></small>
+              <button id="saveProfileBtn" class="primary" type="submit">Salvar dados</button>
+            </form>
+          </div>
           <div class="card favorite-team-card">
             <span class="eyebrow">PERSONALIZAÇÃO</span>
             <h2>Meu time do coração</h2>
@@ -537,6 +559,13 @@
   </div>
 
   <footer>Bolão Brasileirão 2026</footer>
+  <script>
+    if(new URLSearchParams(location.search).get("cadastro")==="1"){
+      document.getElementById("registrationInviteHint")?.classList.remove("hidden");
+      const heroButton=document.getElementById("heroLoginBtn");
+      if(heroButton) heroButton.textContent="Entrar e solicitar participação";
+    }
+  </script>
   <script type="module" src="./js/app.js"></script>
 </body>
 </html>

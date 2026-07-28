@@ -108,3 +108,17 @@ Todas as alterações relevantes do projeto são registradas aqui. Os relatório
 ## Histórico anterior
 
 O histórico detalhado das versões anteriores permanece documentado nos relatórios existentes e no histórico Git.
+
+## [6.5.0] - 2026-07-28
+
+### Adicionado
+- Tela de edição dos dados do participante, com nome e celular opcional.
+- Link público de cadastro com aprovação posterior do administrador.
+- Estados de solicitação pendente, aprovada, recusada e inativa.
+- Ações de aprovação e recusa na Área ADM.
+- Migração SQL em formatos SQL e TXT.
+
+### Segurança
+- Usuários pendentes não acessam as telas internas nem os palpites.
+- Celular não é carregado nas telas públicas do aplicativo.
+- Alterações de nome são vinculadas ao `user_id`.
