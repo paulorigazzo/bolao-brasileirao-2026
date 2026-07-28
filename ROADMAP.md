@@ -73,7 +73,7 @@
 - [x] Conquistas contextuais.
 - [x] Neutralidade competitiva preservada.
 
-## v6.5.1 — Gestão de Participantes
+## v6.5.1a — Gestão de Participantes
 
 - [x] Edição do nome pelo próprio usuário.
 - [x] Celular opcional para futuros avisos via WhatsApp.
@@ -82,7 +82,7 @@
 - [x] Bloqueio de acesso enquanto a solicitação estiver pendente.
 
 
-### v6.5.1 — Exclusão de participantes
+### v6.5.1a — Exclusão de participantes
 - [x] Exclusão permanente dos dados do participante no bolão.
 - [x] Confirmação destrutiva em duas etapas.
 - [x] Proteção contra exclusão do próprio administrador e de outros administradores.

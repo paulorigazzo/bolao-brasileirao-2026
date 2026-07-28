@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.5.1";
+const APP_VERSION = "6.5.1a";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -3431,7 +3431,6 @@ $("clearFavoriteTeamBtn").onclick=()=>{
 $("userMenuBtn").onclick=()=>{ const open=$("userMenu").classList.contains("hidden"); show("userMenu",open); $("userMenuBtn").setAttribute("aria-expanded",String(open)); };
 const closeUserMenu=()=>{ show("userMenu",false); $("userMenuBtn").setAttribute("aria-expanded","false"); };
 $("profileShortcut").onclick=()=>{ closeUserMenu(); navigateTo("profile"); };
-$("teamShortcut").onclick=()=>{ closeUserMenu(); navigateTo("profile"); setTimeout(()=>$("favoriteTeamGrid")?.scrollIntoView({behavior:"smooth",block:"center"}),250); };
 $("standingsShortcut").onclick=()=>{ closeUserMenu(); navigateTo("standings"); };
 $("rulesShortcut").onclick=()=>{ closeUserMenu(); navigateTo("rules"); };
 $("adminMenuShortcut").onclick=()=>{ closeUserMenu(); navigateTo("admin"); };

@@ -1,3 +1,9 @@
+# v6.5.1a — Simplificação do menu do usuário
+
+- remove a opção redundante “Meu time” do menu da conta;
+- mantém “Meu perfil” como acesso aos dados pessoais e preferências;
+- preserva “Meu Time” na navegação principal inferior, onde permanece a experiência esportiva completa.
+
 ## [6.5.1] - 2026-07-28
 
 ### Adicionado
