@@ -73,7 +73,7 @@
 - [x] Conquistas contextuais.
 - [x] Neutralidade competitiva preservada.
 
-## v6.5.0d — Gestão de Participantes
+## v6.5.0e — Gestão de Participantes
 
 - [x] Edição do nome pelo próprio usuário.
 - [x] Celular opcional para futuros avisos via WhatsApp.

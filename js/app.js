@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.5.0d";
+const APP_VERSION = "6.5.0e";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -522,14 +522,14 @@ async function saveOwnProfile(event){
     if(error) throw error;
 
     const updated=Array.isArray(data)?data[0]:data;
-    if(!updated?.user_id) throw new Error("O servidor não confirmou a gravação do perfil. Execute a migração v6.5.0d no Supabase.");
+    if(!updated?.user_id) throw new Error("O servidor não confirmou a gravação do perfil. Execute a migração v6.5.0e no Supabase.");
 
     const {data:confirmed,error:confirmError}=await sb.from("participantes")
       .select("*")
       .eq("user_id",state.user.id)
       .single();
     if(confirmError) throw confirmError;
-    if(String(confirmed?.nome||"").trim()!==name) throw new Error("A alteração não foi persistida no banco. Execute novamente a migração v6.5.0d no Supabase.");
+    if(String(confirmed?.nome||"").trim()!==name) throw new Error("A alteração não foi persistida no banco. Execute novamente a migração v6.5.0e no Supabase.");
 
     state.participant={...state.participant,...confirmed,nome:name,celular:phone};
     state.membership={...state.membership,nome:name,celular:phone};
@@ -579,18 +579,53 @@ function renderMembershipStatus(){
 function applyCanonicalParticipantNames(){
   const byUserId=new Map((state.participants||[])
     .filter(item=>item?.user_id && item?.nome)
-    .map(item=>[String(item.user_id),item.nome]));
+    .map(item=>[String(item.user_id),String(item.nome).trim()]));
+
+  // Constrói um mapa de apelidos históricos para o nome atual. Isso é
+  // necessário porque algumas views antigas expõem apenas `usuario`, sem
+  // `user_id`. Ao renomear um participante, seus palpites históricos podem
+  // continuar trazendo o nome anterior e criar uma segunda linha no ranking.
+  const aliases=new Map();
+  const registerAlias=pick=>{
+    const oldName=String(pick?.usuario||'').trim();
+    const canonical=pick?.user_id ? byUserId.get(String(pick.user_id)) : null;
+    if(oldName && canonical && oldName!==canonical) aliases.set(oldName,canonical);
+  };
+  (state.ownPicks||[]).forEach(registerAlias);
+  (state.publicPicks||[]).forEach(registerAlias);
+
+  const canonicalName=name=>{
+    let current=String(name||'').trim();
+    const visited=new Set();
+    while(aliases.has(current) && !visited.has(current)){
+      visited.add(current);
+      current=aliases.get(current);
+    }
+    return current;
+  };
 
   const canonicalize=pick=>{
-    const canonical=pick?.user_id ? byUserId.get(String(pick.user_id)) : null;
-    return canonical && canonical!==pick.usuario ? {...pick,usuario:canonical} : pick;
+    const byId=pick?.user_id ? byUserId.get(String(pick.user_id)) : null;
+    const canonical=byId || canonicalName(pick?.usuario);
+    return canonical && canonical!==pick?.usuario ? {...pick,usuario:canonical} : pick;
   };
 
   state.ownPicks=(state.ownPicks||[]).map(canonicalize);
   state.publicPicks=(state.publicPicks||[]).map(canonicalize);
 
-  const validNames=new Set((state.participants||[]).map(item=>item?.nome).filter(Boolean));
-  state.pickCounts=(state.pickCounts||[]).filter(item=>validNames.has(item?.usuario));
+  // Consolida contagens duplicadas geradas pelo nome antigo, mantendo a maior
+  // quantidade reportada para cada participante canônico.
+  const countsByName=new Map();
+  for(const item of state.pickCounts||[]){
+    const name=canonicalName(item?.usuario);
+    if(!name) continue;
+    const quantity=Number(item?.quantidade)||0;
+    countsByName.set(name,Math.max(countsByName.get(name)||0,quantity));
+  }
+  const validNames=new Set((state.participants||[]).map(item=>String(item?.nome||'').trim()).filter(Boolean));
+  state.pickCounts=[...countsByName.entries()]
+    .filter(([name])=>validNames.has(name))
+    .map(([usuario,quantidade])=>({usuario,quantidade}));
 }
 
 async function loadData(){
