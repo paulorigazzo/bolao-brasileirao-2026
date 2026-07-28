@@ -3803,3 +3803,32 @@ button,.chip,.filter-chip,.bottom-nav-item,.card[role="button"]{-webkit-tap-high
 /* v6.5.0a — legibilidade dos campos editáveis do perfil */
 .profile-data-form input::placeholder{color:var(--text-muted,#607067);opacity:.78}
 .profile-data-form input:-webkit-autofill{-webkit-text-fill-color:var(--text,#17231c);caret-color:var(--text,#17231c)}
+
+
+/* v6.5.0b — correção urgente de contraste e autofill no formulário de perfil */
+#profileTab #profileDataForm input#profileNameInput,
+#profileTab #profileDataForm input#profilePhoneInput {
+  background-color: #ffffff !important;
+  color: #17231c !important;
+  -webkit-text-fill-color: #17231c !important;
+  caret-color: #17231c !important;
+  opacity: 1 !important;
+}
+#profileTab #profileDataForm input#profileNameInput::placeholder,
+#profileTab #profileDataForm input#profilePhoneInput::placeholder {
+  color: #718078 !important;
+  -webkit-text-fill-color: #718078 !important;
+  opacity: 1 !important;
+}
+#profileTab #profileDataForm input#profileNameInput:-webkit-autofill,
+#profileTab #profileDataForm input#profileNameInput:-webkit-autofill:hover,
+#profileTab #profileDataForm input#profileNameInput:-webkit-autofill:focus,
+#profileTab #profileDataForm input#profilePhoneInput:-webkit-autofill,
+#profileTab #profileDataForm input#profilePhoneInput:-webkit-autofill:hover,
+#profileTab #profileDataForm input#profilePhoneInput:-webkit-autofill:focus {
+  -webkit-text-fill-color: #17231c !important;
+  caret-color: #17231c !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  transition: background-color 9999s ease-out 0s;
+}

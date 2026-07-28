@@ -1,8 +1,9 @@
-## [6.5.0a] - 2026-07-28
+## [6.5.0b] - 2026-07-28
 
 ### Corrigido
-- Cor do texto e do cursor nos campos Nome e Celular de Meu Perfil, garantindo contraste sobre o fundo claro.
-- Cor do placeholder e do preenchimento automático do navegador nos mesmos campos.
+- Força contraste escuro nos campos Nome e Celular, inclusive no autofill do navegador.
+- Adiciona cache busting aos arquivos CSS e JavaScript para impedir carregamento da versão anterior.
+- Isola o botão Salvar dados do manipulador de palpites e adiciona proteção defensiva em savePick.
 
 ## v6.4.0b — Meu Time 2.0
 
