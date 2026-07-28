@@ -484,122 +484,67 @@ export function buildStatisticsDashboardModel({
   }
 
   const group = advancedStats.group || {};
+  const consistency = Number(advancedStats.consistency?.index);
   const relationToAverage = Number.isFinite(group.groupAverageTotal)
     ? Number(totalPoints) - Number(group.groupAverageTotal)
     : null;
   const trendDirectory = {
-    up: {
-      icon: "↗",
-      label: "Em alta",
-      title: "Momento de alta",
-      detail: `+${Math.abs(Number(roundAnalysis.delta) || 0).toFixed(1)} pt/jogo recentemente`,
-      text: `Sua média recente subiu ${Math.abs(Number(roundAnalysis.delta) || 0).toFixed(1)} ponto por jogo.`,
-    },
-    down: {
-      icon: "↘",
-      label: "Em atenção",
-      title: "Momento de atenção",
-      detail: `-${Math.abs(Number(roundAnalysis.delta) || 0).toFixed(1)} pt/jogo recentemente`,
-      text: `Sua média recente caiu ${Math.abs(Number(roundAnalysis.delta) || 0).toFixed(1)} ponto por jogo.`,
-    },
-    stable: {
-      icon: "→",
-      label: "Estável",
-      title: "Desempenho estável",
-      detail: "média próxima das rodadas anteriores",
-      text: "Sua média recente está próxima das rodadas anteriores.",
-    },
-    insufficient: {
-      icon: "·",
-      label: "Em formação",
-      title: "Tendência em formação",
-      detail: "aguardando mais rodadas",
-      text: "São necessárias mais rodadas completas para identificar uma tendência.",
-    },
+    up: { icon: "↗", label: "Em alta", title: "Seu ritmo está crescendo", detail: `+${Math.abs(Number(roundAnalysis.delta) || 0).toFixed(1)} pt/jogo recentemente`, text: `Sua média recente subiu ${Math.abs(Number(roundAnalysis.delta) || 0).toFixed(1)} ponto por jogo.` },
+    down: { icon: "↘", label: "Em atenção", title: "Hora de buscar a reação", detail: `-${Math.abs(Number(roundAnalysis.delta) || 0).toFixed(1)} pt/jogo recentemente`, text: `Sua média recente caiu ${Math.abs(Number(roundAnalysis.delta) || 0).toFixed(1)} ponto por jogo.` },
+    stable: { icon: "→", label: "Estável", title: "Você mantém o ritmo", detail: "média próxima das rodadas anteriores", text: "Sua média recente está próxima das rodadas anteriores." },
+    insufficient: { icon: "·", label: "Em formação", title: "Sua história está começando", detail: "aguardando mais rodadas", text: "São necessárias mais rodadas completas para identificar uma tendência." },
   };
   const trend = trendDirectory[roundAnalysis.trend] || trendDirectory.insufficient;
 
   const nearestGap = group.position === 1
-    ? {
-        label: "Vantagem atual",
-        value: group.leadOverBelow == null ? "—" : `${group.leadOverBelow} pts`,
-        detail: group.below || "sem perseguidor",
-      }
-    : {
-        label: "Próxima posição",
-        value: group.gapToAbove == null ? "—" : `${group.gapToAbove} pts`,
-        detail: group.above || "participante acima",
-      };
+    ? { label: "Vantagem atual", value: group.leadOverBelow == null ? "—" : `${group.leadOverBelow} pts`, detail: group.below || "sem perseguidor" }
+    : { label: "Próxima posição", value: group.gapToAbove == null ? "—" : `${group.gapToAbove} pts`, detail: group.above || "participante acima" };
 
   const specialtyDirectory = [
-    { key: "exact", label: "Placar exato", icon: "🎯" },
-    { key: "difference", label: "Diferença exata", icon: "📐" },
-    { key: "winner", label: "Vencedor correto", icon: "🏁" },
-    { key: "draw", label: "Empates", icon: "⚖️" },
+    { key: "exact", label: "Placares exatos", title: "Rei dos Placares", icon: "🎯" },
+    { key: "difference", label: "Diferenças exatas", title: "Mestre do Saldo", icon: "📐" },
+    { key: "winner", label: "Vencedores corretos", title: "Leitor de Jogo", icon: "🏁" },
+    { key: "draw", label: "Empates", title: "Mestre dos Empates", icon: "⚖️" },
   ];
-  const specialty = specialtyDirectory
-    .map(item => ({ ...item, value: Number(counts[item.key]) || 0 }))
-    .sort((a, b) => b.value - a.value)[0];
+  const specialty = specialtyDirectory.map(item => ({ ...item, value: Number(counts[item.key]) || 0 })).sort((a, b) => b.value - a.value)[0];
 
-  const insights = [{
-    key: "trend",
-    icon: trend.icon,
-    eyebrow: "TENDÊNCIA RECENTE",
-    title: trend.title,
-    text: trend.text,
-    tone: `trend-${roundAnalysis.trend || "insufficient"}`,
-  }];
+  let dynamicTitle = { icon: "⚽", title: "Palpiteiro em Evolução", description: "Seu perfil ficará mais claro a cada rodada." };
+  if (group.position === 1) dynamicTitle = { icon: "👑", title: "Dono da Liderança", description: "Você é a referência atual do bolão." };
+  else if (roundAnalysis.trend === "up") dynamicTitle = { icon: "🔥", title: "Em Ascensão", description: "Seu desempenho recente está ganhando força." };
+  else if (Number.isFinite(consistency) && consistency >= 75) dynamicTitle = { icon: "⭐", title: "Muralha da Regularidade", description: "Você mantém um nível de pontuação muito consistente." };
+  else if (group.gapToLeader != null && group.gapToLeader <= 8) dynamicTitle = { icon: "🦁", title: "Caçador do Líder", description: "A liderança está ao alcance de uma boa sequência." };
+  else if (finished >= 3 && specialty?.value) dynamicTitle = { icon: specialty.icon, title: specialty.title, description: `${specialty.label} são o destaque do seu perfil.` };
 
-  if (finished && specialty?.value) {
-    insights.push({
-      key: "specialty",
-      icon: specialty.icon,
-      eyebrow: "SEU DESTAQUE",
-      title: specialty.label,
-      text: `${specialty.value} ocorrência${specialty.value === 1 ? "" : "s"} · ${Math.round((specialty.value / finished) * 100)}% dos palpites avaliados.`,
-      tone: "",
-    });
-  } else {
-    insights.push({
-      key: "specialty",
-      icon: "✨",
-      eyebrow: "SEU DESTAQUE",
-      title: "Especialidade em formação",
-      text: "Os primeiros resultados revelarão seu tipo de acerto mais frequente.",
-      tone: "",
-    });
-  }
+  let moment = { tone: "neutral", icon: "⚽", eyebrow: "SEU MOMENTO", title: "Temporada em construção", text: "Continue registrando seus palpites para revelar tendências mais precisas.", badge: dynamicTitle.title };
+  if (group.position === 1 && roundAnalysis.trend !== "down") moment = { tone: "celebration", icon: "👑", eyebrow: "SEU MOMENTO", title: "Você dita o ritmo do bolão", text: group.leadOverBelow != null ? `A liderança é sua, com ${group.leadOverBelow} ponto${group.leadOverBelow===1?'':'s'} de vantagem sobre ${group.below || 'o perseguidor mais próximo'}.` : "Você está na liderança e é o participante a ser alcançado.", badge: dynamicTitle.title };
+  else if (roundAnalysis.trend === "up") moment = { tone: "positive", icon: "🔥", eyebrow: "SEU MOMENTO", title: "Em grande fase", text: group.gapToAbove != null ? `Sua média está subindo e faltam ${group.gapToAbove} ponto${group.gapToAbove===1?'':'s'} para alcançar ${group.above || 'a próxima posição'}.` : "Sua média recente cresceu. É uma boa hora para manter a sequência.", badge: dynamicTitle.title };
+  else if (roundAnalysis.trend === "down") moment = { tone: "attention", icon: "⚠️", eyebrow: "SEU MOMENTO", title: "Hora da reação", text: "As últimas rodadas ficaram abaixo do seu ritmo anterior. Uma boa rodada pode mudar rapidamente esse cenário.", badge: dynamicTitle.title };
+  else if (Number.isFinite(consistency) && consistency >= 75) moment = { tone: "steady", icon: "🛡️", eyebrow: "SEU MOMENTO", title: "Regularidade em destaque", text: "Seu desempenho varia pouco entre as rodadas, uma qualidade importante para permanecer competitivo.", badge: dynamicTitle.title };
 
+  const recommendations = [];
+  if (group.position > 1 && group.gapToAbove != null && group.gapToAbove <= 5) recommendations.push({ icon: "🚀", title: "Próxima posição ao alcance", text: `Apenas ${group.gapToAbove} ponto${group.gapToAbove===1?' separa':'s separam'} você de ${group.above || 'quem está logo acima'}.` });
+  if (finished >= 4 && specialty?.value) recommendations.push({ icon: specialty.icon, title: `Aproveite seu ponto forte`, text: `${specialty.label} representam ${Math.round((specialty.value / finished) * 100)}% dos seus palpites avaliados.` });
+  if (roundAnalysis.trend === "down") recommendations.push({ icon: "🎯", title: "Volte ao básico", text: "Priorize primeiro o vencedor provável; o placar exato pode vir como consequência." });
+  else if (roundAnalysis.trend === "up") recommendations.push({ icon: "🔥", title: "Mantenha o método", text: "Seu desempenho recente melhorou. Evite mudanças bruscas na forma de palpitar." });
+  if (Number.isFinite(consistency)) recommendations.push({ icon: consistency >= 75 ? "🛡️" : "📊", title: consistency >= 75 ? "Regularidade é sua aliada" : "Busque mais regularidade", text: consistency >= 75 ? "Seu nível de consistência ajuda a sustentar posições ao longo do campeonato." : "Resultados mais equilibrados entre rodadas podem reduzir oscilações no ranking." });
+  if (!recommendations.length) recommendations.push({ icon: "📅", title: "Continue participando", text: "Quanto mais rodadas completas, mais úteis e personalizadas ficam suas análises." });
+
+  const insights = [{ key: "trend", icon: trend.icon, eyebrow: "TENDÊNCIA RECENTE", title: trend.title, text: trend.text, tone: `trend-${roundAnalysis.trend || "insufficient"}` }];
+  if (finished && specialty?.value) insights.push({ key: "specialty", icon: specialty.icon, eyebrow: "SEU DESTAQUE", title: specialty.label, text: `${specialty.value} ocorrência${specialty.value === 1 ? "" : "s"} · ${Math.round((specialty.value / finished) * 100)}% dos palpites avaliados.`, tone: "" });
+  else insights.push({ key: "specialty", icon: "✨", eyebrow: "SEU DESTAQUE", title: "Especialidade em formação", text: "Os primeiros resultados revelarão seu tipo de acerto mais frequente.", tone: "" });
   const bestRound = advancedStats.personalRecords?.bestRound || null;
-  if (bestRound) {
-    insights.push({
-      key: "best-round",
-      icon: "🏆",
-      eyebrow: "MELHOR RODADA",
-      title: `Rodada ${bestRound.round} · ${bestRound.points} pts`,
-      text: `${bestRound.hits || 0} acerto${bestRound.hits === 1 ? "" : "s"} em ${bestRound.games || 0} jogo${bestRound.games === 1 ? "" : "s"}${bestRound.exact ? ` · ${bestRound.exact} placar${bestRound.exact === 1 ? "" : "es"} exato${bestRound.exact === 1 ? "" : "s"}` : ""}.`,
-      tone: "",
-    });
-  }
+  if (bestRound) insights.push({ key: "best-round", icon: "🏆", eyebrow: "MELHOR RODADA", title: `Rodada ${bestRound.round} · ${bestRound.points} pts`, text: `${bestRound.hits || 0} acerto${bestRound.hits === 1 ? "" : "s"} em ${bestRound.games || 0} jogo${bestRound.games === 1 ? "" : "s"}${bestRound.exact ? ` · ${bestRound.exact} placar${bestRound.exact === 1 ? "" : "es"} exato${bestRound.exact === 1 ? "" : "s"}` : ""}.`, tone: "" });
+
+  const consistencyLabel = !Number.isFinite(consistency) ? { label: "Em formação", stars: 0 } : consistency >= 85 ? { label: "Muito consistente", stars: 5 } : consistency >= 70 ? { label: "Consistente", stars: 4 } : consistency >= 50 ? { label: "Em evolução", stars: 3 } : { label: "Oscilante", stars: 2 };
 
   return {
-    executive: {
-      available: Boolean(group.position),
-      position: group.position,
-      participantCount: group.participantCount,
-      totalPoints: Number(totalPoints) || 0,
-      relationToAverage,
-      nearestGap,
-      trend: { ...trend, key: roundAnalysis.trend || "insufficient" },
-    },
+    executive: { available: Boolean(group.position), position: group.position, participantCount: group.participantCount, totalPoints: Number(totalPoints) || 0, relationToAverage, nearestGap, trend: { ...trend, key: roundAnalysis.trend || "insufficient" }, consistency: { value: Number.isFinite(consistency) ? consistency : null, ...consistencyLabel } },
+    moment,
+    dynamicTitle,
+    recommendations: recommendations.slice(0, 3),
     records: advancedStats.personalRecords || {},
     medals: advancedStats.medals || [],
     insights: insights.slice(0, 3),
-    comparison: {
-      groupAverageTotal: Number(group.groupAverageTotal) || 0,
-      gapToLeader: group.gapToLeader,
-      gapToAbove: group.gapToAbove,
-      leadOverBelow: group.leadOverBelow,
-    },
+    comparison: { groupAverageTotal: Number(group.groupAverageTotal) || 0, gapToLeader: group.gapToLeader, gapToAbove: group.gapToAbove, leadOverBelow: group.leadOverBelow },
   };
 }

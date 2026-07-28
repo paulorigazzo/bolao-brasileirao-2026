@@ -1,13 +1,13 @@
+## v6.3.0 — Final — Polimento da Experiência
+
+- Novo card Momento do Participante.
+- Títulos dinâmicos conforme o desempenho.
+- Recomendações personalizadas e linguagem mais humana.
+- Regularidade apresentada com leitura visual por estrelas.
+- Insights analíticos complementares movidos para área expansível.
+- Refinamentos visuais, responsivos e de acessibilidade.
+
 # Changelog
-
-## v6.3.0f2 — Consolidação Arquitetural da Tela de Estatísticas
-
-- Centraliza o modelo dos painéis analíticos em `statistics-engine.js`.
-- Unifica a seleção dos três insights prioritários.
-- Separa a renderização de visão geral, insights, recordes e medalhas.
-- Remove cálculos duplicados e blocos obsoletos da camada de interface.
-- Amplia os testes automatizados do motor estatístico.
-
 
 ## [6.3.0f1] — Reestruturação visual da Tela de Estatísticas
 
