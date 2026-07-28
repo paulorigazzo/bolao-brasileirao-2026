@@ -1,4 +1,11 @@
-## [6.5.0d] - 2026-07-28
+## [6.5.0e] - 2026-07-28
+
+### Corrigido
+- Consolida nomes históricos e atuais pelo `user_id`, evitando participantes duplicados após renomear o perfil.
+- Reassocia palpites públicos, contagens, ranking, Home, estatísticas e demais cards ao nome canônico atual.
+- Mantém apenas uma identidade por participante sem alterar palpites encerrados no banco.
+
+## [6.5.0e] - 2026-07-28
 
 ### Corrigido
 - Remove a atualização retroativa da coluna `usuario` em palpites encerrados, que acionava a proteção de prazo e abortava a alteração do nome.
