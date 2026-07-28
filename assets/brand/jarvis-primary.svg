@@ -1,12 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 620" role="img" aria-labelledby="title desc">
-<title id="title">Bolão Brasileirão 2026</title><desc id="desc">Escudo verde escuro com estrela dourada, nome do bolão e bola de futebol.</desc>
-<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b3323"/><stop offset="1" stop-color="#03140d"/></linearGradient><filter id="s" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#000" flood-opacity=".35"/></filter></defs>
-<g filter="url(#s)"><path fill="#d8a72e" d="M256 6l17 34 38 6-28 27 7 38-34-18-34 18 7-38-28-27 38-6z"/>
-<path fill="#f4f7f5" d="M256 78 448 137v196c0 116-73 215-192 273C137 548 64 449 64 333V137z"/>
-<path fill="#29b86c" d="M256 90 435 145v188c0 107-67 199-179 256C144 532 77 440 77 333V145z"/>
-<path fill="url(#g)" d="M256 105 421 155v178c0 98-61 183-165 237C152 516 91 431 91 333V155z"/>
-<path fill="none" stroke="#54dd94" stroke-width="5" opacity=".45" d="M256 122 404 166v165c0 89-54 165-148 216-94-51-148-127-148-216V166z"/>
-<text x="256" y="244" text-anchor="middle" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="76" letter-spacing="-4">BOLÃO</text>
-<text x="256" y="300" text-anchor="middle" fill="#58df94" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="34" letter-spacing="1">BRASILEIRÃO</text>
-<g fill="#e6a63b"><rect x="155" y="330" width="48" height="5" rx="2.5"/><rect x="309" y="330" width="48" height="5" rx="2.5"/><text x="256" y="344" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="37">2026</text></g>
-<g transform="translate(256 430)"><circle r="73" fill="#f7f7f4" stroke="#dfe6e1" stroke-width="5"/><path fill="#171b19" d="m0-29 28 20-11 33h-34L-28-9z"/><path fill="#171b19" d="m0-73 18 9-7 23h-22l-7-23zM69-23l4 20-20 14-18-13 7-22zM43 58l-18 11-20-15 7-22 23 1zM-43 58l-22-6-4-23 18-13 19 14zM-69-23l13-17 23 5 2 23-20 9z"/><path fill="#c9323d" d="m17 24 24 9 2 25-18 11L5 54z"/><path fill="none" stroke="#9da7a1" stroke-width="3" d="M0-29 0-51M28-9l20-14M17 24l-5 8M-17 24l-15 6M-28-9l-23-14"/></g></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 430" role="img" aria-labelledby="t d">
+<title id="t">Bolão Brasileirão 2026</title><desc id="d">Escudo oficial Série 4.1 Final</desc>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07150f"/><stop offset=".55" stop-color="#0d2117"/><stop offset="1" stop-color="#06100b"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0a3"/><stop offset=".38" stop-color="#f5c542"/><stop offset="1" stop-color="#c87900"/></linearGradient><filter id="sh" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#000" flood-opacity=".55"/></filter></defs>
+<g filter="url(#sh)">
+<path fill="url(#gold)" stroke="#9b5e00" stroke-width="2" d="M180 4l10 22 24 3-18 17 5 24-21-12-21 12 5-24-18-17 24-3z"/>
+<path fill="#fff" d="M32 55h296l-12 71c-12 73-34 146-77 218-18 29-39 49-59 61-20-12-41-32-59-61-43-72-65-145-77-218z"/>
+<path fill="#43a047" d="M42 64h276l-11 60c-12 70-32 138-72 205-17 28-36 46-55 58-19-12-38-30-55-58-40-67-60-135-72-205z"/>
+<path fill="#0b0f0d" d="M49 72h262l-10 51c-11 67-31 132-68 195-16 26-34 43-53 55-19-12-37-29-53-55-37-63-57-128-68-195z"/>
+<path fill="url(#bg)" d="M58 80h244l-9 42c-11 63-29 124-64 184-15 25-32 41-49 52-17-11-34-27-49-52-35-60-53-121-64-184z"/>
+<path fill="none" stroke="#1b5e20" stroke-width="4" d="M68 89h224l-8 31c-11 59-28 116-60 171-14 23-29 38-44 48-15-10-30-25-44-48-32-55-49-112-60-171z"/>
+<text x="180" y="157" text-anchor="middle" fill="#fff" font-family="Arial Black,Impact,sans-serif" font-size="48" font-weight="900" letter-spacing="1">BOLÃO</text>
+<text x="180" y="195" text-anchor="middle" fill="#7fb52b" font-family="Arial Black,Impact,sans-serif" font-size="25" font-weight="900">BRASILEIRÃO</text>
+<path d="M104 221h36M220 221h36" stroke="#f5c542" stroke-width="4" stroke-linecap="round"/>
+<text x="180" y="232" text-anchor="middle" fill="#ff8c00" font-family="Arial Black,Impact,sans-serif" font-size="25" font-weight="900">2026</text>
+<g transform="translate(180 294)"><circle r="40" fill="#fff" stroke="#d9dfdc" stroke-width="2"/><path fill="#111" d="m0-16 16 12-6 19H-10l-6-19zM0-40l11 6-4 14H-7l-4-14zM38-12l3 13-13 9-11-8 4-14zM25 32l-11 7-13-9 4-14 14 1zM-25 32l-14-4-2-14 11-8 12 9zM-38-12l8-11 14 3 1 14-12 6z"/><path fill="#c92832" d="m10 15 15 6 1 15-12 7-13-9 4-14z"/><path fill="none" stroke="#9aa29e" stroke-width="1.7" d="M0-16v-12M16-4l12-8M10 15l-5 5M-10 15l-8 2M-16-4l-11-8"/></g>
+</g></svg>
