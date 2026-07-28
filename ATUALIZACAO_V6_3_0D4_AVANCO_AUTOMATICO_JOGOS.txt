@@ -1,0 +1,10 @@
+BOLÃO BRASILEIRÃO 2026 — v6.3.0d4
+
+MELHORIA: AVANÇO AUTOMÁTICO APÓS SALVAR PALPITE INDIVIDUAL
+
+- Após salvar um palpite dentro de um card, o próximo jogo editável e ainda sem dados é aberto automaticamente.
+- O card recém-salvo é recolhido e o próximo card é expandido.
+- A tela rola suavemente até o próximo jogo.
+- O foco é colocado no campo de gols do time mandante.
+- Cards com palpite salvo ou rascunho já preenchido são ignorados.
+- Se não houver outro jogo vazio, o card atual permanece aberto e o fluxo termina normalmente.

@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzePredictionProfile, analyzeRoundPerformance, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.3.0d3";
+const APP_VERSION = "6.3.0d4";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -706,6 +706,26 @@ function toggleGameCard(card){
   state.openGameId=willExpand ? Number(card.dataset.id) : null;
 }
 
+function openNextEmptyGameCard(currentCard){
+  const cards=[...document.querySelectorAll(".premium-match-card[data-id]")];
+  const currentIndex=cards.indexOf(currentCard);
+  if(currentIndex<0) return false;
+  const nextCard=cards.slice(currentIndex+1).find(card=>{
+    const id=Number(card.dataset.id);
+    const game=state.games.find(item=>Number(item.id_jogo)===id);
+    return game && !locked(game) && !isFinished(game) && !ownPick(id) && !pickDraft(id);
+  });
+  if(!nextCard) return false;
+  setGameCardExpanded(currentCard,false,true);
+  setGameCardExpanded(nextCard,true,true);
+  state.openGameId=Number(nextCard.dataset.id);
+  window.setTimeout(()=>{
+    nextCard.scrollIntoView({behavior:"smooth",block:"center"});
+    window.setTimeout(()=>nextCard.querySelector(".home-score")?.focus({preventScroll:true}),350);
+  },220);
+  return true;
+}
+
 function premiumDayKey(value){
   const d=new Date(value); return Number.isNaN(d.getTime())?"":`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 }
@@ -936,7 +956,8 @@ async function savePick(event){
   state.openGameId=id;
   updateCardDraftUi(card);
   button.disabled=true;button.textContent="✓ Palpite salvo";
-  message("Palpite salvo com sucesso.");
+  const advanced=openNextEmptyGameCard(card);
+  message(advanced?"Palpite salvo. Próximo jogo aberto para preenchimento.":"Palpite salvo com sucesso.");
   renderRoundProgress(state.games.filter(item=>Number(item.rodada)===Number($("roundSelect")?.value||0)));
   renderRanking();renderStats();renderHome();
 }
