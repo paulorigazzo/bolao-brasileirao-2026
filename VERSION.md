@@ -1,22 +1,17 @@
 # Versão atual
 
-## Aplicação
+- **Versão:** `v6.3.0f2`
+- **Nome:** Consolidação Arquitetural da Tela de Estatísticas — Sprint 2
+- **Status:** candidata para validação
 
-- **Versão:** `v6.3.0f11`
-- **Nome:** Dashboard Analítico — Estatísticas Avançadas
-- **Status:** pacote pronto para validação
-- **Base oficial anterior:** `v6.3.0e`
+## Escopo
 
-## Foco de desenvolvimento
+A Sprint 2 centraliza o modelo de apresentação das estatísticas no motor, elimina cálculos duplicados da interface e divide a renderização dos painéis principais em funções menores.
 
-- Tela alterada: Estatísticas.
-- Tela de Jogos preservada funcionalmente na `v6.3.0d5`.
-- Método de entrega: substituição de arquivos completos.
+## Alterações principais
 
-## Qualidade
-
-Antes de cada commit:
-
-```powershell
-npm run check
-```
+- modelo único `buildStatisticsDashboardModel`;
+- insights gerados em um único ponto;
+- painel executivo, recordes, medalhas e insights desacoplados de `renderStats`;
+- remoção de cálculos redundantes de sequência e comparação;
+- testes automatizados do novo modelo.
