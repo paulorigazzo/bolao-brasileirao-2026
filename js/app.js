@@ -2,13 +2,13 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzePredictionProfile, analyzeRoundPerformance, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.3.0d";
+const APP_VERSION = "6.3.0d1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
 
 const sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
-const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], standings:null, gameFilter:"all", selectedFavoriteTeam:null, rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], openGameId:null, gameAutoOpenContext:null, lastSyncReport:null };
+const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], standings:null, gameFilter:"all", selectedFavoriteTeam:null, rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{} };
 let matchClockRefreshTimer=null;
 let liveScoreRefreshTimer=null;
 const $ = id => document.getElementById(id);
@@ -519,6 +519,54 @@ function goToCurrentRound(){
 }
 function ownPick(gameId){ return state.ownPicks.find(p=>Number(p.id_jogo)===Number(gameId)); }
 
+const PICK_DRAFTS_STORAGE_KEY = "bolao-pick-drafts";
+
+function loadPickDrafts(){
+  try{
+    const stored=JSON.parse(sessionStorage.getItem(PICK_DRAFTS_STORAGE_KEY)||"{}");
+    state.pickDrafts=stored && typeof stored==="object" ? stored : {};
+  }catch{
+    state.pickDrafts={};
+  }
+}
+
+function persistPickDrafts(){
+  try{
+    sessionStorage.setItem(PICK_DRAFTS_STORAGE_KEY,JSON.stringify(state.pickDrafts));
+  }catch(error){
+    console.warn(`[Bolão v${APP_VERSION}] Não foi possível preservar os rascunhos de palpites.`,error);
+  }
+}
+
+function pickDraft(gameId){
+  return state.pickDrafts[String(Number(gameId))]||null;
+}
+
+function updatePickDraft(gameId,side,value){
+  const key=String(Number(gameId));
+  const saved=ownPick(gameId);
+  const current=state.pickDrafts[key]||{
+    gols_casa:saved?.gols_casa!=null?String(saved.gols_casa):"",
+    gols_fora:saved?.gols_fora!=null?String(saved.gols_fora):""
+  };
+  current[side]=value;
+  const savedHome=saved?.gols_casa!=null?String(saved.gols_casa):"";
+  const savedAway=saved?.gols_fora!=null?String(saved.gols_fora):"";
+  if(current.gols_casa===savedHome && current.gols_fora===savedAway){
+    delete state.pickDrafts[key];
+  }else{
+    state.pickDrafts[key]=current;
+  }
+  persistPickDrafts();
+}
+
+function clearPickDrafts(gameIds){
+  gameIds.forEach(id=>delete state.pickDrafts[String(Number(id))]);
+  persistPickDrafts();
+}
+
+loadPickDrafts();
+
 function renderRoundProgress(games){
   const completed=games.filter(g=>ownPick(g.id_jogo)).length;
   const pending=games.filter(g=>!locked(g)&&!isFinished(g)&&!ownPick(g.id_jogo)).length;
@@ -629,7 +677,7 @@ function premiumMatchCard(g){
   const favorite=favoriteTeamMatchData(g);
   const favoriteTeamName=favorite.homeFavorite?g.time_casa:favorite.awayFavorite?g.time_fora:"";
   const favoriteStyle=favorite.isFavoriteMatch?` style="--favorite-primary:${favorite.colors[0]};--favorite-secondary:${favorite.colors[1]};--favorite-text:${favorite.colors[2]}"`:"";
-  const pick=ownPick(g.id_jogo), isLocked=locked(g), finished=isFinished(g), status=gameStatusDisplay(g);
+  const pick=ownPick(g.id_jogo), draft=pickDraft(g.id_jogo), isLocked=locked(g), finished=isFinished(g), status=gameStatusDisplay(g);
   const live=status.key==="live", hasScore=g.gols_casa!=null&&g.gols_fora!=null;
   const rawStatus=normalizeTeamKey(g?.status||"");
   const suspended=rawStatus.includes("suspens");
@@ -643,7 +691,7 @@ function premiumMatchCard(g){
     ? `<div class="premium-score-display"><strong>${g.gols_casa}</strong><span>×</span><strong>${g.gols_fora}</strong><small>Resultado final</small></div>`
     : live&&hasScore
       ? `<div class="premium-score-display live"><strong>${g.gols_casa}</strong><span>×</span><strong>${g.gols_fora}</strong><small>Placar ao vivo</small></div>`
-      : `<div class="premium-pick-inputs"><input class="home-score" inputmode="numeric" type="number" min="0" max="15" aria-label="Gols do ${escapeHtml(g.time_casa)}" value="${pick?.gols_casa??""}" ${isLocked?"disabled":""}><span>×</span><input class="away-score" inputmode="numeric" type="number" min="0" max="15" aria-label="Gols do ${escapeHtml(g.time_fora)}" value="${pick?.gols_fora??""}" ${isLocked?"disabled":""}><small>${pick?"Seu palpite":"Palpite não feito"}</small></div>`;
+      : `<div class="premium-pick-inputs"><input class="home-score" inputmode="numeric" type="number" min="0" max="15" aria-label="Gols do ${escapeHtml(g.time_casa)}" value="${escapeHtml(draft?.gols_casa??pick?.gols_casa??"")}" ${isLocked?"disabled":""}><span>×</span><input class="away-score" inputmode="numeric" type="number" min="0" max="15" aria-label="Gols do ${escapeHtml(g.time_fora)}" value="${escapeHtml(draft?.gols_fora??pick?.gols_fora??"")}" ${isLocked?"disabled":""}><small>${draft?"Alteração não salva":pick?"Seu palpite":"Palpite não feito"}</small></div>`;
   const showComparison=(finished||live)&&hasScore;
   const comparisonPoints=pick?(finished?points(pick,g):calculatePredictionPoints(pick,g)):0;
   const headerPointsLabel=finished&&hasScore?`${comparisonPoints}`:"";
@@ -655,7 +703,7 @@ function premiumMatchCard(g){
         <div class="premium-comparison-points">${pick?`<strong>${comparisonPoints} pts</strong><small>${predictionResultLabel(comparisonPoints,{live})}${live?" • parcial":""}</small>`:`<strong>0 pts</strong><small>${live?"Sem palpite • parcial":"Sem palpite"}</small>`}</div>
       </div>`
     : "";
-  return `<article class="premium-match-card game-card-v2 ${stateClass} ${pick?"has-pick":"needs-pick"} ${favorite.isFavoriteMatch?"is-favorite-team-match":""}" data-id="${g.id_jogo}"${favoriteStyle}>
+  return `<article class="premium-match-card game-card-v2 ${stateClass} ${pick?"has-pick":"needs-pick"} ${draft?"has-unsaved":""} ${favorite.isFavoriteMatch?"is-favorite-team-match":""}" data-id="${g.id_jogo}"${favoriteStyle}>
     <button class="game-toggle premium-game-toggle" type="button" aria-expanded="false">
       <span class="premium-toggle-time"><strong>${premiumTime(g.inicio)}</strong><small>${escapeHtml(g.local_partida||"Local a definir")}</small></span>
       <span class="premium-toggle-match">${compactTeam(g.time_casa_logo,g.time_casa).replace("game-summary-team",`game-summary-team${favorite.homeFavorite?" is-favorite-team":""}`)}<span class="premium-toggle-score">${escapeHtml(summaryScore)}</span>${compactTeam(g.time_fora_logo,g.time_fora).replace("game-summary-team",`game-summary-team${favorite.awayFavorite?" is-favorite-team":""}`)}</span>
@@ -712,7 +760,14 @@ function renderGames(){
   const editable=roundGames.some(g=>!locked(g)&&!isFinished(g));
   $("gamesSaveDock")?.classList.toggle("hidden",!editable);
   requestAnimationFrame(updateGamesBottomSpacing);
-  document.querySelectorAll(".premium-match-card input").forEach(input=>input.addEventListener("input",()=>{input.closest(".premium-match-card")?.classList.add("has-unsaved");$("gamesSaveDock")?.classList.remove("hidden");}));
+  document.querySelectorAll(".premium-match-card input").forEach(input=>input.addEventListener("input",()=>{
+    const card=input.closest(".premium-match-card");
+    if(!card) return;
+    const side=input.classList.contains("home-score")?"gols_casa":"gols_fora";
+    updatePickDraft(Number(card.dataset.id),side,input.value);
+    card.classList.toggle("has-unsaved",Boolean(pickDraft(card.dataset.id)));
+    $("gamesSaveDock")?.classList.remove("hidden");
+  }));
   document.querySelectorAll(".premium-edit-pick").forEach(btn=>btn.addEventListener("click",()=>btn.closest(".premium-match-card")?.querySelector("input")?.focus()));
   const cards=[...document.querySelectorAll(".premium-match-card")];
   cards.forEach(card=>{
@@ -757,6 +812,7 @@ async function saveAllPicks(){
   button.disabled=false;button.textContent="▣ Salvar todos";
   if(error)return message(error.message,true);
   const ids=new Set(payloads.map(p=>Number(p.id_jogo))); state.ownPicks=state.ownPicks.filter(p=>!ids.has(Number(p.id_jogo))).concat(data||payloads);
+  clearPickDrafts([...ids]);
   state.pickCounts=state.pickCounts.filter(item=>item.usuario!==state.participant.nome).concat({usuario:state.participant.nome,quantidade:state.ownPicks.length});
   message(`${payloads.length} palpite${payloads.length===1?"":"s"} salvo${payloads.length===1?"":"s"} com sucesso.`); renderGames();renderRanking();renderStats();renderHome();
 }
@@ -772,6 +828,7 @@ async function savePick(event){
   const {data,error}=await sb.from("palpites").upsert(payload,{onConflict:"id_jogo,user_id"}).select().single();
   if(error){button.disabled=false;button.textContent="Tentar novamente";return message(error.message,true);}
   state.ownPicks=state.ownPicks.filter(p=>Number(p.id_jogo)!==id).concat(data);
+  clearPickDrafts([id]);
   const ownCount=state.ownPicks.length;
   state.pickCounts=state.pickCounts.filter(item=>item.usuario!==state.participant.nome).concat({usuario:state.participant.nome,quantidade:ownCount});
   const round=Number($("roundSelect").value);

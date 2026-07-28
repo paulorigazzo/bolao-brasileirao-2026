@@ -1,0 +1,18 @@
+BOLÃO BRASILEIRÃO 2026 — v6.3.0d1
+HOTFIX — PRESERVAÇÃO DE RASCUNHOS DE PALPITES
+
+Problema corrigido
+- Valores digitados e ainda não salvos desapareciam quando a tela de jogos era renderizada novamente.
+- O re-render pode ocorrer pela atualização automática do relógio, troca de filtro, troca de rodada ou atualização de dados.
+
+Correção implementada
+- Cada campo digitado passa a ser mantido em um rascunho por id do jogo.
+- Os rascunhos são restaurados após qualquer renderização da tela de jogos.
+- Os rascunhos também são preservados durante a sessão do navegador por sessionStorage.
+- O rascunho é removido somente após confirmação de salvamento pelo Supabase.
+- Palpites já salvos continuam sendo carregados normalmente.
+
+Escopo
+- Arquivo alterado: js/app.js
+- Metadado alterado: package.json
+- Nenhuma mudança funcional nas telas Home, Ranking, Estatísticas, Tabela ou Administração.
