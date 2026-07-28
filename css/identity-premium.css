@@ -285,3 +285,9 @@ tbody tr:hover{background:rgba(112,236,165,.045)}
 .brand h1{font-size:1.28rem!important;font-weight:900!important;color:#fff!important}
 .brand-version .version-pill{color:#9bc53d!important;font-size:.72rem!important;font-weight:900!important}
 @media(max-width:520px){.brand-mark{width:47px!important;height:57px!important;flex-basis:47px!important}.brand{gap:10px!important}.brand h1{font-size:1rem!important}}
+
+/* v6.6.0 — Aplicação temporária fiel do PNG JARVIS aprovado */
+.brand-mark{width:58px!important;height:72px!important;flex:0 0 58px!important;padding:0!important;border:0!important}
+.brand-mark img{width:100%!important;height:100%!important;object-fit:contain!important;image-rendering:auto!important;filter:drop-shadow(0 6px 10px rgba(0,0,0,.28))!important}
+.loading-screen .loading-brand,.hero-brand img{image-rendering:auto!important;object-fit:contain!important}
+@media(max-width:520px){.brand-mark{width:48px!important;height:59px!important;flex-basis:48px!important}}

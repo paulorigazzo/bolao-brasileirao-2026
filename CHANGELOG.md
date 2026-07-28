@@ -178,3 +178,9 @@ O histórico detalhado das versões anteriores permanece documentado nos relató
 - Usuários pendentes não acessam as telas internas nem os palpites.
 - Celular não é carregado nas telas públicas do aplicativo.
 - Alterações de nome são vinculadas ao `user_id`.
+
+
+### v6.6.0 — Correção de fidelidade da marca JARVIS
+- Substituição da reconstrução vetorial incorreta pelo PNG oficial aprovado.
+- Aplicação direta no cabeçalho, carregamento e apresentação.
+- Derivação técnica de favicon e ícones PWA sem alteração do desenho da marca.
