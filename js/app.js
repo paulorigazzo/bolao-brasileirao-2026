@@ -2,13 +2,13 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.4.0b";
+const APP_VERSION = "6.5.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
 
 const sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
-const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], standings:null, gameFilter:"all", selectedFavoriteTeam:null, rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{} };
+const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], standings:null, gameFilter:"all", selectedFavoriteTeam:null, rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{} };
 let matchClockRefreshTimer=null;
 let liveScoreRefreshTimer=null;
 const $ = id => document.getElementById(id);
@@ -83,7 +83,7 @@ function gameStatusDisplay(game){
 
 function participantDirectory(){
   if(state.authorizedParticipants?.length){
-    return Object.fromEntries(state.authorizedParticipants.filter(item=>item.ativo!==false).map(item=>[String(item.email||"").toLowerCase(),item.nome]));
+    return Object.fromEntries(state.authorizedParticipants.filter(item=>item.ativo!==false && (!item.status || item.status==="approved")).map(item=>[String(item.email||"").toLowerCase(),item.nome]));
   }
   return CONFIG.participants || {};
 }
@@ -407,25 +407,59 @@ function deadlineText(game){
   return `Fecha em ${minutes} min`;
 }
 
+function isRegistrationLink(){
+  const params=new URLSearchParams(location.search);
+  return params.get("cadastro")==="1" || sessionStorage.getItem("bolaoRegistrationIntent")==="1";
+}
+
 async function login(){
   clearMessage();
-  const { error } = await sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:CONFIG.redirectTo}});
+  const registration=isRegistrationLink();
+  if(registration) sessionStorage.setItem("bolaoRegistrationIntent","1");
+  const redirectUrl=new URL(CONFIG.redirectTo || location.origin,location.origin);
+  if(registration) redirectUrl.searchParams.set("cadastro","1");
+  const { error } = await sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:redirectUrl.toString()}});
   if(error) message(error.message, true);
 }
 async function logout(){ await sb.auth.signOut(); location.reload(); }
+
+async function requestMembership(email){
+  const suggestedName=state.user.user_metadata?.full_name || email.split("@")[0];
+  const {data,error}=await sb.rpc("solicitar_participacao",{p_nome:suggestedName,p_celular:null});
+  if(error) throw error;
+  return Array.isArray(data)?data[0]:data;
+}
 
 async function loadParticipant(){
   const email=String(state.user.email||"").toLowerCase();
   let authorization=null;
   try{
-    const {data,error}=await sb.from("participantes_autorizados").select("nome,email,ativo,administrador").eq("email",email).maybeSingle();
+    const {data,error}=await sb.from("participantes_autorizados")
+      .select("id,nome,email,celular,ativo,administrador,status,solicitado_em,aprovado_em")
+      .eq("email",email).maybeSingle();
     if(error) throw error;
     authorization=data;
   }catch(err){
     console.warn("Consulta dinâmica de autorização indisponível; usando a lista de compatibilidade.",err);
   }
+
   const fallbackName=CONFIG.participants?.[email];
-  if((authorization && authorization.ativo===false) || (!authorization && !fallbackName)) throw new Error("Esta conta não está autorizada para participar do bolão.");
+  if(!authorization && !fallbackName){
+    if(!isRegistrationLink()) throw new Error("Esta conta ainda não está autorizada. Use o link de cadastro enviado pelo administrador.");
+    authorization=await requestMembership(email);
+  }
+
+  if(authorization){
+    const status=authorization.ativo===false && authorization.status==="approved" ? "inactive" : (authorization.status || (authorization.ativo===false?"inactive":"approved"));
+    state.membership={...authorization,status};
+    if(status!=="approved" || authorization.ativo===false){
+      state.participant={nome:authorization.nome || state.user.user_metadata?.full_name || email.split("@")[0],email,user_id:state.user.id,celular:authorization.celular||""};
+      return;
+    }
+  }else{
+    state.membership={status:"approved",nome:fallbackName,email,ativo:true};
+  }
+
   const {data,error}=await sb.from("participantes").select("*").eq("user_id",state.user.id).maybeSingle();
   if(error) throw error;
   if(data){ state.participant=data; return; }
@@ -436,9 +470,83 @@ async function loadParticipant(){
     state.participant=Array.isArray(created)?created[0]:created;
   }catch(err){
     console.warn("Criação automática de perfil indisponível.",err);
-    state.participant={nome:profileName,email,user_id:state.user.id};
+    state.participant={nome:profileName,email,user_id:state.user.id,celular:authorization?.celular||""};
   }
 }
+function normalizeBrazilPhone(value){
+  const digits=String(value||"").replace(/\D/g,"");
+  if(!digits) return "";
+  return digits.startsWith("55") ? digits : `55${digits}`;
+}
+
+function formatBrazilPhone(value){
+  let digits=String(value||"").replace(/\D/g,"");
+  if(digits.startsWith("55")) digits=digits.slice(2);
+  digits=digits.slice(0,11);
+  if(digits.length<=2) return digits;
+  if(digits.length<=6) return `(${digits.slice(0,2)}) ${digits.slice(2)}`;
+  if(digits.length<=10) return `(${digits.slice(0,2)}) ${digits.slice(2,6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0,2)}) ${digits.slice(2,7)}-${digits.slice(7)}`;
+}
+
+function renderEditableProfile(){
+  const nameInput=$("profileNameInput");
+  const phoneInput=$("profilePhoneInput");
+  if(nameInput) nameInput.value=state.participant?.nome||"";
+  if(phoneInput) phoneInput.value=formatBrazilPhone(state.participant?.celular||state.membership?.celular||"");
+  if($("profileName")) $("profileName").textContent=state.participant?.nome||"Participante";
+  if($("profileEmail")) $("profileEmail").textContent=state.user?.email||"";
+}
+
+async function saveOwnProfile(event){
+  event.preventDefault();
+  const name=$("profileNameInput")?.value.trim();
+  const phone=normalizeBrazilPhone($("profilePhoneInput")?.value);
+  const status=$("profileFormStatus");
+  const button=$("saveProfileBtn");
+  if(!name || name.length<2){ if(status) status.textContent="Informe um nome com pelo menos 2 caracteres."; return; }
+  if(phone && (phone.length<12 || phone.length>13)){ if(status) status.textContent="Confira o DDD e o número do celular."; return; }
+  button.disabled=true; button.textContent="Salvando…";
+  try{
+    const previousName=state.participant?.nome;
+    const {data,error}=await sb.rpc("atualizar_meu_perfil",{p_nome:name,p_celular:phone||null});
+    if(error) throw error;
+    const updated=Array.isArray(data)?data[0]:data;
+    state.participant={...state.participant,...updated,nome:name,celular:phone};
+    state.membership={...state.membership,nome:name,celular:phone};
+    if(previousName!==name){
+      state.ownPicks=state.ownPicks.map(item=>({...item,usuario:name}));
+      state.publicPicks=state.publicPicks.map(item=>String(item.user_id)===String(state.user.id)?{...item,usuario:name}:item);
+    }
+    renderEditableProfile();
+    $("headerUserName").textContent=name.split(/\s+/)[0];
+    $("userMenuBtn").setAttribute("aria-label",`Perfil de ${name}. Abrir menu da conta`);
+    applyFavoriteTeamIdentity();
+    renderRanking(); renderHome(); renderStats(); renderMyTeam();
+    if(status) status.textContent="Dados atualizados com sucesso.";
+    message("Seu perfil foi atualizado.");
+  }catch(err){
+    if(status) status.textContent=err.message||"Não foi possível atualizar seus dados.";
+  }finally{
+    button.disabled=false; button.textContent="Salvar dados";
+  }
+}
+
+function renderMembershipStatus(){
+  const status=state.membership?.status || "pending";
+  const map={
+    pending:{icon:"⏳",title:"Cadastro aguardando aprovação",text:"Sua solicitação foi enviada ao administrador. Assim que for aprovada, você poderá acessar o bolão e registrar palpites."},
+    rejected:{icon:"🚫",title:"Solicitação não aprovada",text:"Seu pedido de participação foi analisado e não foi aprovado. Fale com o administrador caso precise de mais informações."},
+    inactive:{icon:"🔒",title:"Acesso desativado",text:"Seu acesso ao bolão está temporariamente desativado. Seu histórico permanece preservado."}
+  };
+  const content=map[status]||map.pending;
+  $("membershipStatusIcon").textContent=content.icon;
+  $("membershipStatusTitle").textContent=content.title;
+  $("membershipStatusText").textContent=content.text;
+  $("membershipStatusEmail").textContent=state.user?.email||"";
+  show("welcome",false); show("app",false); show("loginBtn",false); show("headerUser",true); show("membershipStatus",true);
+}
+
 
 async function loadData(){
   const [{data:games,error:gErr},{data:picks,error:pErr},{data:pub,error:pubErr},{data:counts,error:countsErr},{data:participants,error:participantsErr},{data:adminProgress,error:adminProgressErr},{data:authorized,error:authorizedErr}] = await Promise.all([
@@ -448,7 +556,7 @@ async function loadData(){
     sb.from("contagem_palpites_participantes").select("usuario,quantidade"),
     sb.from("participantes").select("user_id,nome,email,time_favorito"),
     isAdminUser() ? sb.from("progresso_palpites_adm").select("user_id,usuario,id_jogo,atualizado_em") : Promise.resolve({data:[],error:null}),
-    sb.from("participantes_autorizados").select("id,nome,email,ativo,administrador,criado_em,atualizado_em").order("nome")
+    sb.from("participantes_autorizados").select("id,nome,email,celular,ativo,administrador,status,solicitado_em,aprovado_em,criado_em,atualizado_em").order("nome")
   ]);
   if(gErr) throw gErr; if(pErr) throw pErr; if(pubErr) console.warn(pubErr);
   if(countsErr) console.warn("Não foi possível carregar a contagem geral de palpites. Execute a atualização SQL da versão 3.8.", countsErr);
@@ -2119,16 +2227,56 @@ function renderAdminQuickActions(){
   }
 }
 
+function membershipStatusLabel(item){
+  const status=item.status || (item.ativo===false?"inactive":"approved");
+  if(status==="pending") return "⏳ Aguardando aprovação";
+  if(status==="rejected") return "🚫 Solicitação recusada";
+  if(status==="inactive" || item.ativo===false) return "🔒 Acesso desativado";
+  return item.administrador?"👑 Administrador":"✅ Participante ativo";
+}
+
 function renderAdminParticipants(){
-  if(!isAdminUser() || !$(`adminParticipantsList`)) return;
+  if(!isAdminUser() || !$("adminParticipantsList")) return;
   const items=[...(state.authorizedParticipants||[])];
-  const active=items.filter(item=>item.ativo!==false).length;
-  $(`adminParticipantsCount`).textContent=`${active} participante${active===1?"":"s"} ativo${active===1?"":"s"}`;
-  $(`adminParticipantsList`).innerHTML=items.length?items.map(item=>`<div class="admin-member-row ${item.ativo===false?"is-inactive":""}">
-    <div class="admin-member-avatar">${escapeHtml(initials(item.nome).slice(0,2))}</div>
-    <div class="admin-member-copy"><strong>${escapeHtml(item.nome)}</strong><span>${escapeHtml(item.email)}</span><small>${item.administrador?"👑 Administrador":item.ativo===false?"🚫 Acesso desativado":"✅ Participante ativo"}</small></div>
-    <button type="button" class="secondary admin-member-toggle" data-participant-id="${escapeHtml(item.id)}" data-participant-active="${item.ativo!==false}">${item.ativo===false?"Reativar":"Desativar"}</button>
-  </div>`).join(""):`<p class="muted-note">Nenhum participante cadastrado.</p>`;
+  const approved=items.filter(item=>(!item.status || item.status==="approved") && item.ativo!==false).length;
+  const pending=items.filter(item=>item.status==="pending").length;
+  $("adminParticipantsCount").textContent=pending?`${approved} ativos • ${pending} pendente${pending===1?"":"s"}`:`${approved} participante${approved===1?"":"s"} ativo${approved===1?"":"s"}`;
+  $("adminPendingRequestsBadge").textContent=String(pending);
+  show("adminPendingRequestsBadge",pending>0);
+  $("adminParticipantsList").innerHTML=items.length?items.map(item=>{
+    const status=item.status || (item.ativo===false?"inactive":"approved");
+    const phone=item.celular?formatBrazilPhone(item.celular):"Celular não informado";
+    const requested=item.solicitado_em?new Date(item.solicitado_em).toLocaleDateString("pt-BR"):"";
+    const pendingActions=status==="pending"?`<div class="admin-member-actions"><button type="button" class="primary" data-membership-decision="approve" data-participant-id="${escapeHtml(item.id)}">Aprovar</button><button type="button" class="secondary" data-membership-decision="reject" data-participant-id="${escapeHtml(item.id)}">Recusar</button></div>`:
+      `<button type="button" class="secondary admin-member-toggle" data-participant-id="${escapeHtml(item.id)}" data-participant-active="${item.ativo!==false}">${item.ativo===false?"Reativar":"Desativar"}</button>`;
+    return `<div class="admin-member-row status-${escapeHtml(status)}">
+      <div class="admin-member-avatar">${escapeHtml(initials(item.nome).slice(0,2))}</div>
+      <div class="admin-member-copy"><strong>${escapeHtml(item.nome)}</strong><span>${escapeHtml(item.email)}</span><small>${escapeHtml(phone)}${requested&&status==="pending"?` • solicitado em ${escapeHtml(requested)}`:""}</small><small>${membershipStatusLabel(item)}</small></div>
+      ${pendingActions}
+    </div>`;
+  }).join(""):`<p class="muted-note">Nenhum participante cadastrado.</p>`;
+}
+
+async function decideMembership(id,decision){
+  const action=decision==="approve"?"aprovar":"recusar";
+  if(!confirm(`${action[0].toUpperCase()+action.slice(1)} esta solicitação?`)) return;
+  try{
+    const {error}=await sb.rpc("decidir_solicitacao_participacao",{p_id:id,p_decisao:decision});
+    if(error) throw error;
+    await loadData(); renderAdminParticipants(); renderAdminAttention(); renderAdminExecutiveDashboard();
+    message(decision==="approve"?"Participante aprovado. O acesso será liberado no próximo login.":"Solicitação recusada.");
+  }catch(err){ message(err.message||"Não foi possível analisar a solicitação.",true); }
+}
+
+function registrationLink(){
+  const url=new URL(location.origin+location.pathname);
+  url.searchParams.set("cadastro","1");
+  return url.toString();
+}
+async function copyRegistrationLink(){
+  const link=registrationLink();
+  await navigator.clipboard.writeText(link);
+  message("Link de cadastro copiado.");
 }
 
 function openParticipantManager(){
@@ -3008,12 +3156,19 @@ function startLiveScoreRefresh(){
 }
 
 async function initialize(session){
-  state.user=session.user; await loadParticipant(); await loadData();
-  $("profileName").textContent=state.participant.nome; $("profileEmail").textContent=state.user.email;
+  state.user=session.user; await loadParticipant();
   const participantName=(state.participant.nome||"Participante").trim();
   $("headerUserName").textContent=participantName.split(/\s+/)[0];
   $("userMenuBtn").setAttribute("aria-label",`Perfil de ${participantName}. Abrir menu da conta`);
   $("userMenuBtn").setAttribute("title",participantName);
+  show("loginBtn",false); show("headerUser",true);
+  if(state.membership?.status && state.membership.status!=="approved"){
+    renderMembershipStatus();
+    return;
+  }
+  sessionStorage.removeItem("bolaoRegistrationIntent");
+  await loadData();
+  renderEditableProfile();
   applyFavoriteTeamIdentity();
   renderFavoriteTeamSelector();
   show("welcome",false); show("app",true); show("loginBtn",false); show("headerUser",true);
@@ -3130,8 +3285,11 @@ $("standingsMobileList")?.addEventListener("click",async event=>{
     await animateStandingsPanel(expandable,false,MOTION.duration.normal);
   }
 });
-$("loginBtn").onclick=login; $("heroLoginBtn").onclick=login; $("logoutBtn").onclick=logout; $("refreshBtn").onclick=refresh; $("refreshStandingsBtn").onclick=()=>loadStandings(true); $("syncGamesBtn").onclick=syncGames;
+$("loginBtn").onclick=login; $("heroLoginBtn").onclick=login; $("logoutBtn").onclick=logout; $("membershipLogoutBtn")?.addEventListener("click",logout); $("refreshBtn").onclick=refresh; $("refreshStandingsBtn").onclick=()=>loadStandings(true); $("syncGamesBtn").onclick=syncGames;
 $("saveFavoriteTeamBtn").onclick=saveFavoriteTeam;
+$("profileDataForm")?.addEventListener("submit",saveOwnProfile);
+$("profilePhoneInput")?.addEventListener("input",event=>{ event.target.value=formatBrazilPhone(event.target.value); });
+$("copyRegistrationLinkBtn")?.addEventListener("click",copyRegistrationLink);
 $("adminRefreshBtn").onclick=refreshAllAdminData;
 $("adminAttentionAction").onclick=handleAdminAction;
 $("adminQuickActions")?.addEventListener("click",handleAdminQuickAction);
@@ -3140,7 +3298,9 @@ $("adminParticipantManagerClose")?.addEventListener("click",closeParticipantMana
 $("cancelParticipantBtn")?.addEventListener("click",closeParticipantManager);
 $("adminParticipantForm")?.addEventListener("submit",saveAuthorizedParticipant);
 $("adminParticipantsList")?.addEventListener("click",event=>{
-  const button=event.target.closest("[data-participant-id]");
+  const decision=event.target.closest("[data-membership-decision]");
+  if(decision){ decideMembership(decision.dataset.participantId,decision.dataset.membershipDecision); return; }
+  const button=event.target.closest("[data-participant-active]");
   if(button) toggleAuthorizedParticipant(button.dataset.participantId,button.dataset.participantActive==="true");
 });
 $("adminParticipantManagerModal")?.addEventListener("click",event=>{if(event.target===$("adminParticipantManagerModal")) closeParticipantManager();});

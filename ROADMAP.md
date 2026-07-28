@@ -72,3 +72,11 @@
 - [x] História da Temporada.
 - [x] Conquistas contextuais.
 - [x] Neutralidade competitiva preservada.
+
+## v6.5.0 — Gestão de Participantes
+
+- [x] Edição do nome pelo próprio usuário.
+- [x] Celular opcional para futuros avisos via WhatsApp.
+- [x] Cadastro por link.
+- [x] Aprovação e recusa pelo administrador.
+- [x] Bloqueio de acesso enquanto a solicitação estiver pendente.
