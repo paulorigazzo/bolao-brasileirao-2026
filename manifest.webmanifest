@@ -1,9 +1,30 @@
 {
   "name": "Bolão Brasileirão 2026",
   "short_name": "Bolão 2026",
+  "description": "Palpites, ranking e emoção rodada a rodada.",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#06160f",
   "theme_color": "#071a12",
-  "icons": [{"src":"./assets/favicon.svg","sizes":"any","type":"image/svg+xml"}]
+  "icons": [
+    {
+      "src": "./assets/brand/jarvis-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/brand/jarvis-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
 }
