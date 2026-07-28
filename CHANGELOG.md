@@ -1,3 +1,9 @@
+## [6.5.0a] - 2026-07-28
+
+### Corrigido
+- Cor do texto e do cursor nos campos Nome e Celular de Meu Perfil, garantindo contraste sobre o fundo claro.
+- Cor do placeholder e do preenchimento automático do navegador nos mesmos campos.
+
 ## v6.4.0b — Meu Time 2.0
 
 - Nova tela dedicada **Meu Time** na navegação principal.

@@ -3782,7 +3782,7 @@ button,.chip,.filter-chip,.bottom-nav-item,.card[role="button"]{-webkit-tap-high
 .profile-data-form{display:grid;gap:15px;border-top:1px solid var(--border,#dce5df);padding-top:22px}
 .profile-data-form h3{margin:3px 0}
 .profile-data-form label,.admin-participant-form label{display:grid;gap:7px;font-weight:700}
-.profile-data-form input{width:100%;box-sizing:border-box;padding:13px 14px;border:1px solid var(--border,#ccd8d0);border-radius:12px;font:inherit;background:var(--surface,#fff);color:inherit}
+.profile-data-form input{width:100%;box-sizing:border-box;padding:13px 14px;border:1px solid var(--border,#ccd8d0);border-radius:12px;font:inherit;background:var(--surface,#fff);color:var(--text,#17231c);caret-color:var(--text,#17231c)}
 .profile-data-form label small{font-weight:400;color:var(--text-muted,#607067)}
 .optional-label{font-size:.72rem;font-weight:600;color:var(--text-muted,#607067)}
 .profile-form-status{min-height:1.2em;color:var(--color-primary,#16794b)}
@@ -3799,3 +3799,7 @@ button,.chip,.filter-chip,.bottom-nav-item,.card[role="button"]{-webkit-tap-high
   .admin-member-actions button{flex:1}
   .profile-summary{align-items:flex-start}
 }
+
+/* v6.5.0a — legibilidade dos campos editáveis do perfil */
+.profile-data-form input::placeholder{color:var(--text-muted,#607067);opacity:.78}
+.profile-data-form input:-webkit-autofill{-webkit-text-fill-color:var(--text,#17231c);caret-color:var(--text,#17231c)}
