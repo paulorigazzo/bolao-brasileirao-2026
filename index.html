@@ -8,12 +8,12 @@
   <title>Bolão Brasileirão 2026</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.5.2">
-  <link rel="stylesheet" href="./css/styles.css?v=6.5.2">
-  <link rel="stylesheet" href="./css/components.css?v=6.5.2">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.5.2">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.5.2">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.5.2">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.5.3">
+  <link rel="stylesheet" href="./css/styles.css?v=6.5.3">
+  <link rel="stylesheet" href="./css/components.css?v=6.5.3">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.5.3">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.5.3">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.5.3">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -27,7 +27,7 @@
       <span class="brand-mark">⚽</span>
       <div>
         <h1>Bolão Brasileirão</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.5.2</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.5.3</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -557,6 +557,25 @@
     </section>
   </div>
 
+
+  <div id="adminWhatsAppModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="adminWhatsAppTitle">
+    <section class="admin-whatsapp-modal card">
+      <div class="admin-detail-header">
+        <div><span class="eyebrow">MENSAGEM INDIVIDUAL</span><h2 id="adminWhatsAppTitle">Enviar pelo WhatsApp</h2><p class="muted-note"><strong id="adminWhatsAppParticipantName">Participante</strong> · <span id="adminWhatsAppParticipantPhone"></span></p></div>
+        <button id="adminWhatsAppClose" class="modal-close" type="button" aria-label="Fechar">✕</button>
+      </div>
+      <div id="adminWhatsAppTemplates" class="admin-whatsapp-templates" aria-label="Modelos de mensagem">
+        <button type="button" data-whatsapp-template="picks">⏰ Preencher palpites</button>
+        <button type="button" data-whatsapp-template="closes">⚽ Rodada fecha hoje</button>
+        <button type="button" data-whatsapp-template="approved">✅ Inscrição aprovada</button>
+        <button type="button" data-whatsapp-template="welcome">🏆 Boas-vindas</button>
+      </div>
+      <label class="admin-whatsapp-message-label" for="adminWhatsAppMessage">Mensagem<textarea id="adminWhatsAppMessage" rows="7" maxlength="1200" placeholder="Escreva uma mensagem individual..."></textarea></label>
+      <p class="admin-whatsapp-note">O aplicativo apenas prepara a mensagem. O envio só acontece depois da sua confirmação no WhatsApp.</p>
+      <div class="admin-form-actions"><button id="adminWhatsAppCancel" class="secondary" type="button">Cancelar</button><button id="adminWhatsAppSend" class="whatsapp" type="button">Abrir WhatsApp</button></div>
+    </section>
+  </div>
+
   <footer>Bolão Brasileirão 2026</footer>
   <script>
     if(new URLSearchParams(location.search).get("cadastro")==="1"){
@@ -565,6 +584,6 @@
       if(heroButton) heroButton.textContent="Entrar e solicitar participação";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.5.2"></script>
+  <script type="module" src="./js/app.js?v=6.5.3"></script>
 </body>
 </html>

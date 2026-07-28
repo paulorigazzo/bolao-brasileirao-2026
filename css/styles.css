@@ -3840,3 +3840,18 @@ button.danger:focus-visible{outline:3px solid rgba(255,95,95,.35);outline-offset
 button.danger:disabled{opacity:.38;cursor:not-allowed}
 .admin-member-delete{min-width:82px}
 @media(max-width:600px){.admin-member-actions .admin-member-delete{flex:1 1 100%}}
+
+
+/* v6.5.3 — comunicação individual via WhatsApp */
+button.whatsapp{background:#1f9d55;border:1px solid #28b866;color:#fff;font-weight:900}
+button.whatsapp:hover:not(:disabled){filter:brightness(1.08)}
+button.whatsapp:focus-visible{outline:3px solid rgba(37,211,102,.35);outline-offset:2px}
+button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
+.admin-whatsapp-modal{width:min(620px,calc(100vw - 24px));max-height:calc(100vh - 32px);overflow:auto;padding:24px;display:grid;gap:18px}
+.admin-whatsapp-templates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.admin-whatsapp-templates button{padding:11px 12px;text-align:left}
+.admin-whatsapp-templates button.active{border-color:#25d366;background:rgba(37,211,102,.12);box-shadow:0 0 0 2px rgba(37,211,102,.12)}
+.admin-whatsapp-message-label{display:grid;gap:8px;font-weight:800}
+.admin-whatsapp-message-label textarea{width:100%;box-sizing:border-box;resize:vertical;min-height:150px;padding:13px 14px;border:1px solid var(--border,#ccd8d0);border-radius:12px;font:inherit;line-height:1.45;background:#fff;color:#17231c}
+.admin-whatsapp-note{margin:0;color:var(--text-muted,#607067);font-size:.86rem}
+@media(max-width:600px){.admin-whatsapp-templates{grid-template-columns:1fr}.admin-member-actions .admin-member-whatsapp{flex:1 1 100%}.admin-whatsapp-modal{padding:18px}}

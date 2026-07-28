@@ -58,3 +58,7 @@ A implantação desta versão requer a execução da migração em `supabase/mig
 
 ### Exclusão permanente de participante
 A Área ADM permite excluir os dados de um participante do bolão. Antes de publicar, execute `supabase/migrations/20260728_v6_5_1_exclusao_participante.sql`. A operação remove palpites, perfil e autorização, mas preserva a conta externa de autenticação.
+
+## Comunicação via WhatsApp — v6.5.3
+
+A Área ADM permite preparar mensagens individuais para participantes com celular cadastrado. O administrador escolhe um modelo, revisa o texto e conclui o envio manualmente no WhatsApp. Não existem histórico interno, automação ou disparos em massa.

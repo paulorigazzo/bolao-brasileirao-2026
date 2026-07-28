@@ -73,6 +73,13 @@
 - [x] Conquistas contextuais.
 - [x] Neutralidade competitiva preservada.
 
+## v6.5.3 — Comunicação individual via WhatsApp
+
+- mensagens individuais iniciadas pelo administrador;
+- modelos básicos de lembrete e boas-vindas;
+- edição da mensagem antes de abrir o WhatsApp;
+- sem histórico, automação ou disparos em massa nesta etapa.
+
 ## v6.5.2 — Gestão de Participantes
 
 - [x] Edição do nome pelo próprio usuário.
