@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzePredictionProfile, analyzeRoundPerformance, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.3.0d4";
+const APP_VERSION = "6.3.0d5";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -617,7 +617,7 @@ function updateCardDraftUi(card){
   if(summary && saved && !draft) summary.textContent=`${saved.gols_casa} × ${saved.gols_fora}`;
   if(saveButton){
     saveButton.disabled=!validPickDraft(id);
-    saveButton.textContent=draft?"Salvar este palpite":saved?"✓ Palpite salvo":"Salvar este palpite";
+    saveButton.textContent=draft?contextualSavePickLabel(card):saved?"✓ Palpite salvo":contextualSavePickLabel(card);
   }
   updateSaveControls();
 }
@@ -706,15 +706,32 @@ function toggleGameCard(card){
   state.openGameId=willExpand ? Number(card.dataset.id) : null;
 }
 
-function openNextEmptyGameCard(currentCard){
+function nextEmptyGameCard(currentCard){
   const cards=[...document.querySelectorAll(".premium-match-card[data-id]")];
   const currentIndex=cards.indexOf(currentCard);
-  if(currentIndex<0) return false;
-  const nextCard=cards.slice(currentIndex+1).find(card=>{
+  if(currentIndex<0) return null;
+  return cards.slice(currentIndex+1).find(card=>{
     const id=Number(card.dataset.id);
     const game=state.games.find(item=>Number(item.id_jogo)===id);
     return game && !locked(game) && !isFinished(game) && !ownPick(id) && !pickDraft(id);
+  })||null;
+}
+
+function contextualSavePickLabel(card){
+  return nextEmptyGameCard(card)?"Salvar e próximo →":"Salvar palpite";
+}
+
+function refreshContextualSaveButtons(){
+  document.querySelectorAll(".premium-save-pick").forEach(button=>{
+    const card=button.closest(".premium-match-card");
+    if(!card || button.dataset.busy==="true") return;
+    const id=Number(card.dataset.id);
+    button.textContent=pickDraft(id)?contextualSavePickLabel(card):ownPick(id)?"✓ Palpite salvo":contextualSavePickLabel(card);
   });
+}
+
+function openNextEmptyGameCard(currentCard){
+  const nextCard=nextEmptyGameCard(currentCard);
   if(!nextCard) return false;
   setGameCardExpanded(currentCard,false,true);
   setGameCardExpanded(nextCard,true,true);
@@ -782,7 +799,7 @@ function premiumMatchCard(g){
     : "";
   return `<article class="premium-match-card game-card-v2 ${stateClass} ${pick?"has-pick":"needs-pick"} ${draft?"has-unsaved":""} ${favorite.isFavoriteMatch?"is-favorite-team-match":""}" data-id="${g.id_jogo}"${favoriteStyle}>
     <button class="game-toggle premium-game-toggle" type="button" aria-expanded="false">
-      <span class="premium-toggle-time"><strong>${premiumTime(g.inicio)}</strong><small>${escapeHtml(g.local_partida||"Local a definir")}</small></span>
+      <span class="premium-toggle-time"><strong>${premiumTime(g.inicio)}</strong><small title="${escapeHtml(g.local_partida||"Local a definir")}">${escapeHtml(g.local_partida||"Local a definir")}</small></span>
       <span class="premium-toggle-match">${compactTeam(g.time_casa_logo,g.time_casa).replace("game-summary-team",`game-summary-team${favorite.homeFavorite?" is-favorite-team":""}`)}<span class="premium-toggle-score">${escapeHtml(summaryScore)}</span>${compactTeam(g.time_fora_logo,g.time_fora).replace("game-summary-team",`game-summary-team${favorite.awayFavorite?" is-favorite-team":""}`)}</span>
       <span class="premium-toggle-side">${favorite.isFavoriteMatch?favoriteHeartBadge(favoriteTeamName):""}${headerStatusLabel?`<span class="premium-toggle-status" data-game-header-status>${headerStatusLabel}</span>`:""}${headerPointsLabel!==""?`<span class="premium-toggle-points" aria-label="${headerPointsLabel} pontos no jogo"><span aria-hidden="true">★</span>${headerPointsLabel}</span>`:""}<span class="game-chevron" aria-hidden="true">⌄</span></span>
     </button>
@@ -797,7 +814,7 @@ function premiumMatchCard(g){
           <div class="premium-expanded-center">${center}</div>
           <div class="premium-team premium-team-away ${favorite.awayFavorite?"is-favorite-team":""}"><span class="team-badge">${teamLogo(g.time_fora_logo,g.time_fora)}</span><b>${escapeHtml(g.time_fora)}${favorite.awayFavorite?`<span class="favorite-team-name-heart" aria-hidden="true">♥</span>`:""}</b></div>
         </div>
-        ${!isLocked&&!finished?`<div class="premium-game-actions"><button class="primary premium-save-pick" type="button" ${validPickDraft(g.id_jogo)?"":"disabled"}>${draft?"Salvar este palpite":pick?"✓ Palpite salvo":"Salvar este palpite"}</button></div>`:""}
+        ${!isLocked&&!finished?`<div class="premium-game-actions"><button class="primary premium-save-pick" type="button" ${validPickDraft(g.id_jogo)?"":"disabled"}>${draft?"Salvar palpite":pick?"✓ Palpite salvo":"Salvar palpite"}</button></div>`:""}
         ${resultComparison}
       </div>
     </div>
@@ -885,6 +902,7 @@ function renderGames(){
     updateCardDraftUi(card);
   }));
   document.querySelectorAll(".premium-save-pick").forEach(btn=>btn.addEventListener("click",savePick));
+  refreshContextualSaveButtons();
   document.querySelectorAll(".premium-edit-pick").forEach(btn=>btn.addEventListener("click",()=>btn.closest(".premium-match-card")?.querySelector("input")?.focus()));
   const cards=[...document.querySelectorAll(".premium-match-card")];
   cards.forEach(card=>{
@@ -946,16 +964,16 @@ async function savePick(event){
   const home=card.querySelector(".home-score")?.value??"";
   const away=card.querySelector(".away-score")?.value??"";
   if(home===""||away==="") return message("Informe os dois placares.",true);
-  button.disabled=true;button.textContent="Salvando…";
+  button.dataset.busy="true";button.disabled=true;button.textContent="Salvando…";
   const payload={id_jogo:id,user_id:state.user.id,usuario:state.participant.nome,gols_casa:Number(home),gols_fora:Number(away)};
   const {data,error}=await sb.from("palpites").upsert(payload,{onConflict:"id_jogo,user_id"}).select().single();
-  if(error){button.disabled=false;button.textContent="Tentar novamente";return message(error.message,true);}
+  if(error){button.dataset.busy="false";button.disabled=false;button.textContent="Tentar novamente";return message(error.message,true);}
   state.ownPicks=state.ownPicks.filter(pick=>Number(pick.id_jogo)!==id).concat(data||payload);
   clearPickDrafts([id]);
   state.pickCounts=state.pickCounts.filter(item=>item.usuario!==state.participant.nome).concat({usuario:state.participant.nome,quantidade:state.ownPicks.length});
   state.openGameId=id;
   updateCardDraftUi(card);
-  button.disabled=true;button.textContent="✓ Palpite salvo";
+  button.dataset.busy="false";button.disabled=true;button.textContent="✓ Palpite salvo";
   const advanced=openNextEmptyGameCard(card);
   message(advanced?"Palpite salvo. Próximo jogo aberto para preenchimento.":"Palpite salvo com sucesso.");
   renderRoundProgress(state.games.filter(item=>Number(item.rodada)===Number($("roundSelect")?.value||0)));
