@@ -8,12 +8,12 @@
   <title>Bolão Brasileirão 2026</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.5.0b">
-  <link rel="stylesheet" href="./css/styles.css?v=6.5.0b">
-  <link rel="stylesheet" href="./css/components.css?v=6.5.0b">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.5.0b">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.5.0b">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.5.0b">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.5.0c">
+  <link rel="stylesheet" href="./css/styles.css?v=6.5.0c">
+  <link rel="stylesheet" href="./css/components.css?v=6.5.0c">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.5.0c">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.5.0c">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.5.0c">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -27,7 +27,7 @@
       <span class="brand-mark">⚽</span>
       <div>
         <h1>Bolão Brasileirão</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.5.0b</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.5.0c</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -481,7 +481,7 @@
               <label>Nome de exibição<input id="profileNameInput" type="text" maxlength="80" autocomplete="name" required></label>
               <label>Celular com WhatsApp <span class="optional-label">opcional</span><input id="profilePhoneInput" type="tel" inputmode="tel" maxlength="16" autocomplete="tel" placeholder="(16) 99999-9999"><small>Será visível somente para você e para o administrador, preparando futuros avisos do bolão.</small></label>
               <small id="profileFormStatus" class="profile-form-status" aria-live="polite"></small>
-              <button id="saveProfileBtn" class="primary" type="submit">Salvar dados</button>
+              <button id="saveProfileBtn" class="primary" type="button">Salvar dados</button>
             </form>
           </div>
           <div class="card favorite-team-card">
@@ -566,6 +566,6 @@
       if(heroButton) heroButton.textContent="Entrar e solicitar participação";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.5.0b"></script>
+  <script type="module" src="./js/app.js?v=6.5.0c"></script>
 </body>
 </html>
