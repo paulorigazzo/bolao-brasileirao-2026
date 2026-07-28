@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.3.0f";
+const APP_VERSION = "6.3.0f1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1626,15 +1626,23 @@ function renderStats(){
   const advancedPanel=$("statsAdvancedComparison");
   if(advancedPanel){
     const group=advancedStats.group;
-    const rivals=advancedStats.comparisons.slice(0,4);
-    advancedPanel.innerHTML=group.position?`<div class="stats-dashboard-head"><div><span class="eyebrow">PAINEL EXECUTIVO</span><h2>Posição e regularidade</h2></div><span class="stats-profile-chip">percentil ${group.percentile}</span></div>
+    const trendMeta={
+      up:{label:"Em alta",detail:`+${Math.abs(roundAnalysis.delta).toFixed(1)} pt/jogo recentemente`,icon:"↗"},
+      down:{label:"Em atenção",detail:`-${Math.abs(roundAnalysis.delta).toFixed(1)} pt/jogo recentemente`,icon:"↘"},
+      stable:{label:"Estável",detail:"média próxima das rodadas anteriores",icon:"→"},
+      insufficient:{label:"Em formação",detail:"aguardando mais rodadas",icon:"·"},
+    }[roundAnalysis.trend];
+    const nearestGap=group.position===1
+      ? {label:"Vantagem atual",value:group.leadOverBelow==null?"—":`${group.leadOverBelow} pts`,detail:group.below?escapeHtml(group.below):"sem perseguidor"}
+      : {label:"Próxima posição",value:group.gapToAbove==null?"—":`${group.gapToAbove} pts`,detail:group.above?escapeHtml(group.above):"participante acima"};
+    const relation=group.groupAverageTotal?totalPoints-group.groupAverageTotal:null;
+    advancedPanel.innerHTML=group.position?`<div class="stats-dashboard-head"><div><span class="eyebrow">VISÃO GERAL</span><h2>Como você está no bolão</h2><p>Os quatro indicadores mais úteis para entender sua situação atual.</p></div><span class="stats-profile-chip">${group.position}º de ${group.participantCount}</span></div>
       <div class="stats-executive-grid">
-        <article><span>Posição</span><strong>${group.position}º</strong><small>entre ${group.participantCount} participantes</small></article>
-        <article><span>Para o líder</span><strong>${group.gapToLeader===0?'Líder':`${group.gapToLeader} pts`}</strong><small>${group.leader?escapeHtml(group.leader):'—'}</small></article>
-        <article><span>Regularidade</span><strong>${advancedStats.consistency.index==null?'—':`${advancedStats.consistency.index}%`}</strong><small>índice por rodada</small></article>
-        <article><span>Sequência atual</span><strong>${advancedStats.streaks.currentScoringStreak}</strong><small>jogos pontuando</small></article>
-      </div>
-      <div class="stats-rivals-list">${rivals.map(item=>`<div><span>${escapeHtml(item.name)}</span><strong class="${item.difference>=0?'positive':'negative'}">${item.difference>=0?'+':''}${item.difference} pts</strong><small>${item.total} pontos · ${item.exact} exatos</small></div>`).join('')}</div>`:'<div class="stats-empty-state"><span aria-hidden="true">👥</span><strong>Comparação em formação</strong><p>O painel será liberado quando a classificação possuir dados válidos.</p></div>';
+        <article><span>Posição</span><strong>${group.position}º</strong><small>${group.position===1?'Você está na liderança':`entre ${group.participantCount} participantes`}</small></article>
+        <article><span>Pontuação</span><strong>${totalPoints} pts</strong><small>${relation==null?'média do grupo indisponível':`${Math.abs(relation).toFixed(0)} pts ${relation>=0?'acima':'abaixo'} da média`}</small></article>
+        <article><span>${nearestGap.label}</span><strong>${nearestGap.value}</strong><small>${nearestGap.detail}</small></article>
+        <article class="trend-${roundAnalysis.trend}"><span>Momento</span><strong>${trendMeta.icon} ${trendMeta.label}</strong><small>${trendMeta.detail}</small></article>
+      </div>`:'<div class="stats-empty-state"><span aria-hidden="true">👥</span><strong>Visão geral em formação</strong><p>Os indicadores serão liberados quando a classificação possuir dados válidos.</p></div>';
   }
 
   const rankingHistoryPanel=$("statsRankingHistory");
@@ -1676,7 +1684,14 @@ function renderStats(){
   }
 
   const top=Math.max(1,...rounds.map(item=>item.points));
+  const biggestEvolution=rounds.reduce((best,item,index)=>{
+    if(!index) return best;
+    const previous=rounds[index-1];
+    const gain=Number(item.points||0)-Number(previous.points||0);
+    return !best||gain>best.gain?{from:previous.round,to:item.round,gain}:best;
+  },null);
   if($("bestRoundBadge")) $("bestRoundBadge").textContent=bestRound?`Melhor rodada: R${bestRound.round} · ${bestRound.points} pts`:"Melhor rodada: —";
+  if($("statsEvolutionHighlight")) $("statsEvolutionHighlight").textContent=biggestEvolution&&biggestEvolution.gain>0?`Maior evolução: +${biggestEvolution.gain} pts · R${biggestEvolution.from} → R${biggestEvolution.to}`:"Maior evolução: —";
   if($("roundHistory")) $("roundHistory").innerHTML=rounds.length?rounds.map((data,index)=>{
     const previous=index?rounds[index-1]:null;
     const change=!previous?null:data.average-previous.average;
@@ -3049,6 +3064,23 @@ $("teamShortcut").onclick=()=>{ closeUserMenu(); navigateTo("profile"); setTimeo
 $("standingsShortcut").onclick=()=>{ closeUserMenu(); navigateTo("standings"); };
 $("rulesShortcut").onclick=()=>{ closeUserMenu(); navigateTo("rules"); };
 $("adminMenuShortcut").onclick=()=>{ closeUserMenu(); navigateTo("admin"); };
+document.addEventListener("click",event=>{
+  const tab=event.target.closest?.("[data-stats-achievement-tab]");
+  if(tab){
+    const target=tab.dataset.statsAchievementTab;
+    document.querySelectorAll("[data-stats-achievement-tab]").forEach(button=>{
+      const active=button.dataset.statsAchievementTab===target;
+      button.classList.toggle("active",active);
+      button.setAttribute("aria-selected",String(active));
+    });
+    document.querySelectorAll("[data-stats-achievement-panel]").forEach(panel=>{
+      const active=panel.dataset.statsAchievementPanel===target;
+      panel.classList.toggle("active",active);
+      panel.hidden=!active;
+    });
+  }
+});
+
 document.addEventListener("click",event=>{ if(!$("headerUser")?.contains(event.target)){ show("userMenu",false); $("userMenuBtn")?.setAttribute("aria-expanded","false"); } });
 $("homeTab")?.addEventListener("click",async event=>{
   const target=event.target.closest("[data-home-action]");

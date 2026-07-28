@@ -56,6 +56,6 @@
 
 ## Estado atual
 
-- Versão funcional: `v6.3.0f`.
+- Versão funcional: `v6.3.0f11`.
 - Foco ativo: Tela de Estatísticas.
 - Tela de Jogos: ⏸️ congelada momentaneamente na `v6.3.0d5`, salvo bug crítico.

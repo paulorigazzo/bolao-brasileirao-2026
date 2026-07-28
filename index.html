@@ -27,7 +27,7 @@
       <span class="brand-mark">⚽</span>
       <div>
         <h1>Bolão Brasileirão</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.3.0f</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.3.0f1</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -221,30 +221,23 @@
           <div id="statsOverallRing" class="stats-overall-ring" aria-label="Aproveitamento geral"><strong>0%</strong><span>aproveitamento</span></div>
         </div>
 
-        <div id="statsHighlights" class="stats-highlights"></div>
-
         <article id="statsDataQuality" class="stats-data-quality card hidden" aria-live="polite"></article>
 
-        <div class="stats-grid">
-          <article class="card stat-panel"><span class="eyebrow">DESEMPENHO</span><h2>Tipos de acerto</h2><div id="hitBreakdown" class="breakdown"></div></article>
-          <article class="card stat-panel"><span class="eyebrow">TEMPORADA</span><h2>Meu progresso</h2><div id="seasonProgress" class="season-progress"></div></article>
-        </div>
+        <article id="statsAdvancedComparison" class="card stats-dashboard-panel stats-executive-panel" aria-live="polite"></article>
 
-        <div class="stats-grid stats-comparison-grid">
-          <article class="card stat-panel"><span class="eyebrow">COMPARAÇÃO</span><h2>Você × grupo</h2><div id="groupComparison" class="group-comparison"></div></article>
-          <article class="card stat-panel"><span class="eyebrow">MOMENTO</span><h2>Sequência atual</h2><div id="currentStreak" class="current-streak"></div></article>
+        <section class="card stats-evolution-section" aria-labelledby="statsEvolutionTitle">
+          <div class="section-title"><div><span class="eyebrow">EVOLUÇÃO</span><h2 id="statsEvolutionTitle">Pontuação por rodada</h2><p class="stats-section-copy">Veja rapidamente se o seu desempenho está avançando, estável ou em queda.</p></div><div class="stats-evolution-badges"><span id="bestRoundBadge" class="best-round-badge">Melhor rodada: —</span><span id="statsEvolutionHighlight" class="best-round-badge secondary">Maior evolução: —</span></div></div>
+          <div id="roundHistory" class="round-history premium-history"></div>
+        </section>
+
+        <div class="stats-grid stats-core-grid">
+          <article class="card stat-panel"><span class="eyebrow">MEU PERFIL</span><h2>Tipos de acerto</h2><div id="hitBreakdown" class="breakdown"></div></article>
+          <article class="card stat-panel"><span class="eyebrow">PARTICIPAÇÃO</span><h2>Cobertura da temporada</h2><div id="seasonProgress" class="season-progress"></div></article>
         </div>
 
         <section class="stats-insights-section" aria-labelledby="statsInsightsTitle">
-          <div class="stats-section-heading"><div><span class="eyebrow">LEITURA AUTOMÁTICA</span><h2 id="statsInsightsTitle">O que seus números revelam</h2></div><small>Insights calculados a partir dos resultados disponíveis</small></div>
+          <div class="stats-section-heading"><div><span class="eyebrow">LEITURA AUTOMÁTICA</span><h2 id="statsInsightsTitle">O essencial dos seus números</h2></div><small>Até três conclusões priorizadas automaticamente</small></div>
           <div id="statsInsights" class="stats-insights-grid" aria-live="polite"></div>
-        </section>
-
-        <article id="statsAdvancedComparison" class="card stats-dashboard-panel" aria-live="polite"></article>
-
-        <section class="stats-dashboard-grid" aria-label="Recordes e conquistas">
-          <article id="statsRecords" class="card stats-dashboard-panel" aria-live="polite"></article>
-          <article id="statsMedals" class="card stats-dashboard-panel" aria-live="polite"></article>
         </section>
 
         <section class="stats-profile-grid" aria-label="Perfil avançado dos palpites">
@@ -252,12 +245,13 @@
           <article id="statsTeamAffinity" class="card stats-profile-card" aria-live="polite"></article>
         </section>
 
-        <article id="statsRankingHistory" class="card stats-ranking-history" aria-live="polite"></article>
+        <section class="card stats-achievements" aria-labelledby="statsAchievementsTitle">
+          <div class="stats-achievements-head"><div><span class="eyebrow">CONQUISTAS</span><h2 id="statsAchievementsTitle">Recordes e medalhas</h2><p>Curiosidades e marcos ficam reunidos em um único espaço.</p></div><div class="stats-achievement-tabs" role="tablist" aria-label="Recordes e medalhas"><button type="button" class="active" role="tab" aria-selected="true" data-stats-achievement-tab="records">Recordes</button><button type="button" role="tab" aria-selected="false" data-stats-achievement-tab="medals">Medalhas</button></div></div>
+          <div class="stats-achievement-panel active" role="tabpanel" data-stats-achievement-panel="records"><article id="statsRecords" class="stats-dashboard-panel" aria-live="polite"></article></div>
+          <div class="stats-achievement-panel" role="tabpanel" data-stats-achievement-panel="medals" hidden><article id="statsMedals" class="stats-dashboard-panel" aria-live="polite"></article></div>
+        </section>
 
-        <div class="card">
-          <div class="section-title"><div><span class="eyebrow">POR RODADA</span><h2>Evolução da pontuação</h2></div><span id="bestRoundBadge" class="best-round-badge">Melhor rodada: —</span></div>
-          <div id="roundHistory" class="round-history premium-history"></div>
-        </div>
+        <article id="statsRankingHistory" class="card stats-ranking-history" aria-live="polite"></article>
       </section>
 
 

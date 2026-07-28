@@ -1,8 +1,19 @@
 # Changelog
 
+## [6.3.0f1] — Reestruturação visual da Tela de Estatísticas
+
+- Reorganização da tela por prioridade de leitura.
+- Painel executivo reduzido aos quatro indicadores essenciais.
+- Evolução por rodada promovida e inclusão da maior evolução.
+- Remoção visual de comparações e sequências redundantes.
+- Recordes e medalhas consolidados em um único bloco com abas.
+- Insights limitados aos três cartões prioritários já existentes.
+- Nenhuma alteração nas regras de pontuação ou nas demais telas.
+
+
 Todas as alterações relevantes do projeto são registradas aqui. Os relatórios detalhados de cada entrega permanecem em `docs/releases/`.
 
-## [6.3.0f] — Dashboard Analítico
+## [6.3.0f1] — Dashboard Analítico
 
 ### Adicionado
 - painel executivo com posição, distância para o líder, percentil e regularidade;
