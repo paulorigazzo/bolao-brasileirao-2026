@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, classifyStatisticsGames } from "../js/statistics-engine.js";
+import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, classifyStatisticsGames } from "../js/statistics-engine.js";
 
 const games = [
   { id_jogo: 1, status: "encerrado", inicio: "2026-01-01T10:00:00Z", gols_casa: 1, gols_fora: 0 },
@@ -108,5 +108,30 @@ assert.equal(rankingHistory.summary.worstPosition, 2);
 assert.equal(rankingHistory.summary.biggestClimb.places, 1);
 assert.equal(rankingHistory.summary.currentPoints, 13);
 assert.equal(rankingHistory.summary.participantCount, 3);
+
+const advanced = analyzeAdvancedStatistics({
+  entries: [{score:10},{score:5},{score:0},{score:3},{score:10}],
+  rounds: [
+    {round:1,points:15,average:7.5,exact:1},
+    {round:2,points:3,average:1.5,exact:0},
+    {round:3,points:10,average:5,exact:1},
+  ],
+  ranking: [
+    {name:"Gustavo",total:35,exact:2,scored:5},
+    {name:"Paulo",total:28,exact:2,scored:5},
+    {name:"Guilherme",total:20,exact:1,scored:5},
+  ],
+  selectedParticipant:"Paulo",
+  pointsForEntry: entry => entry.score,
+});
+assert.equal(advanced.group.position, 2);
+assert.equal(advanced.group.gapToLeader, 7);
+assert.equal(advanced.group.gapToAbove, 7);
+assert.equal(advanced.group.leadOverBelow, 8);
+assert.equal(advanced.personalRecords.bestRound.round, 1);
+assert.equal(advanced.personalRecords.bestScoringStreak, 2);
+assert.equal(advanced.personalRecords.exact, 2);
+assert.ok(Array.isArray(advanced.medals));
+assert.ok(advanced.insights.length >= 2);
 
 console.log("Motor estatístico verificado com sucesso.");

@@ -1,8 +1,8 @@
 import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
-import { analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, classifyStatisticsGames } from "./statistics-engine.js";
+import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.3.0e";
+const APP_VERSION = "6.3.0f";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1465,6 +1465,13 @@ function renderStats(){
     isScorableGame,
     pointsForPick:(pick,game)=>points(pick,game),
   });
+  const advancedStats=analyzeAdvancedStatistics({
+    entries,
+    rounds,
+    ranking:state.ranking,
+    selectedParticipant:state.participant?.nome,
+    pointsForEntry:({pick,game})=>points(pick,game),
+  });
 
   const ring=$("statsOverallRing");
   if(ring){
@@ -1593,6 +1600,41 @@ function renderStats(){
     const challenge=predictionProfile.challengeTeam;
     const teamItem=(type,icon,title,item,empty)=>item?`<article class="stats-team-affinity-item ${type}"><span class="stats-team-affinity-icon" aria-hidden="true">${icon}</span><div><small>${title}</small><strong>${escapeHtml(item.name)}</strong><p>${item.points} ponto${item.points===1?"":"s"} em ${item.games} jogo${item.games===1?"":"s"} · ${item.hitRate}% com pontos</p></div></article>`:`<article class="stats-team-affinity-item is-empty"><span class="stats-team-affinity-icon" aria-hidden="true">${icon}</span><div><small>${title}</small><strong>Em formação</strong><p>${empty}</p></div></article>`;
     affinityPanel.innerHTML=`<div class="stats-profile-head"><div><span class="eyebrow">AFINIDADE COM CLUBES</span><h2>Times no seu radar</h2></div><span class="stats-profile-chip">mín. 2 jogos</span></div><div class="stats-team-affinity-list">${teamItem("best","⭐","MAIS PONTOS",best,"Os resultados indicarão os clubes em que você mais pontua.")}${teamItem("challenge","🧩","MAIOR DESAFIO",challenge,"Ainda não há erros suficientes para identificar um desafio recorrente.")}</div><p class="stats-profile-note">A análise considera os dois clubes de cada partida e não interfere na pontuação oficial.</p>`;
+  }
+
+
+  const recordsPanel=$("statsRecords");
+  if(recordsPanel){
+    const records=advancedStats.personalRecords;
+    const best=records.bestRound;
+    recordsPanel.innerHTML=finished?`
+      <div class="stats-dashboard-head"><div><span class="eyebrow">RECORDES PESSOAIS</span><h2>Suas melhores marcas</h2></div><span class="stats-profile-chip">temporada atual</span></div>
+      <div class="stats-records-grid">
+        <article><span>Melhor rodada</span><strong>${best?`R${best.round}`:"—"}</strong><small>${best?`${best.points} pontos · ${best.exact} exato${best.exact===1?"":"s"}`:"Sem dados"}</small></article>
+        <article><span>Sequência pontuando</span><strong>${records.bestScoringStreak}</strong><small>jogos consecutivos</small></article>
+        <article><span>Sequência de exatos</span><strong>${records.bestExactStreak}</strong><small>placares consecutivos</small></article>
+        <article><span>Palpites com pontos</span><strong>${records.hits}</strong><small>de ${records.evaluated} avaliados</small></article>
+      </div>`:'<div class="stats-empty-state"><span aria-hidden="true">🥇</span><strong>Recordes em formação</strong><p>Suas melhores marcas aparecerão após os primeiros resultados.</p></div>';
+  }
+
+  const medalsPanel=$("statsMedals");
+  if(medalsPanel){
+    const earned=advancedStats.medals.filter(item=>item.earned);
+    medalsPanel.innerHTML=`<div class="stats-dashboard-head"><div><span class="eyebrow">CONQUISTAS</span><h2>Medalhas automáticas</h2></div><span class="stats-profile-chip">${earned.length} conquistada${earned.length===1?"":"s"}</span></div><div class="stats-medals-grid">${advancedStats.medals.map(item=>`<article class="stats-medal ${item.earned?'earned':'locked'}"><span aria-hidden="true">${item.earned?item.icon:'🔒'}</span><div><strong>${item.title}</strong><p>${item.description}</p></div></article>`).join('')}</div>`;
+  }
+
+  const advancedPanel=$("statsAdvancedComparison");
+  if(advancedPanel){
+    const group=advancedStats.group;
+    const rivals=advancedStats.comparisons.slice(0,4);
+    advancedPanel.innerHTML=group.position?`<div class="stats-dashboard-head"><div><span class="eyebrow">PAINEL EXECUTIVO</span><h2>Posição e regularidade</h2></div><span class="stats-profile-chip">percentil ${group.percentile}</span></div>
+      <div class="stats-executive-grid">
+        <article><span>Posição</span><strong>${group.position}º</strong><small>entre ${group.participantCount} participantes</small></article>
+        <article><span>Para o líder</span><strong>${group.gapToLeader===0?'Líder':`${group.gapToLeader} pts`}</strong><small>${group.leader?escapeHtml(group.leader):'—'}</small></article>
+        <article><span>Regularidade</span><strong>${advancedStats.consistency.index==null?'—':`${advancedStats.consistency.index}%`}</strong><small>índice por rodada</small></article>
+        <article><span>Sequência atual</span><strong>${advancedStats.streaks.currentScoringStreak}</strong><small>jogos pontuando</small></article>
+      </div>
+      <div class="stats-rivals-list">${rivals.map(item=>`<div><span>${escapeHtml(item.name)}</span><strong class="${item.difference>=0?'positive':'negative'}">${item.difference>=0?'+':''}${item.difference} pts</strong><small>${item.total} pontos · ${item.exact} exatos</small></div>`).join('')}</div>`:'<div class="stats-empty-state"><span aria-hidden="true">👥</span><strong>Comparação em formação</strong><p>O painel será liberado quando a classificação possuir dados válidos.</p></div>';
   }
 
   const rankingHistoryPanel=$("statsRankingHistory");

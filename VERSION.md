@@ -2,17 +2,16 @@
 
 ## Aplicação
 
-- **Versão:** `v6.3.0e`
-- **Nome:** Histórico do Ranking — Estatísticas
-- **Status:** em validação na branch de feature
-- **Base oficial anterior:** `v6.3.0d5`
+- **Versão:** `v6.3.0f`
+- **Nome:** Dashboard Analítico — Estatísticas Avançadas
+- **Status:** pacote pronto para validação
+- **Base oficial anterior:** `v6.3.0e`
 
 ## Foco de desenvolvimento
 
-- Tela ativa: Estatísticas.
-- Tela congelada: Jogos, salvo bug crítico.
-- Método de entrega preferido: substituição de arquivos completos.
-- Ambiente de teste: VS Code + `netlify dev` + `http://localhost:8888`.
+- Tela alterada: Estatísticas.
+- Tela de Jogos preservada funcionalmente na `v6.3.0d5`.
+- Método de entrega: substituição de arquivos completos.
 
 ## Qualidade
 
@@ -21,13 +20,3 @@ Antes de cada commit:
 ```powershell
 npm run check
 ```
-
-## Documentação principal
-
-- `README.md`: visão geral e início rápido.
-- `CHANGELOG.md`: histórico resumido.
-- `ROADMAP.md`: fases, status e próximos passos.
-- `docs/releases/`: notas detalhadas das versões.
-- `docs/process/DEVELOPMENT_WORKFLOW.md`: fluxo de desenvolvimento.
-- `docs/deployment/NETLIFY.md`: execução local e deploy.
-- `docs/architecture/OVERVIEW.md`: arquitetura do projeto.

@@ -1,4 +1,4 @@
-export const APP_VERSION = "6.3.0e";
+export const APP_VERSION = "6.3.0f";
 export const FOOTBALL_API_BASE = "https://api.football-data.org/v4";
 export const COMPETITION_CODE = "BSA";
 export const SEASON_YEAR = "2026";
