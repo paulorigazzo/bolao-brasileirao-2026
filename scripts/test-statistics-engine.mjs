@@ -149,5 +149,10 @@ assert.equal(dashboardModel.insights.length, 3);
 assert.equal(dashboardModel.insights[0].key, "trend");
 assert.equal(dashboardModel.records.bestRound.round, 1);
 assert.equal(dashboardModel.medals.length, advanced.medals.length);
+assert.ok(dashboardModel.moment.title.length > 0);
+assert.ok(dashboardModel.dynamicTitle.title.length > 0);
+assert.ok(dashboardModel.recommendations.length >= 1);
+assert.ok(dashboardModel.recommendations.length <= 3);
+assert.equal(dashboardModel.executive.consistency.label, "Consistente");
 
 console.log("Motor estatístico verificado com sucesso.");

@@ -27,7 +27,7 @@
       <span class="brand-mark">⚽</span>
       <div>
         <h1>Bolão Brasileirão</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.3.0f2</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.3.0</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -225,6 +225,8 @@
 
         <article id="statsAdvancedComparison" class="card stats-dashboard-panel stats-executive-panel" aria-live="polite"></article>
 
+        <article id="statsParticipantMoment" class="card stats-moment-card" aria-live="polite"></article>
+
         <section class="card stats-evolution-section" aria-labelledby="statsEvolutionTitle">
           <div class="section-title"><div><span class="eyebrow">EVOLUÇÃO</span><h2 id="statsEvolutionTitle">Pontuação por rodada</h2><p class="stats-section-copy">Veja rapidamente se o seu desempenho está avançando, estável ou em queda.</p></div><div class="stats-evolution-badges"><span id="bestRoundBadge" class="best-round-badge">Melhor rodada: —</span><span id="statsEvolutionHighlight" class="best-round-badge secondary">Maior evolução: —</span></div></div>
           <div id="roundHistory" class="round-history premium-history"></div>
@@ -236,8 +238,9 @@
         </div>
 
         <section class="stats-insights-section" aria-labelledby="statsInsightsTitle">
-          <div class="stats-section-heading"><div><span class="eyebrow">LEITURA AUTOMÁTICA</span><h2 id="statsInsightsTitle">O essencial dos seus números</h2></div><small>Até três conclusões priorizadas automaticamente</small></div>
-          <div id="statsInsights" class="stats-insights-grid" aria-live="polite"></div>
+          <div class="stats-section-heading"><div><span class="eyebrow">PRÓXIMOS PASSOS</span><h2 id="statsInsightsTitle">O que vale observar agora</h2></div><small>Recomendações curtas com base no seu momento</small></div>
+          <div id="statsRecommendations" class="stats-recommendations-grid" aria-live="polite"></div>
+          <details class="stats-more-insights"><summary>Ver mais leituras dos meus números</summary><div id="statsInsights" class="stats-insights-grid" aria-live="polite"></div></details>
         </section>
 
         <section class="stats-profile-grid" aria-label="Perfil avançado dos palpites">

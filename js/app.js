@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.3.0f2";
+const APP_VERSION = "6.3.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1422,6 +1422,21 @@ function ownFinishedEntries(){
 }
 
 
+function renderStatsMoment(model){
+  const panel=$("statsParticipantMoment");
+  if(!panel) return;
+  const moment=model.moment;
+  const title=model.dynamicTitle;
+  panel.className=`card stats-moment-card tone-${moment.tone}`;
+  panel.innerHTML=`<div class="stats-moment-icon" aria-hidden="true">${moment.icon}</div><div class="stats-moment-copy"><span class="eyebrow">${escapeHtml(moment.eyebrow)}</span><h2>${escapeHtml(moment.title)}</h2><p>${escapeHtml(moment.text)}</p></div><div class="stats-dynamic-title"><span>${title.icon}</span><div><small>TÍTULO ATUAL</small><strong>${escapeHtml(title.title)}</strong><p>${escapeHtml(title.description)}</p></div></div>`;
+}
+
+function renderStatsRecommendations(model){
+  const panel=$("statsRecommendations");
+  if(!panel) return;
+  panel.innerHTML=model.recommendations.map(item=>`<article class="stats-recommendation-card"><span aria-hidden="true">${item.icon}</span><div><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.text)}</p></div></article>`).join("");
+}
+
 function renderStatsInsights(model){
   const panel=$("statsInsights");
   if(!panel) return;
@@ -1466,7 +1481,7 @@ function renderStatsExecutive(model){
       <article><span>Posição</span><strong>${executive.position}º</strong><small>${executive.position===1?'Você está na liderança':`entre ${executive.participantCount} participantes`}</small></article>
       <article><span>Pontuação</span><strong>${executive.totalPoints} pts</strong><small>${relation==null?'média do grupo indisponível':`${Math.abs(relation).toFixed(0)} pts ${relation>=0?'acima':'abaixo'} da média`}</small></article>
       <article><span>${gap.label}</span><strong>${gap.value}</strong><small>${escapeHtml(gap.detail)}</small></article>
-      <article class="trend-${trend.key}"><span>Momento</span><strong>${trend.icon} ${trend.label}</strong><small>${trend.detail}</small></article>
+      <article class="trend-${trend.key}"><span>Regularidade</span><strong>${"★".repeat(executive.consistency.stars)}${"☆".repeat(5-executive.consistency.stars)}</strong><small>${executive.consistency.label}${executive.consistency.value==null?"":` · ${executive.consistency.value}%`}</small></article>
     </div>`;
 }
 
@@ -1590,6 +1605,8 @@ function renderStats(){
       <p>Os indicadores exibidos consideram somente partidas com situação e resultado válidos.</p><ul>${reasons.join("")}</ul></div>`:"";
   }
 
+  renderStatsMoment(dashboardModel);
+  renderStatsRecommendations(dashboardModel);
   renderStatsInsights(dashboardModel);
 
   const profilePanel=$("statsPredictionProfile");
