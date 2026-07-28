@@ -271,3 +271,94 @@ export function analyzePredictionProfile({ entries = [], pointsForEntry } = {}) 
     hasEnoughData: entries.length >= 3,
   };
 }
+
+export function analyzeRankingHistory({
+  games = [],
+  picks = [],
+  participantNames = [],
+  selectedParticipant = "",
+  isScorableGame,
+  pointsForPick,
+} = {}) {
+  if (typeof isScorableGame !== "function") throw new TypeError("isScorableGame é obrigatório.");
+  if (typeof pointsForPick !== "function") throw new TypeError("pointsForPick é obrigatório.");
+
+  const names = [...new Set([
+    ...participantNames,
+    ...picks.map(pick => pick?.usuario),
+  ].map(name => String(name || "").trim()).filter(Boolean))];
+  const selected = String(selectedParticipant || "").trim();
+  if (selected && !names.includes(selected)) names.push(selected);
+
+  const scorableGames = games.filter(game => isScorableGame(game) && Number.isFinite(Number(game?.rodada)));
+  const completedRounds = [...new Set(scorableGames.map(game => Number(game.rodada)))].sort((a, b) => a - b);
+  const gameById = new Map(scorableGames.map(game => [Number(game.id_jogo), game]));
+  const picksByRound = new Map();
+
+  for (const pick of picks.filter(Boolean)) {
+    const game = gameById.get(Number(pick.id_jogo));
+    if (!game) continue;
+    const round = Number(game.rodada);
+    const list = picksByRound.get(round) || [];
+    list.push({ pick, game });
+    picksByRound.set(round, list);
+  }
+
+  const totals = new Map(names.map(name => [name, { name, total: 0, exact: 0, scored: 0 }]));
+  const seriesByParticipant = new Map(names.map(name => [name, []]));
+  const rounds = [];
+
+  for (const round of completedRounds) {
+    for (const { pick, game } of picksByRound.get(round) || []) {
+      const name = String(pick.usuario || "").trim();
+      if (!name) continue;
+      if (!totals.has(name)) {
+        totals.set(name, { name, total: 0, exact: 0, scored: 0 });
+        seriesByParticipant.set(name, []);
+      }
+      const item = totals.get(name);
+      const score = Math.max(0, Number(pointsForPick(pick, game)) || 0);
+      item.total += score;
+      item.scored += 1;
+      if (score === 10) item.exact += 1;
+    }
+
+    const ranking = [...totals.values()].sort((a, b) => b.total - a.total || b.exact - a.exact || a.name.localeCompare(b.name));
+    const snapshot = ranking.map((item, index) => ({ ...item, position: index + 1 }));
+    rounds.push({ round, ranking: snapshot });
+    for (const item of snapshot) {
+      seriesByParticipant.get(item.name).push({ round, position: item.position, points: item.total, exact: item.exact });
+    }
+  }
+
+  const participants = [...seriesByParticipant.entries()].map(([name, series]) => ({ name, series }));
+  const selectedSeries = seriesByParticipant.get(selected) || [];
+  const positions = selectedSeries.map(item => item.position);
+  let biggestClimb = null;
+  let biggestDrop = null;
+  for (let index = 1; index < selectedSeries.length; index += 1) {
+    const previous = selectedSeries[index - 1];
+    const current = selectedSeries[index];
+    const movement = previous.position - current.position;
+    if (movement > 0 && (!biggestClimb || movement > biggestClimb.places)) biggestClimb = { round: current.round, places: movement, from: previous.position, to: current.position };
+    if (movement < 0 && (!biggestDrop || Math.abs(movement) > biggestDrop.places)) biggestDrop = { round: current.round, places: Math.abs(movement), from: previous.position, to: current.position };
+  }
+
+  const latest = selectedSeries.at(-1) || null;
+  return {
+    rounds,
+    participants,
+    selectedSeries,
+    summary: {
+      currentPosition: latest?.position ?? null,
+      currentPoints: latest?.points ?? 0,
+      bestPosition: positions.length ? Math.min(...positions) : null,
+      worstPosition: positions.length ? Math.max(...positions) : null,
+      biggestClimb,
+      biggestDrop,
+      completedRounds: completedRounds.length,
+      participantCount: names.length,
+    },
+  };
+}
+

@@ -1,8 +1,8 @@
 import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
-import { analyzePredictionProfile, analyzeRoundPerformance, classifyStatisticsGames } from "./statistics-engine.js";
+import { analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.3.0d5";
+const APP_VERSION = "6.3.0e";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1457,6 +1457,14 @@ function renderStats(){
   const predictionProfile=analyzePredictionProfile({entries,pointsForEntry:({pick,game})=>points(pick,game)});
   const rounds=roundAnalysis.rounds;
   const bestRound=roundAnalysis.bestRound;
+  const rankingHistory=analyzeRankingHistory({
+    games:state.games,
+    picks:state.publicPicks,
+    participantNames:Object.values(participantDirectory()),
+    selectedParticipant:state.participant?.nome,
+    isScorableGame,
+    pointsForPick:(pick,game)=>points(pick,game),
+  });
 
   const ring=$("statsOverallRing");
   if(ring){
@@ -1585,6 +1593,44 @@ function renderStats(){
     const challenge=predictionProfile.challengeTeam;
     const teamItem=(type,icon,title,item,empty)=>item?`<article class="stats-team-affinity-item ${type}"><span class="stats-team-affinity-icon" aria-hidden="true">${icon}</span><div><small>${title}</small><strong>${escapeHtml(item.name)}</strong><p>${item.points} ponto${item.points===1?"":"s"} em ${item.games} jogo${item.games===1?"":"s"} · ${item.hitRate}% com pontos</p></div></article>`:`<article class="stats-team-affinity-item is-empty"><span class="stats-team-affinity-icon" aria-hidden="true">${icon}</span><div><small>${title}</small><strong>Em formação</strong><p>${empty}</p></div></article>`;
     affinityPanel.innerHTML=`<div class="stats-profile-head"><div><span class="eyebrow">AFINIDADE COM CLUBES</span><h2>Times no seu radar</h2></div><span class="stats-profile-chip">mín. 2 jogos</span></div><div class="stats-team-affinity-list">${teamItem("best","⭐","MAIS PONTOS",best,"Os resultados indicarão os clubes em que você mais pontua.")}${teamItem("challenge","🧩","MAIOR DESAFIO",challenge,"Ainda não há erros suficientes para identificar um desafio recorrente.")}</div><p class="stats-profile-note">A análise considera os dois clubes de cada partida e não interfere na pontuação oficial.</p>`;
+  }
+
+  const rankingHistoryPanel=$("statsRankingHistory");
+  if(rankingHistoryPanel){
+    const history=rankingHistory.selectedSeries;
+    const summary=rankingHistory.summary;
+    const participantSeries=rankingHistory.participants
+      .filter(item=>item.series.length)
+      .sort((a,b)=>(a.series.at(-1)?.position||999)-(b.series.at(-1)?.position||999));
+    const maxParticipants=Math.max(1,summary.participantCount);
+    const chartRows=history.map((item,index)=>{
+      const previous=index?history[index-1]:null;
+      const movement=previous?previous.position-item.position:0;
+      const movementLabel=!previous?"início":movement>0?`↑ ${movement}`:movement<0?`↓ ${Math.abs(movement)}`:"→";
+      const movementClass=!previous||movement===0?"stable":movement>0?"up":"down";
+      const positionPercent=maxParticipants===1?50:((maxParticipants-item.position)/(maxParticipants-1))*100;
+      return `<div class="ranking-history-point ${movementClass}"><span>R${item.round}</span><div class="ranking-history-axis"><i style="left:${Math.max(0,Math.min(100,positionPercent))}%" aria-hidden="true"></i></div><strong>${item.position}º</strong><small>${item.points} pts</small><em>${movementLabel}</em></div>`;
+    }).join("");
+    const comparisonRows=participantSeries.slice(0,8).map(item=>{
+      const latest=item.series.at(-1);
+      const isMe=item.name===state.participant?.nome;
+      const width=summary.currentPoints||latest.points?Math.max(6,(latest.points/Math.max(1,...participantSeries.map(row=>row.series.at(-1)?.points||0)))*100):0;
+      return `<div class="ranking-history-competitor ${isMe?'is-me':''}"><span>${latest.position}º</span><div><strong>${escapeHtml(item.name)}${isMe?' <small>VOCÊ</small>':''}</strong><div><i style="width:${width}%"></i></div></div><b>${latest.points} pts</b></div>`;
+    }).join("");
+    const movementText=summary.biggestClimb?`R${summary.biggestClimb.round} · +${summary.biggestClimb.places}`:"—";
+    const dropText=summary.biggestDrop?`R${summary.biggestDrop.round} · -${summary.biggestDrop.places}`:"—";
+    rankingHistoryPanel.innerHTML=history.length?`
+      <div class="stats-ranking-history-head"><div><span class="eyebrow">HISTÓRICO DO RANKING</span><h2>Sua trajetória no bolão</h2><p>Posição acumulada após cada rodada encerrada.</p></div><span class="stats-profile-chip">${summary.completedRounds} rodada${summary.completedRounds===1?'':'s'}</span></div>
+      <div class="ranking-history-summary">
+        <article><span>Melhor posição</span><strong>${summary.bestPosition}º</strong><small>ao longo do campeonato</small></article>
+        <article><span>Pior posição</span><strong>${summary.worstPosition}º</strong><small>ao longo do campeonato</small></article>
+        <article><span>Maior subida</span><strong>${movementText}</strong><small>${summary.biggestClimb?`${summary.biggestClimb.from}º → ${summary.biggestClimb.to}º`:'sem variação positiva'}</small></article>
+        <article><span>Maior queda</span><strong>${dropText}</strong><small>${summary.biggestDrop?`${summary.biggestDrop.from}º → ${summary.biggestDrop.to}º`:'sem variação negativa'}</small></article>
+      </div>
+      <div class="ranking-history-layout">
+        <div class="ranking-history-chart" aria-label="Evolução da posição por rodada">${chartRows}</div>
+        <div class="ranking-history-comparison"><span class="eyebrow">CLASSIFICAÇÃO ATUAL</span>${comparisonRows}</div>
+      </div>`:'<div class="stats-empty-state"><span aria-hidden="true">🏆</span><strong>Histórico do ranking em formação</strong><p>As posições por rodada aparecerão quando houver resultados oficiais e palpites pontuáveis.</p></div>';
   }
 
   const top=Math.max(1,...rounds.map(item=>item.points));
