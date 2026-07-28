@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.5.0a";
+const APP_VERSION = "6.5.0b";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -499,7 +499,8 @@ function renderEditableProfile(){
 }
 
 async function saveOwnProfile(event){
-  event.preventDefault();
+  event?.preventDefault();
+  event?.stopPropagation();
   const name=$("profileNameInput")?.value.trim();
   const phone=normalizeBrazilPhone($("profilePhoneInput")?.value);
   const status=$("profileFormStatus");
@@ -1064,6 +1065,7 @@ async function saveAllPicks(){
 
 async function savePick(event){
   const button=event.currentTarget;
+  if(!button?.classList?.contains("premium-save-pick")) return;
   const card=button.closest(".premium-match-card");
   if(!card) return;
   const id=Number(card.dataset.id);
@@ -3288,6 +3290,7 @@ $("standingsMobileList")?.addEventListener("click",async event=>{
 $("loginBtn").onclick=login; $("heroLoginBtn").onclick=login; $("logoutBtn").onclick=logout; $("membershipLogoutBtn")?.addEventListener("click",logout); $("refreshBtn").onclick=refresh; $("refreshStandingsBtn").onclick=()=>loadStandings(true); $("syncGamesBtn").onclick=syncGames;
 $("saveFavoriteTeamBtn").onclick=saveFavoriteTeam;
 $("profileDataForm")?.addEventListener("submit",saveOwnProfile);
+$("saveProfileBtn")?.addEventListener("click",event=>{ event.stopPropagation(); });
 $("profilePhoneInput")?.addEventListener("input",event=>{ event.target.value=formatBrazilPhone(event.target.value); });
 $("copyRegistrationLinkBtn")?.addEventListener("click",copyRegistrationLink);
 $("adminRefreshBtn").onclick=refreshAllAdminData;
