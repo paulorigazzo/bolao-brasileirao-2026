@@ -49,7 +49,7 @@ npm run check
 
 A v6.4.0b transforma o time favorito em uma experiência transversal, com tela dedicada, forma recente, próximo jogo, desempenho pessoal, sintonia, perfil e história da temporada.
 
-## Gestão de participantes — v6.5.0
+## Gestão de participantes — v6.5.0a
 
 Cada usuário aprovado pode editar seu nome e cadastrar opcionalmente um celular com WhatsApp em **Meu Perfil**. O administrador também pode copiar um link de cadastro; novos usuários entram com Google, enviam uma solicitação e aguardam aprovação na Área ADM.
 
