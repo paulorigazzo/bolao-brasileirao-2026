@@ -24,3 +24,7 @@ Preservar proporções, contraste e área de respiro. Não distorcer, recolorir 
 ## Fonte temporária oficial — v6.6.0
 
 Até a conclusão do SVG mestre, o arquivo `assets/brand/jarvis-approved.png` é a única fonte visual autorizada da marca JARVIS. Ele corresponde exatamente ao PNG aprovado e fornecido pelo responsável do projeto. Nenhuma reconstrução, estilização ou geração por IA deve substituir este arquivo.
+
+## Ativo oficial temporário — PNG HD
+
+A v6.6.0 utiliza `assets/brand/jarvis-logo-hd.png`, reconstruído diretamente do arquivo aprovado **Escudo Bolão 2026.png**. O fundo quadriculado incorporado ao arquivo de origem foi removido tecnicamente para gerar transparência real, sem redesenhar a marca. Todos os ativos rasterizados da aplicação derivam desta mesma matriz.
