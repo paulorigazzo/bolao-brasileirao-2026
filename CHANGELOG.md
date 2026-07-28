@@ -1,4 +1,12 @@
-# v6.5.1a — Simplificação do menu do usuário
+# v6.5.2 — Simplificação do menu do usuário
+
+## 6.5.2 — Auditoria de identidade dos participantes
+
+- Ranking e identificação do usuário atual priorizam `user_id`.
+- Contagens de palpites mantêm identidade canônica após salvamento.
+- Fallback por nome fica restrito à compatibilidade com registros legados.
+- Redução do risco de duplicação após alteração do nome de exibição.
+
 
 - remove a opção redundante “Meu time” do menu da conta;
 - mantém “Meu perfil” como acesso aos dados pessoais e preferências;
