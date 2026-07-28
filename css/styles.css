@@ -3832,3 +3832,11 @@ button,.chip,.filter-chip,.bottom-nav-item,.card[role="button"]{-webkit-tap-high
   -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
   transition: background-color 9999s ease-out 0s;
 }
+
+/* v6.5.1 — exclusão permanente de participantes */
+button.danger{background:rgba(255,95,95,.12);border:1px solid rgba(255,95,95,.48);color:#ffb0b0;font-weight:900}
+button.danger:hover:not(:disabled){background:rgba(255,95,95,.2);border-color:#ff8585;color:#fff}
+button.danger:focus-visible{outline:3px solid rgba(255,95,95,.35);outline-offset:2px}
+button.danger:disabled{opacity:.38;cursor:not-allowed}
+.admin-member-delete{min-width:82px}
+@media(max-width:600px){.admin-member-actions .admin-member-delete{flex:1 1 100%}}
