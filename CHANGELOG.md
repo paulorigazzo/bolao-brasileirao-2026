@@ -2,6 +2,20 @@
 
 Todas as alterações relevantes do projeto são registradas aqui. Os relatórios detalhados de cada entrega permanecem em `docs/releases/`.
 
+## [6.3.0f] — Dashboard Analítico
+
+### Adicionado
+- painel executivo com posição, distância para o líder, percentil e regularidade;
+- recordes pessoais e sequências;
+- comparação direta com participantes próximos;
+- medalhas automáticas com estados conquistado e bloqueado;
+- novos insights interpretativos calculados localmente;
+- estados vazios e layout responsivo.
+
+### Preservado
+- Tela de Jogos e demais áreas fora de Estatísticas;
+- regras de pontuação, Supabase e Netlify Functions.
+
 ## [6.3.0e] — Histórico do Ranking
 
 ### Adicionado

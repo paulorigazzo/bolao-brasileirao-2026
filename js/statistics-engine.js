@@ -362,3 +362,110 @@ export function analyzeRankingHistory({
   };
 }
 
+
+export function analyzeAdvancedStatistics({
+  entries = [],
+  rounds = [],
+  ranking = [],
+  selectedParticipant = "",
+  pointsForEntry,
+} = {}) {
+  if (typeof pointsForEntry !== "function") throw new TypeError("pointsForEntry é obrigatório.");
+
+  const selected = String(selectedParticipant || "").trim();
+  const scores = entries.filter(Boolean).map(entry => Math.max(0, Number(pointsForEntry(entry)) || 0));
+  const total = scores.reduce((sum, value) => sum + value, 0);
+  const exact = scores.filter(value => value === 10).length;
+  const hits = scores.filter(value => value > 0).length;
+  const evaluated = scores.length;
+
+  const roundPoints = rounds.map(item => Number(item?.points) || 0);
+  const roundAverage = roundPoints.length ? roundPoints.reduce((sum, value) => sum + value, 0) / roundPoints.length : 0;
+  const variance = roundPoints.length
+    ? roundPoints.reduce((sum, value) => sum + ((value - roundAverage) ** 2), 0) / roundPoints.length
+    : 0;
+  const standardDeviation = Math.sqrt(variance);
+  const consistency = roundPoints.length < 2 ? null : Math.max(0, Math.min(100, Math.round(100 - (standardDeviation / Math.max(1, roundAverage)) * 45)));
+
+  let currentScoringStreak = 0;
+  for (let index = scores.length - 1; index >= 0 && scores[index] > 0; index -= 1) currentScoringStreak += 1;
+  let bestScoringStreak = 0;
+  let bestExactStreak = 0;
+  let scoringRun = 0;
+  let exactRun = 0;
+  for (const score of scores) {
+    scoringRun = score > 0 ? scoringRun + 1 : 0;
+    exactRun = score === 10 ? exactRun + 1 : 0;
+    bestScoringStreak = Math.max(bestScoringStreak, scoringRun);
+    bestExactStreak = Math.max(bestExactStreak, exactRun);
+  }
+
+  const validRanking = ranking.filter(item => Number(item?.scored) > 0);
+  const sorted = [...validRanking].sort((a, b) => Number(b.total) - Number(a.total) || Number(b.exact) - Number(a.exact));
+  const meIndex = sorted.findIndex(item => String(item?.name || "").trim() === selected);
+  const me = meIndex >= 0 ? sorted[meIndex] : null;
+  const leader = sorted[0] || null;
+  const above = meIndex > 0 ? sorted[meIndex - 1] : null;
+  const below = meIndex >= 0 && meIndex < sorted.length - 1 ? sorted[meIndex + 1] : null;
+  const groupAverageTotal = sorted.length ? sorted.reduce((sum, item) => sum + Number(item.total || 0), 0) / sorted.length : 0;
+  const percentile = meIndex >= 0 && sorted.length > 1 ? Math.round(((sorted.length - 1 - meIndex) / (sorted.length - 1)) * 100) : me ? 100 : null;
+
+  const personalRecords = {
+    bestRound: rounds.length ? [...rounds].sort((a, b) => Number(b.points) - Number(a.points) || Number(b.exact) - Number(a.exact))[0] : null,
+    bestScoringStreak,
+    bestExactStreak,
+    exact,
+    hits,
+    evaluated,
+  };
+
+  const medals = [];
+  const addMedal = (key, icon, title, description, earned) => medals.push({ key, icon, title, description, earned: Boolean(earned) });
+  addMedal("exact", "🎯", "Mira de Elite", `${exact} placar${exact === 1 ? "" : "es"} exato${exact === 1 ? "" : "s"}.`, exact >= 2);
+  addMedal("streak", "🔥", "Sequência Quente", `Melhor série de ${bestScoringStreak} jogos pontuando.`, bestScoringStreak >= 4);
+  addMedal("consistency", "🏆", "Consistência de Ferro", consistency == null ? "Aguardando mais rodadas." : `Índice de regularidade de ${consistency}%.`, consistency != null && consistency >= 70);
+  addMedal("leader", "🥇", "Líder do Bolão", "Ocupa a primeira posição da classificação.", meIndex === 0 && Boolean(me));
+  addMedal("top3", "🚀", "Pelotão de Elite", "Está entre os três melhores participantes.", meIndex >= 0 && meIndex < 3);
+  addMedal("recovery", "📈", "Fase Ascendente", "Média recente superior ao período anterior.", rounds.length >= 4 && Number(rounds.at(-1)?.average || 0) > Number(rounds.at(-2)?.average || 0));
+
+  const comparisons = sorted.filter(item => item !== me).map((item, index) => ({
+    name: item.name,
+    position: index + 1 + (meIndex >= 0 && index >= meIndex ? 1 : 0),
+    total: Number(item.total || 0),
+    difference: me ? Number(me.total || 0) - Number(item.total || 0) : null,
+    exact: Number(item.exact || 0),
+  })).sort((a, b) => Math.abs(a.difference ?? Infinity) - Math.abs(b.difference ?? Infinity));
+
+  const insights = [];
+  if (consistency != null) insights.push(consistency >= 70
+    ? `Sua regularidade é forte: o índice de consistência está em ${consistency}%.`
+    : `Sua pontuação varia bastante entre rodadas; o índice de consistência está em ${consistency}%.`);
+  if (me && leader) insights.push(meIndex === 0
+    ? `Você lidera o bolão com ${Number(me.total || 0)} pontos.`
+    : `Faltam ${Math.max(0, Number(leader.total || 0) - Number(me.total || 0))} pontos para alcançar a liderança.`);
+  if (above && me) insights.push(`O participante imediatamente acima está ${Math.max(0, Number(above.total || 0) - Number(me.total || 0))} ponto${Math.abs(Number(above.total || 0) - Number(me.total || 0)) === 1 ? "" : "s"} à frente.`);
+  if (bestScoringStreak >= 3) insights.push(`Sua melhor sequência foi de ${bestScoringStreak} jogos consecutivos pontuando.`);
+  if (evaluated >= 3) insights.push(`${Math.round((hits / evaluated) * 100)}% dos palpites avaliados renderam pontos.`);
+
+  return {
+    totals: { total, exact, hits, evaluated },
+    consistency: { index: consistency, average: roundAverage, standardDeviation },
+    streaks: { currentScoringStreak, bestScoringStreak, bestExactStreak },
+    personalRecords,
+    group: {
+      position: meIndex >= 0 ? meIndex + 1 : null,
+      participantCount: sorted.length,
+      percentile,
+      groupAverageTotal,
+      gapToLeader: me && leader ? Math.max(0, Number(leader.total || 0) - Number(me.total || 0)) : null,
+      gapToAbove: me && above ? Math.max(0, Number(above.total || 0) - Number(me.total || 0)) : null,
+      leadOverBelow: me && below ? Math.max(0, Number(me.total || 0) - Number(below.total || 0)) : null,
+      leader: leader?.name || null,
+      above: above?.name || null,
+      below: below?.name || null,
+    },
+    comparisons,
+    medals,
+    insights,
+  };
+}

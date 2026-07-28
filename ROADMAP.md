@@ -32,7 +32,7 @@
 - ✅ Sprint C: evolução por rodada e insights automáticos.
 - ✅ Sprint D: perfil inteligente de palpites.
 - ✅ Sprint E: histórico do ranking e trajetória do participante.
-- 🟡 Próxima Sprint: comparação avançada entre participantes e média do grupo.
+- ✅ Sprint F: dashboard analítico, recordes, regularidade, comparações e medalhas automáticas.
 - 🔵 Insights preditivos e recomendações personalizadas por IA.
 - 🔵 Explicações automáticas sobre evolução, quedas e padrões de acerto.
 
@@ -56,6 +56,6 @@
 
 ## Estado atual
 
-- Versão funcional: `v6.3.0e`.
+- Versão funcional: `v6.3.0f`.
 - Foco ativo: Tela de Estatísticas.
 - Tela de Jogos: ⏸️ congelada momentaneamente na `v6.3.0d5`, salvo bug crítico.
