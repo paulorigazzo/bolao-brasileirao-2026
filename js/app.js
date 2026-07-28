@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzePredictionProfile, analyzeRoundPerformance, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.3.0d1";
+const APP_VERSION = "6.3.0d2";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -707,13 +707,13 @@ function premiumMatchCard(g){
     <button class="game-toggle premium-game-toggle" type="button" aria-expanded="false">
       <span class="premium-toggle-time"><strong>${premiumTime(g.inicio)}</strong><small>${escapeHtml(g.local_partida||"Local a definir")}</small></span>
       <span class="premium-toggle-match">${compactTeam(g.time_casa_logo,g.time_casa).replace("game-summary-team",`game-summary-team${favorite.homeFavorite?" is-favorite-team":""}`)}<span class="premium-toggle-score">${escapeHtml(summaryScore)}</span>${compactTeam(g.time_fora_logo,g.time_fora).replace("game-summary-team",`game-summary-team${favorite.awayFavorite?" is-favorite-team":""}`)}</span>
-      <span class="premium-toggle-side">${favorite.isFavoriteMatch?favoriteHeartBadge(favoriteTeamName):""}${headerStatusLabel?`<span class="premium-toggle-status">${headerStatusLabel}</span>`:""}${headerPointsLabel!==""?`<span class="premium-toggle-points" aria-label="${headerPointsLabel} pontos no jogo"><span aria-hidden="true">★</span>${headerPointsLabel}</span>`:""}<span class="game-chevron" aria-hidden="true">⌄</span></span>
+      <span class="premium-toggle-side">${favorite.isFavoriteMatch?favoriteHeartBadge(favoriteTeamName):""}${headerStatusLabel?`<span class="premium-toggle-status" data-game-header-status>${headerStatusLabel}</span>`:""}${headerPointsLabel!==""?`<span class="premium-toggle-points" aria-label="${headerPointsLabel} pontos no jogo"><span aria-hidden="true">★</span>${headerPointsLabel}</span>`:""}<span class="game-chevron" aria-hidden="true">⌄</span></span>
     </button>
     <div class="game-collapsible" style="max-height:0;opacity:0">
       <div class="game-collapsible-inner premium-game-body premium-game-body-v2">
         <div class="premium-expanded-meta">
-          <div class="premium-match-time"><strong>${premiumTime(g.inicio)}</strong><span>${escapeHtml(g.local_partida||"Local a definir")}</span><small>◷ ${deadlineText(g)}</small></div>
-          <div class="premium-match-state"><span>${expandedStatusLabel}</span>${!isLocked&&!finished?`<button class="premium-edit-pick" type="button" aria-label="Editar palpite">✎</button>`:""}</div>
+          <div class="premium-match-time"><strong>${premiumTime(g.inicio)}</strong><span>${escapeHtml(g.local_partida||"Local a definir")}</span><small data-game-deadline>◷ ${deadlineText(g)}</small></div>
+          <div class="premium-match-state"><span data-game-expanded-status>${expandedStatusLabel}</span>${!isLocked&&!finished?`<button class="premium-edit-pick" type="button" aria-label="Editar palpite">✎</button>`:""}</div>
         </div>
         <div class="premium-expanded-matchup">
           <div class="premium-team premium-team-home ${favorite.homeFavorite?"is-favorite-team":""}"><span class="team-badge">${teamLogo(g.time_casa_logo,g.time_casa)}</span><b>${escapeHtml(g.time_casa)}${favorite.homeFavorite?`<span class="favorite-team-name-heart" aria-hidden="true">♥</span>`:""}</b></div>
@@ -741,6 +741,47 @@ function updateGamesBottomSpacing(){
   const listTail=Math.max(120,dockHeight+safeGap);
   tab.style.setProperty("--games-bottom-space",`${tabTail}px`);
   list.style.setProperty("--games-list-tail-space",`${listTail}px`);
+}
+
+function gameStructuralSignature(game){
+  const status=gameStatusDisplay(game);
+  return [
+    Number(game.id_jogo),
+    status.key,
+    locked(game)?1:0,
+    isFinished(game)?1:0,
+    game.gols_casa??"",
+    game.gols_fora??""
+  ].join(":");
+}
+
+function currentGamesStructuralSignature(){
+  const round=Number($("roundSelect")?.value||0);
+  return state.games
+    .filter(game=>Number(game.rodada)===round)
+    .sort((a,b)=>Number(a.id_jogo)-Number(b.id_jogo))
+    .map(gameStructuralSignature)
+    .join("|");
+}
+
+function refreshVisibleGameClocks(){
+  document.querySelectorAll(".premium-match-card[data-id]").forEach(card=>{
+    const game=state.games.find(item=>Number(item.id_jogo)===Number(card.dataset.id));
+    if(!game) return;
+    const status=gameStatusDisplay(game);
+    const rawStatus=normalizeTeamKey(game?.status||"");
+    const suspended=rawStatus.includes("suspens");
+    const interval=status.key==="live"&&(rawStatus.includes("intervalo")||rawStatus.includes("half-time")||rawStatus.includes("paused"));
+    const liveMinute=status.key==="live"&&!interval?liveMatchMinute(game):"";
+    const headerLabel=status.key==="cancelled"?"CANCELADO":suspended?"SUSPENSO":status.key==="postponed"?"ADIADO":isFinished(game)?"ENCERRADO":interval?"INTERVALO":status.key==="live"?`AO VIVO${liveMinute?` • ${liveMinute}'`:""}`:"";
+    const expandedLabel=headerLabel||(locked(game)?"FECHADO":ownPick(game.id_jogo)?"SALVO":"ABERTO");
+    const deadline=card.querySelector("[data-game-deadline]");
+    const header=card.querySelector("[data-game-header-status]");
+    const expanded=card.querySelector("[data-game-expanded-status]");
+    if(deadline) deadline.textContent=`◷ ${deadlineText(game)}`;
+    if(header) header.textContent=headerLabel;
+    if(expanded) expanded.textContent=expandedLabel;
+  });
 }
 
 function renderGames(){
@@ -793,6 +834,7 @@ function renderGames(){
   }
 
   state.gameAutoOpenContext=renderContext;
+  state.gameRenderSignature=currentGamesStructuralSignature();
   if(preferred) setGameCardExpanded(preferred,true,false);
 }
 
@@ -2609,7 +2651,12 @@ function startMatchClockRefresh(){
   if(matchClockRefreshTimer) return;
   matchClockRefreshTimer=setInterval(()=>{
     if(document.hidden || !state.user) return;
-    renderGames();
+    const nextSignature=currentGamesStructuralSignature();
+    if(nextSignature!==state.gameRenderSignature){
+      renderGames();
+    }else{
+      refreshVisibleGameClocks();
+    }
     if(!$('adminTab')?.classList.contains('hidden')) renderAdminRoundStatus();
   },30000);
 }
