@@ -1,0 +1,24 @@
+# Bolão Brasileirão 2026 — V6.3.0D
+
+SPRINT D — PERFIL INTELIGENTE DE PALPITES
+
+ESCOPO
+- Alterações restritas à tela Estatísticas.
+- Nenhuma regra de pontuação foi modificada.
+
+IMPLEMENTADO
+1. Taxa de acerto quando o mandante vence.
+2. Taxa de acerto em empates.
+3. Taxa de acerto quando o visitante vence.
+4. Identificação do cenário de melhor desempenho.
+5. Clube em que o participante mais pontua.
+6. Clube que representa o maior desafio recorrente.
+7. Estados informativos para histórico insuficiente.
+8. Testes automatizados ampliados.
+
+VALIDAÇÃO
+- npm run check
+- npm run test:stats
+
+MENSAGEM DE COMMIT SUGERIDA
+feat(stats): v6.3.0d perfil inteligente

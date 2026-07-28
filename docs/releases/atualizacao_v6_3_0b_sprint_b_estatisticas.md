@@ -1,0 +1,23 @@
+# Bolão Brasileirão 2026 — V6.3.0B
+
+SPRINT B — CLAREZA E CONFIANÇA DAS ESTATÍSTICAS
+
+ESCOPO
+- Alterações restritas à tela Estatísticas.
+- Nenhum card ou cálculo de outras telas foi redesenhado.
+
+IMPLEMENTADO
+1. Participação separada de eficiência.
+2. Cobertura da temporada com barra e denominador contextual.
+3. Indicadores contextualizados com quantidade e percentual.
+4. Estados vazios informativos.
+5. Painel condicional "Qualidade das Estatísticas".
+6. Tratamento explícito de jogos aguardando resultado, adiados, cancelados e dados inválidos.
+7. Testes automatizados ampliados.
+
+VALIDAÇÃO
+- npm run check
+- npm run test:stats
+
+MENSAGEM DE COMMIT SUGERIDA
+feat(stats): v6.3.0b Sprint B

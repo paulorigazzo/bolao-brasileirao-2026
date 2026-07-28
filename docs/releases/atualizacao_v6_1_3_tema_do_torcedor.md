@@ -1,0 +1,20 @@
+# Bolão Brasileirão 2026 — V6.1.3
+
+TEMA DO TORCEDOR
+
+NOVIDADES
+- Restaurada a coloração do botão superior direito pelas cores do time do coração.
+- O escudo do clube continua sendo exibido no botão e no perfil.
+- A mudança é aplicada imediatamente ao salvar outro time favorito.
+- Menu do usuário, avatar e resumo do perfil recebem detalhes discretos da paleta do clube.
+- Mantida a identidade visual principal do Bolão nas demais telas.
+- Usuários sem time escolhido continuam com o tema verde neutro do aplicativo.
+
+ARQUITETURA
+- Nova camada CSS reutilizável: css/fan-theme.css.
+- A paleta permanece centralizada em TEAM_THEMES, no js/app.js.
+- Não exige SQL novo nem mudanças nas variáveis do Netlify/Supabase.
+
+IMPORTANTE
+- Nenhuma regra de negócio foi alterada.
+- A altura dinâmica dos cards da tela Tabela permanece preservada.
