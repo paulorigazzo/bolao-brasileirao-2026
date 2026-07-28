@@ -469,3 +469,137 @@ export function analyzeAdvancedStatistics({
     insights,
   };
 }
+
+
+export function buildStatisticsDashboardModel({
+  advancedStats,
+  roundAnalysis,
+  predictionProfile,
+  totalPoints = 0,
+  counts = {},
+  finished = 0,
+} = {}) {
+  if (!advancedStats || !roundAnalysis || !predictionProfile) {
+    throw new TypeError("advancedStats, roundAnalysis e predictionProfile são obrigatórios.");
+  }
+
+  const group = advancedStats.group || {};
+  const relationToAverage = Number.isFinite(group.groupAverageTotal)
+    ? Number(totalPoints) - Number(group.groupAverageTotal)
+    : null;
+  const trendDirectory = {
+    up: {
+      icon: "↗",
+      label: "Em alta",
+      title: "Momento de alta",
+      detail: `+${Math.abs(Number(roundAnalysis.delta) || 0).toFixed(1)} pt/jogo recentemente`,
+      text: `Sua média recente subiu ${Math.abs(Number(roundAnalysis.delta) || 0).toFixed(1)} ponto por jogo.`,
+    },
+    down: {
+      icon: "↘",
+      label: "Em atenção",
+      title: "Momento de atenção",
+      detail: `-${Math.abs(Number(roundAnalysis.delta) || 0).toFixed(1)} pt/jogo recentemente`,
+      text: `Sua média recente caiu ${Math.abs(Number(roundAnalysis.delta) || 0).toFixed(1)} ponto por jogo.`,
+    },
+    stable: {
+      icon: "→",
+      label: "Estável",
+      title: "Desempenho estável",
+      detail: "média próxima das rodadas anteriores",
+      text: "Sua média recente está próxima das rodadas anteriores.",
+    },
+    insufficient: {
+      icon: "·",
+      label: "Em formação",
+      title: "Tendência em formação",
+      detail: "aguardando mais rodadas",
+      text: "São necessárias mais rodadas completas para identificar uma tendência.",
+    },
+  };
+  const trend = trendDirectory[roundAnalysis.trend] || trendDirectory.insufficient;
+
+  const nearestGap = group.position === 1
+    ? {
+        label: "Vantagem atual",
+        value: group.leadOverBelow == null ? "—" : `${group.leadOverBelow} pts`,
+        detail: group.below || "sem perseguidor",
+      }
+    : {
+        label: "Próxima posição",
+        value: group.gapToAbove == null ? "—" : `${group.gapToAbove} pts`,
+        detail: group.above || "participante acima",
+      };
+
+  const specialtyDirectory = [
+    { key: "exact", label: "Placar exato", icon: "🎯" },
+    { key: "difference", label: "Diferença exata", icon: "📐" },
+    { key: "winner", label: "Vencedor correto", icon: "🏁" },
+    { key: "draw", label: "Empates", icon: "⚖️" },
+  ];
+  const specialty = specialtyDirectory
+    .map(item => ({ ...item, value: Number(counts[item.key]) || 0 }))
+    .sort((a, b) => b.value - a.value)[0];
+
+  const insights = [{
+    key: "trend",
+    icon: trend.icon,
+    eyebrow: "TENDÊNCIA RECENTE",
+    title: trend.title,
+    text: trend.text,
+    tone: `trend-${roundAnalysis.trend || "insufficient"}`,
+  }];
+
+  if (finished && specialty?.value) {
+    insights.push({
+      key: "specialty",
+      icon: specialty.icon,
+      eyebrow: "SEU DESTAQUE",
+      title: specialty.label,
+      text: `${specialty.value} ocorrência${specialty.value === 1 ? "" : "s"} · ${Math.round((specialty.value / finished) * 100)}% dos palpites avaliados.`,
+      tone: "",
+    });
+  } else {
+    insights.push({
+      key: "specialty",
+      icon: "✨",
+      eyebrow: "SEU DESTAQUE",
+      title: "Especialidade em formação",
+      text: "Os primeiros resultados revelarão seu tipo de acerto mais frequente.",
+      tone: "",
+    });
+  }
+
+  const bestRound = advancedStats.personalRecords?.bestRound || null;
+  if (bestRound) {
+    insights.push({
+      key: "best-round",
+      icon: "🏆",
+      eyebrow: "MELHOR RODADA",
+      title: `Rodada ${bestRound.round} · ${bestRound.points} pts`,
+      text: `${bestRound.hits || 0} acerto${bestRound.hits === 1 ? "" : "s"} em ${bestRound.games || 0} jogo${bestRound.games === 1 ? "" : "s"}${bestRound.exact ? ` · ${bestRound.exact} placar${bestRound.exact === 1 ? "" : "es"} exato${bestRound.exact === 1 ? "" : "s"}` : ""}.`,
+      tone: "",
+    });
+  }
+
+  return {
+    executive: {
+      available: Boolean(group.position),
+      position: group.position,
+      participantCount: group.participantCount,
+      totalPoints: Number(totalPoints) || 0,
+      relationToAverage,
+      nearestGap,
+      trend: { ...trend, key: roundAnalysis.trend || "insufficient" },
+    },
+    records: advancedStats.personalRecords || {},
+    medals: advancedStats.medals || [],
+    insights: insights.slice(0, 3),
+    comparison: {
+      groupAverageTotal: Number(group.groupAverageTotal) || 0,
+      gapToLeader: group.gapToLeader,
+      gapToAbove: group.gapToAbove,
+      leadOverBelow: group.leadOverBelow,
+    },
+  };
+}

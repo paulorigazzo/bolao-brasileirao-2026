@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, classifyStatisticsGames } from "../js/statistics-engine.js";
+import { analyzeAdvancedStatistics,
+  buildStatisticsDashboardModel, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, classifyStatisticsGames } from "../js/statistics-engine.js";
 
 const games = [
   { id_jogo: 1, status: "encerrado", inicio: "2026-01-01T10:00:00Z", gols_casa: 1, gols_fora: 0 },
@@ -133,5 +134,20 @@ assert.equal(advanced.personalRecords.bestScoringStreak, 2);
 assert.equal(advanced.personalRecords.exact, 2);
 assert.ok(Array.isArray(advanced.medals));
 assert.ok(advanced.insights.length >= 2);
+
+const dashboardModel = buildStatisticsDashboardModel({
+  advancedStats: advanced,
+  roundAnalysis: { trend: "up", delta: 1.25 },
+  predictionProfile,
+  totalPoints: 28,
+  counts: { exact: 2, difference: 1, winner: 1, draw: 0, miss: 1 },
+  finished: 5,
+});
+assert.equal(dashboardModel.executive.position, 2);
+assert.equal(dashboardModel.executive.nearestGap.value, "7 pts");
+assert.equal(dashboardModel.insights.length, 3);
+assert.equal(dashboardModel.insights[0].key, "trend");
+assert.equal(dashboardModel.records.bestRound.round, 1);
+assert.equal(dashboardModel.medals.length, advanced.medals.length);
 
 console.log("Motor estatístico verificado com sucesso.");

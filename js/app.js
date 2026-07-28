@@ -1,8 +1,8 @@
 import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
-import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, classifyStatisticsGames } from "./statistics-engine.js";
+import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.3.0f1";
+const APP_VERSION = "6.3.0f2";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1421,6 +1421,55 @@ function ownFinishedEntries(){
   return state.ownPicks.map(p=>({pick:p,game:state.games.find(g=>Number(g.id_jogo)===Number(p.id_jogo))})).filter(x=>isScorableGame(x.game));
 }
 
+
+function renderStatsInsights(model){
+  const panel=$("statsInsights");
+  if(!panel) return;
+  panel.innerHTML=model.insights.map(item=>`<article class="stats-insight-card ${item.tone||""}"><span class="stats-insight-icon">${item.icon}</span><div><small>${item.eyebrow}</small><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.text)}</p></div></article>`).join("");
+}
+
+function renderStatsRecords(model,finished){
+  const panel=$("statsRecords");
+  if(!panel) return;
+  const records=model.records;
+  const best=records.bestRound;
+  panel.innerHTML=finished?`
+    <div class="stats-dashboard-head"><div><span class="eyebrow">RECORDES PESSOAIS</span><h2>Suas melhores marcas</h2></div><span class="stats-profile-chip">temporada atual</span></div>
+    <div class="stats-records-grid">
+      <article><span>Melhor rodada</span><strong>${best?`R${best.round}`:"—"}</strong><small>${best?`${best.points} pontos · ${best.exact} exato${best.exact===1?"":"s"}`:"Sem dados"}</small></article>
+      <article><span>Sequência pontuando</span><strong>${records.bestScoringStreak||0}</strong><small>jogos consecutivos</small></article>
+      <article><span>Sequência de exatos</span><strong>${records.bestExactStreak||0}</strong><small>placares consecutivos</small></article>
+      <article><span>Palpites com pontos</span><strong>${records.hits||0}</strong><small>de ${records.evaluated||0} avaliados</small></article>
+    </div>`:'<div class="stats-empty-state"><span aria-hidden="true">🥇</span><strong>Recordes em formação</strong><p>Suas melhores marcas aparecerão após os primeiros resultados.</p></div>';
+}
+
+function renderStatsMedals(model){
+  const panel=$("statsMedals");
+  if(!panel) return;
+  const earned=model.medals.filter(item=>item.earned);
+  panel.innerHTML=`<div class="stats-dashboard-head"><div><span class="eyebrow">CONQUISTAS</span><h2>Medalhas automáticas</h2></div><span class="stats-profile-chip">${earned.length} conquistada${earned.length===1?"":"s"}</span></div><div class="stats-medals-grid">${model.medals.map(item=>`<article class="stats-medal ${item.earned?'earned':'locked'}"><span aria-hidden="true">${item.earned?item.icon:'🔒'}</span><div><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.description)}</p></div></article>`).join('')}</div>`;
+}
+
+function renderStatsExecutive(model){
+  const panel=$("statsAdvancedComparison");
+  if(!panel) return;
+  const executive=model.executive;
+  if(!executive.available){
+    panel.innerHTML='<div class="stats-empty-state"><span aria-hidden="true">👥</span><strong>Visão geral em formação</strong><p>Os indicadores serão liberados quando a classificação possuir dados válidos.</p></div>';
+    return;
+  }
+  const relation=executive.relationToAverage;
+  const gap=executive.nearestGap;
+  const trend=executive.trend;
+  panel.innerHTML=`<div class="stats-dashboard-head"><div><span class="eyebrow">VISÃO GERAL</span><h2>Como você está no bolão</h2><p>Os quatro indicadores mais úteis para entender sua situação atual.</p></div><span class="stats-profile-chip">${executive.position}º de ${executive.participantCount}</span></div>
+    <div class="stats-executive-grid">
+      <article><span>Posição</span><strong>${executive.position}º</strong><small>${executive.position===1?'Você está na liderança':`entre ${executive.participantCount} participantes`}</small></article>
+      <article><span>Pontuação</span><strong>${executive.totalPoints} pts</strong><small>${relation==null?'média do grupo indisponível':`${Math.abs(relation).toFixed(0)} pts ${relation>=0?'acima':'abaixo'} da média`}</small></article>
+      <article><span>${gap.label}</span><strong>${gap.value}</strong><small>${escapeHtml(gap.detail)}</small></article>
+      <article class="trend-${trend.key}"><span>Momento</span><strong>${trend.icon} ${trend.label}</strong><small>${trend.detail}</small></article>
+    </div>`;
+}
+
 function renderStats(){
   calculateRanking();
   const entries=ownFinishedEntries().sort((a,b)=>new Date(a.game.inicio)-new Date(b.game.inicio));
@@ -1472,6 +1521,14 @@ function renderStats(){
     selectedParticipant:state.participant?.nome,
     pointsForEntry:({pick,game})=>points(pick,game),
   });
+  const dashboardModel=buildStatisticsDashboardModel({
+    advancedStats,
+    roundAnalysis,
+    predictionProfile,
+    totalPoints,
+    counts,
+    finished,
+  });
 
   const ring=$("statsOverallRing");
   if(ring){
@@ -1488,13 +1545,6 @@ function renderStats(){
       ? `Ainda não há palpites avaliados. ${progress.missedCompleted} jogo${progress.missedCompleted===1?" foi encerrado":"s foram encerrados"} sem palpite.`
       : "Suas estatísticas aparecerão assim que houver jogos finalizados.";
 
-  let streak=0;
-  for(let i=entries.length-1;i>=0;i--){
-    if(points(entries[i].pick,entries[i].game)>0) streak++;
-    else break;
-  }
-  let bestStreak=0,current=0;
-  entries.forEach(({pick,game})=>{ if(points(pick,game)>0){current++;bestStreak=Math.max(bestStreak,current);}else current=0; });
 
   if($("statsHighlights")) $("statsHighlights").innerHTML=`
     <article><span>Acertos</span><strong>${finished?`${hitRate}%`:"—"}</strong><small>${finished?`${scored} de ${finished} palpites renderam pontos`:"Aguardando resultados"}</small></article>
@@ -1540,48 +1590,7 @@ function renderStats(){
       <p>Os indicadores exibidos consideram somente partidas com situação e resultado válidos.</p><ul>${reasons.join("")}</ul></div>`:"";
   }
 
-  const validPlayers=state.ranking.filter(player=>player.scored>0);
-  const groupAverage=validPlayers.length?validPlayers.reduce((sum,player)=>sum+(player.total/player.scored),0)/validPlayers.length:0;
-  const comparisonMax=Math.max(1,averagePerGame,groupAverage);
-  const difference=averagePerGame-groupAverage;
-  if($("groupComparison")) $("groupComparison").innerHTML=finished?`
-    <div class="comparison-row"><div><span>Você</span><strong>${averagePerGame.toFixed(1)} pts/jogo</strong></div><div class="comparison-track"><i style="width:${averagePerGame/comparisonMax*100}%"></i></div></div>
-    <div class="comparison-row"><div><span>Média do grupo</span><strong>${groupAverage.toFixed(1)} pts/jogo</strong></div><div class="comparison-track group"><i style="width:${groupAverage/comparisonMax*100}%"></i></div></div>
-    <p class="comparison-note ${difference>=0?'positive':'negative'}">${difference>=0?'▲':'▼'} ${Math.abs(difference).toFixed(1)} ponto por jogo ${difference>=0?'acima':'abaixo'} da média do grupo.</p>`
-    : '<div class="stats-empty-state compact"><span aria-hidden="true">⚖️</span><strong>Comparação ainda indisponível</strong><p>Ela será calculada quando houver palpites pontuados no grupo.</p></div>';
-
-  if($("currentStreak")) $("currentStreak").innerHTML=finished?`
-    <div class="streak-number"><strong>${streak}</strong><span>${streak===1?'jogo pontuando':'jogos pontuando'}</span></div>
-    <div class="streak-details"><p><span>Melhor sequência</span><strong>${bestStreak}</strong></p><p><span>Jogos com pontos</span><strong>${scored}</strong></p><p><span>Sem pontuar</span><strong>${counts.miss}</strong></p></div>`
-    : '<div class="stats-empty-state compact"><span aria-hidden="true">🔥</span><strong>Nenhuma sequência iniciada</strong><p>O histórico começa após o primeiro palpite avaliado.</p></div>';
-
-  const insightPanel=$("statsInsights");
-  if(insightPanel){
-    const specialtyCandidates=[
-      {key:"exact",label:"Placar exato",value:counts.exact,icon:"🎯",detail:"10 pontos"},
-      {key:"difference",label:"Diferença exata",value:counts.difference,icon:"📐",detail:"5 pontos"},
-      {key:"winner",label:"Vencedor correto",value:counts.winner,icon:"🏁",detail:"3 pontos"},
-      {key:"draw",label:"Empates",value:counts.draw,icon:"⚖️",detail:"1 ponto"},
-    ].sort((a,b)=>b.value-a.value);
-    const specialty=specialtyCandidates[0];
-    const trendMeta={
-      up:{icon:"↗",title:"Momento de alta",text:`Sua média recente subiu ${Math.abs(roundAnalysis.delta).toFixed(1)} ponto por jogo.`},
-      down:{icon:"↘",title:"Momento de atenção",text:`Sua média recente caiu ${Math.abs(roundAnalysis.delta).toFixed(1)} ponto por jogo.`},
-      stable:{icon:"→",title:"Desempenho estável",text:"Sua média recente está próxima das rodadas anteriores."},
-      insufficient:{icon:"·",title:"Tendência em formação",text:"São necessárias mais rodadas completas para identificar uma tendência."},
-    }[roundAnalysis.trend];
-    const insightCards=[];
-    insightCards.push(`<article class="stats-insight-card trend-${roundAnalysis.trend}"><span class="stats-insight-icon">${trendMeta.icon}</span><div><small>TENDÊNCIA RECENTE</small><strong>${trendMeta.title}</strong><p>${trendMeta.text}</p></div></article>`);
-    if(finished&&specialty?.value){
-      insightCards.push(`<article class="stats-insight-card"><span class="stats-insight-icon">${specialty.icon}</span><div><small>SEU DESTAQUE</small><strong>${specialty.label}</strong><p>${specialty.value} ocorrência${specialty.value===1?"":"s"} · ${Math.round(specialty.value/finished*100)}% dos palpites avaliados.</p></div></article>`);
-    }else{
-      insightCards.push('<article class="stats-insight-card"><span class="stats-insight-icon">✨</span><div><small>SEU DESTAQUE</small><strong>Especialidade em formação</strong><p>Os primeiros resultados revelarão seu tipo de acerto mais frequente.</p></div></article>');
-    }
-    if(bestRound){
-      insightCards.push(`<article class="stats-insight-card"><span class="stats-insight-icon">🏆</span><div><small>MELHOR RODADA</small><strong>Rodada ${bestRound.round} · ${bestRound.points} pts</strong><p>${bestRound.hits} acerto${bestRound.hits===1?"":"s"} em ${bestRound.games} jogo${bestRound.games===1?"":"s"}${bestRound.exact?` · ${bestRound.exact} placar${bestRound.exact===1?"":"es"} exato${bestRound.exact===1?"":"s"}`:""}.</p></div></article>`);
-    }
-    insightPanel.innerHTML=insightCards.join("");
-  }
+  renderStatsInsights(dashboardModel);
 
   const profilePanel=$("statsPredictionProfile");
   if(profilePanel){
@@ -1603,47 +1612,9 @@ function renderStats(){
   }
 
 
-  const recordsPanel=$("statsRecords");
-  if(recordsPanel){
-    const records=advancedStats.personalRecords;
-    const best=records.bestRound;
-    recordsPanel.innerHTML=finished?`
-      <div class="stats-dashboard-head"><div><span class="eyebrow">RECORDES PESSOAIS</span><h2>Suas melhores marcas</h2></div><span class="stats-profile-chip">temporada atual</span></div>
-      <div class="stats-records-grid">
-        <article><span>Melhor rodada</span><strong>${best?`R${best.round}`:"—"}</strong><small>${best?`${best.points} pontos · ${best.exact} exato${best.exact===1?"":"s"}`:"Sem dados"}</small></article>
-        <article><span>Sequência pontuando</span><strong>${records.bestScoringStreak}</strong><small>jogos consecutivos</small></article>
-        <article><span>Sequência de exatos</span><strong>${records.bestExactStreak}</strong><small>placares consecutivos</small></article>
-        <article><span>Palpites com pontos</span><strong>${records.hits}</strong><small>de ${records.evaluated} avaliados</small></article>
-      </div>`:'<div class="stats-empty-state"><span aria-hidden="true">🥇</span><strong>Recordes em formação</strong><p>Suas melhores marcas aparecerão após os primeiros resultados.</p></div>';
-  }
-
-  const medalsPanel=$("statsMedals");
-  if(medalsPanel){
-    const earned=advancedStats.medals.filter(item=>item.earned);
-    medalsPanel.innerHTML=`<div class="stats-dashboard-head"><div><span class="eyebrow">CONQUISTAS</span><h2>Medalhas automáticas</h2></div><span class="stats-profile-chip">${earned.length} conquistada${earned.length===1?"":"s"}</span></div><div class="stats-medals-grid">${advancedStats.medals.map(item=>`<article class="stats-medal ${item.earned?'earned':'locked'}"><span aria-hidden="true">${item.earned?item.icon:'🔒'}</span><div><strong>${item.title}</strong><p>${item.description}</p></div></article>`).join('')}</div>`;
-  }
-
-  const advancedPanel=$("statsAdvancedComparison");
-  if(advancedPanel){
-    const group=advancedStats.group;
-    const trendMeta={
-      up:{label:"Em alta",detail:`+${Math.abs(roundAnalysis.delta).toFixed(1)} pt/jogo recentemente`,icon:"↗"},
-      down:{label:"Em atenção",detail:`-${Math.abs(roundAnalysis.delta).toFixed(1)} pt/jogo recentemente`,icon:"↘"},
-      stable:{label:"Estável",detail:"média próxima das rodadas anteriores",icon:"→"},
-      insufficient:{label:"Em formação",detail:"aguardando mais rodadas",icon:"·"},
-    }[roundAnalysis.trend];
-    const nearestGap=group.position===1
-      ? {label:"Vantagem atual",value:group.leadOverBelow==null?"—":`${group.leadOverBelow} pts`,detail:group.below?escapeHtml(group.below):"sem perseguidor"}
-      : {label:"Próxima posição",value:group.gapToAbove==null?"—":`${group.gapToAbove} pts`,detail:group.above?escapeHtml(group.above):"participante acima"};
-    const relation=group.groupAverageTotal?totalPoints-group.groupAverageTotal:null;
-    advancedPanel.innerHTML=group.position?`<div class="stats-dashboard-head"><div><span class="eyebrow">VISÃO GERAL</span><h2>Como você está no bolão</h2><p>Os quatro indicadores mais úteis para entender sua situação atual.</p></div><span class="stats-profile-chip">${group.position}º de ${group.participantCount}</span></div>
-      <div class="stats-executive-grid">
-        <article><span>Posição</span><strong>${group.position}º</strong><small>${group.position===1?'Você está na liderança':`entre ${group.participantCount} participantes`}</small></article>
-        <article><span>Pontuação</span><strong>${totalPoints} pts</strong><small>${relation==null?'média do grupo indisponível':`${Math.abs(relation).toFixed(0)} pts ${relation>=0?'acima':'abaixo'} da média`}</small></article>
-        <article><span>${nearestGap.label}</span><strong>${nearestGap.value}</strong><small>${nearestGap.detail}</small></article>
-        <article class="trend-${roundAnalysis.trend}"><span>Momento</span><strong>${trendMeta.icon} ${trendMeta.label}</strong><small>${trendMeta.detail}</small></article>
-      </div>`:'<div class="stats-empty-state"><span aria-hidden="true">👥</span><strong>Visão geral em formação</strong><p>Os indicadores serão liberados quando a classificação possuir dados válidos.</p></div>';
-  }
+  renderStatsRecords(dashboardModel,finished);
+  renderStatsMedals(dashboardModel);
+  renderStatsExecutive(dashboardModel);
 
   const rankingHistoryPanel=$("statsRankingHistory");
   if(rankingHistoryPanel){
