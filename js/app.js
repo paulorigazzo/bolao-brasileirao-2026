@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.4.0a";
+const APP_VERSION = "6.4.0b";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1118,6 +1118,7 @@ function renderFavoriteTeamPredictionCard(team){
   const plural=stats.games===1?'jogo analisado':'jogos analisados';
   const aria=`${stats.rate}% de aproveitamento`;
   return `<article class="premium-feature-card favorite-predictions-card home-navigable-card" data-home-action="myTeam" role="button" tabindex="0" aria-label="Abrir Meu Time 2.0">
+    <span class="home-card-chevron" aria-hidden="true">›</span>
     <header class="premium-card-header favorite-predictions-header"><div><span class="premium-kicker">MEUS PALPITES</span><h2>🎯 Meu desempenho com o ${escapeHtml(team.name)}</h2></div></header>
     ${stats.games?`<div class="favorite-predictions-metrics">
       <div><strong>${stats.games}</strong><span>${plural}</span></div>
@@ -1218,6 +1219,7 @@ function renderMyTeam(){
   const formPoints=context.recent.reduce((sum,game)=>sum+({V:3,E:1,D:0}[favoriteTeamResult(game,team)]||0),0);
   host.innerHTML=`
     <article class="my-team-hero card my-team-hero-link" data-my-team-action="standings" role="button" tabindex="0" aria-label="Abrir tabela completa do campeonato">
+      <span class="home-card-chevron" aria-hidden="true">›</span>
       <div class="my-team-hero-main"><span class="my-team-crest">${crest}</span><div><span class="eyebrow">MEU TIME 2.0</span><h1 id="myTeamPageTitle">${escapeHtml(team.name)}</h1><p>${row?`${row.position}º colocado · ${row.points} pontos · ${Number(row.goalDifference)>0?'+':''}${row.goalDifference} de saldo`:'Classificação em atualização'}</p></div></div>
       <div class="my-team-hero-form"><span>Momento recente</span>${favoriteFormMarkup(context)}<small>${formPoints} ponto${formPoints===1?'':'s'} nos últimos ${context.recent.length} jogos</small></div>
     </article>

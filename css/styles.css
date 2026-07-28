@@ -3756,3 +3756,14 @@ button,.chip,.filter-chip,.bottom-nav-item,.card[role="button"]{-webkit-tap-high
 .my-team-hero-link:focus-visible,.favorite-predictions-card.home-navigable-card:focus-visible{outline:3px solid color-mix(in srgb,var(--fan-primary,#39c879) 65%,white);outline-offset:3px;}
 .my-team-hero-link:hover,.favorite-predictions-card.home-navigable-card:hover{transform:translateY(-1px);}
 @media(prefers-reduced-motion:reduce){.my-team-hero-link:hover,.favorite-predictions-card.home-navigable-card:hover{transform:none;}}
+
+/* v6.4.0b — indicação visual nos cards acionáveis, reutilizando o padrão existente */
+.favorite-predictions-card.home-navigable-card{padding-right:3.35rem;}
+.my-team-hero-link{padding-right:3.65rem;}
+.my-team-hero-link .home-card-chevron{top:1rem;right:1rem;color:var(--fan-primary,#77e4a7);background:color-mix(in srgb,var(--fan-primary,#39c879) 16%,transparent);}
+.favorite-predictions-card.home-navigable-card:hover .home-card-chevron,
+.my-team-hero-link:hover .home-card-chevron{transform:translateX(3px);}
+.favorite-predictions-card.home-navigable-card .home-card-chevron,
+.my-team-hero-link .home-card-chevron{transition:transform .18s ease,background .18s ease;}
+@media(max-width:760px){.my-team-hero-link{padding-right:3.45rem;}}
+@media(prefers-reduced-motion:reduce){.favorite-predictions-card.home-navigable-card .home-card-chevron,.my-team-hero-link .home-card-chevron{transition:none;}}
