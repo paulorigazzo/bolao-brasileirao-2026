@@ -27,7 +27,7 @@
       <span class="brand-mark">⚽</span>
       <div>
         <h1>Bolão Brasileirão</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.3.0</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.4.0</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -126,6 +126,10 @@
           <div><strong id="gamesSaveProgress">0 de 0 palpites feitos</strong><div class="games-save-track"><span id="gamesSaveBar"></span></div></div>
           <button id="saveAllPicks" class="primary games-save-all" type="button">▣ Salvar todos</button>
         </div>
+      </section>
+
+      <section id="myTeamTab" class="tab-content hidden my-team-tab" aria-labelledby="myTeamPageTitle">
+        <section id="myTeamContent" aria-live="polite"></section>
       </section>
 
       <section id="rankingTab" class="tab-content hidden ranking-premium-tab">
@@ -492,6 +496,7 @@
           <span>Home</span>
         </button>
         <button class="tab bottom-nav-item" data-tab="games" type="button"><span class="bottom-nav-icon" aria-hidden="true">⚽</span><span>Jogos</span></button>
+        <button class="tab bottom-nav-item" data-tab="myTeam" type="button"><span class="bottom-nav-icon" aria-hidden="true">❤️</span><span>Meu Time</span></button>
         <button class="tab bottom-nav-item" data-tab="ranking" type="button"><span class="bottom-nav-icon" aria-hidden="true">🏆</span><span>Ranking</span></button>
         <button class="tab bottom-nav-item" data-tab="stats" type="button"><span class="bottom-nav-icon" aria-hidden="true">📊</span><span>Estatísticas</span></button>
       </nav>

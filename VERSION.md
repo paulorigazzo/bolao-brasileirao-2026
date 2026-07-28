@@ -1,22 +1,6 @@
 # Versão atual
 
-## Aplicação
-
-- **Versão:** `v6.3.0`
-- **Nome:** Estatísticas — Polimento da Experiência
-- **Status:** versão final candidata à validação
-- **Base oficial anterior:** `v6.3.0f2`
-
-## Foco de desenvolvimento
-
-- Tela alterada: Estatísticas.
-- Demais telas preservadas funcionalmente.
-- Método de entrega: substituição de arquivos completos.
-
-## Qualidade
-
-Antes de cada atualização no GitHub:
-
-```powershell
-npm run check
-```
+- **Versão:** `v6.4.0`
+- **Nome:** Meu Time 2.0
+- **Base oficial anterior:** `v6.3.0 Final`
+- **Status:** candidata à validação funcional e visual

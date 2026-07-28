@@ -59,3 +59,16 @@
 - Versão funcional: `v6.3.0`.
 - Foco ativo: Tela de Estatísticas.
 - Tela de Jogos: ⏸️ congelada momentaneamente na `v6.3.0d5`, salvo bug crítico.
+
+
+## v6.4.0 — Meu Time 2.0
+
+- [x] Home integrada ao Meu Time.
+- [x] Tela dedicada na navegação.
+- [x] Forma recente e próximo jogo.
+- [x] Estatísticas pessoais envolvendo o clube.
+- [x] Perfil do Torcedor.
+- [x] Índice de Sintonia.
+- [x] História da Temporada.
+- [x] Conquistas contextuais.
+- [x] Neutralidade competitiva preservada.
