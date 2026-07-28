@@ -1,3 +1,7 @@
+## v6.6.0 — Projeto JARVIS ✅
+
+Identidade visual Série 4.1 refinada e implementada em Web App, PWA e documentação.
+
 # Roadmap — Bolão Brasileirão 2026
 
 ## Legenda

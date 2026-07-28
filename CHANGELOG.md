@@ -1,3 +1,10 @@
+# v6.6.0 — Projeto JARVIS
+
+- Nova identidade visual oficial baseada na Série 4.1.
+- Marca aplicada ao cabeçalho, carregamento, apresentação, favicon e PWA.
+- Ativos vetoriais, ícones e imagem social adicionados.
+- Nenhuma alteração nas regras de negócio.
+
 # v6.5.3 — Comunicação individual via WhatsApp
 
 - Adiciona botão **WhatsApp** à gestão de cada participante com celular válido.
