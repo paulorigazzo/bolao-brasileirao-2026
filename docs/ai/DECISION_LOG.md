@@ -77,3 +77,38 @@ Planos, edição, commit, push, Pull Request e merge passam a ser autorizações
 - Maior rastreabilidade de decisões e aprovações.
 - Necessidade de manter links entre os documentos e evitar conteúdo duplicado.
 - Nenhuma alteração funcional, de banco, infraestrutura ou versão decorre desta decisão.
+
+## DEC-2026-002 — Homologação H00 e consolidação do workflow
+
+- Data: 2026-07-29
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: baixo
+
+### Contexto
+
+A governança documental v2.0 definida pela D01 foi homologada de ponta a ponta pela H00. A homologação confirmou a estrutura adotada e identificou oportunidades pontuais de precisão operacional, sem necessidade de mudanças estruturais ou funcionais.
+
+### Decisão
+
+Considerar a D01 oficialmente homologada pela H00 e consolidar no workflow:
+
+- proposta e aprovação da branch antes de sua criação;
+- revisão explícita do conteúdo integral de arquivos novos;
+- contrato de saída para Planejamento, Implementação, Publicação, Recuperação e Encerramento;
+- separação entre merge e limpeza de branches;
+- remoção local e remota das branches integradas como padrão do Encerramento autorizado, salvo pedido explícito de preservação;
+- leitura mínima obrigatória conforme o tipo de tarefa;
+- cabeçalhos de fases no padrão `## Fase N — Nome da fase`;
+- separação entre regras obrigatórias em `AGENTS.md` e detalhes operacionais em `docs/ai/CODEX_WORKFLOW.md`.
+
+### Consequências
+
+- A branch passa a ser proposta no plano e criada somente após aprovação.
+- Arquivos novos deixam de depender apenas da visualização convencional do diff.
+- Cada modo possui uma condição de saída verificável e não autoriza automaticamente o modo seguinte.
+- A branch não é excluída durante o merge; depois do merge confirmado, a limpeza local e remota integra o Encerramento por padrão.
+- O Encerramento exige aprovação explícita para começar, mas suas ações previamente aprovadas não exigem autorizações individuais adicionais.
+- A leitura documental torna-se proporcional ao tipo e ao risco da tarefa.
+- A consolidação não altera funcionalidades, regras de negócio, banco, infraestrutura ou versão do produto.
