@@ -7,4 +7,5 @@
 - Rodadas exibem contagem própria de jogos adiados.
 - Cards explicam nova data indefinida e pontuação pendente.
 - Área administrativa separa jogos adiados dos próximos jogos.
+- Card de jogos adiados expansível com confronto, data e horário originais, rodada e local.
 - Filtro específico **Adiados** adicionado à tela de Jogos.
