@@ -1,0 +1,24 @@
+BOLÃO BRASILEIRÃO 2026 — ATUALIZAÇÃO v6.7.1
+
+1. SUPABASE (OBRIGATÓRIO)
+   - Abra o SQL Editor do Supabase.
+   - Execute integralmente um destes arquivos equivalentes:
+     supabase/migrations/20260729_v6_7_1_limite_configuravel_participantes.sql
+     supabase/migrations/20260729_v6_7_1_limite_configuravel_participantes.txt
+   - Aguarde a confirmação de execução sem erros.
+
+2. PUBLICAÇÃO
+   - Publique todo o conteúdo desta pasta no Netlify/GitHub, substituindo a versão anterior.
+
+3. TESTE RECOMENDADO
+   - Entre como administrador.
+   - Abra Área ADM > Participantes.
+   - Confira o contador de ativos e o limite atual.
+   - Altere o limite para um valor maior que a quantidade atual e salve.
+   - Aprove a solicitação pendente.
+   - Confirme a mensagem de sucesso e a atualização da lista.
+
+IMPORTANTE
+- O valor inicial permanece 10.
+- O banco não permite reduzir o limite para menos que a quantidade de participantes já ativos.
+- A validação continua protegida no Supabase, não apenas na interface.

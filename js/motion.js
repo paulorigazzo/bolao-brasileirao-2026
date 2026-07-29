@@ -64,6 +64,7 @@ export function installMotionInteractions(){
   const interactiveSelector='button, [role="button"], .chip, .filter-chip, .premium-feature-card, .premium-match-card, .standings-mobile-card';
 
   document.addEventListener('pointerdown',event=>{
+    if(!(event.target instanceof Element)) return;
     const target=event.target.closest(interactiveSelector);
     if(!target || target.matches(':disabled') || target.closest('[aria-disabled="true"]')) return;
     target.classList.add('motion-pressed');
@@ -78,7 +79,10 @@ export function installMotionInteractions(){
     }
   },{passive:true});
 
-  const release=event=>event.target.closest(interactiveSelector)?.classList.remove('motion-pressed');
+  const release=event=>{
+    if(!(event.target instanceof Element)) return;
+    event.target.closest(interactiveSelector)?.classList.remove('motion-pressed');
+  };
   document.addEventListener('pointerup',release,{passive:true});
   document.addEventListener('pointercancel',release,{passive:true});
   document.addEventListener('pointerleave',release,{passive:true,capture:true});

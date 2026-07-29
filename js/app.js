@@ -2,19 +2,18 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.7.0b";
-const BUILD_TIME = "00:24";
+const APP_VERSION = "6.7.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
 
 const sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
-const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], standings:null, gameFilter:"all", selectedFavoriteTeam:null, rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{} };
+const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], standings:null, gameFilter:"all", selectedFavoriteTeam:null, rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{} };
 let matchClockRefreshTimer=null;
 let liveScoreRefreshTimer=null;
 const $ = id => document.getElementById(id);
 const show = (id, visible=true) => $(id)?.classList.toggle("hidden", !visible);
-if ($("appVersion")) $("appVersion").textContent = `v${APP_VERSION} • Build ${BUILD_TIME}`;
+if ($("appVersion")) $("appVersion").textContent = `v${APP_VERSION}`;
 const initials = name => String(name||"?").split(/\s+/).map(x=>x[0]).join("").slice(0,3).toUpperCase();
 const escapeHtml = value => String(value ?? "").replace(/[&<>'"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
 const formatDate = value => new Date(value).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
@@ -639,21 +638,23 @@ function applyCanonicalParticipantNames(){
 }
 
 async function loadData(){
-  const [{data:games,error:gErr},{data:picks,error:pErr},{data:pub,error:pubErr},{data:counts,error:countsErr},{data:participants,error:participantsErr},{data:adminProgress,error:adminProgressErr},{data:authorized,error:authorizedErr}] = await Promise.all([
+  const [{data:games,error:gErr},{data:picks,error:pErr},{data:pub,error:pubErr},{data:counts,error:countsErr},{data:participants,error:participantsErr},{data:adminProgress,error:adminProgressErr},{data:authorized,error:authorizedErr},{data:participantLimit,error:participantLimitErr}] = await Promise.all([
     sb.from("jogos").select("*").order("rodada").order("inicio"),
     sb.from("palpites").select("*").eq("user_id",state.user.id),
     sb.from("palpites_publicos").select("*"),
     sb.from("contagem_palpites_participantes").select("*"),
     sb.from("participantes").select("user_id,nome,email,time_favorito"),
     isAdminUser() ? sb.from("progresso_palpites_adm").select("user_id,usuario,id_jogo,atualizado_em") : Promise.resolve({data:[],error:null}),
-    sb.from("participantes_autorizados").select("id,nome,email,celular,ativo,administrador,status,solicitado_em,aprovado_em,criado_em,atualizado_em").order("nome")
+    sb.from("participantes_autorizados").select("id,nome,email,celular,ativo,administrador,status,solicitado_em,aprovado_em,criado_em,atualizado_em").order("nome"),
+    isAdminUser() ? sb.rpc("obter_limite_participantes_ativos") : Promise.resolve({data:10,error:null})
   ]);
   if(gErr) throw gErr; if(pErr) throw pErr; if(pubErr) console.warn(pubErr);
   if(countsErr) console.warn("Não foi possível carregar a contagem geral de palpites. Execute a atualização SQL da versão 3.8.", countsErr);
   if(participantsErr) console.warn("Os times dos demais participantes não puderam ser carregados.", participantsErr);
   if(adminProgressErr) console.warn("O progresso administrativo não pôde ser carregado. Execute o SQL da versão 4.4.1.", adminProgressErr);
   if(authorizedErr) console.warn("O cadastro dinâmico de participantes ainda não está disponível. Execute o SQL da versão 4.7.0.",authorizedErr);
-  state.games=games||[]; state.ownPicks=picks||[]; state.publicPicks=pub||[]; state.pickCounts=counts||[]; state.participants=participants||[]; state.adminPickProgress=adminProgress||[]; state.authorizedParticipants=authorized||[];
+  if(participantLimitErr) console.warn("O limite configurável de participantes ainda não está disponível. Execute o SQL da versão 6.7.1.",participantLimitErr);
+  state.games=games||[]; state.ownPicks=picks||[]; state.publicPicks=pub||[]; state.pickCounts=counts||[]; state.participants=participants||[]; state.adminPickProgress=adminProgress||[]; state.authorizedParticipants=authorized||[]; state.participantLimit=Math.max(1,Number(participantLimit)||10);
   applyCanonicalParticipantNames();
   renderSyncStatus();
 }
@@ -2400,12 +2401,59 @@ function membershipStatusLabel(item){
   return item.administrador?"👑 Administrador":"✅ Participante ativo";
 }
 
+function setAdminParticipantsFeedback(text,type="info"){
+  const feedback=$("adminParticipantsFeedback");
+  if(!feedback) return;
+  feedback.textContent=text||"";
+  feedback.classList.toggle("hidden",!text);
+  feedback.classList.toggle("is-error",type==="error");
+  feedback.classList.toggle("is-success",type==="success");
+  feedback.classList.toggle("is-info",type==="info");
+}
+
+function participantLimitReached(){
+  const active=(state.authorizedParticipants||[]).filter(item=>(!item.status || item.status==="approved") && item.ativo!==false).length;
+  return active>=Math.max(1,Number(state.participantLimit)||10);
+}
+
+async function saveParticipantLimit(event){
+  event.preventDefault();
+  const input=$("adminParticipantLimitInput");
+  const button=$("saveParticipantLimitBtn");
+  const limit=Number.parseInt(input?.value,10);
+  if(!Number.isInteger(limit) || limit<1 || limit>100){
+    setAdminParticipantsFeedback("Informe um limite entre 1 e 100 participantes.","error");
+    input?.focus();
+    return;
+  }
+  button.disabled=true;
+  button.textContent="Salvando…";
+  setAdminParticipantsFeedback("Salvando o novo limite…","info");
+  try{
+    const {data,error}=await sb.rpc("definir_limite_participantes_ativos",{p_limite:limit});
+    if(error) throw error;
+    state.participantLimit=Math.max(1,Number(data)||limit);
+    renderAdminParticipants();
+    setAdminParticipantsFeedback(`Limite atualizado para ${state.participantLimit} participantes ativos.`,"success");
+  }catch(err){
+    console.error("Falha ao salvar limite de participantes",err);
+    setAdminParticipantsFeedback(err?.message||"Não foi possível salvar o limite de participantes.","error");
+  }finally{
+    button.disabled=false;
+    button.textContent="Salvar limite";
+  }
+}
+
 function renderAdminParticipants(){
   if(!isAdminUser() || !$("adminParticipantsList")) return;
   const items=[...(state.authorizedParticipants||[])];
   const approved=items.filter(item=>(!item.status || item.status==="approved") && item.ativo!==false).length;
   const pending=items.filter(item=>item.status==="pending").length;
-  $("adminParticipantsCount").textContent=pending?`${approved} ativos • ${pending} pendente${pending===1?"":"s"}`:`${approved} participante${approved===1?"":"s"} ativo${approved===1?"":"s"}`;
+  const limit=Math.max(1,Number(state.participantLimit)||10);
+  const atLimit=approved>=limit;
+  $("adminParticipantsCount").textContent=pending?`${approved}/${limit} ativos • ${pending} pendente${pending===1?"":"s"}`:`${approved}/${limit} participante${approved===1?"":"s"} ativo${approved===1?"":"s"}`;
+  if($("adminParticipantLimitInput")) $("adminParticipantLimitInput").value=String(limit);
+  if($("adminParticipantLimitStatus")) $("adminParticipantLimitStatus").textContent=atLimit?`${approved} de ${limit} ativos — limite atingido`:`${approved} de ${limit} ativos — ${limit-approved} vaga${limit-approved===1?"":"s"} disponível${limit-approved===1?"":"is"}`;
   $("adminPendingRequestsBadge").textContent=String(pending);
   show("adminPendingRequestsBadge",pending>0);
   $("adminParticipantsList").innerHTML=items.length?items.map(item=>{
@@ -2416,7 +2464,7 @@ function renderAdminParticipants(){
     const canDelete=!item.administrador && !isCurrentUser;
     const hasPhone=Boolean(normalizeWhatsAppPhone(item.celular));
     const whatsappButton=`<button type="button" class="whatsapp admin-member-whatsapp" data-participant-whatsapp="${escapeHtml(item.id)}" ${hasPhone?"":"disabled"} title="${hasPhone?"Enviar mensagem individual pelo WhatsApp":"Cadastre o celular do participante para habilitar"}">WhatsApp</button>`;
-    const pendingActions=status==="pending"?`<div class="admin-member-actions">${whatsappButton}<button type="button" class="primary" data-membership-decision="approve" data-participant-id="${escapeHtml(item.id)}">Aprovar</button><button type="button" class="secondary" data-membership-decision="reject" data-participant-id="${escapeHtml(item.id)}">Recusar</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`:
+    const pendingActions=status==="pending"?`<div class="admin-member-actions">${whatsappButton}<button type="button" class="primary" data-membership-decision="approve" data-participant-id="${escapeHtml(item.id)}" ${atLimit?'disabled title="Aumente o limite ou desative um participante ativo para aprovar"':''}>${atLimit?"Limite atingido":"Aprovar"}</button><button type="button" class="secondary" data-membership-decision="reject" data-participant-id="${escapeHtml(item.id)}">Recusar</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`:
       `<div class="admin-member-actions">${whatsappButton}<button type="button" class="secondary admin-member-toggle" data-participant-id="${escapeHtml(item.id)}" data-participant-active="${item.ativo!==false}">${item.ativo===false?"Reativar":"Desativar"}</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`;
     return `<div class="admin-member-row status-${escapeHtml(status)}">
       <div class="admin-member-avatar">${escapeHtml(initials(item.nome).slice(0,2))}</div>
@@ -2496,13 +2544,33 @@ function sendParticipantWhatsApp(){
 
 async function decideMembership(id,decision){
   const action=decision==="approve"?"aprovar":"recusar";
+  if(decision==="approve" && participantLimitReached()){
+    setAdminParticipantsFeedback(`Não foi possível aprovar. O bolão atingiu o limite configurado de ${state.participantLimit} participantes ativos.`,"error");
+    return;
+  }
   if(!confirm(`${action[0].toUpperCase()+action.slice(1)} esta solicitação?`)) return;
+  const row=document.querySelector(`[data-participant-id="${CSS.escape(String(id))}"]`)?.closest(".admin-member-row");
+  const buttons=row?[...row.querySelectorAll("button")]:[];
+  const actionButton=row?.querySelector(`[data-membership-decision="${decision}"]`);
+  const originalText=actionButton?.textContent;
+  buttons.forEach(button=>button.disabled=true);
+  if(actionButton) actionButton.textContent=decision==="approve"?"Aprovando…":"Recusando…";
+  setAdminParticipantsFeedback(decision==="approve"?"Aprovando a solicitação…":"Recusando a solicitação…","info");
   try{
     const {error}=await sb.rpc("decidir_solicitacao_participacao",{p_id:id,p_decisao:decision});
     if(error) throw error;
     await loadData(); renderAdminParticipants(); renderAdminAttention(); renderAdminExecutiveDashboard();
-    message(decision==="approve"?"Participante aprovado. O acesso será liberado no próximo login.":"Solicitação recusada.");
-  }catch(err){ message(err.message||"Não foi possível analisar a solicitação.",true); }
+    const success=decision==="approve"?"Participante aprovado. O acesso será liberado no próximo login.":"Solicitação recusada.";
+    setAdminParticipantsFeedback(success,"success");
+    message(success);
+  }catch(err){
+    console.error("Falha ao analisar solicitação de participante",err);
+    const detail=err?.message||"Não foi possível analisar a solicitação.";
+    setAdminParticipantsFeedback(detail,"error");
+    message(detail,true);
+    buttons.forEach(button=>button.disabled=false);
+    if(actionButton && originalText) actionButton.textContent=originalText;
+  }
 }
 
 function registrationLink(){
@@ -3593,6 +3661,7 @@ $("openParticipantManagerBtn")?.addEventListener("click",openParticipantManager)
 $("adminParticipantManagerClose")?.addEventListener("click",closeParticipantManager);
 $("cancelParticipantBtn")?.addEventListener("click",closeParticipantManager);
 $("adminParticipantForm")?.addEventListener("submit",saveAuthorizedParticipant);
+$("adminParticipantLimitForm")?.addEventListener("submit",saveParticipantLimit);
 $("adminParticipantsList")?.addEventListener("click",event=>{
   const whatsapp=event.target.closest("[data-participant-whatsapp]");
   if(whatsapp){ openParticipantWhatsApp(whatsapp.dataset.participantWhatsapp); return; }

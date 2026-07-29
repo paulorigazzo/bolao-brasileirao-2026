@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.7.0b">
-  <link rel="stylesheet" href="./css/styles.css?v=6.7.0b">
-  <link rel="stylesheet" href="./css/components.css?v=6.7.0b">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.7.0b">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.7.0b">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.7.0b">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.7.1">
+  <link rel="stylesheet" href="./css/styles.css?v=6.7.1">
+  <link rel="stylesheet" href="./css/components.css?v=6.7.1">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.7.1">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.7.1">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.7.1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.7.0b</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.7.1</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -418,6 +418,18 @@
             <div class="admin-card-header-actions"><span id="adminPendingRequestsBadge" class="admin-pending-requests-badge hidden" title="Solicitações pendentes">0</span><span id="adminParticipantsCount" class="admin-participants-badge">Carregando…</span><button class="admin-card-toggle" type="button" data-admin-collapse="adminParticipantsCard" aria-expanded="true" aria-label="Recolher Participantes">⌃</button></div>
           </div>
           <p class="admin-participants-intro">Autorize novas contas Google ou desative acessos sem apagar o histórico.</p>
+          <section class="admin-participant-limit" aria-labelledby="adminParticipantLimitTitle">
+            <div class="admin-participant-limit-copy">
+              <strong id="adminParticipantLimitTitle">Limite de participantes ativos</strong>
+              <small id="adminParticipantLimitStatus">Carregando configuração…</small>
+            </div>
+            <form id="adminParticipantLimitForm" class="admin-participant-limit-form">
+              <label for="adminParticipantLimitInput">Máximo</label>
+              <input id="adminParticipantLimitInput" type="number" min="1" max="100" step="1" inputmode="numeric" value="10" required>
+              <button id="saveParticipantLimitBtn" class="secondary" type="submit">Salvar limite</button>
+            </form>
+          </section>
+          <div id="adminParticipantsFeedback" class="admin-participants-feedback hidden" role="status" aria-live="assertive"></div>
           <div class="admin-participant-actions">
             <button id="copyRegistrationLinkBtn" class="primary admin-add-participant" type="button">🔗 Copiar link de cadastro</button>
             <button id="openParticipantManagerBtn" class="secondary admin-add-participant" type="button">➕ Adicionar manualmente</button>
@@ -589,6 +601,6 @@
       if(heroButton) heroButton.textContent="Entrar e solicitar participação";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.7.0b"></script>
+  <script type="module" src="./js/app.js?v=6.7.1"></script>
 </body>
 </html>

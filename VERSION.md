@@ -1,10 +1,9 @@
-6.7.0b
+6.7.1
 
-# v6.7.0b — Consolidação da Integridade da Rodada
+# v6.7.1 — Limite Configurável de Participantes
 
-- Fonte única de estado por `roundLifecycleSummary()`.
-- Home consolida o antigo Status geral como Integridade da Rodada.
-- Estados finalizado, ao vivo, adiado, cancelado e futuro são apresentados separadamente.
-- Estatísticas indicam dados provisórios, em andamento ou consolidados.
-- Área ADM exibe o estado esportivo e a condição provisória da pontuação.
-- Regras de pontuação, banco de dados e integrações permanecem inalterados.
+- Limite de participantes ativos configurável pela Área ADM.
+- Validação centralizada no Supabase, inclusive para aprovações simultâneas.
+- Feedback visível durante aprovação, recusa e falhas do banco.
+- Contador de participantes ativos em relação ao limite.
+- Correção das exceções de `event.target.closest` em `motion.js`.
