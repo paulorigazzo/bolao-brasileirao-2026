@@ -1,3 +1,9 @@
+# v6.7.0a-r2 — Correção dos Escudos no Card de Jogos Adiados
+
+- Normaliza os escudos no card expansível da Área ADM.
+- Limita largura e altura dos escudos em desktop e celular.
+- Mantém proporção com `object-fit: contain` e evita que imagens ultrapassem o card.
+
 # v6.7.0a — Gestão Inteligente de Jogos Adiados
 
 ## Adicionado

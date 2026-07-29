@@ -1,6 +1,6 @@
-6.7.0a
+6.7.0a-r2
 
-# v6.7.0a — Gestão Inteligente de Jogos Adiados
+# v6.7.0a-r2 — Gestão Inteligente de Jogos Adiados
 
 - Palpites de partidas adiadas permanecem preservados e bloqueados.
 - Ranking passa a ser identificado como provisório enquanto houver adiamentos.
