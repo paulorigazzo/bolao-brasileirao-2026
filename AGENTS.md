@@ -51,6 +51,8 @@ Para trabalho com agentes, consultar também:
 
 O repositório prevalece sobre pacotes antigos, arquivos locais externos e memória de conversas.
 
+A leitura mínima por tipo de tarefa e os detalhes de aplicação destas fontes estão definidos em `docs/ai/CODEX_WORKFLOW.md`.
+
 ## Modos de execução
 
 Toda solicitação deve usar, quando aplicável, um destes modos:
@@ -59,8 +61,13 @@ Toda solicitação deve usar, quando aplicável, um destes modos:
 - **Implementação:** executar alterações previamente aprovadas e validá-las.
 - **Publicação:** realizar somente as ações Git ou de entrega explicitamente autorizadas.
 - **Recuperação:** diagnosticar e restaurar um estado seguro após falha, regressão ou interrupção.
+- **Encerramento:** após merge confirmado, atualizar o estado local e remover por padrão as branches local e remota já integradas.
 
-Os modos não substituem os portões de aprovação. Em especial, Implementação não autoriza Publicação, e Publicação nunca autoriza merge automático.
+Os modos não substituem os portões de aprovação. Em especial, Implementação não autoriza Publicação, Publicação nunca autoriza merge automático e Encerramento depende de aprovação explícita para ser iniciado.
+
+Cada modo deve terminar com o contrato de saída definido em `docs/ai/CODEX_WORKFLOW.md`. No modo Encerramento, as ações já previstas no plano aprovado podem ser executadas sem autorizações individuais adicionais; qualquer ampliação do escopo exige nova aprovação.
+
+As fases operacionais devem usar o padrão de cabeçalho `## Fase N — Nome da fase`. Este arquivo estabelece regras obrigatórias; sequências, comandos, evidências e demais detalhes operacionais pertencem a `docs/ai/CODEX_WORKFLOW.md`.
 
 ## Portões obrigatórios
 
@@ -70,9 +77,9 @@ Os modos não substituem os portões de aprovação. Em especial, Implementaçã
 2. Interromper se o working tree não estiver limpo.
 3. Ler as fontes da verdade relacionadas.
 4. Identificar objetivo, escopo, exclusões, critérios de aceite e riscos.
-5. Apresentar um plano com os arquivos potencialmente afetados.
+5. Apresentar um plano com os arquivos potencialmente afetados e propor o nome da branch.
 6. Aguardar aprovação humana explícita.
-7. Criar uma branch `feature/*`, `fix/*`, `docs/*` ou `hotfix/*`, conforme a tarefa.
+7. Criar a branch aprovada com prefixo `feature/*`, `fix/*`, `docs/*` ou `hotfix/*`, conforme a tarefa.
 
 ### Durante a implementação
 
@@ -111,6 +118,8 @@ Os modos não substituem os portões de aprovação. Em especial, Implementaçã
 7. Mostrar o diff e aguardar revisão.
 8. Após autorização, realizar commit, push e abrir Pull Request para `main`.
 9. Nunca fazer merge automaticamente.
+10. Não excluir a branch durante o merge.
+11. Após o merge confirmado, iniciar o modo Encerramento somente quando autorizado; nesse modo, remover por padrão as branches local e remota integradas, salvo solicitação explícita para preservá-las.
 
 O procedimento detalhado está em `docs/ai/CODEX_WORKFLOW.md`.
 
