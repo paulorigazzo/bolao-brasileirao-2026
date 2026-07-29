@@ -39,6 +39,17 @@ Antes de implementar qualquer funcionalidade, consulte:
 8. Abrir Pull Request para `main`.
 9. Nunca fazer merge automaticamente sem revisão humana.
 
+## Git e fluxo com agentes
+
+- Antes de qualquer tarefa, verificar Git status.
+- Se o working tree não estiver limpo, interromper a execução.
+- Apresentar plano antes de modificar arquivos.
+- Implementar somente após aprovação explícita.
+- Executar `npm run check` antes do commit.
+- Mostrar o diff e os arquivos alterados.
+- Nunca fazer merge automaticamente.
+- Seguir `docs/ai/CODEX_WORKFLOW.md`.
+
 ## Regras de negócio protegidas
 
 Não alterar sem tarefa específica, critérios de aceite e testes:
