@@ -1,3 +1,19 @@
+# v6.7.1 — Limite Configurável de Participantes
+
+## Adicionado
+- Configuração administrativa do número máximo de participantes ativos.
+- RPCs seguras para consultar e atualizar o limite no Supabase.
+- Contador de vagas e estado de limite atingido na Área ADM.
+- Feedback de processamento, sucesso e erro no fluxo de aprovação.
+
+## Ajustado
+- A regra fixa de 10 participantes é substituída por validação configurável no banco.
+- Aprovações concorrentes são serializadas para preservar o limite.
+- Botão Aprovar é desabilitado quando não há vagas.
+
+## Corrigido
+- Erros de `event.target.closest is not a function` nas microinterações de ponteiro.
+
 # v6.7.0b — Consolidação da Integridade da Rodada
 
 ## Adicionado

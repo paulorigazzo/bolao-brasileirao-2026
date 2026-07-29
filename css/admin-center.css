@@ -214,3 +214,27 @@
   .admin-audit-header h2{font-size:1.02rem}
   .admin-audit-badge{max-width:86px;text-align:center;line-height:1.1;white-space:normal}
 }
+
+
+/* v6.7.1 — limite configurável e feedback de aprovação */
+.admin-participant-limit{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  margin:14px 0;padding:14px 16px;border:1px solid var(--admin-line);border-radius:16px;
+  background:rgba(100,217,148,.055)
+}
+.admin-participant-limit-copy{display:grid;gap:4px;min-width:0}
+.admin-participant-limit-copy strong{color:#edf8f1}
+.admin-participant-limit-copy small{color:var(--admin-muted)}
+.admin-participant-limit-form{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.admin-participant-limit-form label{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--admin-muted)}
+.admin-participant-limit-form input{width:76px;min-height:40px;border-radius:10px;border:1px solid var(--admin-line);background:rgba(0,0,0,.16);color:#edf8f1;padding:8px 10px}
+.admin-participants-feedback{margin:12px 0;padding:12px 14px;border-radius:13px;border:1px solid var(--admin-line);font-size:.9rem}
+.admin-participants-feedback.is-info{background:rgba(90,154,255,.07);border-color:rgba(90,154,255,.2);color:#bcd5ff}
+.admin-participants-feedback.is-success{background:rgba(100,217,148,.08);border-color:rgba(100,217,148,.22);color:#a8eac0}
+.admin-participants-feedback.is-error{background:rgba(255,112,112,.07);border-color:rgba(255,112,112,.22);color:#ffb2b2}
+.admin-member-actions button:disabled{cursor:not-allowed;opacity:.56}
+@media(max-width:680px){
+  .admin-participant-limit{align-items:stretch;flex-direction:column}
+  .admin-participant-limit-form{width:100%;flex-wrap:wrap}
+  .admin-participant-limit-form button{flex:1 1 160px}
+}
