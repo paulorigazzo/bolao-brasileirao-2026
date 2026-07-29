@@ -1,10 +1,21 @@
 # Documentação
 
-Esta pasta concentra a documentação viva do projeto.
+Esta pasta reúne a documentação viva e histórica do projeto.
 
-- `architecture/`: arquitetura e decisões técnicas.
-- `deployment/`: execução local e publicação.
-- `process/`: fluxo de trabalho e padrões de entrega.
-- `releases/`: relatórios completos de cada versão.
-- `roadmap/`: materiais complementares do planejamento.
-- `archive/`: documentos históricos que não fazem mais parte do fluxo atual.
+## Fontes oficiais
+
+- [`../README.md`](../README.md): visão rápida do estado atual;
+- [`../VERSION.md`](../VERSION.md): versão funcional;
+- [`../CHANGELOG.md`](../CHANGELOG.md): histórico consolidado;
+- [`../ROADMAP.md`](../ROADMAP.md): prioridade e status do produto.
+
+## Estrutura
+
+- `ai/`: governança, fluxo e orientações para agentes;
+- `architecture/`: visão técnica atual;
+- `deployment/`: execução local e publicação;
+- `process/`: processo de desenvolvimento;
+- `releases/`: notas detalhadas das versões;
+- `archive/`: documentos históricos fora do fluxo atual.
+
+Documentos de visão, estratégia e planejamento nesta pasta devem apontar para o roadmap oficial quando mencionarem prioridade ou status.

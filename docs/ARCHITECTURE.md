@@ -4,70 +4,68 @@
 
 ```text
 Usuário
-  │
-  ▼
-Aplicação Web
-  │
-  ├── Netlify — hospedagem e deploy
-  │
-  ├── Supabase — autenticação e banco de dados
-  │
-  └── API de futebol — jogos, datas, locais e resultados
+  |
+  v
+Aplicação web
+  |
+  +-- Supabase: autenticação, participantes e dados do bolão
+  +-- Netlify: hospedagem e Functions
+  +-- API de futebol: jogos, datas, locais, resultados e classificação
+  +-- Motor estatístico local: métricas determinísticas
 ```
 
-## Visão futura com IA
+As Netlify Functions atuais sincronizam jogos, consultam classificação e produzem diagnóstico. Não existe integração com serviço de IA.
 
-```text
-Usuário
-  │
-  ▼
-Aplicação Web
-  │
-  ▼
-Netlify Function / Backend seguro
-  │
-  ├── Supabase
-  ├── Motor de estatísticas determinísticas
-  ├── API de futebol
-  └── Serviço de IA
-```
-
-## Responsabilidades
+## Responsabilidades atuais
 
 ### Front-end
 
-- Interface.
-- Navegação.
-- Entrada de palpites.
-- Apresentação de ranking e estatísticas.
-- Contexto visual do Copiloto.
+- interface e navegação;
+- entrada e bloqueio de palpites;
+- ranking, estatísticas e Meu Time;
+- administração e comunicação manual via WhatsApp;
+- apresentação das métricas calculadas.
 
 ### Supabase
 
-- Autenticação.
-- Participantes.
-- Palpites.
-- Resultados.
-- Ligas futuras.
-- Políticas de acesso.
+- autenticação e autorização;
+- participantes e perfis;
+- palpites e dados públicos permitidos;
+- políticas de acesso;
+- funções seguras de gestão e limite de participantes.
 
 ### Netlify
 
-- Hospedagem.
-- Deploy.
-- Variáveis de ambiente.
-- Funções serverless futuras.
+- hospedagem e deploy;
+- variáveis de ambiente;
+- sincronização, classificação e diagnóstico por Functions.
 
-### Camada de IA futura
+### Motor estatístico
 
-- Interpretar métricas calculadas.
-- Gerar resumos.
-- Responder perguntas.
-- Apoiar o administrador.
+- classificação dos jogos;
+- evolução por rodada;
+- perfil, recordes, regularidade, comparações e medalhas;
+- modelos determinísticos de momento e recomendação.
 
-## Regras de segurança
+## Evolução prevista com IA
 
-- Nenhuma chave secreta no JavaScript do navegador.
-- Funções administrativas protegidas por autenticação e autorização.
-- Políticas de acesso no banco.
-- Validação de dados no cliente e no backend.
+```text
+Aplicação web
+  |
+  v
+Netlify Function autenticada
+  |
+  +-- Supabase
+  +-- Motor de métricas verificadas
+  +-- Serviço de IA
+```
+
+A camada futura de IA deve interpretar métricas prontas, sem recalcular pontuação ou alterar dados oficiais.
+
+## Segurança
+
+- nenhuma chave secreta no navegador;
+- funções administrativas protegidas por autenticação e autorização;
+- políticas de acesso no banco;
+- contexto mínimo necessário enviado a serviços externos;
+- nenhuma alteração automática de resultados, palpites ou histórico por IA.

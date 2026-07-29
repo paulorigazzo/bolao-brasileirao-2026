@@ -1,63 +1,52 @@
-# Plano de Releases
+# Plano de entregas
 
-## v6.3.0a — Sprint A
+Este documento descreve a sequência futura sem reservar números de versão antecipadamente. A versão de cada entrega será definida no planejamento aprovado.
 
-**Status:** 🟡 **Em andamento**
+## Situação atual
 
-- Tela de Estatísticas.
-- Histórico de ranking.
-- Estatísticas de palpites.
-- Estatísticas por clube.
-- Recordes.
-- Responsividade.
-- Verificação de integridade do escopo.
+- Versão funcional: `v6.7.1b`.
+- Histórico oficial: [`../CHANGELOG.md`](../CHANGELOG.md) e [`releases/`](releases/).
+- Prioridade oficial: [`../ROADMAP.md`](../ROADMAP.md).
 
-## v6.4.0 — Calendário Inteligente
+## Próximas entregas
 
-**Status:** ⬜ **Planejado**
+### E03.9 — Consolidação documental
 
-- Calendário mensal.
-- Navegação entre meses.
-- Linha do tempo.
-- Jogos por dia.
-- Filtros por rodada.
-- Prazos de palpites.
+**Status:** em preparação.
 
-## v6.5.0 — Personalização e IA inicial
+- alinhar documentação ao código existente;
+- consolidar uma única fonte de roadmap;
+- separar estado atual, histórico e visão futura.
 
-**Status:** ⬜ **Planejado**
+### E04.1 — Resumo determinístico da rodada
 
-- Personalização avançada por time favorito.
-- Primeiros resumos narrativos.
-- Explicações de ranking e estatísticas.
-- Assistente administrativo inicial.
-- Preparação das funções serverless.
+**Status:** planejado.
 
-## v6.6.0 — Experiência social e IA contextual
+- definir fatos e métricas rastreáveis;
+- produzir resumo sem modelo generativo;
+- validar resultados e estados incompletos.
 
-**Status:** ⬜ **Planejado**
+### E04.2 — Inteligência narrativa
 
-- Comparações entre participantes.
-- IA contextual por tela.
-- Tendências pessoais.
-- Curiosidades e conteúdo social.
-- Melhorias de acessibilidade e carregamento.
+**Status:** planejado.
 
-## v6.7.0 — Experiência técnica
+- explicar métricas verificadas;
+- registrar origem e período dos dados;
+- proteger autenticação, privacidade e segredos.
 
-**Status:** ⬜ **Planejado**
+### E05 — Copiloto do Bolão
 
-- PWA.
-- Cache offline.
-- Dark Mode.
-- Otimizações de desempenho.
+**Status:** planejado.
 
-## v7.0.0 — Plataforma
+- começar por perguntas predefinidas;
+- evoluir para linguagem natural;
+- adicionar contexto por tela progressivamente.
 
-**Status:** 🔮 **Visão de longo prazo**
+## Entregas posteriores
 
-- Multi-bolões.
-- Administração por liga.
-- IA preditiva experimental.
-- Memória de preferências.
-- Infraestrutura de produto ampliada.
+- conclusão da PWA com service worker e cache offline;
+- calendário consolidado;
+- dark mode;
+- recursos sociais;
+- múltiplos bolões;
+- automação de qualidade e releases.

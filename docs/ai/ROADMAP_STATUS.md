@@ -1,41 +1,32 @@
-# Status para agentes de IA
+# Status operacional para agentes de IA
 
-## Estado atual
+## Fonte oficial
 
-A versão registrada no `README.md` do repositório é:
+Consultar [`../../ROADMAP.md`](../../ROADMAP.md) para status, prioridade e sequência do produto. Este arquivo é apenas um resumo operacional.
 
-**v6.7.0b — Projeto JARVIS**
+## Estado confirmado
 
-O desenvolvimento atual indicado no repositório está concentrado na Tela de Estatísticas. A Tela de Jogos está congelada momentaneamente na `v6.3.0d5`, salvo correção crítica ou tarefa explícita.
+- Versão funcional: `v6.7.1b`.
+- E01.6 e E01.7: concluídas.
+- Estatísticas determinísticas A–F: concluídas.
+- Meu Time 2.0, gestão de participantes, WhatsApp manual, identidade JARVIS e limite configurável: concluídos.
+- PWA: parcial, pois há manifesto e ícones, mas não service worker ou cache offline.
+- IA generativa e Copiloto: não implementados.
 
-## Prioridade acordada
+## Prioridade
 
-**E01.6 — Gestão Inteligente de Jogos Adiados**
+**E04 — Inteligência Narrativa da Rodada**
 
-Antes de iniciar a implementação, o agente deve:
+Sequência recomendada:
 
-1. consultar `ROADMAP.md`;
-2. consultar `CHANGELOG.md`;
-3. consultar `VERSION.md`;
-4. revisar as notas mais recentes em `docs/releases/`;
-5. localizar a implementação atual de partidas adiadas;
-6. confirmar quais partes da E01.6 já estão implementadas;
-7. propor um plano incremental sem duplicar funcionalidades existentes.
+1. E04.1 — definir e validar um resumo determinístico da rodada;
+2. E04.2 — usar IA apenas para explicar métricas verificadas;
+3. E05 — começar o Copiloto por perguntas predefinidas.
 
-## Critérios gerais
+## Restrições
 
-A solução deve:
-
-- diferenciar jogo adiado de jogo futuro comum;
-- preservar palpites já registrados;
-- não reabrir nem encerrar palpites indevidamente;
-- comportar partidas sem nova data definida;
-- atualizar a exibição quando a nova data for conhecida;
-- manter consistência entre Home, Jogos, Área ADM, ranking e estatísticas;
-- preservar a neutralidade das telas e a personalização por time favorito;
-- funcionar em dispositivos móveis;
-- ser validada com casos reais existentes no projeto.
-
-## Observação
-
-Este arquivo é um resumo operacional. O `ROADMAP.md` continua sendo a fonte oficial para escopo, status e priorização.
+- métricas objetivas devem ser calculadas pelo código;
+- respostas devem mostrar origem e limitações;
+- segredos nunca podem ser expostos no navegador;
+- permissões e privacidade do Supabase devem ser preservadas;
+- a Tela de Jogos permanece congelada para evolução ampla.
