@@ -2597,9 +2597,9 @@ function renderAdminRoundStatus(){
     const round=Number.isFinite(Number(game.rodada))?`Rodada ${Number(game.rodada)}`:"Rodada a definir";
     return `<article class="admin-postponed-game">
       <div class="admin-postponed-matchup">
-        <span class="admin-postponed-team">${teamLogo(game.time_casa_logo,game.time_casa)}<strong>${escapeHtml(game.time_casa||"Mandante a definir")}</strong></span>
+        <span class="admin-postponed-team"><span class="admin-postponed-crest">${teamLogo(game.time_casa_logo,game.time_casa)}</span><strong>${escapeHtml(game.time_casa||"Mandante a definir")}</strong></span>
         <span class="admin-postponed-versus">×</span>
-        <span class="admin-postponed-team is-away">${teamLogo(game.time_fora_logo,game.time_fora)}<strong>${escapeHtml(game.time_fora||"Visitante a definir")}</strong></span>
+        <span class="admin-postponed-team is-away"><span class="admin-postponed-crest">${teamLogo(game.time_fora_logo,game.time_fora)}</span><strong>${escapeHtml(game.time_fora||"Visitante a definir")}</strong></span>
       </div>
       <div class="admin-postponed-meta">
         <span><b>📅 Nova data:</b> a definir</span>
