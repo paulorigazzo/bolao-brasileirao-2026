@@ -1,3 +1,7 @@
+
+## v6.7.0b
+- E01.7 Consolidação da Integridade da Rodada (planejamento inicial).
+
 # v6.7.0a-r2 — Correção dos Escudos no Card de Jogos Adiados
 
 - Normaliza os escudos no card expansível da Área ADM.

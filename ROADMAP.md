@@ -108,3 +108,6 @@ Identidade visual Série 4.1 refinada e implementada em Web App, PWA e documenta
 - ✅ Filtro Adiados.
 - ✅ Painel administrativo de jogos pendentes.
 - 🟡 Validação contínua com os quatro casos reais atualmente adiados.
+
+
+- v6.7.0b: Consolidação da Integridade da Rodada.
