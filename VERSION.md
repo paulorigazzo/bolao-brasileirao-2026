@@ -1,1 +1,10 @@
-6.6.0
+6.7.0a
+
+# v6.7.0a — Gestão Inteligente de Jogos Adiados
+
+- Palpites de partidas adiadas permanecem preservados e bloqueados.
+- Ranking passa a ser identificado como provisório enquanto houver adiamentos.
+- Rodadas exibem contagem própria de jogos adiados.
+- Cards explicam nova data indefinida e pontuação pendente.
+- Área administrativa separa jogos adiados dos próximos jogos.
+- Filtro específico **Adiados** adicionado à tela de Jogos.

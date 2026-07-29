@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.6.0";
+const APP_VERSION = "6.7.0a";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -392,12 +392,21 @@ function resultPanel(pick, earned){
   </div>`;
 }
 
+function isPostponed(game){
+  return gameStatusDisplay(game).key==="postponed";
+}
+
 function locked(game){
-  if(["encerrado","cancelado"].includes(String(game.status).toLowerCase())) return true;
-  return Date.now() >= new Date(game.inicio).getTime() - CONFIG.lockMinutesBefore*60000;
+  const status=gameStatusDisplay(game).key;
+  // Partidas adiadas preservam o palpite original e nunca reabrem automaticamente.
+  if(["finished","cancelled","postponed"].includes(status)) return true;
+  const kickoff=new Date(game.inicio).getTime();
+  if(!Number.isFinite(kickoff)) return true;
+  return Date.now() >= kickoff - CONFIG.lockMinutesBefore*60000;
 }
 
 function deadlineText(game){
+  if(isPostponed(game)) return "Palpite preservado • nova data a definir";
   if(locked(game)) return "Palpites encerrados";
   const closeAt = new Date(game.inicio).getTime() - CONFIG.lockMinutesBefore*60000;
   const diff = closeAt - Date.now();
@@ -813,23 +822,43 @@ function updateCardDraftUi(card){
 
 loadPickDrafts();
 
+
+function roundLifecycleSummary(games){
+  const list=Array.isArray(games)?games:[];
+  const counts={total:list.length,finished:0,live:0,future:0,postponed:0,cancelled:0};
+  list.forEach(game=>{
+    const key=gameStatusDisplay(game).key;
+    if(Object.prototype.hasOwnProperty.call(counts,key)) counts[key]++;
+  });
+  const concluded=counts.finished+counts.cancelled;
+  const completion=counts.total?Math.round(concluded/counts.total*100):0;
+  let status="OPEN";
+  if(counts.total && concluded===counts.total) status="FINISHED";
+  else if(counts.postponed>0 && counts.live===0 && counts.future===0) status="PARTIAL";
+  else if(counts.live>0 || concluded>0) status=counts.postponed>0?"PARTIAL":"IN_PROGRESS";
+  return {...counts,concluded,completion,status,isProvisional:counts.postponed>0};
+}
+
 function renderRoundProgress(games){
   const completed=games.filter(g=>ownPick(g.id_jogo)).length;
-  const pending=games.filter(g=>!locked(g)&&!isFinished(g)&&!ownPick(g.id_jogo)).length;
-  const closed=games.filter(g=>locked(g)&&!isFinished(g)).length;
+  const postponed=games.filter(isPostponed).length;
+  const pending=games.filter(g=>!isPostponed(g)&&!locked(g)&&!isFinished(g)&&!ownPick(g.id_jogo)).length;
+  const closed=games.filter(g=>!isPostponed(g)&&locked(g)&&!isFinished(g)).length;
   const percentage=games.length?Math.round(completed/games.length*100):0;
   const round=Number($("roundSelect")?.value||0);
+  const lifecycle=roundLifecycleSummary(games);
   if($("gamesRoundTitle")) $("gamesRoundTitle").textContent=`Rodada ${round}`;
   $("roundProgress").innerHTML=`
     <div class="games-progress-stat is-done"><span class="games-progress-icon">✓</span><div><strong>${completed}</strong><b>PALPITES FEITOS</b><small>de ${games.length} jogos</small></div></div>
     <div class="games-progress-stat is-pending"><span class="games-progress-icon">◷</span><div><strong>${pending}</strong><b>PENDENTES</b><small>para palpitar</small></div></div>
-    <div class="games-progress-stat is-closed"><span class="games-progress-icon">▣</span><div><strong>${closed}</strong><b>FECHADOS</b><small>nesta rodada</small></div></div>`;
-  const counts={filterAllCount:games.length,filterOpenCount:games.filter(g=>!locked(g)).length,filterPickedCount:completed,filterFinishedCount:games.filter(isFinished).length};
+    <div class="games-progress-stat is-postponed"><span class="games-progress-icon">🟠</span><div><strong>${postponed}</strong><b>ADIADOS</b><small>${postponed?"palpites preservados":"nenhum nesta rodada"}</small></div></div>
+    <div class="games-progress-stat is-closed"><span class="games-progress-icon">▣</span><div><strong>${closed}</strong><b>FECHADOS</b><small>sem adiamentos</small></div></div>
+    ${lifecycle.isProvisional?`<div class="round-provisional-note"><strong>Rodada parcialmente concluída</strong><span>${lifecycle.concluded} de ${lifecycle.total} jogos concluídos • ${lifecycle.postponed} adiado${lifecycle.postponed===1?"":"s"}</span></div>`:""}`;
+  const counts={filterAllCount:games.length,filterOpenCount:games.filter(g=>!isPostponed(g)&&!locked(g)).length,filterPickedCount:completed,filterFinishedCount:games.filter(isFinished).length,filterPostponedCount:postponed};
   Object.entries(counts).forEach(([id,value])=>{if($(id))$(id).textContent=value;});
   if($("gamesSaveProgress")) $("gamesSaveProgress").textContent=`${completed} de ${games.length} palpites feitos`;
   if($("gamesSaveBar")) $("gamesSaveBar").style.width=`${percentage}%`;
 }
-
 function teamLogo(url,name){
   const safe=escapeHtml(name), fallback=initials(name);
   return url ? `<img src="${escapeHtml(url)}" alt="Escudo do ${safe}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove();this.parentElement.textContent='${fallback}'">` : fallback;
@@ -849,13 +878,14 @@ function filterGames(games){
   if(state.gameFilter==="open") return games.filter(g=>!locked(g));
   if(state.gameFilter==="picked") return games.filter(g=>ownPick(g.id_jogo));
   if(state.gameFilter==="finished") return games.filter(isFinished);
+  if(state.gameFilter==="postponed") return games.filter(isPostponed);
   return games;
 }
 
 function preferredOpenGameId(games){
   const visibleIds=new Set(games.map(game=>Number(game.id_jogo)));
   if(state.openGameId!=null && visibleIds.has(Number(state.openGameId))) return Number(state.openGameId);
-  const pending=games.find(game=>!locked(game) && !isFinished(game) && !ownPick(game.id_jogo));
+  const pending=games.find(game=>!isPostponed(game) && !locked(game) && !isFinished(game) && !ownPick(game.id_jogo));
   return pending ? Number(pending.id_jogo) : null;
 }
 
@@ -902,7 +932,7 @@ function nextEmptyGameCard(currentCard){
   return cards.slice(currentIndex+1).find(card=>{
     const id=Number(card.dataset.id);
     const game=state.games.find(item=>Number(item.id_jogo)===id);
-    return game && !locked(game) && !isFinished(game) && !ownPick(id) && !pickDraft(id);
+    return game && !isPostponed(game) && !locked(game) && !isFinished(game) && !ownPick(id) && !pickDraft(id);
   })||null;
 }
 
@@ -994,8 +1024,9 @@ function premiumMatchCard(g){
     </button>
     <div class="game-collapsible" style="max-height:0;opacity:0">
       <div class="game-collapsible-inner premium-game-body premium-game-body-v2">
+        ${status.key==="postponed"?`<div class="postponed-match-notice" role="status"><span aria-hidden="true">🟠</span><div><strong>Partida adiada</strong><p>Nova data ainda não definida. ${pick?"Seu palpite foi preservado e permanece bloqueado.":"O período original de palpites foi encerrado."} A pontuação será calculada quando a partida for realizada.</p></div></div>`:""}
         <div class="premium-expanded-meta">
-          <div class="premium-match-time"><strong>${premiumTime(g.inicio)}</strong><span>${escapeHtml(g.local_partida||"Local a definir")}</span><small data-game-deadline>◷ ${deadlineText(g)}</small></div>
+          <div class="premium-match-time"><strong>${status.key==="postponed"?"A definir":premiumTime(g.inicio)}</strong><span>${escapeHtml(g.local_partida||"Local a definir")}</span><small data-game-deadline>◷ ${deadlineText(g)}</small></div>
           <div class="premium-match-state"><span data-game-expanded-status>${expandedStatusLabel}</span>${!isLocked&&!finished?`<button class="premium-edit-pick" type="button" aria-label="Editar palpite">✎</button>`:""}</div>
         </div>
         <div class="premium-expanded-matchup">
@@ -1678,7 +1709,10 @@ function renderRanking(){
   const meIndex=state.ranking.findIndex(isCurrentRankingParticipant);
   const me=meIndex>=0?state.ranking[meIndex]:null;
   const completedRound=rankingCompletedRound();
-  const updatedLabel=completedRound ? `Atualizado após a rodada ${completedRound}` : "Aguardando os primeiros resultados";
+  const lifecycle=roundLifecycleSummary(state.games);
+  const updatedLabel=lifecycle.isProvisional
+    ? `Ranking provisório • ${lifecycle.concluded} de ${lifecycle.total} jogos concluídos`
+    : completedRound ? `Atualizado após a rodada ${completedRound}` : "Aguardando os primeiros resultados";
   const nextAbove=meIndex>0?state.ranking[meIndex-1]:null;
   const nextBelow=meIndex>=0&&meIndex<state.ranking.length-1?state.ranking[meIndex+1]:null;
   const leaderGap=me&&leader?Math.max(0,leader.total-me.total):0;
@@ -1688,7 +1722,7 @@ function renderRanking(){
 
   if($('rankingHero')) $('rankingHero').innerHTML=`
     <div class="ranking-hero-copy">
-      <span class="ranking-hero-kicker">🏆 CLASSIFICAÇÃO GERAL</span>
+      <span class="ranking-hero-kicker">🏆 CLASSIFICAÇÃO GERAL ${lifecycle.isProvisional?'<b class="ranking-provisional-badge">PROVISÓRIO</b>':""}</span>
       <span class="ranking-hero-greeting">${me?"Sua posição atual":"Ranking do bolão"}</span>
       <div class="ranking-hero-position"><strong>${me?rankingOrdinal(meIndex+1):"—"}</strong><span>${me?"lugar":"posição"}</span></div>
       <p>${escapeHtml(rankingGapText(me,meIndex,leader))}</p>
@@ -1701,8 +1735,8 @@ function renderRanking(){
     <article><span>Distância do líder</span><strong>${me&&leader?(leaderGap===0?"Na liderança":`-${leaderGap} pts`):"—"}</strong><small>${me&&leader?(leaderGap===0?"Melhor posição possível":"Diferença atual"):"Sem pontuação"}</small></article>
     <article><span>Participantes</span><strong>${state.ranking.length}</strong><small>${state.ranking.length===1?"competidor":"competidores"}</small></article>`;
 
-  if($('rankingRoundLabel')) $('rankingRoundLabel').textContent=completedRound?`Após a rodada ${completedRound}`:"Classificação geral";
-  if($('rankingUpdatedAt')) $('rankingUpdatedAt').innerHTML=`<span>✓ ${escapeHtml(updatedLabel)}</span><small>Os pontos são recalculados com base nos resultados registrados.</small>`;
+  if($('rankingRoundLabel')) $('rankingRoundLabel').textContent=lifecycle.isProvisional?`${lifecycle.postponed} jogo${lifecycle.postponed===1?"":"s"} adiado${lifecycle.postponed===1?"":"s"}`:completedRound?`Após a rodada ${completedRound}`:"Classificação geral";
+  if($('rankingUpdatedAt')) $('rankingUpdatedAt').innerHTML=`<span>✓ ${escapeHtml(updatedLabel)}</span><small>${lifecycle.isProvisional?"A classificação poderá mudar quando as partidas adiadas forem disputadas.":"Os pontos são recalculados com base nos resultados registrados."}</small>`;
 
   if($('myRankingCard')) $('myRankingCard').innerHTML=me?`
     <div class="my-ranking-main">
@@ -2520,6 +2554,7 @@ function adminGamePhase(game){
   const phase=gameStatusDisplay(game).key;
   if(phase==="finished" || phase==="cancelled") return "finished";
   if(phase==="live") return "live";
+  if(phase==="postponed") return "postponed";
   return "upcoming";
 }
 
@@ -2528,25 +2563,28 @@ function renderAdminRoundStatus(){
   const snapshot=state.adminSnapshot || buildAdminSnapshot();
   const games=[...snapshot.games].sort((a,b)=>new Date(a.inicio)-new Date(b.inicio));
   const now=Date.now();
-  const groups={finished:[],live:[],upcoming:[]};
+  const groups={finished:[],live:[],upcoming:[],postponed:[]};
   games.forEach(game=>groups[adminGamePhase(game,now)].push(game));
   const total=games.length;
   const finished=groups.finished.length;
   const live=groups.live.length;
   const upcoming=groups.upcoming.length;
+  const postponed=groups.postponed.length;
   const progress=total?Math.round(finished/total*100):0;
   const next=groups.upcoming[0]||null;
-  const badge=live?`${live} ao vivo`:finished===total&&total?"Concluída":upcoming?`${upcoming} pendentes`:"Sem jogos";
+  const badge=live?`${live} ao vivo`:postponed?`Parcial • ${postponed} adiado${postponed===1?"":"s"}`:finished===total&&total?"Concluída":upcoming?`${upcoming} pendentes`:"Sem jogos";
   $("adminRoundBadge").textContent=badge;
-  $("adminRoundBadge").className=`admin-round-badge ${live?"is-live":finished===total&&total?"is-finished":"is-scheduled"}`;
+  $("adminRoundBadge").className=`admin-round-badge ${live?"is-live":postponed?"is-postponed":finished===total&&total?"is-finished":"is-scheduled"}`;
 
   const metrics=`<div class="admin-round-metrics">
     <div><strong>${total}</strong><span>Total</span></div>
     <div><strong>${finished}</strong><span>Finalizados</span></div>
     <div><strong>${live}</strong><span>Em andamento</span></div>
     <div><strong>${upcoming}</strong><span>Próximos</span></div>
+    <div><strong>${postponed}</strong><span>Adiados</span></div>
   </div>`;
   const progressHtml=`<div class="admin-round-progress"><div class="admin-round-progress-label"><span>Progresso da rodada</span><strong>${finished}/${total || 0} • ${progress}%</strong></div><div class="admin-round-progress-track"><i style="width:${progress}%"></i></div></div>`;
+  const postponedHtml=postponed?`<section class="admin-postponed-games"><span class="admin-next-label">JOGOS ADIADOS</span><strong>${postponed} partida${postponed===1?"":"s"} aguardando nova data</strong><small>Palpites preservados e pontuação pendente.</small></section>`:"";
   const nextHtml=next?`<section class="admin-next-game"><span class="admin-next-label">PRÓXIMO JOGO</span><div class="admin-next-match"><strong>${escapeHtml(next.time_casa)} <span>×</span> ${escapeHtml(next.time_fora)}</strong><small>${escapeHtml(formatDate(next.inicio))}${next.local?` • ${escapeHtml(next.local)}`:""}</small></div><span class="admin-next-countdown">${formatRemaining(new Date(next.inicio).getTime()-now)}</span></section>`:`<section class="admin-next-game is-empty"><strong>${total?"Todos os jogos da rodada foram concluídos.":"Nenhum jogo cadastrado para esta rodada."}</strong></section>`;
   const gameRows=games.map(game=>{
     const phase=adminGamePhase(game,now);
@@ -2556,7 +2594,7 @@ function renderAdminRoundStatus(){
     const score=game.gols_casa!=null&&game.gols_fora!=null?`<strong class="admin-round-score">${game.gols_casa} × ${game.gols_fora}</strong>`:"";
     return `<article class="admin-round-game status-${phase}"><span class="admin-round-game-icon">${icon}</span><div class="admin-round-game-main"><strong>${escapeHtml(game.time_casa)} × ${escapeHtml(game.time_fora)}</strong><small>${escapeHtml(formatDate(game.inicio))} • ${label}</small></div>${score}</article>`;
   }).join("");
-  $("adminRoundContent").innerHTML=`${metrics}${progressHtml}${nextHtml}<details class="admin-round-details"><summary>Ver todos os jogos <span>${total}</span></summary><div class="admin-round-games">${gameRows||'<p class="muted-note">Nenhum jogo disponível.</p>'}</div></details>`;
+  $("adminRoundContent").innerHTML=`${metrics}${progressHtml}${postponedHtml}${nextHtml}<details class="admin-round-details"><summary>Ver todos os jogos <span>${total}</span></summary><div class="admin-round-games">${gameRows||'<p class="muted-note">Nenhum jogo disponível.</p>'}</div></details>`;
 }
 
 function auditGameContext(game){

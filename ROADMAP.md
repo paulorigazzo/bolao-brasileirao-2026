@@ -97,3 +97,14 @@ Identidade visual Série 4.1 refinada e implementada em Web App, PWA e documenta
 - [x] Exclusão permanente dos dados do participante no bolão.
 - [x] Confirmação destrutiva em duas etapas.
 - [x] Proteção contra exclusão do próprio administrador e de outros administradores.
+
+
+## E01.6 — Gestão Inteligente de Jogos Adiados
+
+- ✅ Palpites preservados e bloqueados.
+- ✅ Ranking provisório.
+- ✅ Rodada parcialmente concluída.
+- ✅ Cards informativos.
+- ✅ Filtro Adiados.
+- ✅ Painel administrativo de jogos pendentes.
+- 🟡 Validação contínua com os quatro casos reais atualmente adiados.

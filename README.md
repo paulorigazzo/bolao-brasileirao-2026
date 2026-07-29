@@ -4,7 +4,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 
 ## Versão atual
 
-`v6.6.0 — Projeto JARVIS`
+`v6.7.0a — Projeto JARVIS`
 
 O desenvolvimento atual está concentrado na Tela de Estatísticas. A Tela de Jogos está congelada momentaneamente na `v6.3.0d5`, salvo correção crítica.
 
@@ -64,6 +64,6 @@ A Área ADM permite excluir os dados de um participante do bolão. Antes de publ
 A Área ADM permite preparar mensagens individuais para participantes com celular cadastrado. O administrador escolhe um modelo, revisa o texto e conclui o envio manualmente no WhatsApp. Não existem histórico interno, automação ou disparos em massa.
 
 
-## Projeto JARVIS — v6.6.0
+## Projeto JARVIS — v6.7.0a
 
 JARVIS é o codinome da identidade visual oficial do Bolão. A versão aplica a marca Série 4.1 ao cabeçalho, carregamento, apresentação, favicon, PWA e compartilhamento, sem alterar funcionalidades.
