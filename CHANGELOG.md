@@ -1,3 +1,8 @@
+# v6.7.1a — Atualização de Versionamento
+
+- Identificadores oficiais do aplicativo sincronizados em `v6.7.1a`.
+- Nenhuma alteração funcional.
+
 # v6.7.1 — Limite Configurável de Participantes
 
 ## Adicionado

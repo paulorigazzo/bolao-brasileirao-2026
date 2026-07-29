@@ -4,7 +4,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 
 ## Versão atual
 
-`v6.7.1 — Projeto JARVIS`
+`v6.7.1a — Projeto JARVIS`
 
 O desenvolvimento atual está concentrado na Tela de Estatísticas. A Tela de Jogos está congelada momentaneamente na `v6.3.0d5`, salvo correção crítica.
 
