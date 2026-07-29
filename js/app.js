@@ -2370,7 +2370,7 @@ function renderAdminAttention(){
   }
   $("adminDataFreshness").textContent=`Atualizado agora • ${new Date(snapshot.updatedAt).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}`;
   const button=$("adminAttentionAction");
-  const actions={reminder:"📲 Enviar lembrete",ranking:"🏆 Ver ranking",games:"⚽ Ver jogos",participants:"👥 Ver participantes",refresh:"🔄 Atualizar agora"};
+  const actions={reminder:"📲 Enviar lembrete",ranking:"🏆 Ver Ranking Completo",games:"⚽ Ver jogos",participants:"👥 Ver participantes",refresh:"🔄 Atualizar agora"};
   button.textContent=actions[view.action]||"";
   button.dataset.action=view.action;
   show("adminAttentionAction",Boolean(actions[view.action]) && !(view.action==="participants"));
