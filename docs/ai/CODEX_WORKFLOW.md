@@ -1,102 +1,205 @@
 # Fluxo de desenvolvimento com Codex
 
-## Antes de iniciar uma tarefa
+## Finalidade
 
-- Verificar o Git status.
-- Trabalhar somente com o working tree limpo.
-- Confirmar que a branch base está atualizada.
-- Ler o `AGENTS.md` e a documentação relacionada.
-- Identificar os arquivos potencialmente afetados.
-- Apresentar um plano antes da implementação.
-- Aguardar aprovação humana.
+Este documento descreve o procedimento operacional para tarefas executadas com o Codex. As regras obrigatórias estão em `AGENTS.md`; os princípios permanentes estão em `docs/ai/DEVELOPMENT_PRINCIPLES.md`.
 
-## Implementação
+## Modos de execução
 
-- Criar uma branch específica para a tarefa.
-- Implementar somente o escopo aprovado.
-- Evitar refatorações paralelas.
-- Preservar áreas não relacionadas.
-- Executar testes e verificações.
-- Mostrar o diff completo.
-- Aguardar revisão antes do commit.
+- **Planejamento:** inspeção, análise e proposta, sem alteração de arquivos.
+- **Implementação:** alteração e validação do escopo aprovado.
+- **Publicação:** commit, push, Pull Request ou outra entrega autorizada.
+- **Recuperação:** diagnóstico e retorno a um estado seguro após falha, regressão ou interrupção.
 
-## Escopo das alterações
+Uma tarefa pode passar por mais de um modo, mas cada transição depende da autorização aplicável. Implementação não concede permissão automática para Publicação.
 
-Cada Pull Request deve conter apenas um objetivo claro.
+## Estados de uma tarefa
 
-Não misturar:
+Toda tarefa percorre os seguintes estados:
 
-- documentação;
-- refatorações;
-- correções;
-- novas funcionalidades;
+1. análise;
+2. plano;
+3. aprovação humana;
+4. implementação;
+5. validação;
+6. revisão humana;
+7. publicação autorizada, quando aplicável.
 
-na mesma Pull Request, salvo quando estritamente necessário.
+Nenhuma aprovação é presumida. Aprovar o plano não autoriza automaticamente commit, push, Pull Request ou merge.
 
-## Publicação
+## Checklist visual resumido
 
-- Confirmar os arquivos alterados.
-- Criar um commit com mensagem adequada.
-- Fazer push da branch.
-- Abrir um Pull Request, preferencialmente como Draft.
-- Aguardar os checks e o Netlify Deploy Preview.
-- Realizar validação visual ou funcional.
+```text
+[ ] Working tree limpo e branch confirmada
+[ ] Fontes da verdade lidas
+[ ] Escopo, exclusões e critérios identificados
+[ ] Plano apresentado e aprovado
+[ ] Branch específica criada
+[ ] Implementação restrita à especificação
+[ ] Diff e arquivos alterados revisados
+[ ] Validações executadas e registradas
+[ ] Revisão humana solicitada
+[ ] Publicação realizada somente se autorizada
+[ ] Merge nunca executado automaticamente
+```
+
+## 1. Análise
+
+Antes de qualquer modificação:
+
+1. executar `git status --short` e identificar a branch atual;
+2. interromper se houver alterações pendentes;
+3. ler `AGENTS.md`;
+4. ler este workflow;
+5. consultar as fontes da verdade e os arquivos relacionados ao escopo;
+6. confirmar o estado atual da funcionalidade ou documentação;
+7. identificar arquivos potencialmente afetados, exclusões, riscos e critérios de aceite.
+
+Se a documentação e o repositório divergirem, registrar a inconsistência e não improvisar uma solução.
+
+## 2. Plano
+
+O plano deve declarar:
+
+- objetivo;
+- abordagem;
+- arquivos potencialmente alterados;
+- áreas explicitamente preservadas;
+- validações previstas;
+- impactos em versão, changelog, release e roadmap;
+- ações Git previstas.
+
+O agente deve aguardar aprovação humana explícita antes de editar arquivos.
+
+Se a aprovação alterar branch, escopo ou validações, incorporar os ajustes antes de iniciar.
+
+## 3. Preparação da branch
+
+Após a aprovação:
+
+1. confirmar novamente que o working tree está limpo;
+2. partir da `main` atualizada, conforme orientação humana;
+3. criar uma branch apropriada:
+   - `feature/*` para funcionalidades;
+   - `fix/*` para correções;
+   - `docs/*` para documentação;
+   - `hotfix/*` para correções urgentes.
+
+Não trocar de branch descartando alterações existentes.
+
+## 4. Implementação
+
+- Alterar somente os arquivos e comportamentos aprovados.
+- Preservar código e documentação não relacionados.
+- Preferir mudanças pequenas e reversíveis.
+- Não introduzir dependências, migrações ou mudanças de infraestrutura sem aprovação específica.
+- Não corrigir problemas incidentais fora do escopo; registrá-los para decisão humana.
+- Reavaliar o plano se surgir risco ou impacto não previsto.
+
+### Tarefas exclusivamente documentais
+
+- Não alterar código, SQL, Supabase, Netlify ou funcionalidades.
+- Manter versão, changelog e roadmap inalterados, salvo necessidade prevista no plano ou nova aprovação.
+- Evitar duplicação e estabelecer links claros entre documentos.
+- Verificar títulos, hierarquia, caminhos, consistência terminológica e codificação UTF-8.
+
+## 5. Validação
+
+Aplicar validação proporcional:
+
+### Código ou configuração
+
+```powershell
+npm run check
+```
+
+Executar também testes específicos do escopo.
+
+### Impacto funcional ou visual
+
+```powershell
+netlify dev
+```
+
+Validar manualmente o fluxo afetado em `http://localhost:8888`.
+
+### Somente documentação
+
+- revisar o diff;
+- verificar os arquivos alterados com Git;
+- conferir links e referências;
+- confirmar que nenhum arquivo fora do escopo mudou;
+- executar `npm run check` quando solicitado ou pertinente ao conjunto de verificações do projeto.
+
+Falhas devem ser relatadas com o comando, a causa conhecida e o impacto. Não mascarar resultados.
+
+## 6. Entrega para revisão
+
+Antes de solicitar revisão humana, apresentar:
+
+- branch atual;
+- arquivos modificados;
+- resumo por arquivo;
+- áreas preservadas;
+- validações executadas e seus resultados;
+- critérios de aceite atendidos;
+- limitações, riscos ou pendências;
+- diff completo ou uma forma objetiva de revisá-lo.
+
+O agente deve parar nesse ponto quando a tarefa pedir revisão antes da publicação.
+
+## 7. Commit, push e Pull Request
+
+Somente executar cada ação quando houver autorização explícita:
+
+1. revisar o escopo do stage;
+2. criar commit com mensagem objetiva;
+3. fazer push da branch;
+4. abrir Pull Request, preferencialmente como Draft;
+5. acompanhar checks e Netlify Deploy Preview quando aplicável.
+
+Arquivos temporários não devem entrar no commit.
+
+## 8. Merge e encerramento
+
 - Nunca fazer merge automaticamente.
-- Excluir a branch após o merge.
-- Atualizar a `main` local.
+- O merge depende de revisão humana.
+- Após o merge, confirmar o estado da `main` e do deploy quando solicitado.
+- Excluir branches somente com autorização ou conforme processo humano estabelecido.
 
 ## Responsabilidades
 
-### ChatGPT
+### Humano
 
-- Definição funcional.
-- Arquitetura.
-- UX.
-- Critérios de aceite.
-- Revisão.
+- define objetivo e critérios;
+- aprova plano e mudanças de escopo;
+- revisa a entrega;
+- autoriza publicação;
+- decide o merge.
 
 ### Codex
 
-- Análise do repositório.
-- Implementação.
-- Testes.
-- Diff.
-- Commit, push e criação do Pull Request após aprovação.
+- inspeciona o repositório;
+- identifica riscos e inconsistências;
+- propõe o plano;
+- implementa o escopo aprovado;
+- valida e apresenta evidências;
+- interrompe diante de bloqueios ou necessidade de nova decisão.
 
-### Humano
+### ChatGPT ou responsável funcional
 
-- Aprovação do plano.
-- Teste funcional.
-- Revisão do Pull Request.
-- Decisão de merge.
+- pode apoiar definição funcional, arquitetura, UX e critérios de aceite;
+- não substitui a fonte da verdade registrada no repositório nem a aprovação humana exigida.
 
-## Regras de segurança aprendidas
+## Condições de interrupção
 
-- O botão Undo do Codex não substitui a verificação do Git status.
-- Nunca iniciar uma nova tarefa com alterações pendentes.
-- Verificar se o GitHub CLI está instalado e autenticado antes de operações remotas.
-- Arquivos temporários usados para montar Pull Requests não devem ser incluídos no commit.
-- Parar diante de erros ou dependências ausentes, sem improvisar.
-- Nunca fazer merge sem revisão humana.
+Interromper a execução quando:
 
-## Histórico de validação
+- o working tree não estiver limpo antes da tarefa;
+- houver conflito entre instruções;
+- o escopo necessário exceder o aprovado;
+- surgir risco a dados, produção, autenticação ou regras protegidas;
+- uma dependência essencial estiver ausente;
+- os critérios de aceite forem insuficientes para uma decisão segura.
 
-### 2026-07-29
-
-Este fluxo foi validado pela primeira vez durante a integração do Codex ao projeto.
-
-Fluxo validado:
-
-- Análise
-- Plano
-- Aprovação humana
-- Branch dedicada
-- Implementação
-- `npm run check`
-- Revisão do diff
-- Commit
-- Push
-- Pull Request
-- Netlify Deploy Preview
-- Revisão humana
-- Merge
+Descrever o bloqueio e aguardar orientação, sem improvisar.
