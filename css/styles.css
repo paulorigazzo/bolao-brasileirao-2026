@@ -3855,3 +3855,18 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 .admin-whatsapp-message-label textarea{width:100%;box-sizing:border-box;resize:vertical;min-height:150px;padding:13px 14px;border:1px solid var(--border,#ccd8d0);border-radius:12px;font:inherit;line-height:1.45;background:#fff;color:#17231c}
 .admin-whatsapp-note{margin:0;color:var(--text-muted,#607067);font-size:.86rem}
 @media(max-width:600px){.admin-whatsapp-templates{grid-template-columns:1fr}.admin-member-actions .admin-member-whatsapp{flex:1 1 100%}.admin-whatsapp-modal{padding:18px}}
+
+
+/* v6.7.0a — Gestão Inteligente de Jogos Adiados */
+.games-premium-progress{grid-template-columns:repeat(4,minmax(0,1fr))}
+.games-progress-stat.is-postponed{border-color:rgba(242,164,65,.28);background:rgba(242,164,65,.08)}
+.round-provisional-note{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid rgba(242,164,65,.25);border-radius:14px;background:rgba(242,164,65,.08)}
+.round-provisional-note strong{color:#f2b65d}.round-provisional-note span{color:var(--muted)}
+.postponed-match-notice{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;padding:14px;border:1px solid rgba(242,164,65,.28);border-radius:14px;background:rgba(242,164,65,.09)}
+.postponed-match-notice>span{font-size:1.25rem}.postponed-match-notice strong{display:block;color:#f2b65d;margin-bottom:3px}.postponed-match-notice p{margin:0;color:var(--muted);line-height:1.45}
+.ranking-provisional-badge{display:inline-flex;margin-left:8px;padding:3px 7px;border-radius:999px;background:rgba(242,164,65,.16);color:#f2b65d;font-size:.62rem;letter-spacing:.08em}
+.admin-round-badge.is-postponed{background:rgba(242,164,65,.14);color:#f2b65d;border-color:rgba(242,164,65,.3)}
+.admin-postponed-games{display:flex;flex-direction:column;gap:4px;margin:14px 0;padding:14px;border:1px solid rgba(242,164,65,.25);border-radius:14px;background:rgba(242,164,65,.08)}
+.admin-postponed-games strong{color:#f2b65d}.admin-postponed-games small{color:var(--muted)}
+.admin-round-game.status-postponed{border-left-color:#f2a441}
+@media(max-width:700px){.games-premium-progress{grid-template-columns:repeat(2,minmax(0,1fr))}.round-provisional-note{flex-direction:column}}

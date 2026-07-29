@@ -1,3 +1,15 @@
+# v6.7.0a — Gestão Inteligente de Jogos Adiados
+
+## Adicionado
+- Estado consolidado de rodada com status parcial e indicador provisório.
+- Filtro de partidas adiadas.
+- Comunicação específica nos cards, Ranking e Administração.
+
+## Corrigido
+- Jogos adiados deixam de ser contados como fechados ou próximos.
+- Jogos adiados não são abertos automaticamente para palpite.
+- Palpites permanecem bloqueados após o adiamento, inclusive quando a API alterar a data.
+
 # v6.6.0 — Projeto JARVIS
 
 - Nova identidade visual oficial baseada na Série 4.1.
