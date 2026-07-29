@@ -66,4 +66,6 @@ A Área ADM permite preparar mensagens individuais para participantes com celula
 
 ## Projeto JARVIS — v6.7.0a
 
+- Área ADM: card de partidas adiadas expansível, com detalhes de confronto, programação e local.
+
 JARVIS é o codinome da identidade visual oficial do Bolão. A versão aplica a marca Série 4.1 ao cabeçalho, carregamento, apresentação, favicon, PWA e compartilhamento, sem alterar funcionalidades.

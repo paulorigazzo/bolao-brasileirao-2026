@@ -2584,7 +2584,39 @@ function renderAdminRoundStatus(){
     <div><strong>${postponed}</strong><span>Adiados</span></div>
   </div>`;
   const progressHtml=`<div class="admin-round-progress"><div class="admin-round-progress-label"><span>Progresso da rodada</span><strong>${finished}/${total || 0} • ${progress}%</strong></div><div class="admin-round-progress-track"><i style="width:${progress}%"></i></div></div>`;
-  const postponedHtml=postponed?`<section class="admin-postponed-games"><span class="admin-next-label">JOGOS ADIADOS</span><strong>${postponed} partida${postponed===1?"":"s"} aguardando nova data</strong><small>Palpites preservados e pontuação pendente.</small></section>`:"";
+  const postponedRows=groups.postponed.map(game=>{
+    const kickoff=new Date(game.inicio);
+    const hasValidKickoff=Number.isFinite(kickoff.getTime());
+    const originalDate=hasValidKickoff
+      ? kickoff.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric"})
+      : "Não informada";
+    const originalTime=hasValidKickoff
+      ? kickoff.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})
+      : "Não informado";
+    const venue=game.local_partida||game.local||"Local a definir";
+    const round=Number.isFinite(Number(game.rodada))?`Rodada ${Number(game.rodada)}`:"Rodada a definir";
+    return `<article class="admin-postponed-game">
+      <div class="admin-postponed-matchup">
+        <span class="admin-postponed-team">${teamLogo(game.time_casa_logo,game.time_casa)}<strong>${escapeHtml(game.time_casa||"Mandante a definir")}</strong></span>
+        <span class="admin-postponed-versus">×</span>
+        <span class="admin-postponed-team is-away">${teamLogo(game.time_fora_logo,game.time_fora)}<strong>${escapeHtml(game.time_fora||"Visitante a definir")}</strong></span>
+      </div>
+      <div class="admin-postponed-meta">
+        <span><b>📅 Nova data:</b> a definir</span>
+        <span><b>◷ Novo horário:</b> a definir</span>
+        <span><b>⌖ Local:</b> ${escapeHtml(venue)}</span>
+        <span><b>🏁 ${escapeHtml(round)}</b></span>
+      </div>
+      <small class="admin-postponed-original">Programação original: ${escapeHtml(originalDate)} às ${escapeHtml(originalTime)}. Palpite preservado e pontuação pendente.</small>
+    </article>`;
+  }).join("");
+  const postponedHtml=postponed?`<details class="admin-postponed-games">
+    <summary>
+      <span><span class="admin-next-label">JOGOS ADIADOS</span><strong>${postponed} partida${postponed===1?"":"s"} aguardando nova data</strong><small>Toque para ver partidas, datas, horários e locais.</small></span>
+      <span class="admin-postponed-toggle" aria-hidden="true">⌄</span>
+    </summary>
+    <div class="admin-postponed-list">${postponedRows}</div>
+  </details>`:"";
   const nextHtml=next?`<section class="admin-next-game"><span class="admin-next-label">PRÓXIMO JOGO</span><div class="admin-next-match"><strong>${escapeHtml(next.time_casa)} <span>×</span> ${escapeHtml(next.time_fora)}</strong><small>${escapeHtml(formatDate(next.inicio))}${next.local?` • ${escapeHtml(next.local)}`:""}</small></div><span class="admin-next-countdown">${formatRemaining(new Date(next.inicio).getTime()-now)}</span></section>`:`<section class="admin-next-game is-empty"><strong>${total?"Todos os jogos da rodada foram concluídos.":"Nenhum jogo cadastrado para esta rodada."}</strong></section>`;
   const gameRows=games.map(game=>{
     const phase=adminGamePhase(game,now);

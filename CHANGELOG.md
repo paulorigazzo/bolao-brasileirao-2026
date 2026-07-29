@@ -1,6 +1,7 @@
 # v6.7.0a — Gestão Inteligente de Jogos Adiados
 
 ## Adicionado
+- Card expansível na Área ADM com detalhamento das partidas adiadas, incluindo confrontos, programação original e local.
 - Estado consolidado de rodada com status parcial e indicador provisório.
 - Filtro de partidas adiadas.
 - Comunicação específica nos cards, Ranking e Administração.
