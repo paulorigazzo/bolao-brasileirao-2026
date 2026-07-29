@@ -1,4 +1,9 @@
-6.7.1a
+6.7.1b
+
+# v6.7.1b — Indicação Visual no Card Meu Time 2.0
+
+- Restaura o chevron permanente que identifica o card principal da tela Meu Time como clicável.
+- Preserva o destino do card, a navegação por teclado e o comportamento das demais telas.
 
 # v6.7.1a — Atualização de Versionamento
 

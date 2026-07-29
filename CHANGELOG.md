@@ -1,3 +1,10 @@
+# v6.7.1b — Indicação Visual no Card Meu Time 2.0
+
+## Corrigido
+- Restaura o chevron permanente no card principal da tela Meu Time.
+- Mantém clique, toque, foco por teclado e navegação para a tabela do campeonato.
+- Nenhum outro card, regra de negócio ou fluxo foi alterado.
+
 # v6.7.1a — Atualização de Versionamento
 
 - Identificadores oficiais do aplicativo sincronizados em `v6.7.1a`.
