@@ -3876,3 +3876,15 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 @media(max-width:520px){.admin-postponed-games>summary{align-items:flex-start}.admin-postponed-meta{grid-template-columns:1fr}.admin-postponed-team strong{font-size:.72rem}.admin-postponed-crest{width:26px;height:26px;min-width:26px;max-width:26px;min-height:26px;max-height:26px;flex-basis:26px}.admin-postponed-crest>img{max-width:22px;max-height:22px}}
 .admin-round-game.status-postponed{border-left-color:#f2a441}
 @media(max-width:700px){.games-premium-progress{grid-template-columns:repeat(2,minmax(0,1fr))}.round-provisional-note{flex-direction:column}}
+
+/* v6.7.0b — E01.7 Consolidação da Integridade da Rodada */
+.segment-postponed{background:#f2a441}.segment-cancelled{background:#7f8b94}
+.premium-round-stats.integrity-stats{grid-template-columns:repeat(4,1fr)}
+.premium-round-stats .is-postponed i{color:#f2a441;background:rgba(242,164,65,.12)}
+.round-integrity-state{margin:7px 0 0;color:var(--muted);font-size:.76rem}.round-integrity-state b{display:inline-grid;place-items:center;width:19px;height:19px;border-radius:50%;background:rgba(255,255,255,.08);color:#f2a441;margin-right:4px}
+.round-integrity-note{margin:0;padding:0 22px 18px;color:var(--muted);font-size:.73rem;line-height:1.45}
+.integrity-tone-finished .round-integrity-state b{color:#3bc676}.integrity-tone-live .round-integrity-state b{color:var(--premium-red)}
+.stats-hero-kicker{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.stats-integrity-badge{display:inline-flex;align-items:center;min-height:22px;padding:3px 8px;border-radius:999px;font-size:.58rem;font-weight:900;letter-spacing:.08em;background:rgba(255,255,255,.08);color:var(--muted)}
+.stats-integrity-badge.tone-partial{background:rgba(242,164,65,.16);color:#f2b65d}.stats-integrity-badge.tone-live{background:rgba(255,79,85,.14);color:#ff7c80}.stats-integrity-badge.tone-finished{background:rgba(59,198,118,.14);color:#60d993}.stats-integrity-badge.tone-open{background:rgba(77,141,255,.14);color:#82adff}
+.admin-round-integrity{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:14px 0;padding:14px 16px;border:1px solid rgba(255,255,255,.09);border-radius:14px;background:rgba(255,255,255,.035)}.admin-round-integrity div{display:grid;gap:3px}.admin-round-integrity small,.admin-round-integrity span{color:var(--muted);font-size:.7rem}.admin-round-integrity strong{font-size:.93rem}.admin-round-integrity>b{font-size:.61rem;letter-spacing:.07em;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.07)}.admin-round-integrity.tone-partial{border-color:rgba(242,164,65,.25)}.admin-round-integrity.tone-partial>b{color:#f2b65d;background:rgba(242,164,65,.12)}.admin-round-integrity.tone-finished>b{color:#60d993;background:rgba(59,198,118,.12)}
+@media(max-width:620px){.premium-round-stats.integrity-stats{grid-template-columns:repeat(2,1fr);row-gap:14px}.premium-round-stats.integrity-stats>div:nth-child(2){border-right:0}.admin-round-integrity{align-items:flex-start;flex-direction:column}.round-integrity-note{padding:0 15px 16px}}

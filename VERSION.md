@@ -1,11 +1,10 @@
-6.7.0a-r2
+6.7.0b
 
-# v6.7.0b-r2 — Gestão Inteligente de Jogos Adiados
+# v6.7.0b — Consolidação da Integridade da Rodada
 
-- Palpites de partidas adiadas permanecem preservados e bloqueados.
-- Ranking passa a ser identificado como provisório enquanto houver adiamentos.
-- Rodadas exibem contagem própria de jogos adiados.
-- Cards explicam nova data indefinida e pontuação pendente.
-- Área administrativa separa jogos adiados dos próximos jogos.
-- Card de jogos adiados expansível com confronto, data e horário originais, rodada e local.
-- Filtro específico **Adiados** adicionado à tela de Jogos.
+- Fonte única de estado por `roundLifecycleSummary()`.
+- Home consolida o antigo Status geral como Integridade da Rodada.
+- Estados finalizado, ao vivo, adiado, cancelado e futuro são apresentados separadamente.
+- Estatísticas indicam dados provisórios, em andamento ou consolidados.
+- Área ADM exibe o estado esportivo e a condição provisória da pontuação.
+- Regras de pontuação, banco de dados e integrações permanecem inalterados.

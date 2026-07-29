@@ -1,6 +1,16 @@
+# v6.7.0b — Consolidação da Integridade da Rodada
 
-## v6.7.0b
-- E01.7 Consolidação da Integridade da Rodada (planejamento inicial).
+## Adicionado
+- Apresentação centralizada dos estados da rodada a partir de `roundLifecycleSummary()`.
+- Card Integridade da Rodada na Home, evoluindo o componente já existente.
+- Segmentos e contagens próprias para partidas adiadas e canceladas.
+- Selo de integridade na tela de Estatísticas.
+- Resumo operacional da integridade na Área ADM.
+
+## Ajustado
+- Jogos adiados deixam de compor a contagem de partidas futuras na Home.
+- Próximo jogo ignora partidas adiadas e canceladas.
+- Mensagens de dados provisórios são exibidas somente quando aplicáveis.
 
 # v6.7.0a-r2 — Correção dos Escudos no Card de Jogos Adiados
 

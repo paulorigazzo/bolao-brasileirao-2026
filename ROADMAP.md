@@ -110,4 +110,10 @@ Identidade visual Série 4.1 refinada e implementada em Web App, PWA e documenta
 - 🟡 Validação contínua com os quatro casos reais atualmente adiados.
 
 
-- v6.7.0b: Consolidação da Integridade da Rodada.
+## E01.7 — Consolidação da Integridade da Rodada
+
+**Status: 🟢 Concluído**
+
+- Fonte única de ciclo de vida da rodada.
+- Integridade consolidada na Home, Estatísticas e Área ADM.
+- Distinção visual entre jogos finalizados, ao vivo, futuros, adiados e cancelados.
