@@ -1654,7 +1654,7 @@ function renderHome(){
 
   const medals=["🥇","🥈","🥉"];
   $("homeRankingSection").innerHTML=`<article class="premium-feature-card premium-ranking-card home-navigable-card" role="button" tabindex="0" data-home-action="ranking" aria-label="Abrir ranking completo">
-    <header class="premium-card-header"><div><span class="premium-kicker">🏆 CLASSIFICAÇÃO</span><h2>Top 3 do bolão</h2></div><span class="premium-inline-action">Ver ranking completo <b>›</b></span></header>
+    <header class="premium-card-header"><div><span class="premium-kicker">🏆 CLASSIFICAÇÃO</span><h2>Top 3 do bolão</h2></div><span class="premium-inline-action">Ver Ranking Completo <b>›</b></span></header>
     <div class="home-ranking-list">${state.ranking.slice(0,3).map((item,index)=>`<div class="home-ranking-row ${isCurrentRankingParticipant(item)?"is-me":""}"><span class="home-medal">${medals[index]}</span>${rankingAvatar(item.name)}<div><strong>${escapeHtml(item.name)}${isCurrentRankingParticipant(item)?' <em class="home-you-badge">VOCÊ</em>':''}</strong><small>${isCurrentRankingParticipant(item)?"Sua posição atual":"Participante"}</small></div><b>${item.total} pts</b><span class="row-chevron" aria-hidden="true">›</span></div>`).join("")||'<p class="muted-note">A classificação aparecerá após os primeiros resultados.</p>'}</div>
   </article>`;
 
