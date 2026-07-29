@@ -16,6 +16,25 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 - 🔵 Planejado: aprovado como direção, ainda não implementado.
 - 🔮 Longo prazo: visão futura, sem compromisso de versão.
 
+## Priorização por Quick Wins
+
+A classificação considera valor percebido, esforço restante e reaproveitamento do código existente:
+
+- **QW1:** máximo retorno com baixo ou médio esforço;
+- **QW2:** retorno muito alto com esforço moderado;
+- **QW3:** bom candidato, mas com dependências ou esforço maior;
+- **LP:** longo prazo ou mudança estrutural.
+
+Prioridade funcional:
+
+1. **QW1 — E04.1:** resumo determinístico da rodada;
+2. **QW1:** compartilhamento aprimorado de ranking e resumo;
+3. **QW1:** exportação CSV/Excel para administração;
+4. **QW2:** histórico consolidado por rodada;
+5. **QW2:** rankings analíticos e comparações entre participantes.
+
+O pipeline de qualidade no GitHub Actions é um **QW1 técnico** e pode evoluir em paralelo, sem substituir a prioridade funcional. A matriz detalhada está em [`docs/BACKLOG.md`](docs/BACKLOG.md).
+
 ## E01 — Base funcional e operação
 
 - ✅ Login Google e autorização de participantes.
@@ -57,11 +76,11 @@ Esses recursos não utilizam IA generativa. Métricas e conclusões são calcula
 
 ## E04 — Inteligência narrativa
 
-- 🔵 E04.1 — Resumo determinístico da rodada com dados rastreáveis.
+- 🔵 **QW1 — E04.1:** Resumo determinístico da rodada com dados rastreáveis.
 - 🔵 E04.2 — Narrativa assistida por IA sobre métricas verificadas.
 - 🔵 Explicação das mudanças no ranking.
 - 🔵 Destaques e curiosidades da rodada.
-- 🔵 Texto revisável para compartilhamento individual.
+- 🔵 **QW1:** Texto determinístico e revisável para compartilhamento individual.
 
 Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e deve indicar origem e limitações.
 
@@ -78,8 +97,9 @@ Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e 
 
 - 🔵 Ligas paralelas e múltiplos bolões.
 - 🔵 Convites e gestão por liga.
-- 🔵 Recursos sociais e comparações ampliadas.
-- 🔵 Pipeline automatizado de qualidade e releases.
+- 🔵 **QW2:** Recursos sociais e comparações ampliadas.
+- 🔵 **QW1 técnico:** Pipeline inicial de qualidade no GitHub Actions.
+- 🔵 Pipeline automatizado de releases.
 - 🔮 Simulações e recursos preditivos.
 - 🔮 Aplicativo nativo.
 

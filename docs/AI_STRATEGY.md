@@ -37,9 +37,11 @@ Diagnóstico, auditoria, integridade e pendências usam regras tradicionais. Exp
 
 Resumos de rodada, mudanças no ranking, destaques e textos revisáveis devem partir de fatos calculados pelo sistema.
 
+A E04.1 é classificada como **QW1** porque integridade da rodada, ranking, histórico e estatísticas já existem. A primeira entrega deve apenas consolidar esses fatos em um modelo determinístico e rastreável.
+
 ### Copiloto do Bolão
 
-**Status:** 🔵 Planejado.
+**Status:** 🔮 Longo prazo após E04.
 
 Deve começar com perguntas predefinidas e evoluir para linguagem natural somente após a camada narrativa estar validada.
 
@@ -70,8 +72,9 @@ Simulações e probabilidades devem ser opcionais, explicáveis e claramente dif
 ## Sequência
 
 1. E04.1 — resumo determinístico da rodada.
-2. E04.2 — narrativa assistida por IA.
-3. E05.1 — perguntas predefinidas.
-4. E05.2 — linguagem natural.
-5. E05.3 — contexto por tela.
-6. Avaliação futura de recursos preditivos.
+2. Compartilhamento determinístico e revisável.
+3. E04.2 — narrativa assistida por IA.
+4. E05.1 — perguntas predefinidas.
+5. E05.2 — linguagem natural.
+6. E05.3 — contexto por tela.
+7. Avaliação futura de recursos preditivos.

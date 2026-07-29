@@ -12,23 +12,33 @@ Este documento descreve a sequência futura sem reservar números de versão ant
 
 ### E03.9 — Consolidação documental
 
-**Status:** em preparação.
+**Status:** concluído.
 
 - alinhar documentação ao código existente;
 - consolidar uma única fonte de roadmap;
 - separar estado atual, histórico e visão futura.
 
+### Priorização dos Quick Wins
+
+**Status:** concluída.
+
+- remover itens já entregues do backlog ativo;
+- classificar o esforço restante e o valor percebido;
+- manter E04.1 como próximo Quick Win funcional;
+- permitir Quick Wins técnicos em paralelo sem substituir a prioridade do produto.
+
 ### E04.1 — Resumo determinístico da rodada
 
-**Status:** planejado.
+**Status:** próximo — QW1.
 
 - definir fatos e métricas rastreáveis;
 - produzir resumo sem modelo generativo;
 - validar resultados e estados incompletos.
+- preparar texto determinístico e revisável para compartilhamento.
 
 ### E04.2 — Inteligência narrativa
 
-**Status:** planejado.
+**Status:** planejado — depende da E04.1.
 
 - explicar métricas verificadas;
 - registrar origem e período dos dados;
@@ -36,7 +46,7 @@ Este documento descreve a sequência futura sem reservar números de versão ant
 
 ### E05 — Copiloto do Bolão
 
-**Status:** planejado.
+**Status:** longo prazo após E04.
 
 - começar por perguntas predefinidas;
 - evoluir para linguagem natural;
@@ -44,6 +54,11 @@ Este documento descreve a sequência futura sem reservar números de versão ant
 
 ## Entregas posteriores
 
+- compartilhamento aprimorado de ranking e resumo;
+- exportação CSV/Excel para administração;
+- histórico consolidado por rodada;
+- rankings analíticos e comparações;
+- GitHub Actions e testes ampliados em trilha técnica paralela;
 - conclusão da PWA com service worker e cache offline;
 - calendário consolidado;
 - dark mode;
