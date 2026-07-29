@@ -3,6 +3,7 @@ import { MOTION, installMotionTokens, installMotionInteractions, installFirstVis
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
 const APP_VERSION = "6.7.0b";
+const BUILD_TIME = "00:24";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -13,7 +14,7 @@ let matchClockRefreshTimer=null;
 let liveScoreRefreshTimer=null;
 const $ = id => document.getElementById(id);
 const show = (id, visible=true) => $(id)?.classList.toggle("hidden", !visible);
-if ($("appVersion")) $("appVersion").textContent = `v${APP_VERSION}`;
+if ($("appVersion")) $("appVersion").textContent = `v${APP_VERSION} • Build ${BUILD_TIME}`;
 const initials = name => String(name||"?").split(/\s+/).map(x=>x[0]).join("").slice(0,3).toUpperCase();
 const escapeHtml = value => String(value ?? "").replace(/[&<>'"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
 const formatDate = value => new Date(value).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
