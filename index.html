@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.7.0a-r2">
-  <link rel="stylesheet" href="./css/styles.css?v=6.7.0a-r2">
-  <link rel="stylesheet" href="./css/components.css?v=6.7.0a-r2">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.7.0a-r2">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.7.0a-r2">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.7.0a-r2">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.7.0b">
+  <link rel="stylesheet" href="./css/styles.css?v=6.7.0b">
+  <link rel="stylesheet" href="./css/components.css?v=6.7.0b">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.7.0b">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.7.0b">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.7.0b">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.7.0a</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.7.0b</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -232,7 +232,7 @@
       <section id="statsTab" class="tab-content hidden">
         <div class="stats-hero card">
           <div>
-            <span class="eyebrow">ESTATÍSTICAS PREMIUM</span>
+            <div class="stats-hero-kicker"><span class="eyebrow">ESTATÍSTICAS PREMIUM</span><span id="statsIntegrityBadge" class="stats-integrity-badge">PARCIAL</span></div>
             <h2>Meu desempenho</h2>
             <p id="statsSummaryText">Acompanhe sua evolução no bolão.</p>
           </div>
@@ -589,6 +589,6 @@
       if(heroButton) heroButton.textContent="Entrar e solicitar participação";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.7.0a-r2"></script>
+  <script type="module" src="./js/app.js?v=6.7.0b"></script>
 </body>
 </html>

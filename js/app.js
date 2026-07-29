@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.7.0a";
+const APP_VERSION = "6.7.0b";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -839,6 +839,14 @@ function roundLifecycleSummary(games){
   return {...counts,concluded,completion,status,isProvisional:counts.postponed>0};
 }
 
+function roundLifecyclePresentation(summary){
+  const data=summary||roundLifecycleSummary([]);
+  if(data.status==="FINISHED") return {label:"Rodada concluída",tone:"finished",icon:"✓",message:"Resultados e pontuações consolidados."};
+  if(data.status==="PARTIAL") return {label:"Rodada parcialmente concluída",tone:"partial",icon:"!",message:"Pontuação provisória enquanto houver partidas pendentes."};
+  if(data.status==="IN_PROGRESS") return {label:"Rodada em andamento",tone:"live",icon:"●",message:"Resultados e pontuações ainda podem mudar."};
+  return {label:"Rodada aberta",tone:"open",icon:"◷",message:"Partidas ainda não iniciadas."};
+}
+
 function renderRoundProgress(games){
   const completed=games.filter(g=>ownPick(g.id_jogo)).length;
   const postponed=games.filter(isPostponed).length;
@@ -1565,10 +1573,12 @@ function renderHome(){
 
   const openGames=roundGames.filter(game=>!locked(game) && !isFinished(game));
   const pending=openGames.filter(game=>!ownPick(game.id_jogo));
+  const lifecycle=roundLifecycleSummary(roundGames);
+  const lifecycleView=roundLifecyclePresentation(lifecycle);
   const live=roundGames.filter(game=>gameStatusDisplay(game).key==="live");
   const finished=roundGames.filter(isScorableGame);
-  const futureCount=Math.max(0,roundGames.length-finished.length-live.length);
-  const nextGame=state.games.filter(game=>!isFinished(game) && new Date(game.inicio).getTime()>now).sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
+  const futureCount=lifecycle.future;
+  const nextGame=state.games.filter(game=>!isFinished(game) && !isPostponed(game) && gameStatusDisplay(game).key!=="cancelled" && new Date(game.inicio).getTime()>now).sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
   const nextPending=[...pending].sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
 
   let priority;
@@ -1576,7 +1586,7 @@ function renderHome(){
     priority={tone:"warning",badge:"ATENÇÃO",icon:"📋",title:`Faltam ${pending.length} ${pending.length===1?"palpite":"palpites"}`,subtitle:`para a Rodada ${round}`,meta:nextPending?`Fecha ${homeDeadline(nextPending)}`:"Complete antes do fechamento",action:"games",label:"Fazer palpites"};
   }else if(live.length){
     priority={tone:"live",badge:"AO VIVO",icon:"🔥",title:`${live.length} ${live.length===1?"jogo ao vivo":"jogos ao vivo"}`,subtitle:"A rodada está acontecendo",meta:"Acompanhe os placares em tempo real",action:"games",label:"Acompanhar jogos"};
-  }else if(roundGames.length && finished.length===roundGames.length){
+  }else if(roundGames.length && lifecycle.status==="FINISHED"){
     priority={tone:"gold",badge:"RODADA ENCERRADA",icon:"🏆",title:`Rodada ${round} concluída`,subtitle:`Você fez ${me.total} ${me.total===1?"ponto":"pontos"}`,meta:"Confira sua posição final na rodada",action:"ranking",label:"Ver resultado"};
   }else{
     priority={tone:"success",badge:"TUDO EM DIA",icon:"✓",title:"Palpites completos",subtitle:`Rodada ${round}`,meta:nextGame?`Próximo: ${nextGame.time_casa} × ${nextGame.time_fora}`:"Nenhuma ação necessária agora",action:"games",label:"Ver jogos"};
@@ -1631,11 +1641,12 @@ function renderHome(){
     $("homeLiveSection").innerHTML="";
   }
 
-  const roundPercent=roundGames.length?Math.round(finished.length/roundGames.length*100):0;
-  $("homeRoundSection").innerHTML=`<article class="premium-feature-card premium-round-card home-navigable-card" role="button" tabindex="0" data-home-action="games" aria-label="Abrir jogos da rodada">
-    <header class="premium-card-header"><div><span class="premium-kicker">📅 RODADA ${round}</span><h2>Status geral</h2></div><span class="premium-inline-action">Abrir rodada <b>›</b></span></header>
-    <div class="premium-segment-progress"><span class="segment-finished" style="width:${roundGames.length?finished.length/roundGames.length*100:0}%"></span><span class="segment-live" style="width:${roundGames.length?live.length/roundGames.length*100:0}%"></span><span class="segment-future" style="width:${roundGames.length?futureCount/roundGames.length*100:0}%"></span></div>
-    <div class="premium-round-stats"><div class="is-finished"><i>✓</i><strong>${finished.length}</strong><span>finalizados</span></div><div class="is-live"><i>◉</i><strong>${live.length}</strong><span>ao vivo</span></div><div class="is-future"><i>◷</i><strong>${futureCount}</strong><span>futuros</span></div></div>
+  const roundPercent=lifecycle.completion;
+  $("homeRoundSection").innerHTML=`<article class="premium-feature-card premium-round-card home-navigable-card integrity-tone-${lifecycleView.tone}" role="button" tabindex="0" data-home-action="games" aria-label="Abrir jogos da rodada">
+    <header class="premium-card-header"><div><span class="premium-kicker">📅 RODADA ${round}</span><h2>Integridade da Rodada</h2><p class="round-integrity-state"><b>${lifecycleView.icon}</b> ${lifecycleView.label} · ${roundPercent}% concluída</p></div><span class="premium-inline-action">Abrir rodada <b>›</b></span></header>
+    <div class="premium-segment-progress" aria-label="Progresso esportivo da rodada"><span class="segment-finished" style="width:${roundGames.length?lifecycle.finished/roundGames.length*100:0}%"></span><span class="segment-live" style="width:${roundGames.length?lifecycle.live/roundGames.length*100:0}%"></span><span class="segment-postponed" style="width:${roundGames.length?lifecycle.postponed/roundGames.length*100:0}%"></span><span class="segment-cancelled" style="width:${roundGames.length?lifecycle.cancelled/roundGames.length*100:0}%"></span><span class="segment-future" style="width:${roundGames.length?lifecycle.future/roundGames.length*100:0}%"></span></div>
+    <div class="premium-round-stats integrity-stats"><div class="is-finished"><i>✓</i><strong>${lifecycle.finished}</strong><span>finalizados</span></div><div class="is-live"><i>◉</i><strong>${lifecycle.live}</strong><span>ao vivo</span></div><div class="is-postponed"><i>!</i><strong>${lifecycle.postponed}</strong><span>adiados</span></div><div class="is-future"><i>◷</i><strong>${lifecycle.future}</strong><span>futuros</span></div></div>
+    <p class="round-integrity-note">${lifecycleView.message}${lifecycle.cancelled?` · ${lifecycle.cancelled} cancelado${lifecycle.cancelled===1?"":"s"}.`:""}</p>
     ${nextGame?`<div class="premium-next-game"><span class="premium-next-label">PRÓXIMO JOGO</span><div class="premium-matchup"><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_casa_logo,nextGame.time_casa)}</span><strong>${escapeHtml(nextGame.time_casa)}</strong></div><b>×</b><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_fora_logo,nextGame.time_fora)}</span><strong>${escapeHtml(nextGame.time_fora)}</strong></div></div><div class="premium-game-meta"><span>📅 ${escapeHtml(new Date(nextGame.inicio).toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit"}))}</span><span>◷ ${escapeHtml(new Date(nextGame.inicio).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}))}</span>${nextGame.local?`<span>⌖ ${escapeHtml(nextGame.local)}</span>`:""}</div><button class="premium-next-games-action" type="button" data-home-action="games">Ver todos os jogos <b aria-hidden="true">›</b></button></div>`:""}
   </article>`;
 
@@ -1883,6 +1894,9 @@ function renderStats(){
   });
   const progress=classification.metrics;
   const quality=classification.dataQuality;
+  const currentRoundGames=state.games.filter(game=>Number(game.rodada)===Number(currentRoundNumber()));
+  const lifecycle=roundLifecycleSummary(currentRoundGames);
+  const lifecycleView=roundLifecyclePresentation(lifecycle);
   const roundAnalysis=analyzeRoundPerformance({entries,pointsForEntry:({pick,game})=>points(pick,game)});
   const predictionProfile=analyzePredictionProfile({entries,pointsForEntry:({pick,game})=>points(pick,game)});
   const rounds=roundAnalysis.rounds;
@@ -1911,6 +1925,13 @@ function renderStats(){
     finished,
   });
 
+  const integrityBadge=$("statsIntegrityBadge");
+  if(integrityBadge){
+    integrityBadge.className=`stats-integrity-badge tone-${lifecycleView.tone}`;
+    integrityBadge.textContent=lifecycle.isProvisional?"PROVISÓRIO":lifecycle.status==="FINISHED"?"CONSOLIDADO":lifecycle.status==="IN_PROGRESS"?"EM ANDAMENTO":"PARCIAL";
+    integrityBadge.title=`${lifecycleView.label}: ${lifecycle.concluded} de ${lifecycle.total} jogos concluídos`;
+  }
+
   const ring=$("statsOverallRing");
   if(ring){
     ring.style.setProperty("--progress",overallRate);
@@ -1921,7 +1942,7 @@ function renderStats(){
   }
 
   if($("statsSummaryText")) $("statsSummaryText").textContent=finished
-    ? `${totalPoints} pontos em ${finished} palpites avaliados · participação de ${progress.participationRate}% nos jogos encerrados.`
+    ? `${totalPoints} pontos em ${finished} palpites avaliados · participação de ${progress.participationRate}% nos jogos encerrados.${lifecycle.isProvisional?" Dados provisórios até a conclusão dos jogos pendentes.":""}`
     : progress.completedEligible
       ? `Ainda não há palpites avaliados. ${progress.missedCompleted} jogo${progress.missedCompleted===1?" foi encerrado":"s foram encerrados"} sem palpite.`
       : "Suas estatísticas aparecerão assim que houver jogos finalizados.";
@@ -2750,6 +2771,8 @@ function renderAdminExecutiveDashboard(){
   const leader=state.ranking?.[0] || null;
   const exactLeader=[...(state.ranking||[])].sort((a,b)=>(Number(b.exact)||0)-(Number(a.exact)||0)||(Number(b.total)||0)-(Number(a.total)||0))[0] || null;
   const completion=snapshot.participants.length ? Math.round(snapshot.completed.length/snapshot.participants.length*100) : 0;
+  const roundLifecycle=roundLifecycleSummary(snapshot.games);
+  const roundLifecycleView=roundLifecyclePresentation(roundLifecycle);
   const seasonProgress=Math.min(100,Math.round((snapshot.round||0)/38*100));
   const leaderText=leader?`${escapeHtml(leader.name)}<small>${Number(leader.total)||0} ponto${Number(leader.total)===1?'':'s'}</small>`:'—<small>Sem pontuação</small>';
   const exactText=exactLeader&&Number(exactLeader.exact)>0?`${escapeHtml(exactLeader.name)}<small>${Number(exactLeader.exact)} placar${Number(exactLeader.exact)===1?'':'es'} exato${Number(exactLeader.exact)===1?'':'s'}</small>`:'—<small>Aguardando resultados</small>';
@@ -2763,6 +2786,7 @@ function renderAdminExecutiveDashboard(){
       <article><span class="admin-executive-icon">📊</span><div><small>Média do grupo</small><strong>${groupAverage.toFixed(1)}</strong><em>pontos por jogo pontuado</em></div></article>
       <article class="is-leader"><span class="admin-executive-icon">🥇</span><div><small>Líder atual</small><strong>${leaderText}</strong></div></article>
     </div>
+    <div class="admin-round-integrity tone-${roundLifecycleView.tone}"><div><small>Integridade da rodada</small><strong>${roundLifecycleView.label}</strong><span>${roundLifecycle.concluded}/${roundLifecycle.total} jogos concluídos · ${roundLifecycle.completion}%</span></div><b>${roundLifecycle.isProvisional?"PONTUAÇÃO PROVISÓRIA":"STATUS CONSOLIDADO"}</b></div>
     <div class="admin-executive-health">
       <div class="admin-executive-health-head"><span>Adesão aos palpites da rodada</span><strong>${completion}%</strong></div>
       <div class="admin-executive-health-track"><i style="width:${completion}%"></i></div>
