@@ -1,119 +1,92 @@
-## v6.6.0 — Projeto JARVIS ✅
-
-Identidade visual Série 4.1 refinada e implementada em Web App, PWA e documentação.
-
 # Roadmap — Bolão Brasileirão 2026
+
+Este é o roadmap oficial e a fonte única para status e prioridade do produto. Changelog e notas de release registram entregas históricas; não substituem este documento.
+
+## Referência atual
+
+- Versão funcional: `v6.7.1b`.
+- Prioridade: **E04 — Inteligência Narrativa da Rodada**.
+- Próxima etapa recomendada: **E04.1 — Resumo determinístico da rodada**.
+- Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
 
-- ✅ Concluído
-- 🟡 Em andamento
-- ⏸️ Congelado momentaneamente
-- 🔵 Planejado
-- 💡 Ideia futura
+- ✅ Concluído: disponível no código atual.
+- 🟡 Parcial: existe uma base utilizável, mas o item ainda não está completo.
+- 🔵 Planejado: aprovado como direção, ainda não implementado.
+- 🔮 Longo prazo: visão futura, sem compromisso de versão.
 
-## Fase 1 — Base funcional
+## E01 — Base funcional e operação
 
-- ✅ Login com Google e identificação dos participantes.
-- ✅ Palpites por rodada com fechamento no horário da partida.
-- ✅ Pontuação, ranking e resultados.
-- ✅ Sincronização automática de jogos, datas, locais e placares.
-- ✅ Área administrativa básica.
+- ✅ Login Google e autorização de participantes.
+- ✅ Palpites por rodada e fechamento no horário da partida.
+- ✅ Regras oficiais de pontuação, resultados e ranking.
+- ✅ Sincronização de jogos, datas, locais, placares e classificação.
+- ✅ Centro de Controle, diagnóstico e auditoria administrativa.
+- ✅ E01.6 — Gestão Inteligente de Jogos Adiados.
+- ✅ E01.7 — Consolidação da Integridade da Rodada.
+- 🟡 Testes automatizados: motor estatístico e sincronização cobertos; cobertura por tela ainda incompleta.
 
-## Fase 2 — Experiência premium
+## E02 — Experiência e personalização
 
-- ✅ Design system e identidade visual.
-- ✅ Navegação mobile e motion design.
+- ✅ Design system, identidade JARVIS e experiência mobile-first.
 - ✅ Cards de jogos compactos e expansíveis.
 - ✅ Tabela do campeonato responsiva.
-- ✅ Personalização pelo time favorito.
-- ✅ Centro de Controle e diagnóstico administrativo.
+- ✅ Meu Time 2.0 e personalização pelo clube favorito.
+- ✅ Gestão de perfil e participantes.
+- ✅ Comunicação individual e manual via WhatsApp.
+- ✅ Limite configurável de participantes ativos.
+- 🟡 PWA: manifesto e ícones disponíveis; service worker e cache offline ausentes.
+- 🟡 Acessibilidade: navegação por teclado, estados e rótulos presentes; auditoria completa ainda pendente.
+- 🔵 Dark mode.
+- 🔵 Calendário consolidado de partidas.
+- 🔵 Central de notícias contextual.
 
-## Fase 3 — Inteligência e estatísticas
+## E03 — Inteligência estatística determinística
 
-- ✅ Sprint A: base estatística e integridade dos indicadores.
-- ✅ Sprint B: clareza, eficiência e confiabilidade.
-- ✅ Sprint C: evolução por rodada e insights automáticos.
-- ✅ Sprint D: perfil inteligente de palpites.
-- ✅ Sprint E: histórico do ranking e trajetória do participante.
-- ✅ Sprint F: dashboard analítico, recordes, regularidade, comparações e medalhas automáticas.
-- 🔵 Insights preditivos e recomendações personalizadas por IA.
-- 🔵 Explicações automáticas sobre evolução, quedas e padrões de acerto.
+- ✅ Sprint A — base estatística e integridade dos indicadores.
+- ✅ Sprint B — clareza, eficiência e confiabilidade.
+- ✅ Sprint C — evolução por rodada e insights automáticos.
+- ✅ Sprint D — perfil inteligente de palpites.
+- ✅ Sprint E — histórico do ranking e trajetória do participante.
+- ✅ Sprint F — dashboard, recordes, regularidade, comparações e medalhas.
+- ✅ Indicadores pessoais relacionados ao time favorito.
+- ✅ Textos de momento e recomendações produzidos por regras locais.
 
-## Fase 4 — Expansão do produto
+Esses recursos não utilizam IA generativa. Métricas e conclusões são calculadas por `js/statistics-engine.js` e apresentadas por `js/app.js`.
+
+## E04 — Inteligência narrativa
+
+- 🔵 E04.1 — Resumo determinístico da rodada com dados rastreáveis.
+- 🔵 E04.2 — Narrativa assistida por IA sobre métricas verificadas.
+- 🔵 Explicação das mudanças no ranking.
+- 🔵 Destaques e curiosidades da rodada.
+- 🔵 Texto revisável para compartilhamento individual.
+
+Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e deve indicar origem e limitações.
+
+## E05 — Copiloto do Bolão
+
+- 🔵 Perguntas predefinidas sobre ranking, rodada e desempenho.
+- 🔵 Interface contextual do Copiloto.
+- 🔵 Perguntas em linguagem natural.
+- 🔵 Contexto específico por tela.
+- 🔵 Apoio administrativo baseado em diagnósticos existentes.
+- 🔮 Memória de preferências.
+
+## E06 — Expansão do produto
 
 - 🔵 Ligas paralelas e múltiplos bolões.
-- 🔵 Calendário em modal e visão consolidada de partidas.
-- 🔵 Central de notícias contextual.
-- 🔵 Convites e gestão ampliada de participantes.
-- 💡 Armazenamento e exportação de pacotes pelo Google Drive.
+- 🔵 Convites e gestão por liga.
+- 🔵 Recursos sociais e comparações ampliadas.
+- 🔵 Pipeline automatizado de qualidade e releases.
+- 🔮 Simulações e recursos preditivos.
+- 🔮 Aplicativo nativo.
 
-## Fase 5 — Automação e operação
+## Fora do escopo imediato
 
-- ✅ GitHub como fonte oficial.
-- ✅ GitHub Desktop, branches e Pull Requests.
-- ✅ VS Code e ambiente local com `netlify dev`.
-- 🟡 Documentação viva e estruturada.
-- 🔵 Testes automatizados ampliados por tela.
-- 🔵 Pipeline de qualidade no GitHub Actions.
-- 🔵 Releases e tags automatizadas.
-
-## Estado atual
-
-- Versão funcional: `v6.3.0`.
-- Foco ativo: Tela de Estatísticas.
-- Tela de Jogos: ⏸️ congelada momentaneamente na `v6.3.0d5`, salvo bug crítico.
-
-
-## v6.4.0b — Meu Time 2.0
-
-- [x] Home integrada ao Meu Time.
-- [x] Tela dedicada na navegação.
-- [x] Forma recente e próximo jogo.
-- [x] Estatísticas pessoais envolvendo o clube.
-- [x] Perfil do Torcedor.
-- [x] Índice de Sintonia.
-- [x] História da Temporada.
-- [x] Conquistas contextuais.
-- [x] Neutralidade competitiva preservada.
-
-## v6.5.3 — Comunicação individual via WhatsApp
-
-- mensagens individuais iniciadas pelo administrador;
-- modelos básicos de lembrete e boas-vindas;
-- edição da mensagem antes de abrir o WhatsApp;
-- sem histórico, automação ou disparos em massa nesta etapa.
-
-## v6.5.2 — Gestão de Participantes
-
-- [x] Edição do nome pelo próprio usuário.
-- [x] Celular opcional para futuros avisos via WhatsApp.
-- [x] Cadastro por link.
-- [x] Aprovação e recusa pelo administrador.
-- [x] Bloqueio de acesso enquanto a solicitação estiver pendente.
-
-
-### v6.5.2 — Exclusão de participantes
-- [x] Exclusão permanente dos dados do participante no bolão.
-- [x] Confirmação destrutiva em duas etapas.
-- [x] Proteção contra exclusão do próprio administrador e de outros administradores.
-
-
-## E01.6 — Gestão Inteligente de Jogos Adiados
-
-- ✅ Palpites preservados e bloqueados.
-- ✅ Ranking provisório.
-- ✅ Rodada parcialmente concluída.
-- ✅ Cards informativos.
-- ✅ Filtro Adiados.
-- ✅ Painel administrativo de jogos pendentes.
-- 🟡 Validação contínua com os quatro casos reais atualmente adiados.
-
-
-## E01.7 — Consolidação da Integridade da Rodada
-
-**Status: 🟢 Concluído**
-
-- Fonte única de ciclo de vida da rodada.
-- Integridade consolidada na Home, Estatísticas e Área ADM.
-- Distinção visual entre jogos finalizados, ao vivo, futuros, adiados e cancelados.
+- geração automática de palpites;
+- disparos automáticos ou em massa por WhatsApp;
+- previsões apresentadas como fatos;
+- mudanças nas regras de pontuação;
+- evolução ampla da Tela de Jogos enquanto estiver congelada.

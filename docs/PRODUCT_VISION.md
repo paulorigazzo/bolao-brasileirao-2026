@@ -2,40 +2,40 @@
 
 ## Produto
 
-**Bolão Brasileirão 2026** é uma aplicação web para organizar bolões privados do Campeonato Brasileiro, com foco em simplicidade, transparência, personalização e inteligência aplicada aos dados.
+O **Bolão Brasileirão 2026** é uma aplicação web para bolões privados do Campeonato Brasileiro, com foco em simplicidade, transparência, personalização e inteligência aplicada aos dados.
 
 ## Missão
 
-Oferecer uma experiência divertida e confiável para pequenos grupos acompanharem jogos, registrarem palpites, compararem desempenho e celebrarem a competição entre amigos.
+Oferecer uma experiência divertida e confiável para pequenos grupos registrarem palpites, acompanharem jogos, compararem desempenho e celebrarem a competição entre amigos.
 
-## Visão
+## Capacidades atuais
 
-Transformar o Bolão Brasileirão em uma plataforma de bolões inteligente, capaz de explicar, analisar, prever e enriquecer a experiência de participantes e administradores sem substituir a diversão e a estratégia do jogo.
+- fechamento individual de palpites no horário de cada partida;
+- pontuação transparente, ranking e resultados;
+- estatísticas determinísticas avançadas;
+- personalização pelo time favorito;
+- administração, sincronização e diagnóstico;
+- gestão controlada de participantes;
+- experiência mobile-first.
 
-## Público-alvo
+## Visão futura
 
-- Grupos privados de amigos e familiares.
-- Bolões com até aproximadamente dez participantes na fase inicial.
-- Administradores que desejam reduzir trabalho manual.
-- Participantes que valorizam estatísticas, personalização e acompanhamento em tempo real.
+Evoluir para uma plataforma capaz de explicar dados por meio de narrativas assistidas e de um Copiloto contextual, sem substituir a estratégia do participante nem apresentar previsões como fatos.
 
-## Diferenciais
+## Público
 
-- Palpites fechados no horário de cada jogo.
-- Pontuação transparente.
-- Experiência responsiva.
-- Personalização por time favorito.
-- Estatísticas avançadas.
-- Copiloto com Inteligência Artificial.
-- Administração simplificada.
-- Evolução futura para múltiplas ligas.
+- grupos privados de amigos e familiares;
+- administradores que desejam reduzir trabalho manual;
+- participantes que valorizam estatísticas e personalização.
 
-## Princípios do produto
+O limite de participantes é configurável pelo administrador; não há mais um limite fixo de produto em dez pessoas.
 
-1. **Clareza antes de complexidade.**
-2. **Mobile first, sem limitar a experiência no computador.**
-3. **Neutralidade esportiva**, mesmo com personalização por time favorito.
-4. **Dados confiáveis e auditáveis.**
-5. **IA explicável e útil**, nunca decorativa.
-6. **Evolução incremental**, com versões pequenas e verificáveis.
-7. **Fonte única de verdade**, mantida na documentação do GitHub.
+## Princípios
+
+1. Clareza antes de complexidade.
+2. Mobile-first sem limitar a experiência no computador.
+3. Neutralidade esportiva.
+4. Dados confiáveis e auditáveis.
+5. IA explicável e útil.
+6. Evolução incremental.
+7. Uma fonte oficial para cada informação duradoura.

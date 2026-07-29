@@ -4,61 +4,74 @@
 
 Usar IA para explicar dados, reduzir trabalho administrativo e enriquecer a experiência sem transformar o produto em um gerador automático de palpites.
 
+## Estado real
+
+O produto já possui uma camada determinística madura de estatísticas, insights, recomendações, integridade da rodada e diagnóstico administrativo. Ela não usa modelos generativos.
+
+Ainda não existem no código:
+
+- provedor ou modelo de IA;
+- chat ou Copiloto;
+- Netlify Function dedicada à IA;
+- perguntas em linguagem natural;
+- memória de conversas ou preferências;
+- geração automática de resumos.
+
 ## Pilares
 
-### 1. Copiloto do Bolão
+### Inteligência estatística
 
-Assistente contextual capaz de responder perguntas sobre ranking, jogos, palpites, desempenho e histórico.
+**Status:** ✅ Base determinística concluída.
 
-**Status:** ⬜ **Planejado**
+Calcula evolução, perfil, recordes, regularidade, comparações, medalhas e indicadores relacionados ao clube favorito.
 
-### 2. IA Estatística
+### Inteligência administrativa
 
-Interpretação de gráficos, padrões, tendências, clubes e comparações.
+**Status:** 🟡 Parcial.
 
-**Status:** 🟡 **Em andamento — camada de dados em construção**
+Diagnóstico, auditoria, integridade e pendências usam regras tradicionais. Explicações por IA e sugestões assistidas ainda são planejadas.
 
-### 3. IA Administrativa
+### Inteligência narrativa
 
-Auditoria, inconsistências, rodadas incompletas e participantes sem palpites.
+**Status:** 🔵 Próxima prioridade.
 
-**Status:** 🔵 **Parcialmente implementado — regras tradicionais já existem em parte**
+Resumos de rodada, mudanças no ranking, destaques e textos revisáveis devem partir de fatos calculados pelo sistema.
 
-### 4. IA Narrativa
+### Copiloto do Bolão
 
-Resumos de rodada, mudanças no ranking e textos para compartilhamento.
+**Status:** 🔵 Planejado.
 
-**Status:** ⬜ **Planejado**
+Deve começar com perguntas predefinidas e evoluir para linguagem natural somente após a camada narrativa estar validada.
 
-### 5. IA Preditiva
+### Inteligência preditiva
 
-Simulações e probabilidades futuras.
+**Status:** 🔮 Longo prazo.
 
-**Status:** 🔮 **Visão de longo prazo**
+Simulações e probabilidades devem ser opcionais, explicáveis e claramente diferentes de resultados oficiais.
 
 ## Princípios
 
-- A IA deve mostrar a origem dos dados usados.
-- Respostas devem respeitar permissões e privacidade.
-- Estatísticas determinísticas devem ser calculadas pelo sistema, não inventadas pelo modelo.
-- O modelo deve explicar resultados calculados por código.
-- Sugestões de palpites, se implementadas, devem ser opcionais e claramente identificadas.
-- Chaves de API nunca devem ficar expostas no navegador.
+- O sistema calcula; o modelo explica.
+- A origem dos dados e as limitações devem ser visíveis.
+- Respostas devem respeitar autenticação, autorização e privacidade.
+- Chaves e segredos nunca ficam no navegador.
+- Nenhum texto gerado pode alterar pontuação, resultados ou dados históricos.
+- Sugestões de palpites não fazem parte do escopo imediato.
 
 ## Arquitetura prevista
 
-1. Front-end envia pergunta e contexto permitido.
-2. Função serverless autentica o usuário.
-3. Função consulta dados necessários no Supabase.
-4. Código calcula métricas objetivas.
-5. Modelo de IA interpreta e redige a resposta.
-6. Resposta retorna com contexto e limitações.
+1. O front-end envia uma solicitação e apenas o contexto permitido.
+2. Uma Netlify Function autentica e autoriza o usuário.
+3. O backend obtém os dados necessários no Supabase.
+4. O código calcula métricas objetivas.
+5. O modelo recebe somente fatos e instruções controladas.
+6. A resposta retorna com origem, período analisado e limitações.
 
-## Sequência recomendada
+## Sequência
 
-1. Consolidar estatísticas e qualidade dos dados.
-2. Criar resumos narrativos de rodada.
-3. Implementar perguntas pré-definidas.
-4. Implementar chat em linguagem natural.
-5. Adicionar contexto por tela.
-6. Avaliar recursos preditivos.
+1. E04.1 — resumo determinístico da rodada.
+2. E04.2 — narrativa assistida por IA.
+3. E05.1 — perguntas predefinidas.
+4. E05.2 — linguagem natural.
+5. E05.3 — contexto por tela.
+6. Avaliação futura de recursos preditivos.

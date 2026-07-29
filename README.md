@@ -2,18 +2,34 @@
 
 Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login Google, fechamento dos palpites no horário da partida, ranking, estatísticas, classificação oficial e área administrativa.
 
-## Versão atual
+## Estado atual
 
-`v6.7.1b — Projeto JARVIS`
+- Versão funcional: `v6.7.1b`.
+- Prioridade: preparar a E04 — Inteligência Narrativa da Rodada.
+- Roadmap oficial: [`ROADMAP.md`](ROADMAP.md).
+- Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
-O desenvolvimento atual está concentrado na Tela de Estatísticas. A Tela de Jogos está congelada momentaneamente na `v6.3.0d5`, salvo correção crítica.
+## Funcionalidades disponíveis
+
+- palpites por rodada com fechamento individual no horário da partida;
+- pontuação, ranking, histórico e estatísticas pessoais;
+- dashboard estatístico com evolução, perfil, recordes, regularidade, comparações e medalhas;
+- tabela do Campeonato Brasileiro;
+- Meu Time 2.0, com forma, próximo jogo, desempenho pessoal, sintonia e história da temporada;
+- tratamento de jogos adiados, cancelados e rodadas parcialmente concluídas;
+- gestão administrativa, diagnóstico, sincronização e auditoria;
+- cadastro, aprovação, edição, exclusão e limite configurável de participantes;
+- preparação manual de mensagens individuais pelo WhatsApp;
+- manifesto web e ativos de PWA, ainda sem service worker ou cache offline.
+
+Não há Copiloto, chat ou geração de texto por IA em produção. Os textos inteligentes atuais são produzidos por regras determinísticas no navegador.
 
 ## Tecnologias
 
 - HTML, CSS e JavaScript modular;
 - Supabase;
 - Netlify e Netlify Functions;
-- GitHub, GitHub Desktop e VS Code.
+- GitHub.
 
 ## Desenvolvimento local
 
@@ -30,42 +46,24 @@ Abra `http://localhost:8888`.
 npm run check
 ```
 
+O comando verifica versões e referências, sintaxe, motor estatístico e política de sincronização.
+
 ## Documentação
 
 - [Versão atual](VERSION.md)
-- [Changelog](CHANGELOG.md)
-- [Roadmap](ROADMAP.md)
-- [Fluxo de desenvolvimento](docs/process/DEVELOPMENT_WORKFLOW.md)
-- [Deploy no Netlify](docs/deployment/NETLIFY.md)
+- [Changelog oficial](CHANGELOG.md)
+- [Roadmap oficial](ROADMAP.md)
+- [Estratégia de IA](docs/AI_STRATEGY.md)
+- [Visão do produto](docs/PRODUCT_VISION.md)
 - [Arquitetura](docs/architecture/OVERVIEW.md)
+- [Fluxo do Codex](docs/ai/CODEX_WORKFLOW.md)
+- [Deploy no Netlify](docs/deployment/NETLIFY.md)
 - [Notas detalhadas das versões](docs/releases/)
 
 ## Fluxo oficial
 
-`feature branch → VS Code → netlify dev → testes → commit → push → Pull Request → main → Netlify`
+`branch específica → implementação → validação local → revisão → commit → push → Pull Request → revisão humana → main → Netlify`
 
+## Migrações atuais
 
-## Meu Time 2.0
-
-A v6.4.0b transforma o time favorito em uma experiência transversal, com tela dedicada, forma recente, próximo jogo, desempenho pessoal, sintonia, perfil e história da temporada.
-
-## Gestão de participantes — v6.5.2
-
-Cada usuário aprovado pode editar seu nome e cadastrar opcionalmente um celular com WhatsApp em **Meu Perfil**. O administrador também pode copiar um link de cadastro; novos usuários entram com Google, enviam uma solicitação e aguardam aprovação na Área ADM.
-
-A implantação desta versão requer a execução da migração em `supabase/migrations/20260728_v6_5_0_gestao_participantes.sql`.
-
-
-### Exclusão permanente de participante
-A Área ADM permite excluir os dados de um participante do bolão. Antes de publicar, execute `supabase/migrations/20260728_v6_5_1_exclusao_participante.sql`. A operação remove palpites, perfil e autorização, mas preserva a conta externa de autenticação.
-
-## Comunicação via WhatsApp — v6.5.3
-
-A Área ADM permite preparar mensagens individuais para participantes com celular cadastrado. O administrador escolhe um modelo, revisa o texto e conclui o envio manualmente no WhatsApp. Não existem histórico interno, automação ou disparos em massa.
-
-
-## Projeto JARVIS — v6.7.1
-
-- Área ADM: card de partidas adiadas expansível, com detalhes de confronto, programação e local.
-
-JARVIS é o codinome da identidade visual oficial do Bolão. A versão aplica a marca Série 4.1 ao cabeçalho, carregamento, apresentação, favicon, PWA e compartilhamento, sem alterar funcionalidades.
+As entregas de gestão de participantes e limite configurável dependem das migrações versionadas em [`supabase/migrations/`](supabase/migrations/). A aplicação não executa migrações automaticamente.

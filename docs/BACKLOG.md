@@ -1,33 +1,36 @@
 # Backlog
 
-Itens ainda não comprometidos definitivamente com uma Sprint.
-
-## Inteligência Artificial
-
-- 🔮 **Visão de longo prazo** — simulação “E se...”.
-- 🔮 **Visão de longo prazo** — probabilidade de posição final.
-- 🔮 **Visão de longo prazo** — sugestões inteligentes de palpites.
-- 🔮 **Visão de longo prazo** — resumos em áudio.
-- 🔮 **Visão de longo prazo** — assistente por voz.
+Itens ainda não comprometidos com uma entrega imediata. O status e a prioridade oficiais permanecem em [`../ROADMAP.md`](../ROADMAP.md).
 
 ## Experiência
 
-- ⬜ **Planejado** — Dark Mode.
-- ⬜ **Planejado** — PWA.
-- ⬜ **Planejado** — cache offline.
-- ⬜ **Planejado** — conquistas e gamificação.
-- ⬜ **Planejado** — central de notícias.
+- 🔵 Dark mode.
+- 🔵 service worker e cache offline para completar a PWA.
+- 🔵 calendário consolidado de partidas.
+- 🔵 central de notícias contextual.
+- 🔵 auditoria ampliada de acessibilidade.
+- 🔵 skeleton loading onde houver benefício comprovado.
 
 ## Social
 
-- ⬜ **Planejado** — comparações entre participantes.
-- ⬜ **Planejado** — histórico de confrontos.
-- ⬜ **Planejado** — compartilhamento avançado.
+- 🔵 comparações ampliadas entre participantes;
+- 🔵 histórico de confrontos;
+- 🔵 compartilhamento avançado;
+- 🔵 convites por liga.
 
 ## Plataforma
 
-- ⬜ **Planejado** — multi-bolões.
-- ⬜ **Planejado** — homologação separada.
-- ⬜ **Planejado** — pipeline de releases.
-- 🔮 **Visão de longo prazo** — aplicativo nativo.
-- 🔮 **Visão de longo prazo** — API pública.
+- 🔵 múltiplos bolões e ligas independentes;
+- 🔵 administração e ranking por liga;
+- 🔵 ambiente separado de homologação;
+- 🔵 pipeline automatizado de qualidade e releases;
+- 🔮 API pública;
+- 🔮 aplicativo nativo.
+
+## IA de longo prazo
+
+- 🔮 simulação “E se...”;
+- 🔮 probabilidade de posição final;
+- 🔮 sugestões inteligentes e opcionais de palpites;
+- 🔮 resumos em áudio;
+- 🔮 assistente por voz.
