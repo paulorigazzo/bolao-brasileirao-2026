@@ -2381,17 +2381,7 @@ function renderAdminAttention(){
   renderAdminControlCenter(snapshot);
 }
 
-function renderAdminQuickActions(){
-  if(!isAdminUser() || !$("adminQuickActions")) return;
-  const snapshot=state.adminSnapshot || buildAdminSnapshot();
-  const pending=snapshot.pending?.length || 0;
-  const reminder=$("adminQuickActions").querySelector('[data-admin-quick-action="reminder"]');
-  if(reminder){
-    reminder.disabled=pending===0;
-    const hint=$("adminReminderHint");
-    if(hint) hint.textContent=pending?`${pending} participante${pending===1?"":"s"} pendente${pending===1?"":"s"}`:"Todos já concluíram";
-  }
-}
+function renderAdminQuickActions(){}
 
 function membershipStatusLabel(item){
   const status=item.status || (item.ativo===false?"inactive":"approved");
@@ -2950,20 +2940,6 @@ async function copyTextWithFallback(text){
   if(!copied) throw new Error("Não foi possível copiar automaticamente.");
 }
 
-function inviteParticipantsViaWhatsApp(){
-  const link=configuredPoolUrl();
-  const text=`🏆 Você está convidado para participar do Bolão do Brasileirão 2026!
-
-Faça seus palpites, acompanhe o ranking e dispute a liderança rodada a rodada.
-
-Entre pelo link:
-${link}`;
-  const whatsappUrl=`https://wa.me/?text=${encodeURIComponent(text)}`;
-  const opened=window.open(whatsappUrl,"_blank","noopener,noreferrer");
-  if(!opened) window.location.href=whatsappUrl;
-  message("Convite preparado no WhatsApp.");
-}
-
 async function copyPoolLink(){
   await copyTextWithFallback(configuredPoolUrl());
   message("Link do bolão copiado!");
@@ -3056,12 +3032,10 @@ async function handleAdminQuickAction(event){
     button.classList.add("is-busy");
     button.disabled=true;
     if(status) status.textContent="Executando ação…";
-    if(action==="reminder") await sendAdminReminder();
-    else if(action==="sync") await syncGames(button);
+    if(action==="sync") await syncGames(button);
     else if(action==="ranking"){ await refresh(); renderRanking(); message("Ranking atualizado com os dados mais recentes."); }
     else if(action==="share-ranking") await shareAdminRanking();
     else if(action==="next-round") goToNextAdminRound();
-    else if(action==="invite-whatsapp") inviteParticipantsViaWhatsApp();
     else if(action==="copy-pool-link") await copyPoolLink();
     if(status) status.textContent="Ação concluída. Os dados do painel permanecem sincronizados.";
   }catch(err){
