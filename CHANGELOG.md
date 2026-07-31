@@ -1,3 +1,16 @@
+# v6.9.0e — Ranking Mobile sem Sobreposição
+
+## Corrigido
+
+- Elimina a sobreposição entre pontos e a ação de palpites na classificação mobile.
+- Reserva uma faixa horizontal exclusiva para os indicadores à direita.
+- Limita nomes longos ao espaço disponível com reticências, sem aumentar a altura dos cards.
+
+## Preservado
+
+- Classificação e ação no desktop.
+- Modal, pontuação, sigilo dos palpites e infraestrutura.
+
 # v6.9.0d — Densidade e Descoberta no Ranking Mobile
 
 ## Ajustado
