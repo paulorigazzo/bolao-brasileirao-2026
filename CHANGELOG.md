@@ -1,3 +1,21 @@
+# v6.8.0 — Cadastro Consolidado
+
+## Adicionado
+
+- Formulário de cadastro integrado à tela inicial do convite.
+- Nome de exibição obrigatório antes do login Google.
+- Telefone com WhatsApp opcional e normalizado.
+- Time favorito opcional selecionado na lista oficial de clubes.
+- Persistência temporária dos dados durante o redirecionamento OAuth.
+- RPCs versionadas para solicitar participação e criar o perfil completo após a aprovação.
+
+## Preservado
+
+- E-mail originado exclusivamente da conta Google.
+- Aprovação administrativa e limite configurável de participantes.
+- Privacidade do telefone, identidade por `user_id` e dados históricos.
+- Regras de palpites, pontuação, ranking e Tela de Jogos.
+
 # v6.7.1b — Indicação Visual no Card Meu Time 2.0
 
 ## Corrigido

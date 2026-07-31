@@ -2,17 +2,18 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.7.1b";
+const APP_VERSION = "6.8.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
 
 const sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
-const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], standings:null, gameFilter:"all", selectedFavoriteTeam:null, rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{} };
+const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{} };
 let matchClockRefreshTimer=null;
 let liveScoreRefreshTimer=null;
 const $ = id => document.getElementById(id);
 const show = (id, visible=true) => $(id)?.classList.toggle("hidden", !visible);
+const REGISTRATION_DRAFT_KEY="bolaoRegistrationDraft";
 if ($("appVersion")) $("appVersion").textContent = `v${APP_VERSION}`;
 const initials = name => String(name||"?").split(/\s+/).map(x=>x[0]).join("").slice(0,3).toUpperCase();
 const escapeHtml = value => String(value ?? "").replace(/[&<>'"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
@@ -207,6 +208,25 @@ function availableTeams(){
   return [...teams.values()].sort((a,b)=>a.name.localeCompare(b.name,"pt-BR"));
 }
 
+function renderTeamOptions(grid,teams,selectedTeam,onSelect){
+  if(!grid) return;
+  grid.innerHTML=teams.map(team=>{
+    const selected=normalizeTeamKey(selectedTeam)===team.key;
+    const image=team.logo
+      ? `<img src="${escapeHtml(team.logo)}" alt="" loading="lazy" referrerpolicy="no-referrer">`
+      : `<span class="team-fallback">${initials(team.name).slice(0,3)}</span>`;
+    return `<button class="favorite-team-option ${selected?"selected":""}" type="button" role="radio" aria-checked="${selected}" data-team="${escapeHtml(team.name)}">${image}<strong>${escapeHtml(team.name)}</strong></button>`;
+  }).join("");
+  grid.querySelectorAll(".favorite-team-option").forEach(button=>button.onclick=()=>{
+    grid.querySelectorAll(".favorite-team-option").forEach(item=>{
+      const selected=item===button;
+      item.classList.toggle("selected",selected);
+      item.setAttribute("aria-checked",String(selected));
+    });
+    onSelect(button.dataset.team);
+  });
+}
+
 function findTeam(name){
   const key=normalizeTeamKey(name);
   return availableTeams().find(team=>team.key===key) || (name ? {key,name,logo:""} : null);
@@ -280,21 +300,9 @@ function renderFavoriteTeamSelector(){
   state.selectedFavoriteTeam=state.participant?.time_favorito || null;
   const grid=$("favoriteTeamGrid");
   if(!grid) return;
-  grid.innerHTML=teams.map(team=>{
-    const selected=normalizeTeamKey(state.selectedFavoriteTeam)===team.key;
-    const image=team.logo
-      ? `<img src="${escapeHtml(team.logo)}" alt="" loading="lazy" referrerpolicy="no-referrer">`
-      : `<span class="team-fallback">${initials(team.name).slice(0,3)}</span>`;
-    return `<button class="favorite-team-option ${selected?"selected":""}" type="button" role="radio" aria-checked="${selected}" data-team="${escapeHtml(team.name)}">${image}<strong>${escapeHtml(team.name)}</strong></button>`;
-  }).join("");
-  grid.querySelectorAll(".favorite-team-option").forEach(button=>button.onclick=()=>{
-    state.selectedFavoriteTeam=button.dataset.team;
-    grid.querySelectorAll(".favorite-team-option").forEach(item=>{
-      const selected=item===button;
-      item.classList.toggle("selected",selected);
-      item.setAttribute("aria-checked",String(selected));
-    });
-    $("favoriteTeamStatus").textContent=`Selecionado: ${button.dataset.team}. Toque em “Salvar escolha”.`;
+  renderTeamOptions(grid,teams,state.selectedFavoriteTeam,team=>{
+    state.selectedFavoriteTeam=team;
+    $("favoriteTeamStatus").textContent=`Selecionado: ${team}. Toque em “Salvar escolha”.`;
   });
 }
 
@@ -421,10 +429,110 @@ function isRegistrationLink(){
   return params.get("cadastro")==="1" || sessionStorage.getItem("bolaoRegistrationIntent")==="1";
 }
 
+function readRegistrationDraft(){
+  try{
+    const parsed=JSON.parse(sessionStorage.getItem(REGISTRATION_DRAFT_KEY)||"{}");
+    return {
+      name:String(parsed?.name||"").trim(),
+      phone:normalizeBrazilPhone(parsed?.phone||""),
+      favoriteTeam:String(parsed?.favoriteTeam||"").trim() || null
+    };
+  }catch(_){
+    return {name:"",phone:"",favoriteTeam:null};
+  }
+}
+
+function collectRegistrationDraft(){
+  return {
+    name:String($("registrationNameInput")?.value||"").trim(),
+    phone:normalizeBrazilPhone($("registrationPhoneInput")?.value),
+    favoriteTeam:state.selectedRegistrationTeam || null
+  };
+}
+
+function validateRegistrationDraft(draft,{showStatus=true}={}){
+  let error="";
+  if(!draft.name || draft.name.length<2) error="Informe um nome com pelo menos 2 caracteres.";
+  else if(draft.phone && (draft.phone.length<12 || draft.phone.length>13)) error="Confira o DDD e o número do celular.";
+  else if(draft.favoriteTeam && state.registrationTeams.length && !state.registrationTeams.some(team=>team.key===normalizeTeamKey(draft.favoriteTeam))) error="Escolha o time favorito na lista oficial.";
+  if(showStatus && $("registrationFormStatus")) $("registrationFormStatus").textContent=error;
+  return !error;
+}
+
+function persistRegistrationDraft(){
+  const draft=collectRegistrationDraft();
+  sessionStorage.setItem(REGISTRATION_DRAFT_KEY,JSON.stringify(draft));
+  return draft;
+}
+
+function renderRegistrationTeamSelector(){
+  const grid=$("registrationFavoriteTeamGrid");
+  if(!grid) return;
+  if(!state.registrationTeams.length){
+    grid.innerHTML='<p class="muted-note">Não foi possível carregar a lista agora. Você pode continuar sem escolher um time.</p>';
+    return;
+  }
+  renderTeamOptions(grid,state.registrationTeams,state.selectedRegistrationTeam,team=>{
+    state.selectedRegistrationTeam=team;
+    persistRegistrationDraft();
+    if($("registrationFormStatus")) $("registrationFormStatus").textContent=`Time selecionado: ${team}.`;
+  });
+}
+
+async function loadRegistrationTeams(){
+  try{
+    const response=await fetch("/.netlify/functions/classificacao-brasileirao",{headers:{Accept:"application/json"},cache:"default"});
+    const result=await response.json();
+    if(!response.ok || !result.ok || !Array.isArray(result.table)) throw new Error(result.error||"Classificação indisponível.");
+    state.registrationTeams=result.table
+      .map(row=>({name:String(row.team||"").trim(),key:normalizeTeamKey(row.team),logo:row.crest||""}))
+      .filter(team=>team.name && team.key)
+      .sort((a,b)=>a.name.localeCompare(b.name,"pt-BR"));
+  }catch(error){
+    console.warn("Não foi possível carregar os clubes no cadastro.",error);
+    state.registrationTeams=[];
+  }
+  renderRegistrationTeamSelector();
+}
+
+function prepareRegistrationForm(){
+  if(!isRegistrationLink()) return;
+  show("registrationInviteHint",true);
+  show("registrationForm",true);
+  const draft=readRegistrationDraft();
+  state.selectedRegistrationTeam=draft.favoriteTeam;
+  if($("registrationNameInput")) $("registrationNameInput").value=draft.name;
+  if($("registrationPhoneInput")) $("registrationPhoneInput").value=formatBrazilPhone(draft.phone);
+  if($("heroLoginBtn")) $("heroLoginBtn").textContent="Entrar com Google e enviar cadastro";
+  loadRegistrationTeams();
+}
+
 async function login(){
   clearMessage();
   const registration=isRegistrationLink();
-  if(registration) sessionStorage.setItem("bolaoRegistrationIntent","1");
+  let draft=null;
+  if(registration){
+    draft=persistRegistrationDraft();
+    if(!validateRegistrationDraft(draft)) return;
+    sessionStorage.setItem("bolaoRegistrationIntent","1");
+  }
+  if(registration && state.user){
+    const button=$("heroLoginBtn");
+    button.disabled=true;
+    button.textContent="Enviando cadastro…";
+    try{
+      state.membership=await requestMembership(state.user.email,draft);
+      sessionStorage.removeItem(REGISTRATION_DRAFT_KEY);
+      sessionStorage.removeItem("bolaoRegistrationIntent");
+      renderMembershipStatus();
+    }catch(error){
+      if($("registrationFormStatus")) $("registrationFormStatus").textContent=error.message||"Não foi possível enviar o cadastro.";
+    }finally{
+      button.disabled=false;
+      button.textContent="Entrar com Google e enviar cadastro";
+    }
+    return;
+  }
   const redirectUrl=new URL(CONFIG.redirectTo || location.origin,location.origin);
   if(registration) redirectUrl.searchParams.set("cadastro","1");
   const { error } = await sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:redirectUrl.toString()}});
@@ -432,9 +540,13 @@ async function login(){
 }
 async function logout(){ await sb.auth.signOut(); location.reload(); }
 
-async function requestMembership(email){
-  const suggestedName=state.user.user_metadata?.full_name || email.split("@")[0];
-  const {data,error}=await sb.rpc("solicitar_participacao",{p_nome:suggestedName,p_celular:null});
+async function requestMembership(email,draft=readRegistrationDraft()){
+  if(!validateRegistrationDraft(draft,{showStatus:false})) throw new Error("Complete o nome antes de enviar o cadastro.");
+  const {data,error}=await sb.rpc("solicitar_participacao_v2",{
+    p_nome:draft.name,
+    p_celular:draft.phone||null,
+    p_time_favorito:draft.favoriteTeam||null
+  });
   if(error) throw error;
   return Array.isArray(data)?data[0]:data;
 }
@@ -444,7 +556,7 @@ async function loadParticipant(){
   let authorization=null;
   try{
     const {data,error}=await sb.from("participantes_autorizados")
-      .select("id,nome,email,celular,ativo,administrador,status,solicitado_em,aprovado_em")
+      .select("id,nome,email,celular,time_favorito,ativo,administrador,status,solicitado_em,aprovado_em")
       .eq("email",email).maybeSingle();
     if(error) throw error;
     authorization=data;
@@ -456,13 +568,14 @@ async function loadParticipant(){
   if(!authorization && !fallbackName){
     if(!isRegistrationLink()) throw new Error("Esta conta ainda não está autorizada. Use o link de cadastro enviado pelo administrador.");
     authorization=await requestMembership(email);
+    sessionStorage.removeItem(REGISTRATION_DRAFT_KEY);
   }
 
   if(authorization){
     const status=authorization.ativo===false && authorization.status==="approved" ? "inactive" : (authorization.status || (authorization.ativo===false?"inactive":"approved"));
     state.membership={...authorization,status};
     if(status!=="approved" || authorization.ativo===false){
-      state.participant={nome:authorization.nome || state.user.user_metadata?.full_name || email.split("@")[0],email,user_id:state.user.id,celular:authorization.celular||""};
+      state.participant={nome:authorization.nome || state.user.user_metadata?.full_name || email.split("@")[0],email,user_id:state.user.id,celular:authorization.celular||"",time_favorito:authorization.time_favorito||null};
       return;
     }
   }else{
@@ -474,7 +587,9 @@ async function loadParticipant(){
   if(data){ state.participant=data; return; }
   const profileName=authorization?.nome || fallbackName || state.user.user_metadata?.full_name || email.split("@")[0];
   try{
-    const {data:created,error:createError}=await sb.rpc("registrar_meu_perfil",{p_nome:profileName});
+    const profileRpc=authorization?"registrar_meu_perfil_consolidado":"registrar_meu_perfil";
+    const profileArgs=authorization?{}:{p_nome:profileName};
+    const {data:created,error:createError}=await sb.rpc(profileRpc,profileArgs);
     if(createError) throw createError;
     state.participant=Array.isArray(created)?created[0]:created;
   }catch(err){
@@ -3627,6 +3742,22 @@ $("saveFavoriteTeamBtn").onclick=saveFavoriteTeam;
 $("profileDataForm")?.addEventListener("submit",event=>{ event.preventDefault(); event.stopImmediatePropagation(); saveOwnProfile(event); });
 $("saveProfileBtn")?.addEventListener("click",saveOwnProfile);
 $("profilePhoneInput")?.addEventListener("input",event=>{ event.target.value=formatBrazilPhone(event.target.value); });
+$("registrationForm")?.addEventListener("submit",event=>event.preventDefault());
+$("registrationNameInput")?.addEventListener("input",()=>{ persistRegistrationDraft(); validateRegistrationDraft(collectRegistrationDraft()); });
+$("registrationPhoneInput")?.addEventListener("input",event=>{
+  event.target.value=formatBrazilPhone(event.target.value);
+  persistRegistrationDraft();
+  validateRegistrationDraft(collectRegistrationDraft());
+});
+$("clearRegistrationTeamBtn")?.addEventListener("click",()=>{
+  state.selectedRegistrationTeam=null;
+  $("registrationFavoriteTeamGrid")?.querySelectorAll(".favorite-team-option").forEach(item=>{
+    item.classList.remove("selected");
+    item.setAttribute("aria-checked","false");
+  });
+  persistRegistrationDraft();
+  if($("registrationFormStatus")) $("registrationFormStatus").textContent="Você poderá escolher um time depois em Meu Perfil.";
+});
 $("copyRegistrationLinkBtn")?.addEventListener("click",copyRegistrationLink);
 $("adminRefreshBtn").onclick=refreshAllAdminData;
 $("adminAttentionAction").onclick=handleAdminAction;
@@ -3731,6 +3862,7 @@ $("myTeamTab")?.addEventListener("keydown",event=>{
 setupAdminQuickNavigation();
 setupAdminCollapsibleCards();
 setupTabs();
+prepareRegistrationForm();
 document.addEventListener("visibilitychange",()=>{
   if(!document.hidden && !$("adminTab")?.classList.contains("hidden") && Date.now()-adminLastBackgroundRefresh>30000) refreshAdminSilently("ao retornar à aba");
 });

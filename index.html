@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.7.1b">
-  <link rel="stylesheet" href="./css/styles.css?v=6.7.1b">
-  <link rel="stylesheet" href="./css/components.css?v=6.7.1b">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.7.1b">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.7.1b">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.7.1b">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.8.0">
+  <link rel="stylesheet" href="./css/styles.css?v=6.8.0">
+  <link rel="stylesheet" href="./css/components.css?v=6.8.0">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.8.0">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.8.0">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.8.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.7.1b</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.8.0</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -66,8 +66,33 @@
         <span class="eyebrow">BOLÃO ENTRE AMIGOS</span>
         <h2>Quem entende mais de Brasileirão?</h2>
         <p>Registre seus placares, acompanhe os resultados e dispute a liderança rodada a rodada.</p>
-        <div id="registrationInviteHint" class="registration-invite-hint hidden"><strong>Você recebeu um convite para participar.</strong><span>Entre com sua conta Google e envie seu cadastro para aprovação do administrador.</span></div>
+        <div id="registrationInviteHint" class="registration-invite-hint hidden">
+          <strong>Você recebeu um convite para participar.</strong>
+          <span>Complete seus dados e entre com sua conta Google para enviar o cadastro à aprovação.</span>
+        </div>
         <button id="heroLoginBtn" class="primary big" type="button">Entrar com Google</button>
+        <form id="registrationForm" class="registration-form hidden" novalidate>
+          <div class="registration-form-heading">
+            <span class="eyebrow">SEU CADASTRO</span>
+            <h3>Complete seu perfil</h3>
+            <p>O nome é obrigatório. Telefone e time favorito podem ser informados agora ou adicionados depois em Meu Perfil.</p>
+          </div>
+          <label>Nome de exibição
+            <input id="registrationNameInput" type="text" maxlength="80" autocomplete="name" required placeholder="Como você quer aparecer no bolão">
+          </label>
+          <label>Celular com WhatsApp <span class="optional-label">opcional</span>
+            <input id="registrationPhoneInput" type="tel" inputmode="tel" maxlength="16" autocomplete="tel" placeholder="(16) 99999-9999">
+          </label>
+          <fieldset class="registration-favorite-team">
+            <legend>Time favorito <span class="optional-label">opcional</span></legend>
+            <p>Escolha na lista oficial para evitar diferenças de grafia.</p>
+            <div id="registrationFavoriteTeamGrid" class="favorite-team-grid registration-team-grid" role="radiogroup" aria-label="Escolha seu time favorito">
+              <p class="muted-note">Carregando clubes…</p>
+            </div>
+            <button id="clearRegistrationTeamBtn" class="secondary registration-clear-team" type="button">Sem time favorito</button>
+          </fieldset>
+          <small id="registrationFormStatus" class="profile-form-status" aria-live="polite"></small>
+        </form>
       </div>
       <div class="hero-brand"><img src="./assets/brand/jarvis-approved.png" alt="Identidade oficial do Bolão Brasileirão 2026"></div>
     </section>
@@ -592,9 +617,9 @@
     if(new URLSearchParams(location.search).get("cadastro")==="1"){
       document.getElementById("registrationInviteHint")?.classList.remove("hidden");
       const heroButton=document.getElementById("heroLoginBtn");
-      if(heroButton) heroButton.textContent="Entrar e solicitar participação";
+      if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.7.1b"></script>
+  <script type="module" src="./js/app.js?v=6.8.0"></script>
 </body>
 </html>
