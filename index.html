@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.10.0d">
-  <link rel="stylesheet" href="./css/styles.css?v=6.10.0d">
-  <link rel="stylesheet" href="./css/components.css?v=6.10.0d">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.10.0d">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.10.0d">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.10.0d">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.11.0">
+  <link rel="stylesheet" href="./css/styles.css?v=6.11.0">
+  <link rel="stylesheet" href="./css/components.css?v=6.11.0">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.11.0">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.11.0">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.11.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.10.0d</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.11.0</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -564,26 +564,33 @@
     <section class="ranking-picks-modal card" tabindex="-1">
       <div class="ranking-picks-header">
         <div>
-          <span class="eyebrow">PALPITES ENCERRADOS</span>
+          <span id="rankingPicksModalEyebrow" class="eyebrow">PALPITES ENCERRADOS</span>
           <h2 id="rankingPicksModalTitle">Palpites do participante</h2>
           <p id="rankingPicksModalSummary" class="muted-note">Somente partidas oficialmente encerradas são reveladas.</p>
         </div>
         <button id="rankingPicksModalClose" class="modal-close" type="button" aria-label="Fechar palpites">✕</button>
       </div>
-      <div class="ranking-picks-round-toolbar" aria-label="Selecionar rodada dos palpites">
-        <button id="rankingPicksPrevRound" class="icon-button" type="button" aria-label="Rodada anterior">‹</button>
-        <div class="ranking-picks-round-selection">
-          <div id="rankingPicksRoundNumberStrip" class="round-number-strip" role="group" aria-label="Selecionar rodada"></div>
-          <label class="ranking-picks-round-fallback" for="rankingPicksRoundSelect">
-            Rodada selecionada
-            <select id="rankingPicksRoundSelect"></select>
-          </label>
-          <button id="rankingPicksCurrentRoundBtn" class="current-round-button" type="button" aria-label="Ir para a rodada atual" title="Ir para a rodada atual"><span aria-hidden="true">◎</span> Rodada Atual</button>
-        </div>
-        <button id="rankingPicksNextRound" class="icon-button" type="button" aria-label="Próxima rodada">›</button>
+      <div class="ranking-picks-view-tabs" role="tablist" aria-label="Conteúdo do participante">
+        <button id="rankingPicksViewTab" class="active" type="button" role="tab" aria-selected="true" aria-controls="rankingPicksView" data-ranking-modal-view="picks">Palpites</button>
+        <button id="rankingDuelViewTab" type="button" role="tab" aria-selected="false" aria-controls="rankingDuelView" data-ranking-modal-view="duel">Comparar comigo</button>
       </div>
-      <div id="rankingPicksGames" class="ranking-picks-games" aria-live="polite"></div>
-      <p class="ranking-picks-privacy">Palpites de jogos futuros, em andamento ou adiados permanecem protegidos.</p>
+      <div id="rankingPicksView" role="tabpanel" aria-labelledby="rankingPicksViewTab">
+        <div class="ranking-picks-round-toolbar" aria-label="Selecionar rodada dos palpites">
+          <button id="rankingPicksPrevRound" class="icon-button" type="button" aria-label="Rodada anterior">‹</button>
+          <div class="ranking-picks-round-selection">
+            <div id="rankingPicksRoundNumberStrip" class="round-number-strip" role="group" aria-label="Selecionar rodada"></div>
+            <label class="ranking-picks-round-fallback" for="rankingPicksRoundSelect">
+              Rodada selecionada
+              <select id="rankingPicksRoundSelect"></select>
+            </label>
+            <button id="rankingPicksCurrentRoundBtn" class="current-round-button" type="button" aria-label="Ir para a rodada atual" title="Ir para a rodada atual"><span aria-hidden="true">◎</span> Rodada Atual</button>
+          </div>
+          <button id="rankingPicksNextRound" class="icon-button" type="button" aria-label="Próxima rodada">›</button>
+        </div>
+        <div id="rankingPicksGames" class="ranking-picks-games" aria-live="polite"></div>
+        <p class="ranking-picks-privacy">Palpites de jogos futuros, em andamento ou adiados permanecem protegidos.</p>
+      </div>
+      <div id="rankingDuelView" class="ranking-duel-view" role="tabpanel" aria-labelledby="rankingDuelViewTab" aria-live="polite" hidden></div>
     </section>
   </div>
 
@@ -675,6 +682,6 @@
       if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.10.0d"></script>
+  <script type="module" src="./js/app.js?v=6.11.0"></script>
 </body>
 </html>

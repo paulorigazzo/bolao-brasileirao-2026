@@ -4,8 +4,8 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 
 ## Estado atual
 
-- Versão funcional: `v6.10.0d`.
-- Prioridade: preparar a E03 — Sprint G, com duelo divertido e determinístico entre participantes.
+- Versão funcional: `v6.11.0`.
+- Prioridade: reavaliar o escopo do histórico consolidado por rodada antes de assumir nova entrega funcional.
 - Roadmap oficial: [`ROADMAP.md`](ROADMAP.md).
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
@@ -15,6 +15,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 - pontuação, ranking, histórico e estatísticas pessoais;
 - destaques pessoais e coletivos por rodada, com resumo controlado na Home e detalhamento acessível;
 - consulta individual de palpites de partidas encerradas pela classificação;
+- duelo determinístico entre dois participantes, com placar por rodadas, títulos e momento recente;
 - dashboard estatístico com evolução, perfil, recordes, regularidade, comparações e medalhas;
 - tabela do Campeonato Brasileiro;
 - Meu Time 2.0, com forma, próximo jogo, desempenho pessoal, sintonia e história da temporada;
