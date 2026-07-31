@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.8.0";
+const APP_VERSION = "6.9.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -11,6 +11,8 @@ const sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonK
 const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{} };
 let matchClockRefreshTimer=null;
 let liveScoreRefreshTimer=null;
+let rankingPicksParticipant=null;
+let rankingPicksReturnFocus=null;
 const $ = id => document.getElementById(id);
 const show = (id, visible=true) => $(id)?.classList.toggle("hidden", !visible);
 const REGISTRATION_DRAFT_KEY="bolaoRegistrationDraft";
@@ -756,7 +758,7 @@ async function loadData(){
   const [{data:games,error:gErr},{data:picks,error:pErr},{data:pub,error:pubErr},{data:counts,error:countsErr},{data:participants,error:participantsErr},{data:adminProgress,error:adminProgressErr},{data:authorized,error:authorizedErr},{data:participantLimit,error:participantLimitErr}] = await Promise.all([
     sb.from("jogos").select("*").order("rodada").order("inicio"),
     sb.from("palpites").select("*").eq("user_id",state.user.id),
-    sb.from("palpites_publicos").select("*"),
+    sb.from("palpites_encerrados_publicos").select("*"),
     sb.from("contagem_palpites_participantes").select("*"),
     sb.from("participantes").select("user_id,nome,email,time_favorito"),
     isAdminUser() ? sb.from("progresso_palpites_adm").select("user_id,usuario,id_jogo,atualizado_em") : Promise.resolve({data:[],error:null}),
@@ -1889,7 +1891,7 @@ function renderRanking(){
       <td data-label="Pontos"><strong class="rank-points">${r.total}</strong></td>
       <td data-label="Exatos"><strong>${r.exact}</strong></td>
       <td data-label="Aproveitamento"><div class="rank-rate"><div class="rank-rate-track"><span style="width:${rate}%"></span></div><strong>${rate}%</strong></div></td>
-      <td data-label="Palpites">${r.count}</td>
+      <td data-label="Palpites"><button class="ranking-picks-action" type="button" data-ranking-picks-key="${escapeHtml(r.key)}" aria-label="Ver palpites de ${escapeHtml(r.name)}"><span>${r.count}</span><span aria-hidden="true">👁</span><em>Ver palpites</em></button></td>
     </tr>`;
   }).join('') || '<tr><td colspan="6"><p class="muted-note">A classificação aparecerá após os primeiros resultados.</p></td></tr>';
 
@@ -1909,6 +1911,79 @@ function renderRanking(){
     </article>`;
   }).join('') || '<p class="muted-note">O pódio será exibido após os primeiros resultados.</p>';
   renderDashboard();
+}
+
+function rankingParticipantPick(picks,participant,gameId){
+  return (picks||[]).find(pick=>{
+    if(Number(pick?.id_jogo)!==Number(gameId)) return false;
+    if(participant?.userId && pick?.user_id) return String(participant.userId)===String(pick.user_id);
+    return canonicalName(pick?.usuario).toLowerCase()===String(participant?.name||"").trim().toLowerCase();
+  }) || null;
+}
+
+function rankingPicksAvailableRounds(){
+  return [...new Set((state.games||[]).map(game=>Number(game?.rodada)).filter(Number.isFinite))].sort((a,b)=>b-a);
+}
+
+function renderRankingParticipantPicks(){
+  const participant=rankingPicksParticipant;
+  const select=$("rankingPicksRoundSelect");
+  const content=$("rankingPicksGames");
+  if(!participant || !select || !content) return;
+  const round=Number(select.value);
+  const games=(state.games||[])
+    .filter(game=>Number(game?.rodada)===round)
+    .sort((a,b)=>new Date(a.inicio)-new Date(b.inicio));
+  const publicPicks=[...(state.publicPicks||[])];
+  if(isCurrentRankingParticipant(participant)){
+    for(const pick of state.ownPicks||[]){
+      if(!publicPicks.some(item=>Number(item.id_jogo)===Number(pick.id_jogo)&&String(item.user_id||"")===String(pick.user_id||""))) publicPicks.push(pick);
+    }
+  }
+  content.innerHTML=games.map(game=>{
+    const reveal=isScorableGame(game);
+    const pick=reveal?rankingParticipantPick(publicPicks,participant,game.id_jogo):null;
+    const result=reveal?`${Number(game.gols_casa)} × ${Number(game.gols_fora)}`:"—";
+    if(!reveal) return `<article class="ranking-pick-game is-locked">
+      <div class="ranking-pick-match"><span>${escapeHtml(game.time_casa)}</span><strong>×</strong><span>${escapeHtml(game.time_fora)}</span></div>
+      <div class="ranking-pick-detail"><span aria-hidden="true">🔒</span><div><strong>Palpites protegidos</strong><small>${isPostponed(game)?"Partida adiada":"Disponíveis após o encerramento oficial"}</small></div></div>
+    </article>`;
+    const earned=pick?points(pick,game):0;
+    return `<article class="ranking-pick-game ${pick?"has-pick":"no-pick"}">
+      <div class="ranking-pick-match"><span>${escapeHtml(game.time_casa)}</span><strong>${result}</strong><span>${escapeHtml(game.time_fora)}</span></div>
+      <div class="ranking-pick-detail">
+        <div><small>PALPITE</small><strong>${pick?`${Number(pick.gols_casa)} × ${Number(pick.gols_fora)}`:"Não registrado"}</strong></div>
+        <div class="ranking-pick-points ${earned===10?"is-exact":""}"><small>PONTOS</small><strong>${pick?earned:"—"}</strong>${earned===10?"<em>Placar exato</em>":""}</div>
+      </div>
+    </article>`;
+  }).join("") || '<p class="muted-note">Não há partidas cadastradas nesta rodada.</p>';
+}
+
+function openRankingParticipantPicks(key,trigger){
+  const participant=(state.ranking||[]).find(item=>item.key===key);
+  if(!participant) return message("Participante não encontrado.",true);
+  const rounds=rankingPicksAvailableRounds();
+  if(!rounds.length) return message("Ainda não há rodadas disponíveis.",true);
+  rankingPicksParticipant=participant;
+  rankingPicksReturnFocus=trigger||document.activeElement;
+  $("rankingPicksModalTitle").textContent=`Palpites de ${participant.name}`;
+  $("rankingPicksModalSummary").textContent="Somente partidas oficialmente encerradas são reveladas.";
+  $("rankingPicksRoundSelect").innerHTML=rounds.map(round=>`<option value="${round}">Rodada ${round}</option>`).join("");
+  const latestWithFinished=rounds.find(round=>state.games.some(game=>Number(game.rodada)===round&&isScorableGame(game)));
+  $("rankingPicksRoundSelect").value=String(latestWithFinished||rounds[0]);
+  renderRankingParticipantPicks();
+  $("rankingPicksModal").classList.remove("hidden");
+  document.body.classList.add("modal-open");
+  setTimeout(()=>$("rankingPicksModalClose")?.focus(),40);
+}
+
+function closeRankingParticipantPicks(){
+  $("rankingPicksModal")?.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+  rankingPicksParticipant=null;
+  const target=rankingPicksReturnFocus;
+  rankingPicksReturnFocus=null;
+  target?.focus?.();
 }
 
 function ownFinishedEntries(){
@@ -3737,6 +3812,13 @@ $("standingsMobileList")?.addEventListener("click",async event=>{
     await animateStandingsPanel(expandable,false,MOTION.duration.normal);
   }
 });
+$("rankingBody")?.addEventListener("click",event=>{
+  const action=event.target.closest("[data-ranking-picks-key]");
+  if(action) openRankingParticipantPicks(action.dataset.rankingPicksKey,action);
+});
+$("rankingPicksRoundSelect")?.addEventListener("change",renderRankingParticipantPicks);
+$("rankingPicksModalClose")?.addEventListener("click",closeRankingParticipantPicks);
+$("rankingPicksModal")?.addEventListener("click",event=>{if(event.target===$("rankingPicksModal")) closeRankingParticipantPicks();});
 $("loginBtn").onclick=login; $("heroLoginBtn").onclick=login; $("logoutBtn").onclick=logout; $("membershipLogoutBtn")?.addEventListener("click",logout); $("refreshBtn").onclick=refresh; $("refreshStandingsBtn").onclick=()=>loadStandings(true); $("syncGamesBtn").onclick=syncGames;
 $("saveFavoriteTeamBtn").onclick=saveFavoriteTeam;
 $("profileDataForm")?.addEventListener("submit",event=>{ event.preventDefault(); event.stopImmediatePropagation(); saveOwnProfile(event); });
@@ -3795,7 +3877,11 @@ $("adminAttentionCard")?.addEventListener("click",event=>{
 });
 $("adminParticipantModalClose").onclick=closeAdminParticipantDetail;
 $("adminParticipantModal").onclick=event=>{ if(event.target===$("adminParticipantModal")) closeAdminParticipantDetail(); };
-document.addEventListener("keydown",event=>{ if(event.key==="Escape" && !$("adminParticipantModal")?.classList.contains("hidden")) closeAdminParticipantDetail(); });
+document.addEventListener("keydown",event=>{
+  if(event.key!=="Escape") return;
+  if(!$("rankingPicksModal")?.classList.contains("hidden")) closeRankingParticipantPicks();
+  else if(!$("adminParticipantModal")?.classList.contains("hidden")) closeAdminParticipantDetail();
+});
 $("clearFavoriteTeamBtn").onclick=()=>{
   state.selectedFavoriteTeam=null;
   $("favoriteTeamGrid")?.querySelectorAll(".favorite-team-option").forEach(item=>{item.classList.remove("selected");item.setAttribute("aria-checked","false");});

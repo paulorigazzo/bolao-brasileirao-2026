@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.8.0">
-  <link rel="stylesheet" href="./css/styles.css?v=6.8.0">
-  <link rel="stylesheet" href="./css/components.css?v=6.8.0">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.8.0">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.8.0">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.8.0">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.9.0">
+  <link rel="stylesheet" href="./css/styles.css?v=6.9.0">
+  <link rel="stylesheet" href="./css/components.css?v=6.9.0">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.9.0">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.9.0">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.9.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.8.0</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.9.0</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -560,6 +560,25 @@
     </section>
   </main>
 
+  <div id="rankingPicksModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="rankingPicksModalTitle">
+    <section class="ranking-picks-modal card" tabindex="-1">
+      <div class="ranking-picks-header">
+        <div>
+          <span class="eyebrow">PALPITES ENCERRADOS</span>
+          <h2 id="rankingPicksModalTitle">Palpites do participante</h2>
+          <p id="rankingPicksModalSummary" class="muted-note">Somente partidas oficialmente encerradas são reveladas.</p>
+        </div>
+        <button id="rankingPicksModalClose" class="modal-close" type="button" aria-label="Fechar palpites">✕</button>
+      </div>
+      <label class="ranking-picks-round-label" for="rankingPicksRoundSelect">
+        Rodada
+        <select id="rankingPicksRoundSelect"></select>
+      </label>
+      <div id="rankingPicksGames" class="ranking-picks-games" aria-live="polite"></div>
+      <p class="ranking-picks-privacy">Palpites de jogos futuros, em andamento ou adiados permanecem protegidos.</p>
+    </section>
+  </div>
+
   <div id="adminParticipantModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="adminParticipantModalTitle">
     <section class="admin-participant-modal card">
       <div class="admin-detail-header">
@@ -620,6 +639,6 @@
       if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.8.0"></script>
+  <script type="module" src="./js/app.js?v=6.9.0"></script>
 </body>
 </html>

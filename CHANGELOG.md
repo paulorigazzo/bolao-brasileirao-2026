@@ -1,3 +1,18 @@
+# v6.9.0 — Transparência dos Palpites
+
+## Adicionado
+
+- Ação de consulta na coluna **Palpites** da classificação.
+- Modal individual com seletor de rodada, resultado, palpite e pontos.
+- Visualização adaptada aos cards da classificação no celular.
+- Visão segura do Supabase restrita a partidas oficialmente encerradas.
+
+## Preservado
+
+- Sigilo dos palpites em jogos futuros, ao vivo, adiados ou cancelados.
+- Fechamento, edição, pontuação e identidade canônica por `user_id`.
+- Tela de Jogos, comparação coletiva e gamificação das Estatísticas.
+
 # v6.8.0 — Cadastro Consolidado
 
 ## Adicionado
