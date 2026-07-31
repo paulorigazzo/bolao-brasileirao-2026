@@ -1,8 +1,9 @@
 import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
+import { buildRoundHighlightsModel } from "./round-highlights-engine.js";
 
-const APP_VERSION = "6.10.0a";
+const APP_VERSION = "6.10.0b";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -13,6 +14,8 @@ let matchClockRefreshTimer=null;
 let liveScoreRefreshTimer=null;
 let rankingPicksParticipant=null;
 let rankingPicksReturnFocus=null;
+let roundHighlightsReturnFocus=null;
+let roundHighlightsModel=null;
 const $ = id => document.getElementById(id);
 const show = (id, visible=true) => $(id)?.classList.toggle("hidden", !visible);
 const REGISTRATION_DRAFT_KEY="bolaoRegistrationDraft";
@@ -1407,6 +1410,119 @@ function homeDeadline(game){
   return new Date(closeAt).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
 }
 
+function roundHighlightsPicks(){
+  const combined=[...(state.publicPicks||[])];
+  for(const pick of state.ownPicks||[]){
+    const duplicate=combined.some(item=>Number(item?.id_jogo)===Number(pick?.id_jogo) && (
+      item?.user_id && pick?.user_id
+        ? String(item.user_id)===String(pick.user_id)
+        : String(item?.usuario||"").trim().toLowerCase()===String(pick?.usuario||state.participant?.nome||"").trim().toLowerCase()
+    ));
+    if(!duplicate) combined.push(pick);
+  }
+  return combined;
+}
+
+function buildRoundHighlights(round){
+  return buildRoundHighlightsModel({
+    round,
+    games:state.games,
+    picks:roundHighlightsPicks(),
+    participants:state.participants,
+    selectedParticipantId:state.participant?.user_id||state.user?.id||"",
+    selectedParticipantName:state.participant?.nome||"",
+    isScorableGame,
+    gameStatusDisplay,
+    pointsForPick:(pick,game)=>points(pick,game)
+  });
+}
+
+function latestConsolidatedRound(beforeRound=Infinity){
+  const rounds=[...new Set((state.games||[]).map(game=>Number(game?.rodada)).filter(round=>Number.isFinite(round)&&round<beforeRound))].sort((a,b)=>b-a);
+  return rounds.find(round=>{
+    const games=state.games.filter(game=>Number(game?.rodada)===round);
+    return roundLifecycleSummary(games).status==="FINISHED";
+  }) || null;
+}
+
+function homeRoundHighlightsContext({round,lifecycle,nextGame,now=Date.now()}){
+  if(lifecycle.status==="FINISHED") return {round,mode:"finished"};
+  if(lifecycle.live>0 || lifecycle.status==="PARTIAL") return null;
+  const previousRound=latestConsolidatedRound(round);
+  if(!previousRound) return null;
+  const previousGames=state.games.filter(game=>Number(game?.rodada)===previousRound);
+  const lastKickoff=Math.max(...previousGames.map(game=>new Date(game?.inicio).getTime()).filter(Number.isFinite));
+  const recentlyFinished=Number.isFinite(lastKickoff) && now-lastKickoff<=72*60*60*1000;
+  const nextKickoff=new Date(nextGame?.inicio).getTime();
+  const longPause=Number.isFinite(nextKickoff) && nextKickoff-now>7*24*60*60*1000;
+  return recentlyFinished||longPause ? {round:previousRound,mode:longPause?"pause":"recent"} : null;
+}
+
+function roundHighlightIcon(key){
+  if(key.startsWith("unique-exact")) return "✨";
+  return ({
+    "new-personal-best":"🏆",
+    "matched-personal-best":"⭐",
+    "personal-round-performance":"🎯",
+    "personal-ranking-movement":"↕",
+    "personal-ranking-context":"📈",
+    "round-winner":"🏆",
+    "exact-leader":"🎯",
+    "biggest-climb":"📈"
+  })[key]||"•";
+}
+
+function homeRoundHighlightsHtml(context){
+  if(!context) return "";
+  const model=buildRoundHighlights(context.round);
+  if(model.isProvisional) return "";
+  const personal=model.facts.personal[0]||null;
+  const group=model.facts.group.find(fact=>!personal || fact.key!==personal.key)||model.facts.group[0]||null;
+  const facts=[personal,group].filter(Boolean).slice(0,2);
+  if(!facts.length) return "";
+  const label=context.mode==="pause"?"ENQUANTO A BOLA NÃO VOLTA":"COMO FOI SUA RODADA";
+  return `<section class="home-round-highlights" aria-label="Destaques da Rodada ${context.round}">
+    <div class="home-round-highlights-heading"><span>${label}</span><strong>Rodada ${context.round}</strong></div>
+    <div class="home-round-highlights-list">${facts.map(fact=>`<div><i aria-hidden="true">${roundHighlightIcon(fact.key)}</i><p><strong>${escapeHtml(fact.title)}</strong><small>${escapeHtml(fact.detail)}</small></p></div>`).join("")}</div>
+    <button class="home-round-highlights-action" type="button" data-home-action="round-highlights" data-round-highlights-round="${context.round}">Ver todos os destaques <b aria-hidden="true">›</b></button>
+  </section>`;
+}
+
+function renderRoundHighlightsModal(model){
+  const content=$("roundHighlightsModalContent");
+  if(!content) return;
+  const factCard=fact=>`<article class="round-highlight-fact"><i aria-hidden="true">${roundHighlightIcon(fact.key)}</i><div><strong>${escapeHtml(fact.title)}</strong><p>${escapeHtml(fact.detail)}</p></div></article>`;
+  const sections=[];
+  const personalKeys=new Set(model.facts.personal.map(fact=>fact.key));
+  const groupFacts=model.facts.group.filter(fact=>!personalKeys.has(fact.key));
+  if(model.facts.personal.length) sections.push(`<section><div class="round-highlight-section-heading"><span>VOCÊ NA RODADA</span><h3>Seu desempenho</h3></div><div class="round-highlight-facts">${model.facts.personal.slice(0,4).map(factCard).join("")}</div></section>`);
+  if(groupFacts.length) sections.push(`<section><div class="round-highlight-section-heading"><span>NO BOLÃO</span><h3>Destaques do grupo</h3></div><div class="round-highlight-facts">${groupFacts.slice(0,4).map(factCard).join("")}</div></section>`);
+  content.innerHTML=sections.join("") || '<p class="muted-note">Ainda não há fatos suficientes para destacar nesta rodada.</p>';
+  $("roundHighlightsModalTitle").textContent=`Como foi a Rodada ${model.round}`;
+  $("roundHighlightsModalSummary").textContent=model.isProvisional?"Resumo parcial: os dados ainda podem mudar.":"Resumo consolidado após o encerramento oficial das partidas.";
+  $("roundHighlightsModalSource").textContent=`Fonte: resultados oficiais e palpites públicos encerrados • ${model.lifecycle.finished} jogo${model.lifecycle.finished===1?"":"s"} considerado${model.lifecycle.finished===1?"":"s"}.`;
+}
+
+function openRoundHighlights(round,trigger){
+  const model=buildRoundHighlights(Number(round));
+  if(model.isProvisional) return message("Os destaques completos estarão disponíveis após a consolidação da rodada.",true);
+  roundHighlightsModel=model;
+  roundHighlightsReturnFocus=trigger||document.activeElement;
+  renderRoundHighlightsModal(model);
+  $("roundHighlightsModal")?.classList.remove("hidden");
+  document.body.classList.add("modal-open");
+  setTimeout(()=>$('roundHighlightsModalClose')?.focus(),40);
+}
+
+function closeRoundHighlights(){
+  $("roundHighlightsModal")?.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+  roundHighlightsModel=null;
+  const target=roundHighlightsReturnFocus;
+  roundHighlightsReturnFocus=null;
+  target?.focus?.();
+}
+
 function favoriteTeamStandingsRow(team){
   if(!team || !Array.isArray(state.standings?.table)) return null;
   const favoriteKey=normalizeTeamKey(team.name);
@@ -1699,6 +1815,7 @@ function renderHome(){
   const futureCount=lifecycle.future;
   const nextGame=state.games.filter(game=>!isFinished(game) && !isPostponed(game) && gameStatusDisplay(game).key!=="cancelled" && new Date(game.inicio).getTime()>now).sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
   const nextPending=[...pending].sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
+  const highlightsContext=homeRoundHighlightsContext({round,lifecycle,nextGame,now});
 
   let priority;
   if(pending.length){
@@ -1766,6 +1883,7 @@ function renderHome(){
     <div class="premium-segment-progress" aria-label="Progresso esportivo da rodada"><span class="segment-finished" style="width:${roundGames.length?lifecycle.finished/roundGames.length*100:0}%"></span><span class="segment-live" style="width:${roundGames.length?lifecycle.live/roundGames.length*100:0}%"></span><span class="segment-postponed" style="width:${roundGames.length?lifecycle.postponed/roundGames.length*100:0}%"></span><span class="segment-cancelled" style="width:${roundGames.length?lifecycle.cancelled/roundGames.length*100:0}%"></span><span class="segment-future" style="width:${roundGames.length?lifecycle.future/roundGames.length*100:0}%"></span></div>
     <div class="premium-round-stats integrity-stats"><div class="is-finished"><i>✓</i><strong>${lifecycle.finished}</strong><span>finalizados</span></div><div class="is-live"><i>◉</i><strong>${lifecycle.live}</strong><span>ao vivo</span></div><div class="is-postponed"><i>!</i><strong>${lifecycle.postponed}</strong><span>adiados</span></div><div class="is-future"><i>◷</i><strong>${lifecycle.future}</strong><span>futuros</span></div></div>
     <p class="round-integrity-note">${lifecycleView.message}${lifecycle.cancelled?` · ${lifecycle.cancelled} cancelado${lifecycle.cancelled===1?"":"s"}.`:""}</p>
+    ${homeRoundHighlightsHtml(highlightsContext)}
     ${nextGame?`<div class="premium-next-game"><span class="premium-next-label">PRÓXIMO JOGO</span><div class="premium-matchup"><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_casa_logo,nextGame.time_casa)}</span><strong>${escapeHtml(nextGame.time_casa)}</strong></div><b>×</b><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_fora_logo,nextGame.time_fora)}</span><strong>${escapeHtml(nextGame.time_fora)}</strong></div></div><div class="premium-game-meta"><span>📅 ${escapeHtml(new Date(nextGame.inicio).toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit"}))}</span><span>◷ ${escapeHtml(new Date(nextGame.inicio).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}))}</span>${nextGame.local?`<span>⌖ ${escapeHtml(nextGame.local)}</span>`:""}</div><button class="premium-next-games-action" type="button" data-home-action="games">Ver todos os jogos <b aria-hidden="true">›</b></button></div>`:""}
   </article>`;
 
@@ -3872,6 +3990,8 @@ $("rankingPicksNextRound")?.addEventListener("click",()=>changeRankingPicksRound
 $("rankingPicksCurrentRoundBtn")?.addEventListener("click",goToRankingPicksCurrentRound);
 $("rankingPicksModalClose")?.addEventListener("click",closeRankingParticipantPicks);
 $("rankingPicksModal")?.addEventListener("click",event=>{if(event.target===$("rankingPicksModal")) closeRankingParticipantPicks();});
+$("roundHighlightsModalClose")?.addEventListener("click",closeRoundHighlights);
+$("roundHighlightsModal")?.addEventListener("click",event=>{if(event.target===$("roundHighlightsModal")) closeRoundHighlights();});
 $("loginBtn").onclick=login; $("heroLoginBtn").onclick=login; $("logoutBtn").onclick=logout; $("membershipLogoutBtn")?.addEventListener("click",logout); $("refreshBtn").onclick=refresh; $("refreshStandingsBtn").onclick=()=>loadStandings(true); $("syncGamesBtn").onclick=syncGames;
 $("saveFavoriteTeamBtn").onclick=saveFavoriteTeam;
 $("profileDataForm")?.addEventListener("submit",event=>{ event.preventDefault(); event.stopImmediatePropagation(); saveOwnProfile(event); });
@@ -3932,7 +4052,8 @@ $("adminParticipantModalClose").onclick=closeAdminParticipantDetail;
 $("adminParticipantModal").onclick=event=>{ if(event.target===$("adminParticipantModal")) closeAdminParticipantDetail(); };
 document.addEventListener("keydown",event=>{
   if(event.key!=="Escape") return;
-  if(!$("rankingPicksModal")?.classList.contains("hidden")) closeRankingParticipantPicks();
+  if(!$("roundHighlightsModal")?.classList.contains("hidden")) closeRoundHighlights();
+  else if(!$("rankingPicksModal")?.classList.contains("hidden")) closeRankingParticipantPicks();
   else if(!$("adminParticipantModal")?.classList.contains("hidden")) closeAdminParticipantDetail();
 });
 $("clearFavoriteTeamBtn").onclick=()=>{
@@ -3968,6 +4089,7 @@ $("homeTab")?.addEventListener("click",async event=>{
   const target=event.target.closest("[data-home-action]");
   if(!target) return;
   const action=target.dataset.homeAction;
+  if(action==="round-highlights"){ openRoundHighlights(target.dataset.roundHighlightsRound,target); return; }
   if(action==="refresh"){ target.disabled=true; try{ await refresh(); } finally{ target.disabled=false; } return; }
   if(action==="standings-favorite"){
     navigateTo("standings");
