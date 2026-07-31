@@ -77,6 +77,13 @@ export function isPostponedRoundHighlightsEligible(lifecycle) {
   return Boolean(lifecycle?.finished > 0 && lifecycle?.postponed > 0 && lifecycle?.future === 0 && lifecycle?.live === 0);
 }
 
+export function selectLatestRoundHighlightsCandidate(candidates = []) {
+  return [...candidates]
+    .filter(candidate => Number.isFinite(Number(candidate?.round)))
+    .sort((a, b) => Number(b.round) - Number(a.round))
+    .find(candidate => candidate.lifecycle?.status === "FINISHED" || isPostponedRoundHighlightsEligible(candidate.lifecycle)) || null;
+}
+
 function emptyScore(identity) {
   return { ...identity, points: 0, exact: 0, hits: 0, picks: 0, position: null };
 }

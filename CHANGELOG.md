@@ -3,6 +3,7 @@
 ## Corrigido
 
 - Rodadas parcialmente concluídas não retrocedem para a rodada anterior quando restam apenas jogos adiados.
+- Quando a Home já avançou para uma rodada futura, os Destaques localizam primeiro a rodada parcial elegível mais recente.
 - A Home e o modal identificam o caráter provisório dos destaques e quantos jogos foram considerados.
 - Fatos variáveis recebem a qualificação “até agora”.
 

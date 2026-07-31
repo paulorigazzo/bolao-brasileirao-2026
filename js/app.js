@@ -1,7 +1,7 @@
 import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
-import { buildRoundHighlightsModel, isPostponedRoundHighlightsEligible } from "./round-highlights-engine.js";
+import { buildRoundHighlightsModel, isPostponedRoundHighlightsEligible, selectLatestRoundHighlightsCandidate } from "./round-highlights-engine.js";
 
 const APP_VERSION = "6.10.0c";
 installMotionTokens();
@@ -1437,12 +1437,12 @@ function buildRoundHighlights(round){
   });
 }
 
-function latestConsolidatedRound(beforeRound=Infinity){
-  const rounds=[...new Set((state.games||[]).map(game=>Number(game?.rodada)).filter(round=>Number.isFinite(round)&&round<beforeRound))].sort((a,b)=>b-a);
-  return rounds.find(round=>{
-    const games=state.games.filter(game=>Number(game?.rodada)===round);
-    return roundLifecycleSummary(games).status==="FINISHED";
-  }) || null;
+function latestRoundHighlightsCandidate(beforeRound=Infinity){
+  const rounds=[...new Set((state.games||[]).map(game=>Number(game?.rodada)).filter(round=>Number.isFinite(round)&&round<beforeRound))];
+  return selectLatestRoundHighlightsCandidate(rounds.map(candidateRound=>({
+    round:candidateRound,
+    lifecycle:roundLifecycleSummary(state.games.filter(game=>Number(game?.rodada)===candidateRound))
+  })));
 }
 
 function homeRoundHighlightsContext({round,lifecycle,nextGame,now=Date.now()}){
@@ -1450,8 +1450,10 @@ function homeRoundHighlightsContext({round,lifecycle,nextGame,now=Date.now()}){
   if(lifecycle.live>0) return null;
   if(isPostponedRoundHighlightsEligible(lifecycle)) return {round,mode:"partial"};
   if(lifecycle.status==="PARTIAL") return null;
-  const previousRound=latestConsolidatedRound(round);
-  if(!previousRound) return null;
+  const previous=latestRoundHighlightsCandidate(round);
+  if(!previous) return null;
+  const previousRound=Number(previous.round);
+  if(isPostponedRoundHighlightsEligible(previous.lifecycle)) return {round:previousRound,mode:"partial"};
   const previousGames=state.games.filter(game=>Number(game?.rodada)===previousRound);
   const lastKickoff=Math.max(...previousGames.map(game=>new Date(game?.inicio).getTime()).filter(Number.isFinite));
   const recentlyFinished=Number.isFinite(lastKickoff) && now-lastKickoff<=72*60*60*1000;

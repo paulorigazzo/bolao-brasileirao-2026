@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { buildRoundHighlightsModel, isPostponedRoundHighlightsEligible } from "../js/round-highlights-engine.js";
+import { buildRoundHighlightsModel, isPostponedRoundHighlightsEligible, selectLatestRoundHighlightsCandidate } from "../js/round-highlights-engine.js";
 
 const participants = [
   { user_id: "ana-id", nome: "Ana" },
@@ -116,6 +116,16 @@ assert.equal(isPostponedRoundHighlightsEligible(postponedPartial.lifecycle), tru
 assert.deepEqual(postponedPartial.provenance.scorableGameIds, [4]);
 assert.deepEqual(postponedPartial.provenance.excludedGameIds, [6]);
 assert.equal(isPostponedRoundHighlightsEligible({ finished: 1, postponed: 1, future: 1, live: 0 }), false);
+const latestCandidate = selectLatestRoundHighlightsCandidate([
+  { round: 20, lifecycle: { status: "FINISHED", finished: 10, postponed: 0, future: 0, live: 0 } },
+  { round: 21, lifecycle: { status: "PARTIAL", finished: 6, postponed: 4, future: 0, live: 0 } },
+  { round: 22, lifecycle: { status: "OPEN", finished: 0, postponed: 0, future: 10, live: 0 } },
+]);
+assert.equal(latestCandidate.round, 21);
+assert.equal(selectLatestRoundHighlightsCandidate([
+  { round: 20, lifecycle: { status: "FINISHED", finished: 10, postponed: 0, future: 0, live: 0 } },
+  { round: 21, lifecycle: { status: "PARTIAL", finished: 6, postponed: 3, future: 1, live: 0 } },
+]).round, 20);
 
 const noPick = buildRoundHighlightsModel({
   round: 2,

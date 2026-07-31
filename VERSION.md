@@ -3,6 +3,7 @@
 # v6.10.0c — Destaques em rodada com jogos adiados
 
 - Mantém como referência a rodada mais recente que já possui resultados válidos.
+- Prioriza essa rodada mesmo quando a Home já avançou para a próxima rodada aberta.
 - Exibe destaques provisórios somente quando restam jogos adiados e não há partidas ao vivo ou normalmente em aberto.
 - Identifica claramente a quantidade de jogos considerados e qualifica os fatos com “até agora”.
 - Preserva o cálculo exclusivamente sobre jogos finalizados e a estrutura existente da Home.
