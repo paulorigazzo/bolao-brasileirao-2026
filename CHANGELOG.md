@@ -1,3 +1,17 @@
+# v6.9.0d — Densidade e Descoberta no Ranking Mobile
+
+## Ajustado
+
+- Reduz a altura dos cards da classificação completa no celular.
+- Mantém pontos e acesso aos palpites na mesma faixa vertical à direita.
+- Transforma `Palpites`, quantidade e olho em uma única cápsula visualmente clicável.
+- Preserva área de toque mínima de 44 pixels, foco e rótulo acessível.
+
+## Preservado
+
+- Classificação e ação no desktop.
+- Modal, pontuação, sigilo dos palpites e infraestrutura.
+
 # v6.9.0c — Harmonia do Ranking Mobile
 
 ## Ajustado
