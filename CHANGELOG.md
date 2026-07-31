@@ -1,3 +1,9 @@
+# v6.11.0b — Rodadas do duelo em destaque
+
+- Aplica à seção “Últimas Rodadas” a mesma linguagem visual dos indicadores oficiais.
+- Adiciona selo de rodada, placares maiores, selo VS e destaque do vencedor.
+- Integra o histórico completo ao card e mantém empates e rodadas parciais claramente identificados.
+
 # v6.11.0a — Refinamento visual do duelo
 
 - Reforça a comparação lado a lado com avatares, ícones, números maiores e selo VS.

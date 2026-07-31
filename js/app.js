@@ -5,7 +5,7 @@ import { buildRoundHighlightsModel, isPostponedRoundHighlightsEligible, selectLa
 import { buildAdminRoundSummary } from "./admin-round-share.js";
 import { buildParticipantDuelModel } from "./participant-duel-engine.js";
 
-const APP_VERSION = "6.11.0a";
+const APP_VERSION = "6.11.0b";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2158,9 +2158,10 @@ function participantDuelRoundHtml(item,model){
     : item.winner==="current"
       ? `${escapeHtml(model.current.name)} venceu`
       : `${escapeHtml(model.opponent.name)} venceu`;
-  return `<article class="ranking-duel-round winner-${item.winner}">
-    <span>R${item.round}${item.provisional?' <small>PARCIAL</small>':''}</span>
-    <div><strong>${item.current} <i>×</i> ${item.opponent}</strong><small>${result}</small></div>
+  return `<article class="ranking-duel-round winner-${item.winner}" aria-label="Rodada ${item.round}: ${escapeHtml(model.current.name)}, ${item.current} pontos; ${escapeHtml(model.opponent.name)}, ${item.opponent} pontos; ${result}">
+    <div class="ranking-duel-round-meta"><strong>R${item.round}</strong>${item.provisional?'<small>PARCIAL</small>':''}</div>
+    <div class="ranking-duel-round-score"><strong class="current-value">${item.current}</strong><i aria-hidden="true">VS</i><strong class="opponent-value">${item.opponent}</strong></div>
+    <small class="ranking-duel-round-result">${result}</small>
   </article>`;
 }
 
@@ -2244,8 +2245,11 @@ function renderParticipantDuel(){
       </div>
       ${metrics.map(metric).join("")}
     </section>
-    <section class="ranking-duel-recent"><div><span class="eyebrow">ÚLTIMAS RODADAS</span><h3>Rodada a rodada</h3></div>${recent}</section>
-    ${model.rounds.length>5?`<details class="ranking-duel-all"><summary>Ver todas as ${model.rounds.length} rodadas comparáveis</summary><div>${allRounds}</div></details>`:""}
+    <section class="ranking-duel-recent">
+      <header><span class="eyebrow">ÚLTIMAS RODADAS</span><h3>Rodada a rodada</h3><p>A mesma ordem dos participantes é mantida em todos os confrontos.</p></header>
+      <div class="ranking-duel-rounds">${recent}</div>
+      ${model.rounds.length>5?`<details class="ranking-duel-all"><summary>Ver todas as ${model.rounds.length} rodadas comparáveis</summary><div>${allRounds}</div></details>`:""}
+    </section>
     <p class="ranking-picks-privacy">Somente jogos oficialmente encerrados entram no duelo. O placar recreativo não altera a classificação.</p>`;
 }
 

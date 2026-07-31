@@ -1,4 +1,10 @@
-6.11.0a
+6.11.0b
+
+# v6.11.0b — Rodadas do duelo em destaque
+
+- Alinha “Últimas Rodadas” ao novo padrão visual dos indicadores do duelo.
+- Destaca placares, vencedor, empates e rodadas parciais sem alterar os cálculos.
+- Integra o histórico expandido ao mesmo card e preserva a experiência mobile-first.
 
 # v6.11.0a — Refinamento visual do duelo
 
