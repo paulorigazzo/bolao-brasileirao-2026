@@ -17,7 +17,7 @@ Itens já concluídos, como gráficos históricos, Meu Time 2.0, explicações e
 
 | Item | Estado real | Lacuna | Esforço | Valor | Classe | Dependências |
 |---|---|---|:---:|:---:|:---:|---|
-| E04.1 — Resumo determinístico da rodada | Base forte | Consolidar fatos, destaques, ranking e integridade em um modelo rastreável | Baixo/médio | Muito alto | **QW1** | E01.7 e E03 concluídas |
+| E04.1 — Destaques determinísticos da rodada | Motor concluído | Apresentar fatos pessoais e coletivos na Home sem ampliar sua complexidade | Baixo/médio | Muito alto | **QW1** | E04.1A concluída; E04.1B pendente |
 | Compartilhamento de ranking e resumo | Parcial | Ampliar o compartilhamento nativo e os textos revisáveis | Baixo/médio | Alto | **QW1** | E04.1 para resumo completo |
 | Exportação CSV/Excel | Não iniciado | Gerar arquivo administrativo a partir dos dados estruturados | Baixo/médio | Alto para ADM | **QW1** | Ranking e participantes |
 | GitHub Actions | Não iniciado | Executar `npm run check` automaticamente em Pull Requests | Baixo/médio | Alto técnico | **QW1 técnico** | Scripts existentes |

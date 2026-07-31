@@ -4,9 +4,9 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.9.0e`.
+- Versão funcional: `v6.10.0a`.
 - Prioridade: **E04 — Inteligência Narrativa da Rodada**.
-- Próxima etapa recomendada: **E04.1 — Resumo determinístico da rodada**.
+- Próxima etapa recomendada: **E04.1B — Experiência controlada dos destaques na Home**.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -27,7 +27,7 @@ A classificação considera valor percebido, esforço restante e reaproveitament
 
 Prioridade funcional:
 
-1. **QW1 — E04.1:** resumo determinístico da rodada;
+1. **QW1 — E04.1B:** experiência controlada dos destaques na Home;
 2. **QW1:** compartilhamento aprimorado de ranking e resumo;
 3. **QW1:** exportação CSV/Excel para administração;
 4. **QW2:** histórico consolidado por rodada;
@@ -78,7 +78,7 @@ Esses recursos não utilizam IA generativa. Métricas e conclusões são calcula
 
 ## E04 — Inteligência narrativa
 
-- 🔵 **QW1 — E04.1:** Resumo determinístico da rodada com dados rastreáveis.
+- 🟡 **QW1 — E04.1:** motor determinístico e rastreável concluído na E04.1A; apresentação ao participante pendente na E04.1B.
 - 🔵 E04.2 — Narrativa assistida por IA sobre métricas verificadas.
 - 🔵 Explicação das mudanças no ranking.
 - 🔵 Destaques e curiosidades da rodada.

@@ -1,5 +1,11 @@
 # Registro de Decisões do Produto
 
+## 31 de julho de 2026 — Destaques da rodada em evolução incremental
+
+**Decisão:** dividir a E04.1 em um motor determinístico independente (E04.1A) e uma experiência controlada na Home (E04.1B).
+
+**Motivo:** validar primeiro a relevância, a rastreabilidade e a segurança dos fatos produzidos, evitando alterações bruscas ou redundantes na primeira tela do aplicativo.
+
 ## 27 de julho de 2026 — Documentação viva no GitHub
 
 **Decisão:** adotar uma pasta `docs` como fonte oficial da visão, roadmap, releases, arquitetura e decisões.

@@ -1,12 +1,13 @@
 {
   "name": "bolao-br-2026",
-  "version": "6.9.0e",
+  "version": "6.10.0a",
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node scripts/check-project.mjs && npm run check:syntax && npm run test:stats && npm run test:sync-status",
-    "check:syntax": "node --check js/app.js && node --check js/statistics-engine.js && node --check js/motion.js && node --check netlify/functions/_api-helpers.mjs && node --check netlify/functions/_constants.mjs && node --check netlify/functions/_sync-policy.mjs && node --check netlify/functions/_sync-shared.mjs && node --check netlify/functions/classificacao-brasileirao.mjs && node --check netlify/functions/diagnostico-sistema.mjs && node --check netlify/functions/sincronizar-jogos.mjs && node --check netlify/functions/sincronizar-jogos-agendado.mjs",
+    "check": "node scripts/check-project.mjs && npm run check:syntax && npm run test:stats && npm run test:round-highlights && npm run test:sync-status",
+    "check:syntax": "node --check js/app.js && node --check js/statistics-engine.js && node --check js/round-highlights-engine.js && node --check js/motion.js && node --check netlify/functions/_api-helpers.mjs && node --check netlify/functions/_constants.mjs && node --check netlify/functions/_sync-policy.mjs && node --check netlify/functions/_sync-shared.mjs && node --check netlify/functions/classificacao-brasileirao.mjs && node --check netlify/functions/diagnostico-sistema.mjs && node --check netlify/functions/sincronizar-jogos.mjs && node --check netlify/functions/sincronizar-jogos-agendado.mjs",
     "test:stats": "node scripts/test-statistics-engine.mjs",
+    "test:round-highlights": "node scripts/test-round-highlights-engine.mjs",
     "test:sync-status": "node scripts/test-sync-status-policy.mjs"
   },
   "dependencies": {

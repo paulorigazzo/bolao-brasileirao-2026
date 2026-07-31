@@ -1,4 +1,11 @@
-6.9.0e
+6.10.0a
+
+# v6.10.0a — Motor de Destaques da Rodada
+
+- Cria um motor determinístico independente para fatos pessoais e coletivos por rodada.
+- Rastreia a origem de cada destaque e preserva empates, identidade canônica e estados provisórios.
+- Adiciona testes para rodadas completas, parciais, empates, acertos exclusivos e ausência de palpites.
+- Não altera a Home nem qualquer outra interface.
 
 # v6.9.0e — Ranking Mobile sem Sobreposição
 
