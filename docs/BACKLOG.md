@@ -18,7 +18,6 @@ Itens já concluídos, como gráficos históricos, Meu Time 2.0, explicações e
 | Item | Estado real | Lacuna | Esforço | Valor | Classe | Dependências |
 |---|---|---|:---:|:---:|:---:|---|
 | Exportação CSV/Excel | Não iniciado | Gerar arquivo administrativo a partir dos dados estruturados | Baixo/médio | Alto para ADM | **QW1** | Ranking e participantes |
-| GitHub Actions | Não iniciado | Executar `npm run check` automaticamente em Pull Requests | Baixo/médio | Alto técnico | **QW1 técnico** | Scripts existentes |
 | Histórico consolidado por rodada | Parcial | Unir jogos, resultado, ranking e destaques em uma visão | Médio | Alto | **QW2** | Histórico e ranking existentes |
 | Rankings analíticos | Parcial | Criar filtros por rodada, precisão e cenários | Médio | Alto | **QW2** | Motor estatístico |
 | Comparação entre participantes | Base disponível | Criar interface e critérios de comparação | Médio | Alto | **QW2** | Ranking e estatísticas |
