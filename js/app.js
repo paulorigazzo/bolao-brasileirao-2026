@@ -3,8 +3,9 @@ import { MOTION, installMotionTokens, installMotionInteractions, installFirstVis
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 import { buildRoundHighlightsModel, isPostponedRoundHighlightsEligible, selectLatestRoundHighlightsCandidate } from "./round-highlights-engine.js";
 import { buildAdminRoundSummary } from "./admin-round-share.js";
+import { buildParticipantDuelModel } from "./participant-duel-engine.js";
 
-const APP_VERSION = "6.10.0d";
+const APP_VERSION = "6.11.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -15,6 +16,7 @@ let matchClockRefreshTimer=null;
 let liveScoreRefreshTimer=null;
 let rankingPicksParticipant=null;
 let rankingPicksReturnFocus=null;
+let rankingPicksModalView="picks";
 let roundHighlightsReturnFocus=null;
 let roundHighlightsModel=null;
 let adminRoundShareOriginalText="";
@@ -2146,6 +2148,99 @@ function renderRankingParticipantPicks(){
   updateRankingPicksRoundControls();
 }
 
+function currentRankingParticipant(){
+  return (state.ranking||[]).find(isCurrentRankingParticipant) || null;
+}
+
+function participantDuelRoundHtml(item,model){
+  const result=item.winner==="tie"
+    ? "Empate"
+    : item.winner==="current"
+      ? `${escapeHtml(model.current.name)} venceu`
+      : `${escapeHtml(model.opponent.name)} venceu`;
+  return `<article class="ranking-duel-round winner-${item.winner}">
+    <span>R${item.round}${item.provisional?' <small>PARCIAL</small>':''}</span>
+    <div><strong>${item.current} <i>×</i> ${item.opponent}</strong><small>${result}</small></div>
+  </article>`;
+}
+
+function renderParticipantDuel(){
+  const content=$("rankingDuelView");
+  const opponent=rankingPicksParticipant;
+  const current=currentRankingParticipant();
+  if(!content || !opponent) return;
+  if(!current || isCurrentRankingParticipant(opponent)){
+    content.innerHTML='<div class="ranking-duel-empty"><span aria-hidden="true">⚔️</span><strong>Escolha outro participante</strong><p>O duelo compara seu desempenho com outra pessoa do Ranking.</p></div>';
+    return;
+  }
+
+  const model=buildParticipantDuelModel({
+    games:state.games,
+    picks:roundHighlightsPicks(),
+    ranking:state.ranking,
+    currentParticipant:current,
+    opponent,
+    isScorableGame,
+    gameStatusDisplay,
+    pointsForPick:(pick,game)=>points(pick,game),
+  });
+  if(!model.available){
+    content.innerHTML=`<div class="ranking-duel-empty"><span aria-hidden="true">🌱</span><strong>Rivalidade em formação</strong><p>A comparação aparecerá quando vocês tiverem palpites públicos em uma mesma rodada válida.</p></div>`;
+    return;
+  }
+
+  const sideCard=side=>`<article class="ranking-duel-side ${side.key}">
+    ${rankingAvatar(side.name,"ranking-duel-avatar")}
+    <strong>${escapeHtml(side.name)}</strong>
+    <span class="ranking-duel-title">${escapeHtml(side.title.label)}</span>
+    <small>${escapeHtml(side.title.evidence)}</small>
+  </article>`;
+  const metric=(label,currentValue,opponentValue,suffix="")=>`<div class="ranking-duel-metric"><span>${label}</span><strong>${currentValue}${suffix}</strong><i>×</i><strong>${opponentValue}${suffix}</strong></div>`;
+  const recent=model.recentRounds.map(item=>participantDuelRoundHtml(item,model)).join("");
+  const allRounds=[...model.rounds].reverse().map(item=>participantDuelRoundHtml(item,model)).join("");
+  const provisional=model.provisional?'<p class="ranking-duel-provisional">⚠️ O duelo inclui resultado parcial de rodada com jogo adiado e poderá mudar após sua conclusão.</p>':"";
+
+  content.innerHTML=`
+    <section class="ranking-duel-scoreboard" aria-label="Placar recreativo por rodadas vencidas">
+      <span class="eyebrow">DUELO NA TEMPORADA</span>
+      <div class="ranking-duel-score"><div><strong>${escapeHtml(model.current.name)}</strong><b>${model.current.wins}</b></div><i>×</i><div><strong>${escapeHtml(model.opponent.name)}</strong><b>${model.opponent.wins}</b></div></div>
+      <p>${model.ties} empate${model.ties===1?'':'s'} em ${model.comparableRounds} rodada${model.comparableRounds===1?' comparável':'s comparáveis'}. O placar conta quem pontuou mais em cada rodada.</p>
+    </section>
+    <p class="ranking-duel-phrase">“${escapeHtml(model.phrase)}”</p>
+    <section class="ranking-duel-titles">${sideCard(model.current)}${sideCard(model.opponent)}</section>
+    <section class="ranking-duel-moment moment-${model.moment.key}"><span aria-hidden="true">${model.moment.icon}</span><div><small>MOMENTO DO DUELO</small><strong>${escapeHtml(model.moment.label)}</strong><p>${escapeHtml(model.moment.description)}</p></div></section>
+    ${provisional}
+    <section class="ranking-duel-metrics" aria-label="Indicadores oficiais lado a lado">
+      <div class="ranking-duel-metrics-head"><strong>${escapeHtml(model.current.name)}</strong><span>INDICADORES OFICIAIS</span><strong>${escapeHtml(model.opponent.name)}</strong></div>
+      ${metric("Posição",model.current.position?`${model.current.position}º`:"—",model.opponent.position?`${model.opponent.position}º`:"—")}
+      ${metric("Pontos",model.current.officialPoints,model.opponent.officialPoints)}
+      ${metric("Placares exatos",model.current.officialExact,model.opponent.officialExact)}
+      ${metric("Jogos pontuados",model.current.officialScored,model.opponent.officialScored)}
+      ${metric("Últimas 5",model.current.recentPoints,model.opponent.recentPoints," pts")}
+    </section>
+    <section class="ranking-duel-recent"><div><span class="eyebrow">ÚLTIMAS RODADAS</span><h3>Rodada a rodada</h3></div>${recent}</section>
+    ${model.rounds.length>5?`<details class="ranking-duel-all"><summary>Ver todas as ${model.rounds.length} rodadas comparáveis</summary><div>${allRounds}</div></details>`:""}
+    <p class="ranking-picks-privacy">Somente jogos oficialmente encerrados entram no duelo. O placar recreativo não altera a classificação.</p>`;
+}
+
+function setRankingPicksModalView(view){
+  const duelButton=$("rankingDuelViewTab");
+  const next=view==="duel"&&!duelButton?.disabled?"duel":"picks";
+  rankingPicksModalView=next;
+  const isDuel=next==="duel";
+  $("rankingPicksView")?.toggleAttribute("hidden",isDuel);
+  $("rankingDuelView")?.toggleAttribute("hidden",!isDuel);
+  $("rankingPicksViewTab")?.classList.toggle("active",!isDuel);
+  duelButton?.classList.toggle("active",isDuel);
+  $("rankingPicksViewTab")?.setAttribute("aria-selected",String(!isDuel));
+  duelButton?.setAttribute("aria-selected",String(isDuel));
+  if($("rankingPicksModalEyebrow")) $("rankingPicksModalEyebrow").textContent=isDuel?"COMPARAÇÃO AMIGÁVEL":"PALPITES ENCERRADOS";
+  if($("rankingPicksModalTitle")) $("rankingPicksModalTitle").textContent=isDuel?`Você × ${rankingPicksParticipant?.name||"participante"}`:`Palpites de ${rankingPicksParticipant?.name||"participante"}`;
+  if($("rankingPicksModalSummary")) $("rankingPicksModalSummary").textContent=isDuel?"Um duelo divertido baseado somente em resultados oficiais.":"Somente partidas oficialmente encerradas são reveladas.";
+  $("rankingPicksModalClose")?.setAttribute("aria-label",isDuel?"Fechar comparação":"Fechar palpites");
+  if(isDuel) renderParticipantDuel();
+}
+
 function openRankingParticipantPicks(key,trigger){
   const participant=(state.ranking||[]).find(item=>item.key===key);
   if(!participant) return message("Participante não encontrado.",true);
@@ -2153,12 +2248,17 @@ function openRankingParticipantPicks(key,trigger){
   if(!rounds.length) return message("Ainda não há rodadas disponíveis.",true);
   rankingPicksParticipant=participant;
   rankingPicksReturnFocus=trigger||document.activeElement;
-  $("rankingPicksModalTitle").textContent=`Palpites de ${participant.name}`;
-  $("rankingPicksModalSummary").textContent="Somente partidas oficialmente encerradas são reveladas.";
+  const duelButton=$("rankingDuelViewTab");
+  const current=currentRankingParticipant();
+  if(duelButton){
+    duelButton.disabled=!current||isCurrentRankingParticipant(participant);
+    duelButton.title=duelButton.disabled?"Escolha outro participante para comparar.":`Comparar seu desempenho com ${participant.name}`;
+  }
   $("rankingPicksRoundSelect").innerHTML=rounds.map(round=>`<option value="${round}">Rodada ${round}</option>`).join("");
   const latestWithFinished=[...rounds].reverse().find(round=>state.games.some(game=>Number(game.rodada)===round&&isScorableGame(game)));
   $("rankingPicksRoundSelect").value=String(latestWithFinished||rounds.at(-1));
   renderRankingParticipantPicks();
+  setRankingPicksModalView("picks");
   $("rankingPicksModal").classList.remove("hidden");
   document.body.classList.add("modal-open");
   setTimeout(()=>$("rankingPicksModalClose")?.focus(),40);
@@ -2168,6 +2268,7 @@ function closeRankingParticipantPicks(){
   $("rankingPicksModal")?.classList.add("hidden");
   document.body.classList.remove("modal-open");
   rankingPicksParticipant=null;
+  rankingPicksModalView="picks";
   const target=rankingPicksReturnFocus;
   rankingPicksReturnFocus=null;
   target?.focus?.();
@@ -4063,6 +4164,10 @@ $("rankingPicksRoundNumberStrip")?.addEventListener("click",event=>{
 $("rankingPicksPrevRound")?.addEventListener("click",()=>changeRankingPicksRound(-1));
 $("rankingPicksNextRound")?.addEventListener("click",()=>changeRankingPicksRound(1));
 $("rankingPicksCurrentRoundBtn")?.addEventListener("click",goToRankingPicksCurrentRound);
+$("rankingPicksModal")?.addEventListener("click",event=>{
+  const viewButton=event.target.closest("[data-ranking-modal-view]");
+  if(viewButton) setRankingPicksModalView(viewButton.dataset.rankingModalView);
+});
 $("rankingPicksModalClose")?.addEventListener("click",closeRankingParticipantPicks);
 $("rankingPicksModal")?.addEventListener("click",event=>{if(event.target===$("rankingPicksModal")) closeRankingParticipantPicks();});
 $("roundHighlightsModalClose")?.addEventListener("click",closeRoundHighlights);

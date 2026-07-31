@@ -17,7 +17,6 @@ Itens já concluídos, como gráficos históricos, Meu Time 2.0, explicações e
 
 | Item | Estado real | Lacuna | Esforço | Valor | Classe | Dependências |
 |---|---|---|:---:|:---:|:---:|---|
-| Duelo entre participantes e métricas contextuais | Escopo aprovado | Implementar comparação direta, placar recreativo, títulos e momento recente no modal do Ranking | Médio | Alto para participantes | **QW1** | Ranking, palpites públicos encerrados e motor estatístico |
 | Histórico consolidado por rodada | Parcial | Unir jogos, resultado, ranking e destaques em uma visão | Médio | Alto | **QW2** | Histórico e ranking existentes |
 | Calendário consolidado | Não iniciado | Criar modal ou visão dedicada de partidas | Médio | Alto | **QW2** | Dados de jogos |
 | Testes automatizados por fluxo | Parcial | Cobrir telas e jornadas além dos motores atuais | Médio | Alto técnico | **QW2** | Infraestrutura de testes |

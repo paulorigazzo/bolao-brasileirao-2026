@@ -1,4 +1,11 @@
-6.10.0d
+6.11.0
+
+# v6.11.0 — Duelo entre participantes
+
+- Adiciona comparação direta e divertida entre dois participantes no modal do Ranking.
+- Exibe placar recreativo por rodadas, indicadores oficiais, títulos temporários e momento recente.
+- Usa somente palpites públicos de jogos encerrados e identifica rodadas parciais com partidas adiadas.
+- Mantém o placar do duelo separado da pontuação oficial e preserva Home, Jogos e Área ADM.
 
 # v6.10.0d — Resumo administrativo da rodada
 

@@ -1,3 +1,19 @@
+# v6.11.0 — Duelo entre participantes
+
+## Adicionado
+
+- Aba “Comparar comigo” no modal de palpites do Ranking.
+- Placar recreativo por rodadas vencidas, empates e indicadores oficiais lado a lado.
+- Títulos temporários, frase divertida e momento do duelo produzidos por regras determinísticas.
+- Histórico recente e expansão das rodadas comparáveis.
+- Motor independente e testes automatizados para o confronto.
+
+## Segurança e experiência
+
+- Somente partidas oficialmente encerradas e palpites públicos entram nos cálculos.
+- Rodadas com apenas jogos adiados são identificadas como parciais.
+- Home, Tela de Jogos, Área ADM, Supabase e regras de pontuação permanecem inalterados.
+
 # v6.10.0d — Resumo administrativo da rodada
 
 ## Adicionado
