@@ -1,4 +1,11 @@
-6.10.0a
+6.10.0b
+
+# v6.10.0b — Destaques da Rodada na Home
+
+- Integra o motor determinístico ao card existente de Integridade da Rodada.
+- Exibe no máximo dois destaques após a consolidação ou em pausas longas.
+- Adiciona modal acessível com fatos pessoais, coletivos e origem dos dados.
+- Preserva a ordem, os demais cards e a função operacional da Home.
 
 # v6.10.0a — Motor de Destaques da Rodada
 

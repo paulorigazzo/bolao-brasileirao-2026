@@ -4,9 +4,9 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.10.0a`.
+- Versão funcional: `v6.10.0b`.
 - Prioridade: **E04 — Inteligência Narrativa da Rodada**.
-- Próxima etapa recomendada: **E04.1B — Experiência controlada dos destaques na Home**.
+- Próxima etapa recomendada: **QW1 — Compartilhamento determinístico e revisável dos destaques**.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -27,11 +27,10 @@ A classificação considera valor percebido, esforço restante e reaproveitament
 
 Prioridade funcional:
 
-1. **QW1 — E04.1B:** experiência controlada dos destaques na Home;
-2. **QW1:** compartilhamento aprimorado de ranking e resumo;
-3. **QW1:** exportação CSV/Excel para administração;
-4. **QW2:** histórico consolidado por rodada;
-5. **QW2:** rankings analíticos e comparações entre participantes.
+1. **QW1:** compartilhamento aprimorado de ranking e destaques;
+2. **QW1:** exportação CSV/Excel para administração;
+3. **QW2:** histórico consolidado por rodada;
+4. **QW2:** rankings analíticos e comparações entre participantes.
 
 O pipeline de qualidade no GitHub Actions é um **QW1 técnico** e pode evoluir em paralelo, sem substituir a prioridade funcional. A matriz detalhada está em [`docs/BACKLOG.md`](docs/BACKLOG.md).
 
@@ -78,7 +77,7 @@ Esses recursos não utilizam IA generativa. Métricas e conclusões são calcula
 
 ## E04 — Inteligência narrativa
 
-- 🟡 **QW1 — E04.1:** motor determinístico e rastreável concluído na E04.1A; apresentação ao participante pendente na E04.1B.
+- ✅ **E04.1:** motor determinístico e rastreável concluído na E04.1A, com experiência controlada na Home entregue na E04.1B.
 - 🔵 E04.2 — Narrativa assistida por IA sobre métricas verificadas.
 - 🔵 Explicação das mudanças no ranking.
 - 🔵 Destaques e curiosidades da rodada.

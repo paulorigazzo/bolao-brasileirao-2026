@@ -1,3 +1,17 @@
+# v6.10.0b — Destaques da Rodada na Home
+
+## Adicionado
+
+- Faixa compacta com até dois destaques no card de Integridade da Rodada.
+- Modal com desempenho pessoal, impacto no ranking, destaques coletivos e origem dos dados.
+- Chamada contextual para a última rodada após seu encerramento ou durante pausas superiores a sete dias.
+
+## Segurança e experiência
+
+- Destaques completos aparecem somente para rodadas consolidadas.
+- Palpites futuros, ao vivo e adiados permanecem protegidos.
+- Ordem, Hero, Visão Geral, partidas ao vivo, Top 3 e Meu Time permanecem inalterados.
+
 # v6.10.0a — Motor de Destaques da Rodada
 
 ## Adicionado
