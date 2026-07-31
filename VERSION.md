@@ -1,4 +1,10 @@
-6.9.0c
+6.9.0d
+
+# v6.9.0d — Densidade e Descoberta no Ranking Mobile
+
+- Reduz a altura dos cards da classificação no celular.
+- Torna `Palpites`, quantidade e olho uma cápsula clicável claramente visível.
+- Mantém pontos e ação na mesma faixa vertical à direita.
 
 # v6.9.0c — Harmonia do Ranking Mobile
 
