@@ -1,4 +1,11 @@
-6.8.0
+6.9.0
+
+# v6.9.0 — Transparência dos Palpites
+
+- Permite consultar, pela classificação, os palpites individuais de cada participante.
+- Revela somente partidas oficialmente encerradas e com resultado final.
+- Mantém jogos futuros, ao vivo, adiados e cancelados protegidos no Supabase e na interface.
+- Oferece seletor de rodada e apresenta resultado, palpite e pontos em modal responsivo.
 
 # v6.8.0 — Cadastro Consolidado
 

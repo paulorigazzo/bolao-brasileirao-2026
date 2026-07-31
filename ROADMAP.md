@@ -4,7 +4,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.8.0`.
+- Versão funcional: `v6.9.0`.
 - Prioridade: **E04 — Inteligência Narrativa da Rodada**.
 - Próxima etapa recomendada: **E04.1 — Resumo determinístico da rodada**.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
@@ -54,6 +54,7 @@ O pipeline de qualidade no GitHub Actions é um **QW1 técnico** e pode evoluir 
 - ✅ Meu Time 2.0 e personalização pelo clube favorito.
 - ✅ Gestão de perfil e participantes.
 - ✅ Comunicação individual e manual via WhatsApp.
+- ✅ Transparência individual dos palpites após o encerramento oficial das partidas.
 - ✅ Limite configurável de participantes ativos.
 - ✅ Cadastro consolidado com nome, telefone opcional e time favorito opcional.
 - 🟡 PWA: manifesto e ícones disponíveis; service worker e cache offline ausentes.

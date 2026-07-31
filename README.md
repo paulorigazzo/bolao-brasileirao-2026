@@ -4,7 +4,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 
 ## Estado atual
 
-- Versão funcional: `v6.8.0`.
+- Versão funcional: `v6.9.0`.
 - Prioridade: preparar a E04 — Inteligência Narrativa da Rodada.
 - Roadmap oficial: [`ROADMAP.md`](ROADMAP.md).
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
@@ -13,6 +13,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 
 - palpites por rodada com fechamento individual no horário da partida;
 - pontuação, ranking, histórico e estatísticas pessoais;
+- consulta individual de palpites de partidas encerradas pela classificação;
 - dashboard estatístico com evolução, perfil, recordes, regularidade, comparações e medalhas;
 - tabela do Campeonato Brasileiro;
 - Meu Time 2.0, com forma, próximo jogo, desempenho pessoal, sintonia e história da temporada;
