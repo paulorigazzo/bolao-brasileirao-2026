@@ -1,3 +1,9 @@
+# v6.11.0a — Refinamento visual do duelo
+
+- Reforça a comparação lado a lado com avatares, ícones, números maiores e selo VS.
+- Evidencia o melhor resultado de cada indicador e apresenta um resumo compacto das vantagens.
+- Mantém regras, dados e estrutura geral do Duelo entre participantes inalterados.
+
 # v6.11.0 — Duelo entre participantes
 
 ## Adicionado
