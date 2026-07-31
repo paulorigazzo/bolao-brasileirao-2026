@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.10.0c">
-  <link rel="stylesheet" href="./css/styles.css?v=6.10.0c">
-  <link rel="stylesheet" href="./css/components.css?v=6.10.0c">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.10.0c">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.10.0c">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.10.0c">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.10.0d">
+  <link rel="stylesheet" href="./css/styles.css?v=6.10.0d">
+  <link rel="stylesheet" href="./css/components.css?v=6.10.0d">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.10.0d">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.10.0d">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.10.0d">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.10.0c</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.10.0d</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -416,8 +416,8 @@
             <button type="button" class="admin-quick-action" data-admin-quick-action="ranking">
               <span class="admin-quick-action-icon">🏆</span><span><strong>Atualizar ranking</strong><small>Recarregar dados e classificação</small></span><i>›</i>
             </button>
-            <button type="button" class="admin-quick-action" data-admin-quick-action="share-ranking">
-              <span class="admin-quick-action-icon">📤</span><span><strong>Compartilhar classificação</strong><small>Enviar o ranking atual</small></span><i>›</i>
+            <button type="button" class="admin-quick-action" data-admin-quick-action="share-round">
+              <span class="admin-quick-action-icon">📤</span><span><strong>Compartilhar resumo da rodada</strong><small>Destaques e Top 3 revisáveis</small></span><i>›</i>
             </button>
             <button type="button" class="admin-quick-action" data-admin-quick-action="next-round">
               <span class="admin-quick-action-icon">📅</span><span><strong>Ver próxima rodada</strong><small>Ir para os próximos jogos</small></span><i>›</i>
@@ -654,6 +654,19 @@
     </section>
   </div>
 
+  <div id="adminRoundShareModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="adminRoundShareTitle" aria-describedby="adminRoundShareContext">
+    <section class="admin-round-share-modal card" tabindex="-1">
+      <div class="admin-detail-header">
+        <div><span class="eyebrow">COMUNICAÇÃO ADMINISTRATIVA</span><h2 id="adminRoundShareTitle">Resumo da rodada</h2><p id="adminRoundShareContext" class="muted-note"></p></div>
+        <button id="adminRoundShareClose" class="modal-close" type="button" aria-label="Fechar resumo da rodada">✕</button>
+      </div>
+      <span id="adminRoundShareStatus" class="admin-round-share-status">CONSOLIDADO</span>
+      <label class="admin-round-share-message" for="adminRoundShareMessage">Prévia revisável<textarea id="adminRoundShareMessage" rows="14" maxlength="1800"></textarea></label>
+      <p class="admin-round-share-note">Somente resultados oficiais encerrados entram no texto. Revise o conteúdo antes de compartilhar.</p>
+      <div class="admin-round-share-actions"><button id="adminRoundShareCancel" class="secondary" type="button">Cancelar</button><button id="adminRoundShareRestore" class="secondary" type="button">Restaurar original</button><button id="adminRoundShareCopy" class="secondary" type="button">Copiar texto</button><button id="adminRoundShareSend" class="primary" type="button">Compartilhar</button></div>
+    </section>
+  </div>
+
   <footer>Bolão Brasileirão 2026</footer>
   <script>
     if(new URLSearchParams(location.search).get("cadastro")==="1"){
@@ -662,6 +675,6 @@
       if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.10.0c"></script>
+  <script type="module" src="./js/app.js?v=6.10.0d"></script>
 </body>
 </html>

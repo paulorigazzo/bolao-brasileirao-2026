@@ -1,4 +1,11 @@
-6.10.0c
+6.10.0d
+
+# v6.10.0d — Resumo administrativo da rodada
+
+- Substitui o compartilhamento isolado da classificação por um resumo coletivo com Destaques e Top 3.
+- Restringe geração, revisão, cópia e compartilhamento à Área ADM.
+- Trata rodadas consolidadas e com jogos adiados, sem expor partidas protegidas.
+- Preserva integralmente a Home e as permissões dos participantes.
 
 # v6.10.0c — Destaques em rodada com jogos adiados
 

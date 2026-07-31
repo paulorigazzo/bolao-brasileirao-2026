@@ -2,8 +2,9 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 import { buildRoundHighlightsModel, isPostponedRoundHighlightsEligible, selectLatestRoundHighlightsCandidate } from "./round-highlights-engine.js";
+import { buildAdminRoundSummary } from "./admin-round-share.js";
 
-const APP_VERSION = "6.10.0c";
+const APP_VERSION = "6.10.0d";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -16,6 +17,8 @@ let rankingPicksParticipant=null;
 let rankingPicksReturnFocus=null;
 let roundHighlightsReturnFocus=null;
 let roundHighlightsModel=null;
+let adminRoundShareOriginalText="";
+let adminRoundShareReturnFocus=null;
 const $ = id => document.getElementById(id);
 const show = (id, visible=true) => $(id)?.classList.toggle("hidden", !visible);
 const REGISTRATION_DRAFT_KEY="bolaoRegistrationDraft";
@@ -3267,18 +3270,68 @@ async function sendAdminReminder(){
   }catch(err){ if(err?.name!=="AbortError") message("Não foi possível compartilhar o lembrete.",true); }
 }
 
-function adminRankingShareText(){
-  const round=state.adminSnapshot?.round || currentRoundNumber();
-  const rows=(state.ranking||[]).map((item,index)=>`${index+1}º ${item.name} — ${item.total} ponto${item.total===1?"":"s"}`).join("\n");
-  return `🏆 Bolão Brasileirão 2026 — Classificação\nRodada de referência: ${round}\n\n${rows||"Ranking ainda sem pontuação."}`;
+function currentAdminRoundSummary(){
+  if(!isAdminUser()) return {available:false,reason:"unauthorized"};
+  calculateRanking();
+  const currentRound=currentRoundNumber();
+  const currentLifecycle=roundLifecycleSummary(state.games.filter(game=>Number(game?.rodada)===currentRound));
+  if(currentLifecycle.live>0) return {available:false,reason:"live"};
+  const candidate=latestRoundHighlightsCandidate(Infinity);
+  if(!candidate) return {available:false,reason:"no-results"};
+  const highlights=buildRoundHighlights(Number(candidate.round));
+  return buildAdminRoundSummary({
+    round:candidate.round,
+    lifecycle:highlights.lifecycle,
+    facts:highlights.facts.group,
+    ranking:state.ranking
+  });
 }
 
-async function shareAdminRanking(){
-  const text=adminRankingShareText();
+function closeAdminRoundShare(){
+  $("adminRoundShareModal")?.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+  adminRoundShareOriginalText="";
+  const target=adminRoundShareReturnFocus;
+  adminRoundShareReturnFocus=null;
+  target?.focus?.();
+}
+
+function openAdminRoundShare(trigger){
+  const summary=currentAdminRoundSummary();
+  if(!summary.available) return message("O resumo estará disponível quando houver resultados válidos e nenhum jogo ao vivo.",true);
+  adminRoundShareOriginalText=summary.text;
+  adminRoundShareReturnFocus=trigger||document.activeElement;
+  $("adminRoundShareTitle").textContent=`Resumo da Rodada ${summary.round}`;
+  $("adminRoundShareStatus").textContent=summary.isProvisional?"PROVISÓRIO":"CONSOLIDADO";
+  $("adminRoundShareStatus").className=`admin-round-share-status ${summary.isProvisional?"is-provisional":"is-complete"}`;
+  $("adminRoundShareContext").textContent=summary.isProvisional
+    ? `${summary.consideredGames} de ${summary.totalGames} jogos concluídos • ${summary.postponedGames} adiados`
+    : `${summary.consideredGames} jogos considerados • resultados consolidados`;
+  $("adminRoundShareMessage").value=summary.text;
+  $("adminRoundShareModal")?.classList.remove("hidden");
+  document.body.classList.add("modal-open");
+  setTimeout(()=>$('adminRoundShareMessage')?.focus(),40);
+}
+
+function restoreAdminRoundShare(){
+  if($("adminRoundShareMessage")) $("adminRoundShareMessage").value=adminRoundShareOriginalText;
+  message("Texto original restaurado.");
+}
+
+async function copyAdminRoundShare(){
+  const text=String($("adminRoundShareMessage")?.value||"").trim();
+  if(!text) return message("O resumo não pode ficar vazio.",true);
+  await copyTextWithFallback(text);
+  message("Resumo da rodada copiado.");
+}
+
+async function shareAdminRoundSummary(){
+  const text=String($("adminRoundShareMessage")?.value||"").trim();
+  if(!text) return message("O resumo não pode ficar vazio.",true);
   try{
-    if(navigator.share) await navigator.share({title:"Classificação • Bolão Brasileirão 2026",text});
-    else { await navigator.clipboard.writeText(text); message("Classificação copiada. Agora cole no WhatsApp."); }
-  }catch(err){ if(err?.name!=="AbortError") message("Não foi possível compartilhar a classificação.",true); }
+    if(navigator.share) await navigator.share({title:$("adminRoundShareTitle")?.textContent||"Resumo da rodada",text});
+    else { await copyTextWithFallback(text); message("Resumo copiado. Agora cole no aplicativo desejado."); }
+  }catch(err){ if(err?.name!=="AbortError") message("Não foi possível compartilhar o resumo da rodada.",true); }
 }
 
 function goToNextAdminRound(){
@@ -3408,7 +3461,7 @@ async function handleAdminQuickAction(event){
     if(status) status.textContent="Executando ação…";
     if(action==="sync") await syncGames(button);
     else if(action==="ranking"){ await refresh(); renderRanking(); message("Ranking atualizado com os dados mais recentes."); }
-    else if(action==="share-ranking") await shareAdminRanking();
+    else if(action==="share-round") openAdminRoundShare(button);
     else if(action==="next-round") goToNextAdminRound();
     else if(action==="copy-pool-link") await copyPoolLink();
     if(status) status.textContent="Ação concluída. Os dados do painel permanecem sincronizados.";
@@ -4060,6 +4113,12 @@ $("adminWhatsAppClose")?.addEventListener("click",closeParticipantWhatsApp);
 $("adminWhatsAppCancel")?.addEventListener("click",closeParticipantWhatsApp);
 $("adminWhatsAppSend")?.addEventListener("click",sendParticipantWhatsApp);
 $("adminWhatsAppTemplates")?.addEventListener("click",event=>{const button=event.target.closest("[data-whatsapp-template]");if(button) selectWhatsAppTemplate(button.dataset.whatsappTemplate);});
+$("adminRoundShareClose")?.addEventListener("click",closeAdminRoundShare);
+$("adminRoundShareCancel")?.addEventListener("click",closeAdminRoundShare);
+$("adminRoundShareRestore")?.addEventListener("click",restoreAdminRoundShare);
+$("adminRoundShareCopy")?.addEventListener("click",copyAdminRoundShare);
+$("adminRoundShareSend")?.addEventListener("click",shareAdminRoundSummary);
+$("adminRoundShareModal")?.addEventListener("click",event=>{if(event.target===$("adminRoundShareModal")) closeAdminRoundShare();});
 $("adminAttentionContent").onclick=event=>{
   const card=event.target.closest("[data-admin-participant]");
   if(card) openAdminParticipantDetail(card.dataset.adminParticipant);
@@ -4074,7 +4133,8 @@ $("adminParticipantModalClose").onclick=closeAdminParticipantDetail;
 $("adminParticipantModal").onclick=event=>{ if(event.target===$("adminParticipantModal")) closeAdminParticipantDetail(); };
 document.addEventListener("keydown",event=>{
   if(event.key!=="Escape") return;
-  if(!$("roundHighlightsModal")?.classList.contains("hidden")) closeRoundHighlights();
+  if(!$("adminRoundShareModal")?.classList.contains("hidden")) closeAdminRoundShare();
+  else if(!$("roundHighlightsModal")?.classList.contains("hidden")) closeRoundHighlights();
   else if(!$("rankingPicksModal")?.classList.contains("hidden")) closeRankingParticipantPicks();
   else if(!$("adminParticipantModal")?.classList.contains("hidden")) closeAdminParticipantDetail();
 });

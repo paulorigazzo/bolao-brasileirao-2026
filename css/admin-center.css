@@ -238,3 +238,22 @@
   .admin-participant-limit-form{width:100%;flex-wrap:wrap}
   .admin-participant-limit-form button{flex:1 1 160px}
 }
+
+/* v6.10.0d — resumo determinístico e revisável exclusivo da Área ADM */
+.admin-round-share-modal{width:min(680px,calc(100vw - 24px));max-height:calc(100vh - 28px);overflow:auto;padding:24px;display:grid;gap:16px}
+.admin-round-share-status{justify-self:start;padding:6px 10px;border:1px solid var(--admin-line);border-radius:999px;font-size:.68rem;font-weight:950;letter-spacing:.07em}
+.admin-round-share-status.is-complete{color:#9ce9b9;background:rgba(100,217,148,.09);border-color:rgba(100,217,148,.22)}
+.admin-round-share-status.is-provisional{color:#ffd08c;background:rgba(255,173,79,.08);border-color:rgba(255,173,79,.2)}
+.admin-round-share-message{display:grid;gap:8px;color:#edf8f1;font-size:.78rem;font-weight:900;letter-spacing:.03em}
+.admin-round-share-message textarea{width:100%;min-height:300px;box-sizing:border-box;resize:vertical;padding:15px;border:1px solid var(--admin-line);border-radius:14px;background:rgba(0,0,0,.2);color:#edf8f1;font:inherit;line-height:1.5;letter-spacing:0}
+.admin-round-share-message textarea:focus{outline:3px solid rgba(100,217,148,.2);border-color:rgba(100,217,148,.45)}
+.admin-round-share-note{margin:0;color:var(--admin-muted);font-size:.78rem;line-height:1.45}
+.admin-round-share-actions{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap}
+.admin-round-share-actions button{min-height:44px}
+@media(max-width:600px){
+  .admin-round-share-modal{padding:18px;gap:14px}
+  .admin-round-share-message textarea{min-height:270px}
+  .admin-round-share-actions{display:grid;grid-template-columns:1fr 1fr}
+  .admin-round-share-actions button{width:100%}
+}
+@media(max-width:380px){.admin-round-share-actions{grid-template-columns:1fr}}

@@ -1,3 +1,20 @@
+# v6.10.0d — Resumo administrativo da rodada
+
+## Adicionado
+
+- Prévia editável do resumo coletivo da rodada com até três Destaques e Top 3.
+- Identificação consolidada ou provisória, com quantidade de jogos considerados e adiados.
+- Ações para restaurar, copiar e compartilhar manualmente o texto.
+
+## Alterado
+
+- “Compartilhar classificação” foi substituído por “Compartilhar resumo da rodada”, evitando ações redundantes.
+
+## Preservado
+
+- A funcionalidade é exclusiva da Área ADM; a Home e o modal dos participantes não foram alterados.
+- Não há envio automático, persistência de mensagens ou integração externa nova.
+
 # v6.10.0c — Destaques em rodada com jogos adiados
 
 ## Corrigido
