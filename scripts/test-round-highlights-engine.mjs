@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { buildRoundHighlightsModel } from "../js/round-highlights-engine.js";
+import { buildRoundHighlightsModel, isPostponedRoundHighlightsEligible, selectLatestRoundHighlightsCandidate } from "../js/round-highlights-engine.js";
 
 const participants = [
   { user_id: "ana-id", nome: "Ana" },
@@ -98,6 +98,34 @@ assert.deepEqual(partial.provenance.scorableGameIds, [4]);
 assert.deepEqual(partial.provenance.excludedGameIds, [5, 6, 7]);
 assert.equal(partial.roundRanking.find(item => item.key === "user:ana-id").points, 3);
 assert.equal(partial.facts.group.some(fact => fact.key.startsWith("unique-exact:")), false);
+assert.equal(isPostponedRoundHighlightsEligible(partial.lifecycle), false);
+
+const postponedPartial = buildRoundHighlightsModel({
+  round: 3,
+  games: [
+    { id_jogo: 4, rodada: 3, status: "encerrado", gols_casa: 1, gols_fora: 1 },
+    { id_jogo: 6, rodada: 3, status: "postponed" },
+  ],
+  picks: [{ id_jogo: 4, user_id: "ana-id", score: 3 }],
+  participants,
+  selectedParticipantId: "ana-id",
+  ...dependencies,
+});
+assert.equal(postponedPartial.status, "provisional");
+assert.equal(isPostponedRoundHighlightsEligible(postponedPartial.lifecycle), true);
+assert.deepEqual(postponedPartial.provenance.scorableGameIds, [4]);
+assert.deepEqual(postponedPartial.provenance.excludedGameIds, [6]);
+assert.equal(isPostponedRoundHighlightsEligible({ finished: 1, postponed: 1, future: 1, live: 0 }), false);
+const latestCandidate = selectLatestRoundHighlightsCandidate([
+  { round: 20, lifecycle: { status: "FINISHED", finished: 10, postponed: 0, future: 0, live: 0 } },
+  { round: 21, lifecycle: { status: "PARTIAL", finished: 6, postponed: 4, future: 0, live: 0 } },
+  { round: 22, lifecycle: { status: "OPEN", finished: 0, postponed: 0, future: 10, live: 0 } },
+]);
+assert.equal(latestCandidate.round, 21);
+assert.equal(selectLatestRoundHighlightsCandidate([
+  { round: 20, lifecycle: { status: "FINISHED", finished: 10, postponed: 0, future: 0, live: 0 } },
+  { round: 21, lifecycle: { status: "PARTIAL", finished: 6, postponed: 3, future: 1, live: 0 } },
+]).round, 20);
 
 const noPick = buildRoundHighlightsModel({
   round: 2,

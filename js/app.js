@@ -1,9 +1,9 @@
 import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
-import { buildRoundHighlightsModel } from "./round-highlights-engine.js";
+import { buildRoundHighlightsModel, isPostponedRoundHighlightsEligible, selectLatestRoundHighlightsCandidate } from "./round-highlights-engine.js";
 
-const APP_VERSION = "6.10.0b";
+const APP_VERSION = "6.10.0c";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1437,25 +1437,42 @@ function buildRoundHighlights(round){
   });
 }
 
-function latestConsolidatedRound(beforeRound=Infinity){
-  const rounds=[...new Set((state.games||[]).map(game=>Number(game?.rodada)).filter(round=>Number.isFinite(round)&&round<beforeRound))].sort((a,b)=>b-a);
-  return rounds.find(round=>{
-    const games=state.games.filter(game=>Number(game?.rodada)===round);
-    return roundLifecycleSummary(games).status==="FINISHED";
-  }) || null;
+function latestRoundHighlightsCandidate(beforeRound=Infinity){
+  const rounds=[...new Set((state.games||[]).map(game=>Number(game?.rodada)).filter(round=>Number.isFinite(round)&&round<beforeRound))];
+  return selectLatestRoundHighlightsCandidate(rounds.map(candidateRound=>({
+    round:candidateRound,
+    lifecycle:roundLifecycleSummary(state.games.filter(game=>Number(game?.rodada)===candidateRound))
+  })));
 }
 
 function homeRoundHighlightsContext({round,lifecycle,nextGame,now=Date.now()}){
   if(lifecycle.status==="FINISHED") return {round,mode:"finished"};
-  if(lifecycle.live>0 || lifecycle.status==="PARTIAL") return null;
-  const previousRound=latestConsolidatedRound(round);
-  if(!previousRound) return null;
+  if(lifecycle.live>0) return null;
+  if(isPostponedRoundHighlightsEligible(lifecycle)) return {round,mode:"partial"};
+  if(lifecycle.status==="PARTIAL") return null;
+  const previous=latestRoundHighlightsCandidate(round);
+  if(!previous) return null;
+  const previousRound=Number(previous.round);
+  if(isPostponedRoundHighlightsEligible(previous.lifecycle)) return {round:previousRound,mode:"partial"};
   const previousGames=state.games.filter(game=>Number(game?.rodada)===previousRound);
   const lastKickoff=Math.max(...previousGames.map(game=>new Date(game?.inicio).getTime()).filter(Number.isFinite));
   const recentlyFinished=Number.isFinite(lastKickoff) && now-lastKickoff<=72*60*60*1000;
   const nextKickoff=new Date(nextGame?.inicio).getTime();
   const longPause=Number.isFinite(nextKickoff) && nextKickoff-now>7*24*60*60*1000;
   return recentlyFinished||longPause ? {round:previousRound,mode:longPause?"pause":"recent"} : null;
+}
+
+function provisionalRoundHighlightFact(fact){
+  if(!fact) return fact;
+  let title=String(fact.title||"");
+  title=title
+    .replace(" venceu a rodada"," lidera a rodada")
+    .replace(" empataram na rodada"," lideram a rodada")
+    .replace(" liderou nos placares exatos"," lidera nos placares exatos")
+    .replace(" lideraram nos placares exatos"," lideram nos placares exatos")
+    .replace(/ na rodada$/," até agora");
+  if(!title.endsWith("até agora")) title=`${title} até agora`;
+  return {...fact,title};
 }
 
 function roundHighlightIcon(key){
@@ -1475,14 +1492,17 @@ function roundHighlightIcon(key){
 function homeRoundHighlightsHtml(context){
   if(!context) return "";
   const model=buildRoundHighlights(context.round);
-  if(model.isProvisional) return "";
-  const personal=model.facts.personal[0]||null;
-  const group=model.facts.group.find(fact=>!personal || fact.key!==personal.key)||model.facts.group[0]||null;
+  const partial=context.mode==="partial" && isPostponedRoundHighlightsEligible(model.lifecycle);
+  if(model.isProvisional && !partial) return "";
+  const displayFact=fact=>partial?provisionalRoundHighlightFact(fact):fact;
+  const personal=displayFact(model.facts.personal[0]||null);
+  const group=displayFact(model.facts.group.find(fact=>!personal || fact.key!==personal.key)||model.facts.group[0]||null);
   const facts=[personal,group].filter(Boolean).slice(0,2);
   if(!facts.length) return "";
-  const label=context.mode==="pause"?"ENQUANTO A BOLA NÃO VOLTA":"COMO FOI SUA RODADA";
+  const label=context.mode==="pause"?"ENQUANTO A BOLA NÃO VOLTA":"DESTAQUES DA RODADA";
   return `<section class="home-round-highlights" aria-label="Destaques da Rodada ${context.round}">
     <div class="home-round-highlights-heading"><span>${label}</span><strong>Rodada ${context.round}</strong></div>
+    ${partial?`<div class="round-highlights-partial-notice" role="status"><strong>⚠ Rodada com jogos adiados</strong><span>Destaques consideram ${model.lifecycle.finished} de ${model.lifecycle.total} jogos concluídos.</span></div>`:""}
     <div class="home-round-highlights-list">${facts.map(fact=>`<div><i aria-hidden="true">${roundHighlightIcon(fact.key)}</i><p><strong>${escapeHtml(fact.title)}</strong><small>${escapeHtml(fact.detail)}</small></p></div>`).join("")}</div>
     <button class="home-round-highlights-action" type="button" data-home-action="round-highlights" data-round-highlights-round="${context.round}">Ver todos os destaques <b aria-hidden="true">›</b></button>
   </section>`;
@@ -1491,21 +1511,23 @@ function homeRoundHighlightsHtml(context){
 function renderRoundHighlightsModal(model){
   const content=$("roundHighlightsModalContent");
   if(!content) return;
-  const factCard=fact=>`<article class="round-highlight-fact"><i aria-hidden="true">${roundHighlightIcon(fact.key)}</i><div><strong>${escapeHtml(fact.title)}</strong><p>${escapeHtml(fact.detail)}</p></div></article>`;
+  const partial=isPostponedRoundHighlightsEligible(model.lifecycle);
+  const displayFact=fact=>partial?provisionalRoundHighlightFact(fact):fact;
+  const factCard=fact=>{const display=displayFact(fact);return `<article class="round-highlight-fact"><i aria-hidden="true">${roundHighlightIcon(display.key)}</i><div><strong>${escapeHtml(display.title)}</strong><p>${escapeHtml(display.detail)}</p></div></article>`;};
   const sections=[];
   const personalKeys=new Set(model.facts.personal.map(fact=>fact.key));
   const groupFacts=model.facts.group.filter(fact=>!personalKeys.has(fact.key));
   if(model.facts.personal.length) sections.push(`<section><div class="round-highlight-section-heading"><span>VOCÊ NA RODADA</span><h3>Seu desempenho</h3></div><div class="round-highlight-facts">${model.facts.personal.slice(0,4).map(factCard).join("")}</div></section>`);
   if(groupFacts.length) sections.push(`<section><div class="round-highlight-section-heading"><span>NO BOLÃO</span><h3>Destaques do grupo</h3></div><div class="round-highlight-facts">${groupFacts.slice(0,4).map(factCard).join("")}</div></section>`);
-  content.innerHTML=sections.join("") || '<p class="muted-note">Ainda não há fatos suficientes para destacar nesta rodada.</p>';
+  content.innerHTML=`${partial?`<div class="round-highlights-partial-notice is-modal" role="status"><strong>⚠ Rodada com jogos adiados</strong><span>Estes destaques são provisórios e consideram ${model.lifecycle.finished} de ${model.lifecycle.total} jogos concluídos.</span></div>`:""}${sections.join("") || '<p class="muted-note">Ainda não há fatos suficientes para destacar nesta rodada.</p>'}`;
   $("roundHighlightsModalTitle").textContent=`Como foi a Rodada ${model.round}`;
-  $("roundHighlightsModalSummary").textContent=model.isProvisional?"Resumo parcial: os dados ainda podem mudar.":"Resumo consolidado após o encerramento oficial das partidas.";
+  $("roundHighlightsModalSummary").textContent=partial?"Resumo parcial dos jogos já concluídos.":"Resumo consolidado após o encerramento oficial das partidas.";
   $("roundHighlightsModalSource").textContent=`Fonte: resultados oficiais e palpites públicos encerrados • ${model.lifecycle.finished} jogo${model.lifecycle.finished===1?"":"s"} considerado${model.lifecycle.finished===1?"":"s"}.`;
 }
 
 function openRoundHighlights(round,trigger){
   const model=buildRoundHighlights(Number(round));
-  if(model.isProvisional) return message("Os destaques completos estarão disponíveis após a consolidação da rodada.",true);
+  if(model.isProvisional && !isPostponedRoundHighlightsEligible(model.lifecycle)) return message("Os destaques estarão disponíveis quando houver resultados válidos da rodada.",true);
   roundHighlightsModel=model;
   roundHighlightsReturnFocus=trigger||document.activeElement;
   renderRoundHighlightsModal(model);
