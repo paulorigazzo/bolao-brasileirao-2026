@@ -4,7 +4,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.11.0a`.
+- Versão funcional: `v6.11.0b`.
 - Prioridade: **QW2 — reavaliação do histórico consolidado por rodada**.
 - Próxima etapa recomendada: validar valor e redundâncias do histórico consolidado antes de assumir nova entrega funcional.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
