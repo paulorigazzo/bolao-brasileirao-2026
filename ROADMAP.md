@@ -4,9 +4,9 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.10.0c`.
-- Prioridade: **E04 — Inteligência Narrativa da Rodada**.
-- Próxima etapa recomendada: **QW1 — Compartilhamento determinístico e revisável dos destaques**.
+- Versão funcional: `v6.10.0d`.
+- Prioridade: **QW1 — Exportação administrativa de dados**.
+- Próxima etapa recomendada: **QW1 — Exportação CSV/Excel para administração**.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -27,10 +27,9 @@ A classificação considera valor percebido, esforço restante e reaproveitament
 
 Prioridade funcional:
 
-1. **QW1:** compartilhamento aprimorado de ranking e destaques;
-2. **QW1:** exportação CSV/Excel para administração;
-3. **QW2:** histórico consolidado por rodada;
-4. **QW2:** rankings analíticos e comparações entre participantes.
+1. **QW1:** exportação CSV/Excel para administração;
+2. **QW2:** histórico consolidado por rodada;
+3. **QW2:** rankings analíticos e comparações entre participantes.
 
 O pipeline de qualidade no GitHub Actions é um **QW1 técnico** e pode evoluir em paralelo, sem substituir a prioridade funcional. A matriz detalhada está em [`docs/BACKLOG.md`](docs/BACKLOG.md).
 
@@ -77,11 +76,11 @@ Esses recursos não utilizam IA generativa. Métricas e conclusões são calcula
 
 ## E04 — Inteligência narrativa
 
-- ✅ **E04.1:** motor determinístico e rastreável concluído na E04.1A, com experiência controlada na Home entregue na E04.1B.
+- ✅ **E04.1:** motor rastreável concluído na E04.1A, experiência controlada na Home entregue na E04.1B e resumo coletivo administrativo entregue na E04.1C.
 - 🔵 E04.2 — Narrativa assistida por IA sobre métricas verificadas.
 - 🔵 Explicação das mudanças no ranking.
 - 🔵 Destaques e curiosidades da rodada.
-- 🔵 **QW1:** Texto determinístico e revisável para compartilhamento individual.
+- ✅ **E04.1C:** resumo coletivo determinístico e revisável, restrito à Área ADM e sem compartilhamento pelos participantes.
 
 Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e deve indicar origem e limitações.
 
