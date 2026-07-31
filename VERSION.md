@@ -1,4 +1,11 @@
-6.7.1b
+6.8.0
+
+# v6.8.0 — Cadastro Consolidado
+
+- Reúne nome, telefone opcional e time favorito opcional na tela inicial do convite.
+- Usa a lista oficial de clubes para evitar diferenças de grafia.
+- Preserva os dados durante o login Google e envia a solicitação somente após a autenticação.
+- Materializa automaticamente o perfil completo depois da aprovação administrativa.
 
 # v6.7.1b — Indicação Visual no Card Meu Time 2.0
 

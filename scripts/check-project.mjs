@@ -9,19 +9,24 @@ const required = [
   "index.html", "css/design-system.css", "css/components.css", "css/styles.css", "js/app.js", "js/config.js", "js/motion.js", "js/statistics-engine.js",
   "netlify.toml", "netlify/functions/classificacao-brasileirao.mjs",
   "netlify/functions/sincronizar-jogos.mjs", "netlify/functions/sincronizar-jogos-agendado.mjs",
-  "netlify/functions/diagnostico-sistema.mjs"
+  "netlify/functions/diagnostico-sistema.mjs",
+  "supabase/migrations/20260731_v6_8_0_cadastro_consolidado.sql"
 ];
 for (const file of required) await access(path.join(projectRoot, file), constants.R_OK);
 
-const [html, app, diagnostic] = await Promise.all([
+const [html, app, diagnostic, registrationMigration] = await Promise.all([
   readFile(path.join(projectRoot, "index.html"), "utf8"),
   readFile(path.join(projectRoot, "js/app.js"), "utf8"),
   readFile(path.join(projectRoot, "netlify/functions/diagnostico-sistema.mjs"), "utf8"),
+  readFile(path.join(projectRoot, "supabase/migrations/20260731_v6_8_0_cadastro_consolidado.sql"), "utf8"),
 ]);
 const failures = [];
 if (!html.includes(`v${APP_VERSION}`)) failures.push("versão do index.html divergente");
 if (!app.includes(`const APP_VERSION = "${APP_VERSION}"`)) failures.push("versão do app.js divergente");
 if (!diagnostic.includes("APP_VERSION")) failures.push("diagnóstico não usa a versão compartilhada");
+if (!html.includes('id="registrationForm"')) failures.push("formulário de cadastro consolidado ausente");
+if (!app.includes('sb.rpc("solicitar_participacao_v2"')) failures.push("app não usa a RPC de cadastro consolidado");
+if (!registrationMigration.includes("registrar_meu_perfil_consolidado")) failures.push("migração não materializa o perfil consolidado");
 if (CLASSIFICATION_SNAPSHOT_ID !== "BSA-2026") failures.push("ID do cache inesperado");
 if (MAX_API_CALLS_PER_SYNC > 8) failures.push("limite interno da API excede 8");
 

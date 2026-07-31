@@ -4,7 +4,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 
 ## Estado atual
 
-- Versão funcional: `v6.7.1b`.
+- Versão funcional: `v6.8.0`.
 - Prioridade: preparar a E04 — Inteligência Narrativa da Rodada.
 - Roadmap oficial: [`ROADMAP.md`](ROADMAP.md).
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
@@ -18,7 +18,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 - Meu Time 2.0, com forma, próximo jogo, desempenho pessoal, sintonia e história da temporada;
 - tratamento de jogos adiados, cancelados e rodadas parcialmente concluídas;
 - gestão administrativa, diagnóstico, sincronização e auditoria;
-- cadastro, aprovação, edição, exclusão e limite configurável de participantes;
+- cadastro consolidado com nome, telefone opcional e time favorito opcional, seguido de aprovação administrativa;
 - preparação manual de mensagens individuais pelo WhatsApp;
 - manifesto web e ativos de PWA, ainda sem service worker ou cache offline.
 
