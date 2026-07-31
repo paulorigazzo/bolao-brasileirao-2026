@@ -31,7 +31,7 @@ Prioridade funcional:
 2. **QW2:** histórico consolidado por rodada;
 3. **QW2:** rankings analíticos e comparações entre participantes.
 
-O pipeline de qualidade no GitHub Actions é um **QW1 técnico** e pode evoluir em paralelo, sem substituir a prioridade funcional. A matriz detalhada está em [`docs/BACKLOG.md`](docs/BACKLOG.md).
+O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 técnico**, sem substituir a prioridade funcional. A matriz detalhada está em [`docs/BACKLOG.md`](docs/BACKLOG.md).
 
 ## E01 — Base funcional e operação
 
@@ -98,7 +98,7 @@ Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e 
 - 🔵 Ligas paralelas e múltiplos bolões.
 - 🔵 Convites e gestão por liga.
 - 🔵 **QW2:** Recursos sociais e comparações ampliadas.
-- 🔵 **QW1 técnico:** Pipeline inicial de qualidade no GitHub Actions.
+- ✅ **QW1 técnico:** Pipeline inicial de qualidade no GitHub Actions.
 - 🔵 Pipeline automatizado de releases.
 - 🔮 Simulações e recursos preditivos.
 - 🔮 Aplicativo nativo.
