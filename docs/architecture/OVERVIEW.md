@@ -8,6 +8,7 @@ O Bolão Brasileirão 2026 é uma aplicação web mobile-first construída com H
 - `css/`: design system, componentes, temas e estilos específicos.
 - `js/app.js`: integração da interface, navegação e fluxos da aplicação.
 - `js/statistics-engine.js`: cálculos e regras exclusivas da Tela de Estatísticas.
+- `js/round-highlights-engine.js`: fatos pessoais e coletivos rastreáveis por rodada, sem dependência da interface.
 - `js/config.js`: configuração central do aplicativo.
 - `js/motion.js`: tokens e comportamentos de animação.
 - `netlify/functions/`: sincronização de jogos, classificação e diagnóstico.

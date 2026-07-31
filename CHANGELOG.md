@@ -1,3 +1,18 @@
+# v6.10.0a — Motor de Destaques da Rodada
+
+## Adicionado
+
+- Motor puro e determinístico de fatos pessoais e coletivos por rodada.
+- Evidências rastreáveis para pontuação, ranking, movimentos, placares exatos e contexto individual.
+- Tratamento explícito de empates, jogos não pontuáveis, dados insuficientes e rodadas provisórias.
+- Cobertura automatizada dos principais cenários do motor.
+
+## Preservado
+
+- Home, Tela de Jogos e demais interfaces.
+- Regras de pontuação, Supabase, Netlify Functions e dados históricos.
+- Ausência de IA generativa e de compartilhamento automático.
+
 # v6.9.0e — Ranking Mobile sem Sobreposição
 
 ## Corrigido
