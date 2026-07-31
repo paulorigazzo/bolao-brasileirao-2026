@@ -1,3 +1,16 @@
+# v6.10.0c — Destaques em rodada com jogos adiados
+
+## Corrigido
+
+- Rodadas parcialmente concluídas não retrocedem para a rodada anterior quando restam apenas jogos adiados.
+- A Home e o modal identificam o caráter provisório dos destaques e quantos jogos foram considerados.
+- Fatos variáveis recebem a qualificação “até agora”.
+
+## Preservado
+
+- Jogos adiados continuam excluídos do cálculo.
+- Rodadas ao vivo ou ainda normalmente em aberto continuam sem narrativa parcial.
+
 # v6.10.0b — Destaques da Rodada na Home
 
 ## Adicionado

@@ -73,6 +73,10 @@ function lifecycleForRound(games, { isScorableGame, gameStatusDisplay }) {
   return lifecycle;
 }
 
+export function isPostponedRoundHighlightsEligible(lifecycle) {
+  return Boolean(lifecycle?.finished > 0 && lifecycle?.postponed > 0 && lifecycle?.future === 0 && lifecycle?.live === 0);
+}
+
 function emptyScore(identity) {
   return { ...identity, points: 0, exact: 0, hits: 0, picks: 0, position: null };
 }
