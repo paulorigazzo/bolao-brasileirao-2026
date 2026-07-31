@@ -1,4 +1,10 @@
-6.9.0
+6.9.0a
+
+# v6.9.0a — Refinamento do Modal de Palpites
+
+- Inclui os escudos dos clubes ao lado dos nomes no modal.
+- Adota o seletor visual de rodadas da tela Jogos, com faixa numérica, setas e botão Rodada Atual.
+- Preserva a proteção dos palpites e a rodada inicial com partidas encerradas.
 
 # v6.9.0 — Transparência dos Palpites
 
