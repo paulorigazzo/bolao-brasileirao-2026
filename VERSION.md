@@ -1,4 +1,10 @@
-6.11.0
+6.11.0a
+
+# v6.11.0a — Refinamento visual do duelo
+
+- Torna os indicadores lado a lado mais vibrantes com avatares, ícones e números maiores.
+- Destaca a vantagem em cada indicador e resume vitórias e empates sem alterar os cálculos.
+- Preserva o motor do duelo, a pontuação oficial e as demais telas.
 
 # v6.11.0 — Duelo entre participantes
 

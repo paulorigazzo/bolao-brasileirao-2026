@@ -5,7 +5,7 @@ import { buildRoundHighlightsModel, isPostponedRoundHighlightsEligible, selectLa
 import { buildAdminRoundSummary } from "./admin-round-share.js";
 import { buildParticipantDuelModel } from "./participant-duel-engine.js";
 
-const APP_VERSION = "6.11.0";
+const APP_VERSION = "6.11.0a";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2195,7 +2195,33 @@ function renderParticipantDuel(){
     <span class="ranking-duel-title">${escapeHtml(side.title.label)}</span>
     <small>${escapeHtml(side.title.evidence)}</small>
   </article>`;
-  const metric=(label,currentValue,opponentValue,suffix="")=>`<div class="ranking-duel-metric"><span>${label}</span><strong>${currentValue}${suffix}</strong><i>×</i><strong>${opponentValue}${suffix}</strong></div>`;
+  const metrics=[
+    { icon:"🏆", label:"Posição", current:model.current.position, opponent:model.opponent.position, lowerWins:true, format:value=>value?`${value}º`:"—" },
+    { icon:"★", label:"Pontos", current:model.current.officialPoints, opponent:model.opponent.officialPoints },
+    { icon:"◎", label:"Placares exatos", current:model.current.officialExact, opponent:model.opponent.officialExact },
+    { icon:"✓", label:"Jogos pontuados", current:model.current.officialScored, opponent:model.opponent.officialScored },
+    { icon:"⚡", label:"Últimas 5", current:model.current.recentPoints, opponent:model.opponent.recentPoints, suffix:" pts" },
+  ];
+  const metricWinner=metric=>{
+    if(!Number.isFinite(metric.current)||!Number.isFinite(metric.opponent)) return "neutral";
+    if(metric.current===metric.opponent) return "tie";
+    const currentWins=metric.lowerWins?metric.current<metric.opponent:metric.current>metric.opponent;
+    return currentWins?"current":"opponent";
+  };
+  const metricScore=metrics.reduce((score,metric)=>{
+    score[metricWinner(metric)]+=1;
+    return score;
+  },{ current:0, opponent:0, tie:0, neutral:0 });
+  const metricSummary=`${metricScore.current} × ${metricScore.opponent} · ${metricScore.tie} empate${metricScore.tie===1?'':'s'}`;
+  const metric=metric=>{
+    const winner=metricWinner(metric);
+    const format=metric.format||((value)=>`${value}${metric.suffix||""}`);
+    const result=winner==="neutral"?"sem comparação":winner==="tie"?"empate":winner==="current"?`vantagem de ${model.current.name}`:`vantagem de ${model.opponent.name}`;
+    return `<div class="ranking-duel-metric winner-${winner}" aria-label="${escapeHtml(metric.label)}: ${escapeHtml(model.current.name)}, ${format(metric.current)}; ${escapeHtml(model.opponent.name)}, ${format(metric.opponent)}; ${escapeHtml(result)}">
+      <span class="ranking-duel-metric-label"><b aria-hidden="true">${metric.icon}</b>${escapeHtml(metric.label)}</span>
+      <strong class="current-value">${format(metric.current)}</strong><i aria-hidden="true">VS</i><strong class="opponent-value">${format(metric.opponent)}</strong>
+    </div>`;
+  };
   const recent=model.recentRounds.map(item=>participantDuelRoundHtml(item,model)).join("");
   const allRounds=[...model.rounds].reverse().map(item=>participantDuelRoundHtml(item,model)).join("");
   const provisional=model.provisional?'<p class="ranking-duel-provisional">⚠️ O duelo inclui resultado parcial de rodada com jogo adiado e poderá mudar após sua conclusão.</p>':"";
@@ -2211,12 +2237,12 @@ function renderParticipantDuel(){
     <section class="ranking-duel-moment moment-${model.moment.key}"><span aria-hidden="true">${model.moment.icon}</span><div><small>MOMENTO DO DUELO</small><strong>${escapeHtml(model.moment.label)}</strong><p>${escapeHtml(model.moment.description)}</p></div></section>
     ${provisional}
     <section class="ranking-duel-metrics" aria-label="Indicadores oficiais lado a lado">
-      <div class="ranking-duel-metrics-head"><strong>${escapeHtml(model.current.name)}</strong><span>INDICADORES OFICIAIS</span><strong>${escapeHtml(model.opponent.name)}</strong></div>
-      ${metric("Posição",model.current.position?`${model.current.position}º`:"—",model.opponent.position?`${model.opponent.position}º`:"—")}
-      ${metric("Pontos",model.current.officialPoints,model.opponent.officialPoints)}
-      ${metric("Placares exatos",model.current.officialExact,model.opponent.officialExact)}
-      ${metric("Jogos pontuados",model.current.officialScored,model.opponent.officialScored)}
-      ${metric("Últimas 5",model.current.recentPoints,model.opponent.recentPoints," pts")}
+      <div class="ranking-duel-metrics-head">
+        <div class="ranking-duel-metrics-person">${rankingAvatar(model.current.name,"ranking-duel-metrics-avatar")}<strong>${escapeHtml(model.current.name)}</strong></div>
+        <div class="ranking-duel-metrics-summary"><span>INDICADORES OFICIAIS</span><small>${metricSummary}</small></div>
+        <div class="ranking-duel-metrics-person opponent">${rankingAvatar(model.opponent.name,"ranking-duel-metrics-avatar")}<strong>${escapeHtml(model.opponent.name)}</strong></div>
+      </div>
+      ${metrics.map(metric).join("")}
     </section>
     <section class="ranking-duel-recent"><div><span class="eyebrow">ÚLTIMAS RODADAS</span><h3>Rodada a rodada</h3></div>${recent}</section>
     ${model.rounds.length>5?`<details class="ranking-duel-all"><summary>Ver todas as ${model.rounds.length} rodadas comparáveis</summary><div>${allRounds}</div></details>`:""}
