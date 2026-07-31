@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.9.0";
+const APP_VERSION = "6.9.0a";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1922,7 +1922,48 @@ function rankingParticipantPick(picks,participant,gameId){
 }
 
 function rankingPicksAvailableRounds(){
-  return [...new Set((state.games||[]).map(game=>Number(game?.rodada)).filter(Number.isFinite))].sort((a,b)=>b-a);
+  return [...new Set((state.games||[]).map(game=>Number(game?.rodada)).filter(Number.isFinite))].sort((a,b)=>a-b);
+}
+
+function updateRankingPicksRoundControls(){
+  const select=$("rankingPicksRoundSelect");
+  const strip=$("rankingPicksRoundNumberStrip");
+  if(!select || !strip) return;
+  const rounds=[...select.options].map(option=>Number(option.value)).filter(Number.isFinite);
+  const selected=Number(select.value);
+  const selectedIndex=Math.max(0,rounds.indexOf(selected));
+  const visibleCount=5;
+  let start=Math.max(0,selectedIndex-Math.floor(visibleCount/2));
+  start=Math.min(start,Math.max(0,rounds.length-visibleCount));
+  strip.innerHTML=rounds.slice(start,start+visibleCount).map(round=>`<button type="button" class="round-number-button ${round===selected?"is-selected":""}" data-ranking-picks-round="${round}" aria-pressed="${round===selected}" aria-label="Selecionar rodada ${round}">${round}</button>`).join("");
+  const previous=$("rankingPicksPrevRound");
+  const next=$("rankingPicksNextRound");
+  if(previous) previous.disabled=selectedIndex<=0;
+  if(next) next.disabled=selectedIndex>=rounds.length-1;
+  const currentButton=$("rankingPicksCurrentRoundBtn");
+  const current=currentRoundNumber();
+  if(currentButton){
+    currentButton.disabled=selected===current || !rounds.includes(current);
+    currentButton.setAttribute("aria-label", selected===current ? `Você já está na ${current}ª rodada, a rodada atual` : `Ir para a ${current}ª rodada, a rodada atual`);
+    currentButton.title=selected===current ? `Rodada atual: ${current}ª` : `Ir para a rodada atual (${current}ª)`;
+  }
+}
+
+function changeRankingPicksRound(delta){
+  const select=$("rankingPicksRoundSelect");
+  if(!select) return;
+  const next=select.selectedIndex+delta;
+  if(next<0 || next>=select.options.length) return;
+  select.selectedIndex=next;
+  renderRankingParticipantPicks();
+}
+
+function goToRankingPicksCurrentRound(){
+  const select=$("rankingPicksRoundSelect");
+  const round=currentRoundNumber();
+  if(!select || Number(select.value)===round || ![...select.options].some(option=>Number(option.value)===round)) return;
+  select.value=String(round);
+  renderRankingParticipantPicks();
 }
 
 function renderRankingParticipantPicks(){
@@ -1944,19 +1985,22 @@ function renderRankingParticipantPicks(){
     const reveal=isScorableGame(game);
     const pick=reveal?rankingParticipantPick(publicPicks,participant,game.id_jogo):null;
     const result=reveal?`${Number(game.gols_casa)} × ${Number(game.gols_fora)}`:"—";
+    const home=`<span class="ranking-pick-team"><span class="ranking-pick-crest">${teamLogo(game.time_casa_logo,game.time_casa)}</span><span>${escapeHtml(game.time_casa)}</span></span>`;
+    const away=`<span class="ranking-pick-team is-away"><span class="ranking-pick-crest">${teamLogo(game.time_fora_logo,game.time_fora)}</span><span>${escapeHtml(game.time_fora)}</span></span>`;
     if(!reveal) return `<article class="ranking-pick-game is-locked">
-      <div class="ranking-pick-match"><span>${escapeHtml(game.time_casa)}</span><strong>×</strong><span>${escapeHtml(game.time_fora)}</span></div>
+      <div class="ranking-pick-match">${home}<strong>×</strong>${away}</div>
       <div class="ranking-pick-detail"><span aria-hidden="true">🔒</span><div><strong>Palpites protegidos</strong><small>${isPostponed(game)?"Partida adiada":"Disponíveis após o encerramento oficial"}</small></div></div>
     </article>`;
     const earned=pick?points(pick,game):0;
     return `<article class="ranking-pick-game ${pick?"has-pick":"no-pick"}">
-      <div class="ranking-pick-match"><span>${escapeHtml(game.time_casa)}</span><strong>${result}</strong><span>${escapeHtml(game.time_fora)}</span></div>
+      <div class="ranking-pick-match">${home}<strong>${result}</strong>${away}</div>
       <div class="ranking-pick-detail">
         <div><small>PALPITE</small><strong>${pick?`${Number(pick.gols_casa)} × ${Number(pick.gols_fora)}`:"Não registrado"}</strong></div>
         <div class="ranking-pick-points ${earned===10?"is-exact":""}"><small>PONTOS</small><strong>${pick?earned:"—"}</strong>${earned===10?"<em>Placar exato</em>":""}</div>
       </div>
     </article>`;
   }).join("") || '<p class="muted-note">Não há partidas cadastradas nesta rodada.</p>';
+  updateRankingPicksRoundControls();
 }
 
 function openRankingParticipantPicks(key,trigger){
@@ -1969,8 +2013,8 @@ function openRankingParticipantPicks(key,trigger){
   $("rankingPicksModalTitle").textContent=`Palpites de ${participant.name}`;
   $("rankingPicksModalSummary").textContent="Somente partidas oficialmente encerradas são reveladas.";
   $("rankingPicksRoundSelect").innerHTML=rounds.map(round=>`<option value="${round}">Rodada ${round}</option>`).join("");
-  const latestWithFinished=rounds.find(round=>state.games.some(game=>Number(game.rodada)===round&&isScorableGame(game)));
-  $("rankingPicksRoundSelect").value=String(latestWithFinished||rounds[0]);
+  const latestWithFinished=[...rounds].reverse().find(round=>state.games.some(game=>Number(game.rodada)===round&&isScorableGame(game)));
+  $("rankingPicksRoundSelect").value=String(latestWithFinished||rounds.at(-1));
   renderRankingParticipantPicks();
   $("rankingPicksModal").classList.remove("hidden");
   document.body.classList.add("modal-open");
@@ -3817,6 +3861,15 @@ $("rankingBody")?.addEventListener("click",event=>{
   if(action) openRankingParticipantPicks(action.dataset.rankingPicksKey,action);
 });
 $("rankingPicksRoundSelect")?.addEventListener("change",renderRankingParticipantPicks);
+$("rankingPicksRoundNumberStrip")?.addEventListener("click",event=>{
+  const button=event.target.closest("[data-ranking-picks-round]");
+  if(!button) return;
+  $("rankingPicksRoundSelect").value=button.dataset.rankingPicksRound;
+  renderRankingParticipantPicks();
+});
+$("rankingPicksPrevRound")?.addEventListener("click",()=>changeRankingPicksRound(-1));
+$("rankingPicksNextRound")?.addEventListener("click",()=>changeRankingPicksRound(1));
+$("rankingPicksCurrentRoundBtn")?.addEventListener("click",goToRankingPicksCurrentRound);
 $("rankingPicksModalClose")?.addEventListener("click",closeRankingParticipantPicks);
 $("rankingPicksModal")?.addEventListener("click",event=>{if(event.target===$("rankingPicksModal")) closeRankingParticipantPicks();});
 $("loginBtn").onclick=login; $("heroLoginBtn").onclick=login; $("logoutBtn").onclick=logout; $("membershipLogoutBtn")?.addEventListener("click",logout); $("refreshBtn").onclick=refresh; $("refreshStandingsBtn").onclick=()=>loadStandings(true); $("syncGamesBtn").onclick=syncGames;
