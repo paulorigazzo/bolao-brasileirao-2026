@@ -1,4 +1,10 @@
-6.9.0b
+6.9.0c
+
+# v6.9.0c — Harmonia do Ranking Mobile
+
+- Reposiciona a ação de palpites abaixo dos pontos na coluna direita.
+- Remove o texto repetitivo da ação e recupera a densidade dos cards no celular.
+- Mantém a área de toque acessível e o desktop inalterado.
 
 # v6.9.0b — Alinhamento e Destaque dos Palpites
 

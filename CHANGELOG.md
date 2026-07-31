@@ -1,3 +1,17 @@
+# v6.9.0c — Harmonia do Ranking Mobile
+
+## Ajustado
+
+- Reorganiza a ação de consulta dos palpites na classificação mobile.
+- Exibe **Palpites**, quantidade e ícone de visualização de forma compacta abaixo dos pontos.
+- Remove o texto repetitivo **Ver palpites** dos cards no celular.
+- Reduz a altura ocupada pela ação sem comprometer a área de toque.
+
+## Preservado
+
+- Classificação e ação no desktop.
+- Modal, acessibilidade, regras de pontuação e proteção dos palpites.
+
 # v6.9.0b — Alinhamento e Destaque dos Palpites
 
 ## Ajustado
