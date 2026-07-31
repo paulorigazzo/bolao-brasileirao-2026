@@ -1,4 +1,10 @@
-6.9.0d
+6.9.0e
+
+# v6.9.0e — Ranking Mobile sem Sobreposição
+
+- Consolida pontos e palpites em uma única faixa horizontal à direita.
+- Impede que nomes longos ultrapassem sua coluna, usando reticências.
+- Preserva a altura compacta e a apresentação desktop.
 
 # v6.9.0d — Densidade e Descoberta no Ranking Mobile
 

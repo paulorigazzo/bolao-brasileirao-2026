@@ -4,7 +4,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.9.0d`.
+- Versão funcional: `v6.9.0e`.
 - Prioridade: **E04 — Inteligência Narrativa da Rodada**.
 - Próxima etapa recomendada: **E04.1 — Resumo determinístico da rodada**.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.

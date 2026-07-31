@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.9.0d";
+const APP_VERSION = "6.9.0e";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1887,11 +1887,11 @@ function renderRanking(){
     const medal=i===0?'gold':i===1?'silver':i===2?'bronze':'';
     return `<tr class="ranking-row ranking-premium-row${placeClass} ${isMe?"me-row":""}">
       <td><div class="rank-position"><span class="rank-medal ${medal}">${i<3?i+1:""}</span><span class="rank-number">${i+1}º</span>${movementBadge(r.name)}</div></td>
-      <td><div class="rank-participant">${rankingAvatar(r.name)}<div><strong>${escapeHtml(r.name)}</strong>${isMe?'<span class="you-chip">VOCÊ</span>':""}<small>${team?escapeHtml(team.name):"Participante"}</small></div></div></td>
+      <td><div class="rank-participant">${rankingAvatar(r.name)}<div><strong title="${escapeHtml(r.name)}">${escapeHtml(r.name)}</strong>${isMe?'<span class="you-chip">VOCÊ</span>':""}<small>${team?escapeHtml(team.name):"Participante"}</small></div></div></td>
       <td data-label="Pontos"><strong class="rank-points">${r.total}</strong></td>
       <td data-label="Exatos"><strong>${r.exact}</strong></td>
       <td data-label="Aproveitamento"><div class="rank-rate"><div class="rank-rate-track"><span style="width:${rate}%"></span></div><strong>${rate}%</strong></div></td>
-      <td data-label="Palpites"><button class="ranking-picks-action" type="button" data-ranking-picks-key="${escapeHtml(r.key)}" aria-label="Ver palpites de ${escapeHtml(r.name)}"><span>${r.count}</span><span aria-hidden="true">👁</span><em>Ver palpites</em></button></td>
+      <td data-label="Palpites"><button class="ranking-picks-action" type="button" data-ranking-picks-key="${escapeHtml(r.key)}" aria-label="Ver ${r.count} palpites de ${escapeHtml(r.name)}, que tem ${r.total} pontos"><span class="ranking-picks-mobile-summary" aria-hidden="true"><span><small>Pontos</small><strong>${r.total}</strong></span><i></i><span><small>Palpites</small><strong>${r.count}</strong><b>👁</b></span></span><span class="ranking-picks-desktop-count">${r.count}</span><span class="ranking-picks-desktop-eye" aria-hidden="true">👁</span><em>Ver palpites</em></button></td>
     </tr>`;
   }).join('') || '<tr><td colspan="6"><p class="muted-note">A classificação aparecerá após os primeiros resultados.</p></td></tr>';
 
