@@ -1,6 +1,6 @@
 # Backlog
 
-Itens ainda não comprometidos com uma entrega imediata. O status e a prioridade oficiais permanecem em [`../ROADMAP.md`](../ROADMAP.md).
+Itens planejados e ainda não concluídos. O status e a prioridade oficiais permanecem em [`../ROADMAP.md`](../ROADMAP.md).
 
 ## Critérios de priorização
 
@@ -17,12 +17,11 @@ Itens já concluídos, como gráficos históricos, Meu Time 2.0, explicações e
 
 | Item | Estado real | Lacuna | Esforço | Valor | Classe | Dependências |
 |---|---|---|:---:|:---:|:---:|---|
-| Exportação CSV/Excel | Não iniciado | Gerar arquivo administrativo a partir dos dados estruturados | Baixo/médio | Alto para ADM | **QW1** | Ranking e participantes |
+| Duelo entre participantes e métricas contextuais | Escopo aprovado | Implementar comparação direta, placar recreativo, títulos e momento recente no modal do Ranking | Médio | Alto para participantes | **QW1** | Ranking, palpites públicos encerrados e motor estatístico |
 | Histórico consolidado por rodada | Parcial | Unir jogos, resultado, ranking e destaques em uma visão | Médio | Alto | **QW2** | Histórico e ranking existentes |
-| Rankings analíticos | Parcial | Criar filtros por rodada, precisão e cenários | Médio | Alto | **QW2** | Motor estatístico |
-| Comparação entre participantes | Base disponível | Criar interface e critérios de comparação | Médio | Alto | **QW2** | Ranking e estatísticas |
 | Calendário consolidado | Não iniciado | Criar modal ou visão dedicada de partidas | Médio | Alto | **QW2** | Dados de jogos |
 | Testes automatizados por fluxo | Parcial | Cobrir telas e jornadas além dos motores atuais | Médio | Alto técnico | **QW2** | Infraestrutura de testes |
+| Exportação CSV/Excel | Adiado | Confirmar uma necessidade administrativa concreta antes de gerar arquivos estruturados | Baixo/médio | Médio para ADM | **QW3** | Demanda administrativa validada, ranking e participantes |
 | Narrativa assistida por IA | Não iniciado | Integrar backend seguro e modelo generativo | Alto | Alto | **QW3** | E04.1 |
 | Histórico de mensagens WhatsApp | Não iniciado | Persistir mensagens e consentimentos aplicáveis | Médio/alto | Médio | **QW3** | Modelo de dados e privacidade |
 | Central de notícias | Não iniciado | Definir fonte, curadoria e interface | Alto | Médio/alto | **QW3** | Integração externa |

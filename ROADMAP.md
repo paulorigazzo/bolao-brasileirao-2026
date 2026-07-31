@@ -5,8 +5,8 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 ## Referência atual
 
 - Versão funcional: `v6.10.0d`.
-- Prioridade: **QW1 — Exportação administrativa de dados**.
-- Próxima etapa recomendada: **QW1 — Exportação CSV/Excel para administração**.
+- Prioridade: **QW1 — E03 Sprint G: Duelo entre participantes**.
+- Próxima etapa recomendada: **E03 Sprint G — comparação direta, analítica e divertida entre dois participantes**.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -27,9 +27,9 @@ A classificação considera valor percebido, esforço restante e reaproveitament
 
 Prioridade funcional:
 
-1. **QW1:** exportação CSV/Excel para administração;
+1. **QW1:** E03 Sprint G — duelo entre participantes;
 2. **QW2:** histórico consolidado por rodada;
-3. **QW2:** rankings analíticos e comparações entre participantes.
+3. **QW2:** calendário consolidado de partidas.
 
 O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 técnico**, sem substituir a prioridade funcional. A matriz detalhada está em [`docs/BACKLOG.md`](docs/BACKLOG.md).
 
@@ -69,6 +69,7 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - ✅ Sprint D — perfil inteligente de palpites.
 - ✅ Sprint E — histórico do ranking e trajetória do participante.
 - ✅ Sprint F — dashboard, recordes, regularidade, comparações e medalhas.
+- 🔵 **Sprint G — Duelo entre participantes:** comparação direta acessada pelo Ranking, com métricas contextuais, placar recreativo por rodadas, títulos temporários, frase divertida e momento recente determinísticos.
 - ✅ Indicadores pessoais relacionados ao time favorito.
 - ✅ Textos de momento e recomendações produzidos por regras locais.
 
@@ -97,7 +98,7 @@ Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e 
 
 - 🔵 Ligas paralelas e múltiplos bolões.
 - 🔵 Convites e gestão por liga.
-- 🔵 **QW2:** Recursos sociais e comparações ampliadas.
+- 🔵 Recursos sociais ampliados após a validação do Duelo entre participantes.
 - ✅ **QW1 técnico:** Pipeline inicial de qualidade no GitHub Actions.
 - 🔵 Pipeline automatizado de releases.
 - 🔮 Simulações e recursos preditivos.
