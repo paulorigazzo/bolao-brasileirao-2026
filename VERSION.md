@@ -1,4 +1,9 @@
-6.9.0a
+6.9.0b
+
+# v6.9.0b — Alinhamento e Destaque dos Palpites
+
+- Centraliza o placar do palpite sob o resultado oficial.
+- Destaca em verde toda pontuação positiva e preserva o dourado do placar exato.
 
 # v6.9.0a — Refinamento do Modal de Palpites
 

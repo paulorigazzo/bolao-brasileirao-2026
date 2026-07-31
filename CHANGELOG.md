@@ -1,3 +1,12 @@
+# v6.9.0b — Alinhamento e Destaque dos Palpites
+
+## Ajustado
+
+- Centraliza o placar apostado exatamente abaixo do resultado da partida.
+- Exibe em verde as pontuações de 1, 3 e 5 pontos.
+- Preserva em dourado a pontuação de 10 pontos e o selo **Placar exato**.
+- Mantém a pontuação zero com apresentação neutra.
+
 # v6.9.0a — Refinamento do Modal de Palpites
 
 ## Ajustado
