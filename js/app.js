@@ -2,7 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 
-const APP_VERSION = "6.9.0a";
+const APP_VERSION = "6.9.0b";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1995,8 +1995,8 @@ function renderRankingParticipantPicks(){
     return `<article class="ranking-pick-game ${pick?"has-pick":"no-pick"}">
       <div class="ranking-pick-match">${home}<strong>${result}</strong>${away}</div>
       <div class="ranking-pick-detail">
-        <div><small>PALPITE</small><strong>${pick?`${Number(pick.gols_casa)} × ${Number(pick.gols_fora)}`:"Não registrado"}</strong></div>
-        <div class="ranking-pick-points ${earned===10?"is-exact":""}"><small>PONTOS</small><strong>${pick?earned:"—"}</strong>${earned===10?"<em>Placar exato</em>":""}</div>
+        <div class="ranking-pick-prediction"><small>PALPITE</small><strong>${pick?`${Number(pick.gols_casa)} × ${Number(pick.gols_fora)}`:"Não registrado"}</strong></div>
+        <div class="ranking-pick-points ${earned>0?"has-points":""} ${earned===10?"is-exact":""}"><small>PONTOS</small><strong>${pick?earned:"—"}</strong>${earned===10?"<em>Placar exato</em>":""}</div>
       </div>
     </article>`;
   }).join("") || '<p class="muted-note">Não há partidas cadastradas nesta rodada.</p>';
