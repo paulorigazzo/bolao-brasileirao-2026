@@ -1,3 +1,10 @@
+# v6.11.2 — Refinamentos de layout desktop
+
+- Organiza cada rodada do duelo em uma faixa de contexto e outra de confronto no desktop.
+- Alinha os placares recentes às mesmas três colunas dos indicadores oficiais.
+- Mantém os cinco destinos da barra flutuante em uma única linha no computador.
+- Preserva cálculos, resultados, navegação e experiência mobile.
+
 # v6.11.1 — Refinamentos de layout mobile
 
 - Mantém os cinco destinos da barra flutuante organizados em uma linha no modo paisagem.

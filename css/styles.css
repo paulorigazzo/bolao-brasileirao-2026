@@ -4130,3 +4130,43 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
   .ranking-duel-recent header p{display:none}
   .ranking-duel-round-result{max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
+
+/* v6.11.2 — refinamentos de layout desktop para Duelo e navegação */
+@media(min-width:681px){
+  .bottom-nav{
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    width:min(620px,calc(100% - 24px));
+  }
+}
+@media(min-width:521px){
+  .ranking-duel-round{
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-rows:auto auto;
+    gap:8px 12px;
+    padding:11px 14px;
+  }
+  .ranking-duel-round-meta{
+    grid-column:1;
+    grid-row:1;
+    display:flex;
+    align-items:center;
+    gap:7px;
+  }
+  .ranking-duel-round-result{
+    grid-column:2;
+    grid-row:1;
+    align-self:center;
+    justify-self:end;
+    margin:0;
+  }
+  .ranking-duel-round>.ranking-duel-round-score{
+    grid-column:1/-1;
+    grid-row:2;
+    display:grid;
+    width:100%;
+    grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);
+    gap:9px;
+    text-align:center;
+  }
+  .ranking-duel-round-score>i{justify-self:center}
+}
