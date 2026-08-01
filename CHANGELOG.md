@@ -1,3 +1,10 @@
+# v6.11.1 — Refinamentos de layout mobile
+
+- Mantém os cinco destinos da barra flutuante organizados em uma linha no modo paisagem.
+- Reequilibra identidade e indicadores nos cards da classificação completa.
+- Separa contexto e placar nas últimas rodadas do duelo em telas estreitas.
+- Preserva navegação, regras, dados e padrões visuais existentes.
+
 # v6.11.0b — Rodadas do duelo em destaque
 
 - Aplica à seção “Últimas Rodadas” a mesma linguagem visual dos indicadores oficiais.

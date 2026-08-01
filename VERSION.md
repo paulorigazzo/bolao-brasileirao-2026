@@ -1,4 +1,10 @@
-6.11.0b
+6.11.1
+
+# v6.11.1 — Refinamentos de layout mobile
+
+- Corrige a barra flutuante em celulares na orientação horizontal.
+- Recupera espaço para nomes, time e selo `Você` na classificação completa.
+- Elimina a sobreposição entre estado parcial e placar nas últimas rodadas do duelo.
 
 # v6.11.0b — Rodadas do duelo em destaque
 
