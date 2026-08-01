@@ -4114,12 +4114,14 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
     justify-self:end;
     margin:0;
   }
-  .ranking-duel-round-score{
+  .ranking-duel-round>.ranking-duel-round-score{
     grid-column:1/-1;
     grid-row:2;
+    display:grid;
     width:100%;
     grid-template-columns:minmax(0,1fr) 30px minmax(0,1fr);
     gap:7px;
+    text-align:center;
   }
   .ranking-duel-round-score>strong{font-size:1.02rem}
   .ranking-duel-round-score>i{width:28px;height:28px}
