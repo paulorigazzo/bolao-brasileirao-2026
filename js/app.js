@@ -5,7 +5,7 @@ import { buildRoundHighlightsModel, isPostponedRoundHighlightsEligible, selectLa
 import { buildAdminRoundSummary } from "./admin-round-share.js";
 import { buildParticipantDuelModel } from "./participant-duel-engine.js";
 
-const APP_VERSION = "6.11.0b";
+const APP_VERSION = "6.11.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
