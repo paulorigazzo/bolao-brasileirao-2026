@@ -1,4 +1,10 @@
-6.11.1
+6.11.2
+
+# v6.11.2 — Refinamentos de layout desktop
+
+- Alinha os confrontos de “Últimas Rodadas” às colunas comparativas superiores no computador.
+- Separa contexto, estado parcial e placar para impedir sobreposições em telas largas.
+- Mantém os cinco destinos da barra flutuante em uma única linha no desktop.
 
 # v6.11.1 — Refinamentos de layout mobile
 
