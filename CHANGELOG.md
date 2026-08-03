@@ -1,3 +1,17 @@
+# v6.13.0 — Calendário Interativo de Partidas
+
+## Adicionado
+
+- Calendário mensal acessível pela Home, com quantidade de jogos por dia e indicação do time favorito.
+- Navegação de um toque para a rodada e a partida mais relevante da data selecionada.
+- Tratamento específico para partidas adiadas que aguardam nova data.
+- Motor determinístico e testes para agrupamento por data, fuso horário e prioridade do destino.
+
+## Preservado
+
+- Estrutura visual da Tela de Jogos, regras de palpites, pontuação, Área ADM e Supabase.
+- Organização original das partidas por rodada.
+
 # v6.12.0 — Acesso histórico aos Destaques da Rodada
 
 ## Adicionado

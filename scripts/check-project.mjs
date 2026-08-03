@@ -6,8 +6,8 @@ import { APP_VERSION, CLASSIFICATION_SNAPSHOT_ID, MAX_API_CALLS_PER_SYNC } from 
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const required = [
-  "index.html", "css/design-system.css", "css/components.css", "css/styles.css", "js/app.js", "js/config.js", "js/motion.js", "js/statistics-engine.js", "js/round-highlights-engine.js", "js/participant-duel-engine.js", "js/admin-round-share.js",
-  "scripts/test-round-highlights-engine.mjs", "scripts/test-participant-duel-engine.mjs", "scripts/test-admin-round-share.mjs",
+  "index.html", "css/design-system.css", "css/components.css", "css/styles.css", "js/app.js", "js/config.js", "js/motion.js", "js/statistics-engine.js", "js/round-highlights-engine.js", "js/participant-duel-engine.js", "js/admin-round-share.js", "js/match-calendar-engine.js",
+  "scripts/test-round-highlights-engine.mjs", "scripts/test-participant-duel-engine.mjs", "scripts/test-admin-round-share.mjs", "scripts/test-match-calendar-engine.mjs",
   "netlify.toml", "netlify/functions/classificacao-brasileirao.mjs",
   "netlify/functions/sincronizar-jogos.mjs", "netlify/functions/sincronizar-jogos-agendado.mjs",
   "netlify/functions/diagnostico-sistema.mjs",

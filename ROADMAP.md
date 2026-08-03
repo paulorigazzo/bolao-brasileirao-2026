@@ -4,9 +4,9 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.12.0`.
-- Prioridade: **QW2 — calendário consolidado de partidas**.
-- Próxima etapa recomendada: definir o escopo e o valor do calendário consolidado sem ampliar a Tela de Jogos congelada.
+- Versão funcional: `v6.13.0`.
+- Prioridade: **QW2 — auditoria ampliada de acessibilidade**.
+- Próxima etapa recomendada: revisar os principais fluxos por teclado, foco, contraste e tecnologias assistivas.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -27,9 +27,9 @@ A classificação considera valor percebido, esforço restante e reaproveitament
 
 Prioridade funcional:
 
-1. **QW2:** calendário consolidado de partidas;
-2. **QW2:** auditoria ampliada de acessibilidade;
-3. **QW2:** testes automatizados por fluxo.
+1. **QW2:** auditoria ampliada de acessibilidade;
+2. **QW2:** testes automatizados por fluxo;
+3. **QW3:** narrativa assistida por IA sobre métricas verificadas.
 
 O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 técnico**, sem substituir a prioridade funcional. A matriz detalhada está em [`docs/BACKLOG.md`](docs/BACKLOG.md).
 
@@ -58,7 +58,7 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - 🟡 PWA: manifesto e ícones disponíveis; service worker e cache offline ausentes.
 - 🟡 Acessibilidade: navegação por teclado, estados e rótulos presentes; auditoria completa ainda pendente.
 - 🔵 Dark mode.
-- 🔵 Calendário consolidado de partidas.
+- ✅ **E02.1 — Calendário Interativo de Partidas:** visão mensal pela Home, com quantidade de jogos, destaque do time favorito e acesso direto à partida na rodada original.
 - 🔵 Central de notícias contextual.
 
 ## E03 — Inteligência estatística determinística

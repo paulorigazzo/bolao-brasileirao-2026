@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.12.0">
-  <link rel="stylesheet" href="./css/styles.css?v=6.12.0">
-  <link rel="stylesheet" href="./css/components.css?v=6.12.0">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.12.0">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.12.0">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.12.0">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.13.0">
+  <link rel="stylesheet" href="./css/styles.css?v=6.13.0">
+  <link rel="stylesheet" href="./css/components.css?v=6.13.0">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.13.0">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.13.0">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.13.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.12.0</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.13.0</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -609,6 +609,28 @@
     </section>
   </div>
 
+  <div id="matchCalendarModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="matchCalendarTitle" aria-describedby="matchCalendarSummary">
+    <section class="match-calendar-modal card" tabindex="-1">
+      <div class="match-calendar-header">
+        <div>
+          <span class="eyebrow">AGENDA DO BRASILEIRÃO</span>
+          <h2 id="matchCalendarTitle">Calendário de partidas</h2>
+          <p id="matchCalendarSummary" class="muted-note"></p>
+        </div>
+        <button id="matchCalendarClose" class="modal-close" type="button" aria-label="Fechar calendário">✕</button>
+      </div>
+      <div class="match-calendar-toolbar">
+        <button id="matchCalendarPrevious" class="icon-button" type="button" aria-label="Mês anterior">‹</button>
+        <strong id="matchCalendarMonth">Mês</strong>
+        <button id="matchCalendarNext" class="icon-button" type="button" aria-label="Próximo mês">›</button>
+      </div>
+      <div class="match-calendar-weekdays" aria-hidden="true"><span>DOM</span><span>SEG</span><span>TER</span><span>QUA</span><span>QUI</span><span>SEX</span><span>SÁB</span></div>
+      <div id="matchCalendarGrid" class="match-calendar-grid" aria-live="polite"></div>
+      <p class="match-calendar-legend"><span><i class="calendar-ball" aria-hidden="true">⚽</i> quantidade de jogos</span><span><i class="calendar-heart" aria-hidden="true">♥</i> seu time joga</span></p>
+      <div id="matchCalendarPostponed" class="match-calendar-postponed"></div>
+    </section>
+  </div>
+
   <div id="adminParticipantModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="adminParticipantModalTitle">
     <section class="admin-participant-modal card">
       <div class="admin-detail-header">
@@ -682,6 +704,6 @@
       if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.12.0"></script>
+  <script type="module" src="./js/app.js?v=6.13.0"></script>
 </body>
 </html>
