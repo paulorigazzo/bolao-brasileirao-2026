@@ -5,8 +5,8 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 ## Referência atual
 
 - Versão funcional: `v6.13.0`.
-- Prioridade: **QW2 — avaliar a expansão dos testes automatizados por fluxo**.
-- Próxima etapa recomendada: definir jornadas prioritárias, riscos cobertos e retorno esperado antes de ampliar a automação.
+- Prioridade: **reavaliar o Backlog antes de selecionar uma nova entrega**.
+- Próxima etapa recomendada: analisar valor, esforço, redundância e risco das candidatas restantes sem promover automaticamente um novo item.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -25,11 +25,13 @@ A classificação considera valor percebido, esforço restante e reaproveitament
 - **QW3:** bom candidato, mas com dependências ou esforço maior;
 - **LP:** longo prazo ou mudança estrutural.
 
-Prioridade funcional:
+Situação das candidatas recentes:
 
-1. **QW2:** testes automatizados por fluxo;
-2. **QW3:** narrativa assistida por IA sobre métricas verificadas;
+1. **Em definição:** próxima entrega funcional;
+2. **Reavaliar quando necessário:** testes automatizados por fluxo e narrativa assistida por IA;
 3. **Reavaliar quando necessário:** auditoria ampliada de acessibilidade.
+
+Os critérios e motivos do adiamento de testes por fluxo e IA estão registrados na [análise de 3 de agosto de 2026](docs/product/ANALISE_QW2_QW3_2026-08-03.md).
 
 O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 técnico**, sem substituir a prioridade funcional. A matriz detalhada está em [`docs/BACKLOG.md`](docs/BACKLOG.md).
 
@@ -42,7 +44,7 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - ✅ Centro de Controle, diagnóstico e auditoria administrativa.
 - ✅ E01.6 — Gestão Inteligente de Jogos Adiados.
 - ✅ E01.7 — Consolidação da Integridade da Rodada.
-- 🟡 Testes automatizados: motor estatístico e sincronização cobertos; cobertura por tela ainda incompleta.
+- 🟡 Testes automatizados: motores e sincronização cobertos; expansão por fluxo reavaliada e adiada até existir necessidade concreta.
 
 ## E02 — Experiência e personalização
 
@@ -79,8 +81,8 @@ Esses recursos não utilizam IA generativa. Métricas e conclusões são calcula
 
 - ✅ **E04.1:** motor rastreável concluído na E04.1A, experiência controlada na Home entregue na E04.1B e resumo coletivo administrativo entregue na E04.1C.
 - ✅ **E04.1D:** acesso histórico aos Destaques da Rodada pelas Estatísticas, reutilizando o modal e o motor existentes sem criar uma visão redundante.
-- 🔵 E04.2 — Narrativa assistida por IA sobre métricas verificadas.
-- 🔵 Explicação das mudanças no ranking.
+- 🟡 E04.2 — Narrativa assistida por IA reavaliada e adiada até existir um caso de uso sem redundância e com valor demonstrado.
+- 🔵 Explicação determinística das mudanças no ranking, preservada como possibilidade futura antes de qualquer uso de IA.
 - 🔵 Destaques e curiosidades da rodada.
 - ✅ **E04.1C:** resumo coletivo determinístico e revisável, restrito à Área ADM e sem compartilhamento pelos participantes.
 

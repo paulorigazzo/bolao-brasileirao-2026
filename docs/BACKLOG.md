@@ -21,9 +21,9 @@ O calendário consolidado foi atendido pela E02.1 como uma visão mensal interat
 
 | Item | Estado real | Lacuna | Esforço | Valor | Classe | Dependências |
 |---|---|---|:---:|:---:|:---:|---|
-| Testes automatizados por fluxo | Parcial | Cobrir telas e jornadas além dos motores atuais | Médio | Alto técnico | **QW2** | Infraestrutura de testes |
+| Testes automatizados por fluxo | Reavaliado e adiado | Retomar diante de regressão concreta, mudança em regra protegida ou escopo específico; ver [análise de 03/08/2026](product/ANALISE_QW2_QW3_2026-08-03.md) | Médio/alto | Alto técnico quando houver necessidade comprovada | **Sob demanda** | Evidência concreta e infraestrutura de testes |
 | Exportação CSV/Excel | Adiado | Confirmar uma necessidade administrativa concreta antes de gerar arquivos estruturados | Baixo/médio | Médio para ADM | **QW3** | Demanda administrativa validada, ranking e participantes |
-| Narrativa assistida por IA | Não iniciado | Integrar backend seguro e modelo generativo | Alto | Alto | **QW3** | E04.1 |
+| Narrativa assistida por IA | Reavaliado e adiado | Demonstrar valor adicional e ausência de redundância antes de integrar serviço generativo; ver [análise de 03/08/2026](product/ANALISE_QW2_QW3_2026-08-03.md) | Alto | Não demonstrado no formato atual | **Sob demanda** | Caso de uso validado, backend seguro e fallback determinístico |
 | Histórico de mensagens WhatsApp | Não iniciado | Persistir mensagens e consentimentos aplicáveis | Médio/alto | Médio | **QW3** | Modelo de dados e privacidade |
 | Central de notícias | Não iniciado | Definir fonte, curadoria e interface | Alto | Médio/alto | **QW3** | Integração externa |
 | Heatmaps | Não iniciado | Agregar métricas e criar visualização própria | Médio | Médio | **QW3** | Motor estatístico |
