@@ -4,8 +4,8 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 
 ## Estado atual
 
-- Versão funcional: `v6.11.3`.
-- Prioridade: reavaliar o escopo do histórico consolidado por rodada antes de assumir nova entrega funcional.
+- Versão funcional: `v6.12.0`.
+- Prioridade: definir o escopo e o valor do calendário consolidado de partidas.
 - Roadmap oficial: [`ROADMAP.md`](ROADMAP.md).
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 

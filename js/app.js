@@ -5,7 +5,7 @@ import { buildRoundHighlightsModel, isPostponedRoundHighlightsEligible, selectLa
 import { buildAdminRoundSummary } from "./admin-round-share.js";
 import { buildParticipantDuelModel } from "./participant-duel-engine.js";
 
-const APP_VERSION = "6.11.3";
+const APP_VERSION = "6.12.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2589,7 +2589,7 @@ function renderStats(){
     const change=!previous?null:data.average-previous.average;
     const changeLabel=change===null?"início":Math.abs(change)<.05?"estável":change>0?`+${change.toFixed(1)}`:change.toFixed(1);
     const changeClass=change===null||Math.abs(change)<.05?"stable":change>0?"up":"down";
-    return `<div class="round-history-item ${bestRound&&data.round===bestRound.round?'best':''}"><span>R${data.round}</span><div class="history-track"><div style="width:${data.points/top*100}%"></div></div><strong>${data.points} pts</strong><small>${data.hits}/${data.games} acertos · ${data.average.toFixed(1)} pts/jogo</small><em class="round-change ${changeClass}">${changeLabel}</em></div>`;
+    return `<button type="button" class="round-history-item ${bestRound&&data.round===bestRound.round?'best':''}" data-stats-round-highlights="${data.round}" aria-label="Ver Destaques da Rodada ${data.round}"><span>R${data.round}</span><div class="history-track"><div style="width:${data.points/top*100}%"></div></div><strong>${data.points} pts</strong><small>${data.hits}/${data.games} acertos · ${data.average.toFixed(1)} pts/jogo</small><em class="round-change ${changeClass}">${changeLabel}</em><span class="round-history-chevron" aria-hidden="true">›</span></button>`;
   }).join(""):'<div class="stats-empty-state"><span aria-hidden="true">📈</span><strong>Sem evolução por rodada ainda</strong><p>O gráfico será exibido após os primeiros jogos finalizados com palpite.</p></div>';
 }
 
@@ -4207,6 +4207,10 @@ $("rankingPicksModal")?.addEventListener("click",event=>{
 });
 $("rankingPicksModalClose")?.addEventListener("click",closeRankingParticipantPicks);
 $("rankingPicksModal")?.addEventListener("click",event=>{if(event.target===$("rankingPicksModal")) closeRankingParticipantPicks();});
+$("roundHistory")?.addEventListener("click",event=>{
+  const trigger=event.target.closest("[data-stats-round-highlights]");
+  if(trigger) openRoundHighlights(trigger.dataset.statsRoundHighlights,trigger);
+});
 $("roundHighlightsModalClose")?.addEventListener("click",closeRoundHighlights);
 $("roundHighlightsModal")?.addEventListener("click",event=>{if(event.target===$("roundHighlightsModal")) closeRoundHighlights();});
 $("loginBtn").onclick=login; $("heroLoginBtn").onclick=login; $("logoutBtn").onclick=logout; $("membershipLogoutBtn")?.addEventListener("click",logout); $("refreshBtn").onclick=refresh; $("refreshStandingsBtn").onclick=()=>loadStandings(true); $("syncGamesBtn").onclick=syncGames;
