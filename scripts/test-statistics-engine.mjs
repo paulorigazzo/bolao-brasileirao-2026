@@ -39,6 +39,8 @@ assert.equal(result.dataQuality.cancelled, 1);
 assert.equal(result.dataQuality.invalid, 0);
 assert.equal(result.dataQuality.hasAttention, true);
 assert.equal(result.dataQuality.level, "info");
+assert.equal(result.groups.postponed.length, 1);
+assert.equal(result.groups.postponed[0].game.id_jogo, 4);
 
 
 const roundAnalysis = analyzeRoundPerformance({

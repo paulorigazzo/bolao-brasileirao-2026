@@ -1,3 +1,9 @@
+# v6.11.3 — Contexto dos jogos adiados nas Estatísticas
+
+- O card “Qualidade das Estatísticas” explicita que a contagem abrange a temporada.
+- Lista cada partida adiada com seu confronto e sua rodada original.
+- Mantém inalteradas as regras de classificação e os cálculos estatísticos.
+
 # v6.11.2 — Refinamentos de layout desktop
 
 - Organiza cada rodada do duelo em uma faixa de contexto e outra de confronto no desktop.

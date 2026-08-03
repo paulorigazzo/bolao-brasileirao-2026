@@ -5,7 +5,7 @@ import { buildRoundHighlightsModel, isPostponedRoundHighlightsEligible, selectLa
 import { buildAdminRoundSummary } from "./admin-round-share.js";
 import { buildParticipantDuelModel } from "./participant-duel-engine.js";
 
-const APP_VERSION = "6.11.2";
+const APP_VERSION = "6.11.3";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2490,8 +2490,15 @@ function renderStats(){
   const qualityPanel=$("statsDataQuality");
   if(qualityPanel){
     const reasons=[];
+    const postponedGames=classification.groups.postponed
+      .map(entry=>entry.game)
+      .sort((a,b)=>Number(a.rodada)-Number(b.rodada) || new Date(a.inicio)-new Date(b.inicio));
+    const postponedDetails=postponedGames.length?`<div class="stats-postponed-details" aria-label="Partidas adiadas fora dos cálculos">
+      <strong>Partidas adiadas por rodada original</strong>
+      <div class="stats-postponed-list">${postponedGames.map(game=>`<div class="stats-postponed-row"><span>R${Number(game.rodada)||"—"}</span><p><b>${escapeHtml(game.time_casa||"Mandante a definir")}</b><i aria-hidden="true">×</i><b>${escapeHtml(game.time_fora||"Visitante a definir")}</b></p></div>`).join("")}</div>
+    </div>`:"";
     if(quality.awaitingResult) reasons.push(`<li><strong>${quality.awaitingResult}</strong> aguardando resultado oficial</li>`);
-    if(quality.postponed) reasons.push(`<li><strong>${quality.postponed}</strong> adiado${quality.postponed===1?"":"s"} fora dos cálculos</li>`);
+    if(quality.postponed) reasons.push(`<li><strong>${quality.postponed}</strong> jogo${quality.postponed===1?"":"s"} adiado${quality.postponed===1?"":"s"} na temporada fora dos cálculos</li>`);
     if(quality.cancelled) reasons.push(`<li><strong>${quality.cancelled}</strong> cancelado${quality.cancelled===1?"":"s"} fora dos cálculos</li>`);
     if(quality.invalid) reasons.push(`<li><strong>${quality.invalid}</strong> com dados incompletos para revisão</li>`);
     qualityPanel.classList.toggle("hidden",!quality.hasAttention);
@@ -2499,7 +2506,7 @@ function renderStats(){
     qualityPanel.innerHTML=quality.hasAttention?`
       <div class="stats-quality-icon" aria-hidden="true">${quality.level==="warning"?"⚠️":"ℹ️"}</div>
       <div><span class="eyebrow">QUALIDADE DAS ESTATÍSTICAS</span><h2>${quality.level==="warning"?"Alguns dados precisam de atenção":"Números calculados com ressalvas"}</h2>
-      <p>Os indicadores exibidos consideram somente partidas com situação e resultado válidos.</p><ul>${reasons.join("")}</ul></div>`:"";
+      <p>Os indicadores exibidos consideram somente partidas com situação e resultado válidos.</p><ul>${reasons.join("")}</ul>${postponedDetails}</div>`:"";
   }
 
   renderStatsMoment(dashboardModel);
