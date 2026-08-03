@@ -13,11 +13,12 @@ Itens planejados e ainda não concluídos. O status e a prioridade oficiais perm
 
 Itens já concluídos, como gráficos históricos, Meu Time 2.0, explicações estatísticas determinísticas e documentação viva, não permanecem no backlog.
 
+A reavaliação do histórico consolidado concluiu que uma nova tela repetiria conteúdos já existentes. A lacuna de consulta histórica foi atendida pela E04.1D, com acesso aos Destaques da Rodada pelas Estatísticas e reutilização do modal existente.
+
 ## Matriz atualizada
 
 | Item | Estado real | Lacuna | Esforço | Valor | Classe | Dependências |
 |---|---|---|:---:|:---:|:---:|---|
-| Histórico consolidado por rodada | Parcial | Unir jogos, resultado, ranking e destaques em uma visão | Médio | Alto | **QW2** | Histórico e ranking existentes |
 | Calendário consolidado | Não iniciado | Criar modal ou visão dedicada de partidas | Médio | Alto | **QW2** | Dados de jogos |
 | Testes automatizados por fluxo | Parcial | Cobrir telas e jornadas além dos motores atuais | Médio | Alto técnico | **QW2** | Infraestrutura de testes |
 | Exportação CSV/Excel | Adiado | Confirmar uma necessidade administrativa concreta antes de gerar arquivos estruturados | Baixo/médio | Médio para ADM | **QW3** | Demanda administrativa validada, ranking e participantes |

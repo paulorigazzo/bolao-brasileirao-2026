@@ -1,3 +1,16 @@
+# v6.12.0 — Acesso histórico aos Destaques da Rodada
+
+## Adicionado
+
+- Acesso aos Destaques da Rodada diretamente pelo histórico de pontuação nas Estatísticas.
+- Identificação visual e acessível de cada rodada como ação disponível.
+- Cobertura automatizada para impedir mistura de jogos e resultados entre rodadas históricas.
+
+## Preservado
+
+- O mesmo modal, motor determinístico e tratamento de rodadas consolidadas ou com jogos adiados.
+- Home, Tela de Jogos, Área ADM, Supabase e regras de pontuação permanecem inalterados.
+
 # v6.11.3 — Contexto dos jogos adiados nas Estatísticas
 
 - O card “Qualidade das Estatísticas” explicita que a contagem abrange a temporada.

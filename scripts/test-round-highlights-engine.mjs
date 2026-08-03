@@ -59,6 +59,20 @@ assert.deepEqual(complete, buildRoundHighlightsModel({
   ...dependencies,
 }));
 
+const historical = buildRoundHighlightsModel({
+  round: 1,
+  games,
+  picks,
+  participants,
+  selectedParticipantId: "ana-id",
+  ...dependencies,
+});
+assert.equal(historical.round, 1);
+assert.equal(historical.lifecycle.finished, 1);
+assert.deepEqual(historical.provenance.scorableGameIds, [1]);
+assert.equal(historical.roundRanking[0].name, "Bia");
+assert.equal(historical.facts.group.find(fact => fact.key === "round-winner").participantKeys[0], "user:bia-id");
+
 const tied = buildRoundHighlightsModel({
   round: 2,
   games: games.filter(game => game.rodada === 2),

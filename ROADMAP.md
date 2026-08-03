@@ -4,9 +4,9 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.11.3`.
-- Prioridade: **QW2 — reavaliação do histórico consolidado por rodada**.
-- Próxima etapa recomendada: validar valor e redundâncias do histórico consolidado antes de assumir nova entrega funcional.
+- Versão funcional: `v6.12.0`.
+- Prioridade: **QW2 — calendário consolidado de partidas**.
+- Próxima etapa recomendada: definir o escopo e o valor do calendário consolidado sem ampliar a Tela de Jogos congelada.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -27,9 +27,9 @@ A classificação considera valor percebido, esforço restante e reaproveitament
 
 Prioridade funcional:
 
-1. **QW2:** reavaliar o histórico consolidado por rodada;
-2. **QW2:** calendário consolidado de partidas;
-3. **QW2:** auditoria ampliada de acessibilidade.
+1. **QW2:** calendário consolidado de partidas;
+2. **QW2:** auditoria ampliada de acessibilidade;
+3. **QW2:** testes automatizados por fluxo.
 
 O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 técnico**, sem substituir a prioridade funcional. A matriz detalhada está em [`docs/BACKLOG.md`](docs/BACKLOG.md).
 
@@ -78,6 +78,7 @@ Esses recursos não utilizam IA generativa. Métricas e conclusões são calcula
 ## E04 — Inteligência narrativa
 
 - ✅ **E04.1:** motor rastreável concluído na E04.1A, experiência controlada na Home entregue na E04.1B e resumo coletivo administrativo entregue na E04.1C.
+- ✅ **E04.1D:** acesso histórico aos Destaques da Rodada pelas Estatísticas, reutilizando o modal e o motor existentes sem criar uma visão redundante.
 - 🔵 E04.2 — Narrativa assistida por IA sobre métricas verificadas.
 - 🔵 Explicação das mudanças no ranking.
 - 🔵 Destaques e curiosidades da rodada.

@@ -1,4 +1,10 @@
-6.11.3
+6.12.0
+
+# v6.12.0 — Acesso histórico aos Destaques da Rodada
+
+- Permite rever os Destaques diretamente pelo histórico de pontuação nas Estatísticas.
+- Reutiliza o modal e o motor determinístico existentes, sem criar uma visão redundante.
+- Preserva Home, Jogos, Área ADM, Supabase e regras de pontuação.
 
 # v6.11.3 — Contexto dos jogos adiados nas Estatísticas
 
