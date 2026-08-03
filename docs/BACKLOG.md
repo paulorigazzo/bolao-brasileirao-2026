@@ -29,7 +29,7 @@ O calendário consolidado foi atendido pela E02.1 como uma visão mensal interat
 | Heatmaps | Não iniciado | Agregar métricas e criar visualização própria | Médio | Médio | **QW3** | Motor estatístico |
 | Exportação PDF | Não iniciado | Criar e validar layout de relatório | Médio/alto | Médio para ADM | **QW3** | Modelo de relatório |
 | Dark mode | Não iniciado | Criar tokens, alternância e persistência | Médio | Médio | **QW3** | Design system |
-| Auditoria ampliada de acessibilidade | Parcial | Revisar fluxos, foco, contraste e leitores de tela | Médio | Alto inclusivo | **QW2** | Interface atual |
+| Auditoria ampliada de acessibilidade | Reavaliado e adiado | Retomar diante de barreira reproduzível, exigência formal ou escopo dedicado; ver [auditoria de 03/08/2026](accessibility/AUDIT_2026-08-03.md) | Médio | Alto inclusivo quando houver necessidade comprovada | **Sob demanda** | Evidência concreta ou objetivo de conformidade |
 | service worker e cache offline | Não iniciado | Completar a PWA e definir política de atualização | Alto | Médio/alto | **LP** | Manifesto existente |
 | Push e e-mail | Não iniciado | Adicionar serviços, consentimento e backend | Alto | Alto | **LP** | Backend e PWA |
 | Probabilidades e simulações | Não iniciado | Criar modelos explicáveis e validação | Alto | Alto | **LP** | Base histórica ampliada |

@@ -1,5 +1,11 @@
 # Registro de Decisões do Produto
 
+## 3 de agosto de 2026 — Acessibilidade ampla reavaliada
+
+**Decisão:** retirar a auditoria ampliada de acessibilidade da prioridade imediata, preservar acessibilidade como requisito de todas as entregas e retomar uma iniciativa ampla quando houver barreira reproduzível, necessidade formal ou escopo dedicado.
+
+**Motivo:** a [auditoria preliminar](accessibility/AUDIT_2026-08-03.md) encontrou uma base favorável e oportunidades de melhoria, mas não demonstrou falha crítica que justificasse uma alteração transversal e complexa neste momento.
+
 ## 31 de julho de 2026 — Destaques da rodada em evolução incremental
 
 **Decisão:** dividir a E04.1 em um motor determinístico independente (E04.1A) e uma experiência controlada na Home (E04.1B).

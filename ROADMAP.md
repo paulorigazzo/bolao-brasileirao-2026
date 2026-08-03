@@ -5,8 +5,8 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 ## Referência atual
 
 - Versão funcional: `v6.13.0`.
-- Prioridade: **QW2 — auditoria ampliada de acessibilidade**.
-- Próxima etapa recomendada: revisar os principais fluxos por teclado, foco, contraste e tecnologias assistivas.
+- Prioridade: **QW2 — avaliar a expansão dos testes automatizados por fluxo**.
+- Próxima etapa recomendada: definir jornadas prioritárias, riscos cobertos e retorno esperado antes de ampliar a automação.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -27,9 +27,9 @@ A classificação considera valor percebido, esforço restante e reaproveitament
 
 Prioridade funcional:
 
-1. **QW2:** auditoria ampliada de acessibilidade;
-2. **QW2:** testes automatizados por fluxo;
-3. **QW3:** narrativa assistida por IA sobre métricas verificadas.
+1. **QW2:** testes automatizados por fluxo;
+2. **QW3:** narrativa assistida por IA sobre métricas verificadas;
+3. **Reavaliar quando necessário:** auditoria ampliada de acessibilidade.
 
 O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 técnico**, sem substituir a prioridade funcional. A matriz detalhada está em [`docs/BACKLOG.md`](docs/BACKLOG.md).
 
@@ -56,7 +56,7 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - ✅ Limite configurável de participantes ativos.
 - ✅ Cadastro consolidado com nome, telefone opcional e time favorito opcional.
 - 🟡 PWA: manifesto e ícones disponíveis; service worker e cache offline ausentes.
-- 🟡 Acessibilidade: navegação por teclado, estados e rótulos presentes; auditoria completa ainda pendente.
+- 🟡 Acessibilidade: base de navegação, estados e rótulos presente; a [auditoria preliminar de 3 de agosto de 2026](docs/accessibility/AUDIT_2026-08-03.md) não demonstrou falha crítica e adiou uma intervenção ampla até existir necessidade concreta.
 - 🔵 Dark mode.
 - ✅ **E02.1 — Calendário Interativo de Partidas:** visão mensal pela Home, com quantidade de jogos, destaque do time favorito e acesso direto à partida na rodada original.
 - 🔵 Central de notícias contextual.
