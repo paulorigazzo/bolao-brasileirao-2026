@@ -1,4 +1,10 @@
-6.11.2
+6.11.3
+
+# v6.11.3 — Contexto dos jogos adiados nas Estatísticas
+
+- Detalha todas as partidas adiadas excluídas dos cálculos estatísticos.
+- Identifica a rodada original e o confronto de cada partida.
+- Preserva a classificação dos jogos e todos os cálculos existentes.
 
 # v6.11.2 — Refinamentos de layout desktop
 
