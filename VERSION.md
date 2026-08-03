@@ -1,4 +1,11 @@
-6.12.0
+6.13.0
+
+# v6.13.0 — Calendário Interativo de Partidas
+
+- Apresenta os jogos em uma grade mensal compacta e responsiva.
+- Indica quantidade de partidas e presença do time favorito em cada dia.
+- Abre com um toque a rodada e o jogo prioritário na Tela de Jogos.
+- Mantém partidas adiadas sem data fora da grade, devidamente identificadas.
 
 # v6.12.0 — Acesso histórico aos Destaques da Rodada
 

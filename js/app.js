@@ -4,8 +4,9 @@ import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHist
 import { buildRoundHighlightsModel, isPostponedRoundHighlightsEligible, selectLatestRoundHighlightsCandidate } from "./round-highlights-engine.js";
 import { buildAdminRoundSummary } from "./admin-round-share.js";
 import { buildParticipantDuelModel } from "./participant-duel-engine.js";
+import { buildMatchCalendarModel } from "./match-calendar-engine.js";
 
-const APP_VERSION = "6.12.0";
+const APP_VERSION = "6.13.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -21,6 +22,9 @@ let roundHighlightsReturnFocus=null;
 let roundHighlightsModel=null;
 let adminRoundShareOriginalText="";
 let adminRoundShareReturnFocus=null;
+let matchCalendarReturnFocus=null;
+let matchCalendarModel=null;
+let matchCalendarMonthKey=null;
 const $ = id => document.getElementById(id);
 const show = (id, visible=true) => $(id)?.classList.toggle("hidden", !visible);
 const REGISTRATION_DRAFT_KEY="bolaoRegistrationDraft";
@@ -1550,6 +1554,115 @@ function closeRoundHighlights(){
   target?.focus?.();
 }
 
+function calendarMonthLabel(year,month){
+  const label=new Intl.DateTimeFormat("pt-BR",{month:"long",year:"numeric",timeZone:"America/Sao_Paulo"}).format(new Date(Date.UTC(year,month-1,15)));
+  return label.charAt(0).toUpperCase()+label.slice(1);
+}
+
+function renderMatchCalendar(){
+  const model=matchCalendarModel;
+  if(!model) return;
+  const monthIndex=model.months.findIndex(month=>month.key===matchCalendarMonthKey);
+  const month=model.months[monthIndex]||null;
+  const previous=$("matchCalendarPrevious"),next=$("matchCalendarNext");
+  if(previous) previous.disabled=monthIndex<=0;
+  if(next) next.disabled=monthIndex<0 || monthIndex>=model.months.length-1;
+
+  const nextGame=model.nextGame;
+  if($("matchCalendarSummary")){
+    if(nextGame){
+      const kickoff=new Date(nextGame.inicio);
+      const days=Math.max(0,Math.ceil((kickoff.getTime()-Date.now())/86400000));
+      const date=kickoff.toLocaleDateString("pt-BR",{day:"2-digit",month:"long",timeZone:"America/Sao_Paulo"});
+      $("matchCalendarSummary").textContent=gameStatusDisplay(nextGame).key==="live"?"Há uma partida acontecendo agora.":`Próximo jogo em ${days} dia${days===1?"":"s"} · ${date}`;
+    }else $("matchCalendarSummary").textContent="Ainda não há novos jogos agendados.";
+  }
+
+  if($("matchCalendarMonth")) $("matchCalendarMonth").textContent=month?calendarMonthLabel(month.year,month.month):"Sem partidas agendadas";
+  const grid=$("matchCalendarGrid");
+  if(grid){
+    if(!month){
+      grid.innerHTML='<div class="match-calendar-empty"><span aria-hidden="true">⚽</span><strong>Agenda em atualização</strong><p>Novas datas aparecerão aqui assim que forem oficializadas.</p></div>';
+    }else{
+      const firstWeekday=new Date(Date.UTC(month.year,month.month-1,1)).getUTCDay();
+      const totalDays=new Date(Date.UTC(month.year,month.month,0)).getUTCDate();
+      const byDay=new Map(month.days.map(day=>[day.day,day]));
+      const cells=[];
+      for(let index=0;index<firstWeekday;index+=1) cells.push('<span class="match-calendar-blank" aria-hidden="true"></span>');
+      for(let dayNumber=1;dayNumber<=totalDays;dayNumber+=1){
+        const day=byDay.get(dayNumber);
+        const isToday=day?.dateKey===model.todayKey;
+        if(!day){
+          const plainKey=`${month.key}-${String(dayNumber).padStart(2,"0")}`;
+          cells.push(`<span class="match-calendar-day is-empty ${plainKey===model.todayKey?"is-today":""}"><b>${dayNumber}</b></span>`);
+          continue;
+        }
+        const spokenDate=new Date(Date.UTC(month.year,month.month-1,dayNumber,12)).toLocaleDateString("pt-BR",{day:"numeric",month:"long",timeZone:"UTC"});
+        const aria=`${spokenDate}, ${day.count} jogo${day.count===1?"":"s"}${day.hasFavorite?", incluindo o seu time":""}${day.hasLive?", com partida ao vivo":""}`;
+        cells.push(`<button class="match-calendar-day has-games ${day.hasFavorite?"has-favorite":""} ${day.hasLive?"has-live":""} ${isToday?"is-today":""}" type="button" data-calendar-game="${day.targetGameId}" aria-label="${escapeHtml(aria)}"${isToday?' aria-current="date"':""}><b>${dayNumber}</b><span><i class="calendar-ball" aria-hidden="true">⚽</i><strong>${day.count}</strong>${day.hasFavorite?'<i class="calendar-heart" aria-hidden="true">♥</i>':""}${day.hasLive?'<i class="calendar-live-dot" aria-hidden="true"></i>':""}</span></button>`);
+      }
+      grid.innerHTML=cells.join("");
+    }
+  }
+
+  const postponed=$("matchCalendarPostponed");
+  if(postponed) postponed.innerHTML=model.postponed.length?`<section><span class="eyebrow">AGUARDANDO NOVA DATA</span><h3>Partidas adiadas</h3><div>${model.postponed.map(game=>`<article><span>R${Number(game.rodada)||"—"}</span><p><strong>${escapeHtml(game.time_casa||"Mandante a definir")}</strong><i aria-hidden="true">×</i><strong>${escapeHtml(game.time_fora||"Visitante a definir")}</strong></p></article>`).join("")}</div></section>`:"";
+}
+
+function openMatchCalendar(trigger){
+  matchCalendarModel=buildMatchCalendarModel({games:state.games,favoriteTeam:state.participant?.time_favorito||null});
+  matchCalendarMonthKey=matchCalendarModel.initialMonthKey;
+  matchCalendarReturnFocus=trigger||document.activeElement;
+  renderMatchCalendar();
+  $("matchCalendarModal")?.classList.remove("hidden");
+  document.body.classList.add("modal-open");
+  setTimeout(()=>$('matchCalendarClose')?.focus(),40);
+}
+
+function closeMatchCalendar(restoreFocus=true){
+  $("matchCalendarModal")?.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+  matchCalendarModel=null;
+  matchCalendarMonthKey=null;
+  const target=matchCalendarReturnFocus;
+  matchCalendarReturnFocus=null;
+  if(restoreFocus) target?.focus?.();
+}
+
+function changeMatchCalendarMonth(delta){
+  if(!matchCalendarModel) return;
+  const index=matchCalendarModel.months.findIndex(month=>month.key===matchCalendarMonthKey);
+  const target=matchCalendarModel.months[index+delta];
+  if(target){ matchCalendarMonthKey=target.key; renderMatchCalendar(); }
+}
+
+function openGameFromCalendar(gameId){
+  const game=state.games.find(item=>Number(item.id_jogo)===Number(gameId));
+  if(!game) return message("A partida selecionada não está mais disponível.",true);
+  closeMatchCalendar(false);
+  state.gameFilter="all";
+  document.querySelectorAll(".filter-chip").forEach(button=>{
+    const active=button.dataset.filter==="all";
+    button.classList.toggle("active",active);
+    button.setAttribute("aria-pressed",String(active));
+  });
+  if($("roundSelect")) $("roundSelect").value=String(game.rodada);
+  state.openGameId=Number(game.id_jogo);
+  state.gameAutoOpenContext=null;
+  navigateTo("games");
+  renderGames();
+  setTimeout(()=>{
+    const card=document.querySelector(`.premium-match-card[data-id="${Number(game.id_jogo)}"]`);
+    if(!card) return;
+    card.classList.add("is-calendar-target");
+    setGameCardExpanded(card,true,false);
+    card.scrollIntoView({behavior:prefersReducedMotion()?"auto":"smooth",block:"center"});
+    card.querySelector(".game-toggle")?.focus({preventScroll:true});
+    setTimeout(()=>card.classList.remove("is-calendar-target"),prefersReducedMotion()?1200:3200);
+  },120);
+  message(`Exibindo ${game.time_casa} × ${game.time_fora}, da rodada ${Number(game.rodada)}, selecionado no calendário.`);
+}
+
 function favoriteTeamStandingsRow(team){
   if(!team || !Array.isArray(state.standings?.table)) return null;
   const favoriteKey=normalizeTeamKey(team.name);
@@ -1911,7 +2024,7 @@ function renderHome(){
     <div class="premium-round-stats integrity-stats"><div class="is-finished"><i>✓</i><strong>${lifecycle.finished}</strong><span>finalizados</span></div><div class="is-live"><i>◉</i><strong>${lifecycle.live}</strong><span>ao vivo</span></div><div class="is-postponed"><i>!</i><strong>${lifecycle.postponed}</strong><span>adiados</span></div><div class="is-future"><i>◷</i><strong>${lifecycle.future}</strong><span>futuros</span></div></div>
     <p class="round-integrity-note">${lifecycleView.message}${lifecycle.cancelled?` · ${lifecycle.cancelled} cancelado${lifecycle.cancelled===1?"":"s"}.`:""}</p>
     ${homeRoundHighlightsHtml(highlightsContext)}
-    ${nextGame?`<div class="premium-next-game"><span class="premium-next-label">PRÓXIMO JOGO</span><div class="premium-matchup"><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_casa_logo,nextGame.time_casa)}</span><strong>${escapeHtml(nextGame.time_casa)}</strong></div><b>×</b><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_fora_logo,nextGame.time_fora)}</span><strong>${escapeHtml(nextGame.time_fora)}</strong></div></div><div class="premium-game-meta"><span>📅 ${escapeHtml(new Date(nextGame.inicio).toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit"}))}</span><span>◷ ${escapeHtml(new Date(nextGame.inicio).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}))}</span>${nextGame.local?`<span>⌖ ${escapeHtml(nextGame.local)}</span>`:""}</div><button class="premium-next-games-action" type="button" data-home-action="games">Ver todos os jogos <b aria-hidden="true">›</b></button></div>`:""}
+    ${nextGame?`<div class="premium-next-game"><span class="premium-next-label">PRÓXIMO JOGO</span><div class="premium-matchup"><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_casa_logo,nextGame.time_casa)}</span><strong>${escapeHtml(nextGame.time_casa)}</strong></div><b>×</b><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_fora_logo,nextGame.time_fora)}</span><strong>${escapeHtml(nextGame.time_fora)}</strong></div></div><div class="premium-game-meta"><span>📅 ${escapeHtml(new Date(nextGame.inicio).toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit"}))}</span><span>◷ ${escapeHtml(new Date(nextGame.inicio).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}))}</span>${nextGame.local_partida?`<span>⌖ ${escapeHtml(nextGame.local_partida)}</span>`:""}</div><button class="premium-next-games-action" type="button" data-home-action="calendar">Abrir calendário <b aria-hidden="true">›</b></button></div>`:`<div class="premium-next-game is-empty"><span class="premium-next-label">AGENDA DE JOGOS</span><p class="muted-note">Consulte as próximas datas e as partidas que aguardam reagendamento.</p><button class="premium-next-games-action" type="button" data-home-action="calendar">Abrir calendário <b aria-hidden="true">›</b></button></div>`}
   </article>`;
 
   const medals=["🥇","🥈","🥉"];
@@ -4213,6 +4326,14 @@ $("roundHistory")?.addEventListener("click",event=>{
 });
 $("roundHighlightsModalClose")?.addEventListener("click",closeRoundHighlights);
 $("roundHighlightsModal")?.addEventListener("click",event=>{if(event.target===$("roundHighlightsModal")) closeRoundHighlights();});
+$("matchCalendarClose")?.addEventListener("click",()=>closeMatchCalendar());
+$("matchCalendarPrevious")?.addEventListener("click",()=>changeMatchCalendarMonth(-1));
+$("matchCalendarNext")?.addEventListener("click",()=>changeMatchCalendarMonth(1));
+$("matchCalendarGrid")?.addEventListener("click",event=>{
+  const day=event.target.closest("[data-calendar-game]");
+  if(day) openGameFromCalendar(day.dataset.calendarGame);
+});
+$("matchCalendarModal")?.addEventListener("click",event=>{if(event.target===$("matchCalendarModal")) closeMatchCalendar();});
 $("loginBtn").onclick=login; $("heroLoginBtn").onclick=login; $("logoutBtn").onclick=logout; $("membershipLogoutBtn")?.addEventListener("click",logout); $("refreshBtn").onclick=refresh; $("refreshStandingsBtn").onclick=()=>loadStandings(true); $("syncGamesBtn").onclick=syncGames;
 $("saveFavoriteTeamBtn").onclick=saveFavoriteTeam;
 $("profileDataForm")?.addEventListener("submit",event=>{ event.preventDefault(); event.stopImmediatePropagation(); saveOwnProfile(event); });
@@ -4280,6 +4401,7 @@ $("adminParticipantModal").onclick=event=>{ if(event.target===$("adminParticipan
 document.addEventListener("keydown",event=>{
   if(event.key!=="Escape") return;
   if(!$("adminRoundShareModal")?.classList.contains("hidden")) closeAdminRoundShare();
+  else if(!$("matchCalendarModal")?.classList.contains("hidden")) closeMatchCalendar();
   else if(!$("roundHighlightsModal")?.classList.contains("hidden")) closeRoundHighlights();
   else if(!$("rankingPicksModal")?.classList.contains("hidden")) closeRankingParticipantPicks();
   else if(!$("adminParticipantModal")?.classList.contains("hidden")) closeAdminParticipantDetail();
@@ -4317,6 +4439,7 @@ $("homeTab")?.addEventListener("click",async event=>{
   const target=event.target.closest("[data-home-action]");
   if(!target) return;
   const action=target.dataset.homeAction;
+  if(action==="calendar"){ openMatchCalendar(target); return; }
   if(action==="round-highlights"){ openRoundHighlights(target.dataset.roundHighlightsRound,target); return; }
   if(action==="refresh"){ target.disabled=true; try{ await refresh(); } finally{ target.disabled=false; } return; }
   if(action==="standings-favorite"){

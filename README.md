@@ -4,8 +4,8 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 
 ## Estado atual
 
-- Versão funcional: `v6.12.0`.
-- Prioridade: definir o escopo e o valor do calendário consolidado de partidas.
+- Versão funcional: `v6.13.0`.
+- Prioridade: auditoria ampliada de acessibilidade.
 - Roadmap oficial: [`ROADMAP.md`](ROADMAP.md).
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
@@ -20,6 +20,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 - tabela do Campeonato Brasileiro;
 - Meu Time 2.0, com forma, próximo jogo, desempenho pessoal, sintonia e história da temporada;
 - tratamento de jogos adiados, cancelados e rodadas parcialmente concluídas;
+- calendário mensal interativo com acesso direto à partida mais relevante de cada dia;
 - gestão administrativa, diagnóstico, sincronização e auditoria;
 - cadastro consolidado com nome, telefone opcional e time favorito opcional, seguido de aprovação administrativa;
 - preparação manual de mensagens individuais pelo WhatsApp;
