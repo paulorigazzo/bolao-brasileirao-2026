@@ -145,6 +145,63 @@ function winnersBy(items, selector) {
   return best > 0 ? items.filter(item => selector(item) === best) : [];
 }
 
+function joinedParticipantSummary(items, { withPoints = false } = {}) {
+  const visible = items.slice(0, 2);
+  const labels = visible.map(item => withPoints ? `${item.name} (${item.roundPoints})` : item.name);
+  const names = labels.length > 1 ? `${labels.slice(0, -1).join(", ")} e ${labels.at(-1)}` : labels[0] || "";
+  const remaining = Math.max(0, items.length - visible.length);
+  return remaining ? `${labels.join(", ")} e mais ${remaining} ${plural(remaining, "participante")}` : names;
+}
+
+function rankingMovementDetail({ movement, movements, roundRanking, currentRanking }) {
+  const base = `${movement.from}º → ${movement.to}º.`;
+  const selectedCurrent = currentRanking.find(item => item.key === movement.key);
+  const selectedRound = roundRanking.find(item => item.key === movement.key);
+  if (!selectedCurrent || !selectedRound) return { detail: base, crossed: [], explanationType: "insufficient" };
+
+  const climbed = movement.places > 0;
+  const crossed = movements
+    .filter(item => item.key !== movement.key && item.from != null && (
+      climbed
+        ? item.from < movement.from && item.to > movement.to
+        : item.from > movement.from && item.to < movement.to
+    ))
+    .sort((a, b) => Math.abs(a.from - movement.from) - Math.abs(b.from - movement.from) || a.name.localeCompare(b.name, "pt-BR"))
+    .map(item => {
+      const round = roundRanking.find(candidate => candidate.key === item.key) || emptyScore(item);
+      const current = currentRanking.find(candidate => candidate.key === item.key) || emptyScore(item);
+      return {
+        key: item.key,
+        name: item.name,
+        from: item.from,
+        to: item.to,
+        roundPoints: round.points,
+        currentPoints: current.points,
+        currentExact: current.exact,
+      };
+    });
+
+  if (!crossed.length) return { detail: base, crossed, explanationType: "insufficient" };
+
+  const tied = crossed.filter(item => item.currentPoints === selectedCurrent.points);
+  if (tied.length === crossed.length) {
+    const exactDecided = tied.every(item => item.currentExact !== selectedCurrent.exact);
+    const names = joinedParticipantSummary(tied);
+    const reason = exactDecided ? "O desempate por placares exatos definiu" : "Os critérios de desempate do Ranking definiram";
+    return { detail: `${base} ${reason} a nova ordem em relação a ${names}.`, crossed, explanationType: exactDecided ? "exact-tiebreak" : "ranking-tiebreak" };
+  }
+
+  if (tied.length) {
+    const names = joinedParticipantSummary(crossed);
+    return { detail: `${base} Seu desempenho na rodada e os critérios de desempate definiram a nova ordem em relação a ${names}.`, crossed, explanationType: "mixed" };
+  }
+
+  const names = joinedParticipantSummary(crossed, { withPoints: true });
+  if (climbed) return { detail: `${base} Você fez ${selectedRound.points} ${plural(selectedRound.points, "ponto")} e ultrapassou ${names}.`, crossed, explanationType: "round-points" };
+  const verb = crossed.length === 1 ? "passou" : "passaram";
+  return { detail: `${base} Você fez ${selectedRound.points} ${plural(selectedRound.points, "ponto")}; ${names} ${verb} à sua frente.`, crossed, explanationType: "round-points" };
+}
+
 export function buildRoundHighlightsModel({
   round,
   games = [],
@@ -274,15 +331,25 @@ export function buildRoundHighlightsModel({
     }));
   }
 
-  if (selectedMovement?.from != null && selectedMovement.places !== 0) personalFacts.push(makeFact({
-    key: "personal-ranking-movement",
-    scope: "personal",
-    priority: 95,
-    title: selectedMovement.places > 0 ? `Você subiu ${selectedMovement.places} ${plural(selectedMovement.places, "posição", "posições")}` : `Você caiu ${Math.abs(selectedMovement.places)} ${plural(Math.abs(selectedMovement.places), "posição", "posições")}`,
-    detail: `${selectedMovement.from}º → ${selectedMovement.to}º.`,
-    participantKeys: [selectedMovement.key],
-    evidence: { source: "ranking-history", round: selectedRound, ...selectedMovement },
-  }));
+  if (selectedMovement?.from != null && selectedMovement.places !== 0) {
+    const explanation = rankingMovementDetail({ movement: selectedMovement, movements, roundRanking, currentRanking });
+    personalFacts.push(makeFact({
+      key: "personal-ranking-movement",
+      scope: "personal",
+      priority: 95,
+      title: selectedMovement.places > 0 ? `Você subiu ${selectedMovement.places} ${plural(selectedMovement.places, "posição", "posições")}` : `Você caiu ${Math.abs(selectedMovement.places)} ${plural(Math.abs(selectedMovement.places), "posição", "posições")}`,
+      detail: explanation.detail,
+      participantKeys: [selectedMovement.key, ...explanation.crossed.map(item => item.key)],
+      evidence: {
+        source: "ranking-history",
+        round: selectedRound,
+        ...selectedMovement,
+        explanationType: explanation.explanationType,
+        selectedRoundPoints: selectedRoundScore?.points ?? 0,
+        crossedParticipants: explanation.crossed,
+      },
+    }));
+  }
 
   if (selectedCurrent && currentRanking.length) {
     const leader = currentRanking[0];
@@ -313,7 +380,7 @@ export function buildRoundHighlightsModel({
       group: sortFacts(groupFacts),
     },
     provenance: {
-      engine: "round-highlights-v1",
+      engine: "round-highlights-v2",
       round: selectedRound,
       scorableGameIds: scorableRoundGames.map(game => Number(game.id_jogo)),
       excludedGameIds: roundGames.filter(game => !isScorableGame(game)).map(game => Number(game.id_jogo)),

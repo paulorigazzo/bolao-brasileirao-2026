@@ -4,7 +4,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 
 ## Estado atual
 
-- Versão funcional: `v6.13.0`.
+- Versão funcional: `v6.14.0`.
 - Prioridade: reavaliar o Backlog antes de selecionar uma nova entrega.
 - Roadmap oficial: [`ROADMAP.md`](ROADMAP.md).
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
@@ -14,6 +14,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 - palpites por rodada com fechamento individual no horário da partida;
 - pontuação, ranking, histórico e estatísticas pessoais;
 - destaques pessoais e coletivos por rodada, com resumo controlado na Home e detalhamento acessível;
+- explicação determinística das mudanças de posição no Ranking pelos Destaques da Rodada;
 - consulta individual de palpites de partidas encerradas pela classificação;
 - duelo determinístico entre dois participantes, com placar por rodadas, títulos e momento recente;
 - dashboard estatístico com evolução, perfil, recordes, regularidade, comparações e medalhas;

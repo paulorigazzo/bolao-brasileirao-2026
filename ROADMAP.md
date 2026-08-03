@@ -4,7 +4,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.13.0`.
+- Versão funcional: `v6.14.0`.
 - Prioridade: **reavaliar o Backlog antes de selecionar uma nova entrega**.
 - Próxima etapa recomendada: analisar valor, esforço, redundância e risco das candidatas restantes sem promover automaticamente um novo item.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
@@ -81,8 +81,8 @@ Esses recursos não utilizam IA generativa. Métricas e conclusões são calcula
 
 - ✅ **E04.1:** motor rastreável concluído na E04.1A, experiência controlada na Home entregue na E04.1B e resumo coletivo administrativo entregue na E04.1C.
 - ✅ **E04.1D:** acesso histórico aos Destaques da Rodada pelas Estatísticas, reutilizando o modal e o motor existentes sem criar uma visão redundante.
+- ✅ **E04.1E:** explicação determinística das mudanças de posição, identificando participantes ultrapassados, desempenho na rodada e critérios de desempate no modal existente.
 - 🟡 E04.2 — Narrativa assistida por IA reavaliada e adiada até existir um caso de uso sem redundância e com valor demonstrado.
-- 🔵 Explicação determinística das mudanças no ranking, preservada como possibilidade futura antes de qualquer uso de IA.
 - 🔵 Destaques e curiosidades da rodada.
 - ✅ **E04.1C:** resumo coletivo determinístico e revisável, restrito à Área ADM e sem compartilhamento pelos participantes.
 
