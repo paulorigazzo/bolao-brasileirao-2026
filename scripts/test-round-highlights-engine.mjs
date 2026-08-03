@@ -42,6 +42,7 @@ const complete = buildRoundHighlightsModel({
 assert.equal(complete.status, "finished");
 assert.equal(complete.isProvisional, false);
 assert.equal(complete.lifecycle.finished, 2);
+assert.equal(complete.provenance.engine, "round-highlights-v2");
 assert.equal(complete.selectedParticipant.name, "Ana");
 assert.equal(complete.roundRanking[0].name, "Ana");
 assert.equal(complete.roundRanking[0].points, 15);
@@ -49,6 +50,8 @@ assert.equal(complete.facts.group.find(fact => fact.key === "round-winner").part
 assert.equal(complete.facts.group.find(fact => fact.key === "unique-exact:2").evidence.gameId, 2);
 assert.equal(complete.facts.personal.find(fact => fact.key === "new-personal-best").evidence.previousBest, 3);
 assert.equal(complete.facts.personal.find(fact => fact.key === "personal-ranking-movement").evidence.places, 1);
+assert.equal(complete.facts.personal.find(fact => fact.key === "personal-ranking-movement").detail, "2º → 1º. Você fez 15 pontos e ultrapassou Bia (3).");
+assert.deepEqual(complete.facts.personal.find(fact => fact.key === "personal-ranking-movement").participantKeys, ["user:ana-id", "user:bia-id"]);
 assert.ok(complete.facts.personal.every(fact => fact.evidence.source));
 assert.deepEqual(complete, buildRoundHighlightsModel({
   round: 2,
@@ -152,6 +155,104 @@ const noPick = buildRoundHighlightsModel({
 assert.equal(noPick.facts.group.length, 0);
 assert.equal(noPick.facts.personal.find(fact => fact.key === "personal-round-performance").evidence.points, 0);
 assert.equal(noPick.facts.personal.find(fact => fact.key === "personal-round-performance").evidence.comparison, "insufficient");
+
+const movementParticipants = [
+  { user_id: "selected", nome: "Zeca" },
+  { user_id: "one", nome: "Ana" },
+  { user_id: "two", nome: "Bia" },
+  { user_id: "three", nome: "Caio" },
+];
+const movementGames = [
+  { id_jogo: 101, rodada: 1, status: "encerrado", gols_casa: 1, gols_fora: 0 },
+  { id_jogo: 102, rodada: 2, status: "encerrado", gols_casa: 1, gols_fora: 0 },
+];
+const climb = buildRoundHighlightsModel({
+  round: 2,
+  games: movementGames,
+  picks: [
+    { id_jogo: 101, user_id: "selected", score: 0 },
+    { id_jogo: 101, user_id: "one", score: 5 },
+    { id_jogo: 101, user_id: "two", score: 3 },
+    { id_jogo: 101, user_id: "three", score: 1 },
+    { id_jogo: 102, user_id: "selected", score: 10 },
+    { id_jogo: 102, user_id: "one", score: 0 },
+    { id_jogo: 102, user_id: "two", score: 0 },
+    { id_jogo: 102, user_id: "three", score: 0 },
+  ],
+  participants: movementParticipants,
+  selectedParticipantId: "selected",
+  ...dependencies,
+});
+const climbFact = climb.facts.personal.find(fact => fact.key === "personal-ranking-movement");
+assert.equal(climbFact.title, "Você subiu 3 posições");
+assert.equal(climbFact.detail, "4º → 1º. Você fez 10 pontos e ultrapassou Caio (0), Bia (0) e mais 1 participante.");
+assert.equal(climbFact.evidence.crossedParticipants.length, 3);
+assert.equal(climbFact.evidence.explanationType, "round-points");
+
+const drop = buildRoundHighlightsModel({
+  round: 2,
+  games: movementGames,
+  picks: [
+    { id_jogo: 101, user_id: "selected", score: 10 },
+    { id_jogo: 101, user_id: "one", score: 5 },
+    { id_jogo: 101, user_id: "two", score: 3 },
+    { id_jogo: 101, user_id: "three", score: 1 },
+    { id_jogo: 102, user_id: "selected", score: 0 },
+    { id_jogo: 102, user_id: "one", score: 10 },
+    { id_jogo: 102, user_id: "two", score: 10 },
+    { id_jogo: 102, user_id: "three", score: 10 },
+  ],
+  participants: movementParticipants,
+  selectedParticipantId: "selected",
+  ...dependencies,
+});
+const dropFact = drop.facts.personal.find(fact => fact.key === "personal-ranking-movement");
+assert.equal(dropFact.title, "Você caiu 3 posições");
+assert.equal(dropFact.detail, "1º → 4º. Você fez 0 pontos; Ana (10), Bia (10) e mais 1 participante passaram à sua frente.");
+
+const tieGames = [
+  { id_jogo: 201, rodada: 1, status: "encerrado", gols_casa: 1, gols_fora: 0 },
+  { id_jogo: 202, rodada: 1, status: "encerrado", gols_casa: 1, gols_fora: 0 },
+  { id_jogo: 203, rodada: 2, status: "encerrado", gols_casa: 1, gols_fora: 0 },
+  { id_jogo: 204, rodada: 2, status: "encerrado", gols_casa: 1, gols_fora: 0 },
+];
+const exactTiebreak = buildRoundHighlightsModel({
+  round: 2,
+  games: tieGames,
+  picks: [
+    { id_jogo: 201, user_id: "selected", score: 5 },
+    { id_jogo: 202, user_id: "selected", score: 5 },
+    { id_jogo: 201, user_id: "one", score: 5 },
+    { id_jogo: 202, user_id: "one", score: 5 },
+    { id_jogo: 203, user_id: "selected", score: 10 },
+    { id_jogo: 203, user_id: "one", score: 5 },
+    { id_jogo: 204, user_id: "one", score: 5 },
+  ],
+  participants: [
+    { user_id: "selected", nome: "Zeca" },
+    { user_id: "one", nome: "Ana" },
+  ],
+  selectedParticipantId: "selected",
+  ...dependencies,
+});
+const exactFact = exactTiebreak.facts.personal.find(fact => fact.key === "personal-ranking-movement");
+assert.equal(exactFact.detail, "2º → 1º. O desempate por placares exatos definiu a nova ordem em relação a Ana.");
+assert.equal(exactFact.evidence.explanationType, "exact-tiebreak");
+
+const noMovement = buildRoundHighlightsModel({
+  round: 2,
+  games: movementGames,
+  picks: [
+    { id_jogo: 101, user_id: "selected", score: 10 },
+    { id_jogo: 101, user_id: "one", score: 3 },
+    { id_jogo: 102, user_id: "selected", score: 3 },
+    { id_jogo: 102, user_id: "one", score: 3 },
+  ],
+  participants: movementParticipants.slice(0, 2),
+  selectedParticipantId: "selected",
+  ...dependencies,
+});
+assert.equal(noMovement.facts.personal.some(fact => fact.key === "personal-ranking-movement"), false);
 
 const empty = buildRoundHighlightsModel({
   round: 99,

@@ -1,3 +1,11 @@
+# v6.14.0 — Explicação da movimentação no Ranking
+
+- Explica por que o participante subiu ou caiu após uma rodada.
+- Identifica participantes ultrapassados ou que passaram à frente e compara a pontuação da rodada.
+- Trata empates pelos critérios oficiais e limita a quantidade de nomes para preservar a leitura no celular.
+- Reutiliza o fato existente no modal de Destaques, sem criar card, tela ou serviço externo.
+- Preserva integralmente a classificação oficial, a Home, Jogos, Área ADM e Supabase.
+
 # v6.13.0 — Calendário Interativo de Partidas
 
 ## Adicionado
