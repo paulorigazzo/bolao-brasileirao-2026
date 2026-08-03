@@ -1,5 +1,11 @@
 # Registro de Decisões do Produto
 
+## 3 de agosto de 2026 — Testes por fluxo e narrativa assistida por IA adiados
+
+**Decisão:** adiar a expansão dos testes automatizados por fluxo e as funcionalidades associadas à IA, preservando os testes determinísticos atuais e a fase de IA como direção futura sem prioridade imediata.
+
+**Motivo:** a [reavaliação das duas propostas](product/ANALISE_QW2_QW3_2026-08-03.md) concluiu que a automação ampla exigiria intervenção desproporcional em áreas protegidas sem falha grave comprovada, enquanto a narrativa generativa apresentaria alta redundância e valor adicional ainda não demonstrado.
+
 ## 3 de agosto de 2026 — Acessibilidade ampla reavaliada
 
 **Decisão:** retirar a auditoria ampliada de acessibilidade da prioridade imediata, preservar acessibilidade como requisito de todas as entregas e retomar uma iniciativa ampla quando houver barreira reproduzível, necessidade formal ou escopo dedicado.
