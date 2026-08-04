@@ -233,3 +233,32 @@ Com esse esclarecimento, considerar homologado o workflow proporcional composto 
 - Pisos de validação e portões Git permanecem inalterados.
 - A homologação do workflow não autoriza nenhuma implementação sensível específica; cada tarefa ainda exige plano, critérios, evidências e aprovações próprias.
 - Esta decisão não altera código, funcionalidade, versão, Supabase, Netlify ou prioridade do produto.
+
+## DEC-2026-007 — Automação mínima dos contratos documentais
+
+- Data: 2026-08-04
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: médio
+
+### Contexto
+
+A D02, a D03 e a homologação H01 consolidaram fontes oficiais, validação proporcional e evidências rastreáveis. Permaneceram manuais duas verificações mecânicas: a consistência da versão operacional atual entre fontes selecionadas e a existência dos destinos de referências Markdown locais.
+
+### Decisão
+
+Integrar ao `npm run check` um verificador local, determinístico, sem rede e somente leitura para:
+
+- comparar a versão canônica de `VERSION.md` com `package.json`, `js/app.js`, `netlify/functions/_constants.mjs`, `README.md`, `ROADMAP.md` e `index.html`;
+- verificar a existência de destinos Markdown locais, ignorando URLs, e-mails, âncoras internas e exemplos em blocos de código.
+
+Versões históricas legítimas não são tratadas como fontes da versão atual. O verificador informa arquivo e divergência, mas não altera conteúdo automaticamente.
+
+### Consequências
+
+- Divergências mecânicas passam a falhar localmente e no pipeline já existente.
+- Releases, changelog e demais referências históricas preservam suas versões próprias.
+- Links externos não dependem de disponibilidade de rede.
+- Validações interpretativas permanecem fora do bloqueio automatizado.
+- Esta decisão não altera funcionalidade, versão, Supabase, Netlify, regras de negócio ou prioridade do produto.
