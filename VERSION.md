@@ -1,4 +1,4 @@
-6.14.0
+6.14.1
 
 # v6.13.0 — Calendário Interativo de Partidas
 

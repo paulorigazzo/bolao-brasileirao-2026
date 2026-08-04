@@ -6,7 +6,7 @@ import { buildAdminRoundSummary } from "./admin-round-share.js";
 import { buildParticipantDuelModel } from "./participant-duel-engine.js";
 import { buildMatchCalendarModel } from "./match-calendar-engine.js";
 
-const APP_VERSION = "6.14.0";
+const APP_VERSION = "6.14.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -774,7 +774,7 @@ async function loadData(){
     sb.from("contagem_palpites_participantes").select("*"),
     sb.from("participantes").select("user_id,nome,email,time_favorito"),
     isAdminUser() ? sb.from("progresso_palpites_adm").select("user_id,usuario,id_jogo,atualizado_em") : Promise.resolve({data:[],error:null}),
-    sb.from("participantes_autorizados").select("id,nome,email,celular,ativo,administrador,status,solicitado_em,aprovado_em,criado_em,atualizado_em").order("nome"),
+    sb.from("participantes_autorizados").select("id,nome,email,celular,time_favorito,ativo,administrador,status,solicitado_em,aprovado_em,criado_em,atualizado_em").order("nome"),
     isAdminUser() ? sb.rpc("obter_limite_participantes_ativos") : Promise.resolve({data:10,error:null})
   ]);
   if(gErr) throw gErr; if(pErr) throw pErr; if(pubErr) console.warn(pubErr);
@@ -2041,10 +2041,18 @@ function participantTeam(name){
   return findTeam(participant?.time_favorito || (name===state.participant?.nome ? state.participant?.time_favorito : null));
 }
 
-function rankingAvatar(name, extraClass=""){
-  const team=participantTeam(name);
+function participantProfileByEmail(email){
+  const normalizedEmail=String(email||"").trim().toLowerCase();
+  return state.participants.find(item=>String(item?.email||"").trim().toLowerCase()===normalizedEmail) || null;
+}
+
+function participantAvatar(name, team, extraClass=""){
   const fallback=initials(name).slice(0,2);
   return `<span class="ranking-avatar ${extraClass}">${team?.logo ? `<img src="${escapeHtml(team.logo)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove();this.parentElement.textContent='${escapeHtml(fallback)}'">` : escapeHtml(fallback)}</span>`;
+}
+
+function rankingAvatar(name, extraClass=""){
+  return participantAvatar(name,participantTeam(name),extraClass);
 }
 
 function updateRankingMovement(){
@@ -3078,6 +3086,9 @@ function renderAdminParticipants(){
     const status=item.status || (item.ativo===false?"inactive":"approved");
     const phone=item.celular?formatBrazilPhone(item.celular):"Celular não informado";
     const requested=item.solicitado_em?new Date(item.solicitado_em).toLocaleDateString("pt-BR"):"";
+    const profile=participantProfileByEmail(item.email);
+    const team=findTeam(profile?.time_favorito || item.time_favorito || "");
+    const teamLabel=team?.name || "Time do coração não escolhido";
     const isCurrentUser=String(item.email||"").toLowerCase()===String(state.user?.email||"").toLowerCase();
     const canDelete=!item.administrador && !isCurrentUser;
     const hasPhone=Boolean(normalizeWhatsAppPhone(item.celular));
@@ -3085,8 +3096,8 @@ function renderAdminParticipants(){
     const pendingActions=status==="pending"?`<div class="admin-member-actions">${whatsappButton}<button type="button" class="primary" data-membership-decision="approve" data-participant-id="${escapeHtml(item.id)}" ${atLimit?'disabled title="Aumente o limite ou desative um participante ativo para aprovar"':''}>${atLimit?"Limite atingido":"Aprovar"}</button><button type="button" class="secondary" data-membership-decision="reject" data-participant-id="${escapeHtml(item.id)}">Recusar</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`:
       `<div class="admin-member-actions">${whatsappButton}<button type="button" class="secondary admin-member-toggle" data-participant-id="${escapeHtml(item.id)}" data-participant-active="${item.ativo!==false}">${item.ativo===false?"Reativar":"Desativar"}</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`;
     return `<div class="admin-member-row status-${escapeHtml(status)}">
-      <div class="admin-member-avatar">${escapeHtml(initials(item.nome).slice(0,2))}</div>
-      <div class="admin-member-copy"><strong>${escapeHtml(item.nome)}</strong><span>${escapeHtml(item.email)}</span><small>${escapeHtml(phone)}${requested&&status==="pending"?` • solicitado em ${escapeHtml(requested)}`:""}</small><small>${membershipStatusLabel(item)}</small></div>
+      ${participantAvatar(item.nome,team,"admin-member-avatar")}
+      <div class="admin-member-copy"><strong>${escapeHtml(item.nome)}</strong><span class="admin-member-team${team?"":" is-unset"}">${escapeHtml(teamLabel)}</span><span>${escapeHtml(item.email)}</span><small>${escapeHtml(phone)}${requested&&status==="pending"?` • solicitado em ${escapeHtml(requested)}`:""}</small><small>${membershipStatusLabel(item)}</small></div>
       ${pendingActions}
     </div>`;
   }).join(""):`<p class="muted-note">Nenhum participante cadastrado.</p>`;
