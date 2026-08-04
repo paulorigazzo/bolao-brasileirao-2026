@@ -4,7 +4,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 
 ## Estado atual
 
-- Versão funcional: `v6.14.0`.
+- Versão funcional: `v6.14.1`.
 - Prioridade: planejar a fundação de Temporadas e Bolões, preservando 2026 e preparando 2027 sem iniciar implementação funcional.
 - Roadmap oficial: [`ROADMAP.md`](ROADMAP.md).
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.

@@ -4194,3 +4194,8 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
   }
   .ranking-duel-round-score>i{justify-self:center}
 }
+
+/* v6.14.1 — identificação do time do coração na gestão de participantes */
+.admin-member-avatar img{display:block;width:78%;height:78%;object-fit:contain}
+.admin-member-copy .admin-member-team{margin-top:3px;color:var(--green2);font-size:.68rem;font-weight:850}
+.admin-member-copy .admin-member-team.is-unset{color:var(--muted);font-weight:700}

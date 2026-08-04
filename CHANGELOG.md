@@ -1,3 +1,10 @@
+# v6.14.1 — Time do coração na gestão de participantes
+
+- Mostra o escudo e o nome do time do coração de cada participante na Área ADM.
+- Usa o perfil atual como fonte prioritária e preserva a escolha feita durante uma solicitação ainda pendente.
+- Mantém as iniciais e informa claramente quando o time do coração não foi escolhido.
+- Preserva ações administrativas, dados, permissões, Ranking, Home, Meu Time e Jogos.
+
 # v6.14.0 — Explicação da movimentação no Ranking
 
 - Explica por que o participante subiu ou caiu após uma rodada.
