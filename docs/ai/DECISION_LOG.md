@@ -172,3 +172,31 @@ Os portões independentes de plano, implementação, commit, push, Pull Request,
 - A revisão humana passa a comparar os critérios aprovados com evidências identificadas de forma consistente.
 - A H01 poderá manter, ajustar ou substituir detalhes desta decisão sem alterar os portões de governança.
 - Esta decisão não altera código, funcionalidade, versão, Supabase, Netlify ou prioridade do produto.
+
+## DEC-2026-005 — Resultado da homologação H01
+
+- Data: 2026-08-04
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: médio
+
+### Contexto
+
+A DEC-2026-004 condicionou o uso do workflow proporcional em trabalho sensível à homologação H01. A H01 reexecutou documentalmente três entregas reais: D03 como risco baixo, v6.11.1 como risco médio visual e v6.8.0 como risco alto.
+
+Os casos baixo e alto confirmaram pisos de validação claros e proporcionais. O caso médio revelou que uma sincronização de versão em `netlify/functions/_constants.mjs`, sem mudança de comportamento, pode ser interpretada literalmente como gatilho de risco alto apenas pelo caminho do arquivo.
+
+### Decisão
+
+Classificar a H01 como **ajuste necessário**. A D03 demonstra valor, mas não está homologada para trabalho sensível até que uma D03.1 esclareça que gatilhos altos decorrem de impacto funcional ou operacional na área protegida, e não apenas de documentação, referência, metadado, identificador de versão ou localização do arquivo.
+
+O maior risco continua prevalecendo quando houver mudança funcional sensível ou dúvida real sobre o impacto. A fundamentação completa está em [`WORKFLOW_H01.md`](WORKFLOW_H01.md).
+
+### Consequências
+
+- Temporadas e Bolões e demais trabalhos sensíveis permanecem bloqueados para implementação pelo novo modelo até a D03.1.
+- A D03.1 deve ser documental e restrita à semântica dos gatilhos, sem alterar os pisos de validação ou portões Git.
+- Depois da D03.1, o caso médio deve ser reaplicado e o caso alto deve permanecer inequivocamente alto.
+- Evidências históricas indisponíveis não foram presumidas nem tratadas como falha funcional das entregas analisadas.
+- Esta homologação não altera código, funcionalidade, versão, Supabase, Netlify ou prioridade do produto.
