@@ -4,7 +4,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.14.0`.
+- Versão funcional: `v6.14.1`.
 - Prioridade: **formalizar a fundação de Temporadas e Bolões, preservando 2026 e preparando 2027**.
 - Próxima etapa recomendada: concluir o planejamento e, mediante nova aprovação, iniciar uma fundação paralela sem impacto funcional, conforme a [arquitetura de Temporadas e Bolões](docs/architecture/TEMPORADAS_E_BOLOES.md).
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.

@@ -33,11 +33,11 @@ Diagnóstico, auditoria, integridade e pendências usam regras tradicionais. Exp
 
 ### Inteligência narrativa
 
-**Status:** 🔵 Próxima prioridade.
+**Status:** ✅ Base determinística concluída; uso de IA generativa adiado.
 
-Resumos de rodada, mudanças no ranking, destaques e textos revisáveis devem partir de fatos calculados pelo sistema.
+Resumos de rodada, mudanças no ranking, destaques e textos revisáveis partem de fatos calculados pelo sistema.
 
-A E04.1 é classificada como **QW1** porque integridade da rodada, ranking, histórico e estatísticas já existem. A primeira entrega deve apenas consolidar esses fatos em um modelo determinístico e rastreável.
+A narrativa determinística e rastreável foi entregue sem modelos generativos. A evolução assistida por IA permanece adiada até existir um caso de uso sem redundância e com valor demonstrado, conforme o [`ROADMAP.md`](../ROADMAP.md).
 
 ### Copiloto do Bolão
 
