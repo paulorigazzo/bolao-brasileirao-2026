@@ -116,7 +116,11 @@ Toda implementação deve adotar o maior nível aplicável:
 | Médio | Código, interface ou configuração ordinária sem área protegida | Tudo do risco baixo, `npm run check`, testes específicos e cenários manuais; `netlify dev` quando houver impacto funcional ou visual |
 | Alto | Área protegida, dados, segurança, produção ou mudança estrutural | Tudo do risco médio, mais rollback ou mitigação, cenários negativos e evidências específicas de segurança, isolamento, preservação ou equivalência |
 
-São sempre risco alto: Supabase, banco, migrações, RLS, autenticação, autorização, privacidade, escrita ou exclusão de dados, palpites, fechamento, pontuação, sincronização, Functions, produção, dependências novas, regras de negócio protegidas, mudanças transversais de arquitetura e Temporadas e Bolões.
+São sempre risco alto as mudanças funcionais ou operacionais que envolvam Supabase, banco, migrações, RLS, autenticação, autorização, privacidade, escrita ou exclusão de dados, palpites, fechamento, pontuação, sincronização, Functions, produção, regras de negócio protegidas, mudanças transversais de arquitetura e Temporadas e Bolões, bem como a introdução de dependências novas.
+
+Documentação, referências, metadados, identificadores ou sincronização de versão e a mera localização de um arquivo em uma área protegida não elevam o risco por si só. Esses itens herdam o maior risco do comportamento efetivamente alterado. Por exemplo, atualizar somente `APP_VERSION` em um arquivo de Functions não transforma uma entrega visual de risco médio em risco alto.
+
+Alterações mistas adotam o maior risco funcional ou operacional presente no diff. Se um metadado acompanhar uma mudança sensível, prevalece o risco alto. Em caso de dúvida real sobre o impacto, adotar o maior nível.
 
 Em risco médio ou alto, cada critério de aceite deve indicar antes da implementação qual evidência o comprovará. Na entrega, reutilizar a mesma identificação e registrar evidência obtida e resultado. Tabelas são opcionais; uma lista `CA → evidência` é suficiente.
 

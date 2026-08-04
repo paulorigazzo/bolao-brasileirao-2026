@@ -200,3 +200,36 @@ O maior risco continua prevalecendo quando houver mudança funcional sensível o
 - Depois da D03.1, o caso médio deve ser reaplicado e o caso alto deve permanecer inequivocamente alto.
 - Evidências históricas indisponíveis não foram presumidas nem tratadas como falha funcional das entregas analisadas.
 - Esta homologação não altera código, funcionalidade, versão, Supabase, Netlify ou prioridade do produto.
+
+## DEC-2026-006 — Clarificação dos gatilhos de risco alto
+
+- Data: 2026-08-04
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: médio
+
+### Contexto
+
+A H01 classificou a D03 como ajuste necessário porque a lista de gatilhos podia elevar uma entrega apenas pela localização do arquivo. Na v6.11.1, uma alteração visual de risco médio também sincronizou `APP_VERSION` em `netlify/functions/_constants.mjs`, sem mudar o comportamento da Function.
+
+### Decisão
+
+Classificar o risco pelo comportamento funcional ou operacional efetivamente alterado. Documentação, referências, metadados, identificadores ou sincronização de versão e a mera localização do arquivo não elevam o risco por si só.
+
+Alterações mistas adotam o maior risco funcional ou operacional presente no diff. Mudanças reais em áreas protegidas continuam obrigatoriamente altas, e a dúvida real sobre o impacto continua sendo resolvida pelo maior nível.
+
+A reaplicação dos casos da H01 confirmou:
+
+- v6.11.1 como risco médio, pois a Function recebeu somente um identificador de versão e o comportamento alterado foi visual;
+- v6.8.0 como risco alto, pois modificou autenticação, dados pessoais, RPCs e migração.
+
+Com esse esclarecimento, considerar homologado o workflow proporcional composto pela D03 e pela D03.1.
+
+### Consequências
+
+- Tarefas não são superdimensionadas apenas pelo caminho de um arquivo ou por metadados sincronizados.
+- Mudanças funcionais em Supabase, banco, RLS, autenticação, dados, Functions, produção e demais áreas protegidas permanecem risco alto.
+- Pisos de validação e portões Git permanecem inalterados.
+- A homologação do workflow não autoriza nenhuma implementação sensível específica; cada tarefa ainda exige plano, critérios, evidências e aprovações próprias.
+- Esta decisão não altera código, funcionalidade, versão, Supabase, Netlify ou prioridade do produto.
