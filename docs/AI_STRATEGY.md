@@ -71,10 +71,4 @@ Simulações e probabilidades devem ser opcionais, explicáveis e claramente dif
 
 ## Sequência
 
-1. E04.1 — resumo determinístico da rodada.
-2. Compartilhamento determinístico e revisável.
-3. E04.2 — narrativa assistida por IA.
-4. E05.1 — perguntas predefinidas.
-5. E05.2 — linguagem natural.
-6. E05.3 — contexto por tela.
-7. Avaliação futura de recursos preditivos.
+A prioridade, o status e a sequência de evolução estão no [`ROADMAP.md`](../ROADMAP.md). Este documento mantém somente a estratégia e os princípios permanentes para uma eventual adoção de IA.
