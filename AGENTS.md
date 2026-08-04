@@ -167,7 +167,8 @@ Não alterar sem tarefa específica, critérios de aceite e testes:
 
 - Toda implementação deve ser classificada como risco baixo, médio ou alto, com justificativa.
 - Risco baixo é restrito a documentação e mudanças comprovadamente não funcionais; alterações de código ou interface são no mínimo risco médio.
-- Áreas protegidas, dados, segurança, produção e mudanças estruturais são sempre risco alto. Em caso de dúvida entre dois níveis, prevalece o maior.
+- Mudanças funcionais ou operacionais em áreas protegidas, dados, segurança, produção e estruturas são sempre risco alto. Documentação, referências, metadados, identificadores de versão ou a mera localização do arquivo não elevam o risco por si só.
+- Alterações mistas adotam o maior risco do comportamento efetivamente modificado. Em caso de dúvida real sobre o impacto, prevalece o maior nível.
 - Alteração de código: executar `npm run check` e testes específicos.
 - Alteração funcional ou visual: também validar com `netlify dev`.
 - Alteração exclusivamente documental: revisar estrutura, links, consistência, ortografia e diff; executar `npm run check` quando o comando também validar documentação ou quando solicitado.
