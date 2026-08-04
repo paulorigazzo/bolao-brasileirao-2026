@@ -139,3 +139,36 @@ A transição será aditiva, paralela e reversível. O Bolão 2026 permanecerá 
 - A administração da plataforma será separada da administração de cada bolão.
 - Nenhuma funcionalidade será exposta antes de equivalência, isolamento e retorno serem comprovados.
 - Esta decisão documental não altera código, Supabase, Netlify, versão ou experiência atual.
+
+## DEC-2026-004 — Workflow proporcional ao risco
+
+- Data: 2026-08-04
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: médio
+
+### Contexto
+
+O workflow homologado pela H00 exige validação proporcional e evidência antes da conclusão, mas ainda não define níveis objetivos de risco nem relaciona formalmente cada critério de aceite à evidência que o comprova. O histórico de refinamentos visuais também demonstra a necessidade de selecionar cenários relevantes antes da implementação, sem transformar essa seleção em checklist universal.
+
+### Decisão
+
+Adotar três níveis de risco para implementações:
+
+- baixo, restrito a documentação e mudanças comprovadamente não funcionais;
+- médio, para código, interface e configuração ordinária;
+- alto, obrigatório para áreas protegidas, dados, segurança, produção e mudanças estruturais.
+
+Em risco médio ou alto, cada critério de aceite deve indicar sua evidência prevista e, na entrega, a evidência obtida e o resultado. Mudanças visuais devem selecionar somente os cenários aplicáveis ao componente.
+
+Os portões independentes de plano, implementação, commit, push, Pull Request, merge e encerramento permanecem inalterados. A eficácia e a proporcionalidade deste modelo serão avaliadas pela homologação H01 antes de sua aplicação em trabalho sensível.
+
+### Consequências
+
+- Planos passam a declarar risco e, quando exigido, evidências por critério.
+- Tarefas triviais permanecem livres de tabelas e cenários irrelevantes.
+- Áreas sensíveis não podem receber validação de risco baixo ou médio.
+- A revisão humana passa a comparar os critérios aprovados com evidências identificadas de forma consistente.
+- A H01 poderá manter, ajustar ou substituir detalhes desta decisão sem alterar os portões de governança.
+- Esta decisão não altera código, funcionalidade, versão, Supabase, Netlify ou prioridade do produto.

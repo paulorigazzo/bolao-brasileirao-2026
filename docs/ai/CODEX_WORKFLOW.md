@@ -18,8 +18,8 @@ Uma vez aprovado o modo Encerramento, o agente pode executar sem novas autoriza�
 
 ### Contrato de saída dos modos
 
-- **Planejamento:** apresentar objetivo, abordagem, arquivos potenciais, preservações, validações, impactos documentais e ações Git; confirmar que nenhum arquivo foi alterado; aguardar aprovação para Implementação.
-- **Implementação:** apresentar branch, arquivos alterados, resumo por arquivo, áreas preservadas, validações, critérios atendidos, limitações, diff e estado do Git; não publicar; aguardar revisão humana.
+- **Planejamento:** apresentar objetivo, abordagem, arquivos potenciais, preservações, nível de risco, critérios e, em risco médio ou alto, evidências previstas por critério, impactos documentais e ações Git; confirmar que nenhum arquivo foi alterado; aguardar aprovação para Implementação.
+- **Implementação:** apresentar branch, arquivos alterados, resumo por arquivo, áreas preservadas, critérios e resultados e, em risco médio ou alto, evidências obtidas por critério, limitações, diff e estado do Git; não publicar; aguardar revisão humana.
 - **Publicação:** informar separadamente cada ação autorizada executada e seu resultado, sem realizar merge automático; indicar a autorização ainda necessária.
 - **Recuperação:** confirmar o estado seguro restaurado e as evidências, ou descrever o bloqueio, impacto e orientação necessária; não ampliar a recuperação para implementação ou publicação.
 - **Encerramento:** confirmar o merge, atualizar a referência local de `main`, remover por padrão as branches local e remota integradas, salvo pedido explícito de preservação, e apresentar o estado final do Git.
@@ -45,6 +45,7 @@ Nenhuma aprovação é presumida. Aprovar o plano não autoriza automaticamente 
 [ ] Working tree limpo e branch confirmada
 [ ] Fontes da verdade lidas
 [ ] Escopo, exclusões e critérios identificados
+[ ] Risco classificado e evidências aplicáveis previstas
 [ ] Branch proposta no plano
 [ ] Plano e branch aprovados
 [ ] Branch específica criada
@@ -83,7 +84,7 @@ Antes de qualquer modificação:
 4. ler este workflow;
 5. consultar as fontes da verdade e os arquivos relacionados ao escopo;
 6. confirmar o estado atual da funcionalidade ou documentação;
-7. identificar arquivos potencialmente afetados, exclusões, riscos e critérios de aceite.
+7. identificar arquivos potencialmente afetados, exclusões, critérios de aceite e classificar o risco.
 
 Se a documentação e o repositório divergirem, registrar a inconsistência e não improvisar uma solução.
 
@@ -93,9 +94,10 @@ O plano deve declarar:
 
 - objetivo;
 - abordagem;
+- nível de risco e justificativa;
 - arquivos potencialmente alterados;
 - áreas explicitamente preservadas;
-- validações previstas;
+- critérios de aceite e, em risco médio ou alto, evidências previstas associadas;
 - impactos em versão, changelog, release e roadmap;
 - ações Git previstas;
 - tipo e nome proposto para a branch.
@@ -103,6 +105,24 @@ O plano deve declarar:
 O agente deve aguardar aprovação humana explícita antes de editar arquivos.
 
 O nome da branch é uma proposta e não deve ser criado antes da aprovação humana explícita. Se a aprovação alterar branch, escopo ou validações, incorporar os ajustes antes de iniciar.
+
+### Classificação de risco
+
+Toda implementação deve adotar o maior nível aplicável:
+
+| Nível | Aplicação | Piso de validação |
+| --- | --- | --- |
+| Baixo | Documentação e mudanças comprovadamente não funcionais | Diff, escopo, arquivos novos, consistência e links ou referências aplicáveis |
+| Médio | Código, interface ou configuração ordinária sem área protegida | Tudo do risco baixo, `npm run check`, testes específicos e cenários manuais; `netlify dev` quando houver impacto funcional ou visual |
+| Alto | Área protegida, dados, segurança, produção ou mudança estrutural | Tudo do risco médio, mais rollback ou mitigação, cenários negativos e evidências específicas de segurança, isolamento, preservação ou equivalência |
+
+São sempre risco alto: Supabase, banco, migrações, RLS, autenticação, autorização, privacidade, escrita ou exclusão de dados, palpites, fechamento, pontuação, sincronização, Functions, produção, dependências novas, regras de negócio protegidas, mudanças transversais de arquitetura e Temporadas e Bolões.
+
+Em risco médio ou alto, cada critério de aceite deve indicar antes da implementação qual evidência o comprovará. Na entrega, reutilizar a mesma identificação e registrar evidência obtida e resultado. Tabelas são opcionais; uma lista `CA → evidência` é suficiente.
+
+### Cenários visuais aplicáveis
+
+Quando houver impacto visual, o plano deve selecionar somente os cenários que podem ser afetados: celular, orientação horizontal, desktop, conteúdo longo, estados especiais, toque, teclado, foco visível e redução de movimento. A seleção é proporcional ao componente; capturas não são obrigatórias quando outra evidência comprovar o critério.
 
 ## Fase 3 — Preparação da branch
 
@@ -173,11 +193,11 @@ Para qualquer tipo de tarefa, a revisão deve considerar separadamente alteraç�
 Antes de solicitar revisão humana, apresentar:
 
 - branch atual;
+- nível de risco aplicado;
 - arquivos modificados;
 - resumo por arquivo;
 - áreas preservadas;
-- validações executadas e seus resultados;
-- critérios de aceite atendidos;
+- critérios de aceite e resultados e, em risco médio ou alto, evidências obtidas associadas;
 - limitações, riscos ou pendências;
 - diff completo ou uma forma objetiva de revisá-lo;
 - saídas de `git status --short`, `git diff --name-only` e `git ls-files --others --exclude-standard`.

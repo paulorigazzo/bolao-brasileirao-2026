@@ -76,7 +76,7 @@ As fases operacionais devem usar o padrão de cabeçalho `## Fase N — Nome da 
 1. Verificar a branch e o Git status.
 2. Interromper se o working tree não estiver limpo.
 3. Ler as fontes da verdade relacionadas.
-4. Identificar objetivo, escopo, exclusões, critérios de aceite e riscos.
+4. Identificar objetivo, escopo, exclusões, critérios de aceite e classificar o risco da tarefa.
 5. Apresentar um plano com os arquivos potencialmente afetados e propor o nome da branch.
 6. Aguardar aprovação humana explícita.
 7. Criar a branch aprovada com prefixo `feature/*`, `fix/*`, `docs/*` ou `hotfix/*`, conforme a tarefa.
@@ -165,10 +165,15 @@ Não alterar sem tarefa específica, critérios de aceite e testes:
 
 ## Validação proporcional
 
+- Toda implementação deve ser classificada como risco baixo, médio ou alto, com justificativa.
+- Risco baixo é restrito a documentação e mudanças comprovadamente não funcionais; alterações de código ou interface são no mínimo risco médio.
+- Áreas protegidas, dados, segurança, produção e mudanças estruturais são sempre risco alto. Em caso de dúvida entre dois níveis, prevalece o maior.
 - Alteração de código: executar `npm run check` e testes específicos.
 - Alteração funcional ou visual: também validar com `netlify dev`.
 - Alteração exclusivamente documental: revisar estrutura, links, consistência, ortografia e diff; executar `npm run check` quando o comando também validar documentação ou quando solicitado.
 - Informar claramente qualquer validação não executada e o motivo.
+
+Os critérios de classificação, as evidências exigidas e os cenários visuais aplicáveis estão definidos em `docs/ai/CODEX_WORKFLOW.md`.
 
 ## Prioridade atual
 
