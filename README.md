@@ -5,7 +5,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 ## Estado atual
 
 - Versão funcional: `v6.14.0`.
-- Prioridade: reavaliar o Backlog antes de selecionar uma nova entrega.
+- Prioridade: planejar a fundação de Temporadas e Bolões, preservando 2026 e preparando 2027 sem iniciar implementação funcional.
 - Roadmap oficial: [`ROADMAP.md`](ROADMAP.md).
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
@@ -61,6 +61,7 @@ O comando verifica versões e referências, sintaxe, motor estatístico e polít
 - [Estratégia de IA](docs/AI_STRATEGY.md)
 - [Visão do produto](docs/PRODUCT_VISION.md)
 - [Arquitetura](docs/architecture/OVERVIEW.md)
+- [Temporadas e Bolões](docs/architecture/TEMPORADAS_E_BOLOES.md)
 - [Fluxo do Codex](docs/ai/CODEX_WORKFLOW.md)
 - [Deploy no Netlify](docs/deployment/NETLIFY.md)
 - [Notas detalhadas das versões](docs/releases/)

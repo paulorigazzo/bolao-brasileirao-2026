@@ -5,8 +5,8 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 ## Referência atual
 
 - Versão funcional: `v6.14.0`.
-- Prioridade: **reavaliar o Backlog antes de selecionar uma nova entrega**.
-- Próxima etapa recomendada: analisar valor, esforço, redundância e risco das candidatas restantes sem promover automaticamente um novo item.
+- Prioridade: **formalizar a fundação de Temporadas e Bolões, preservando 2026 e preparando 2027**.
+- Próxima etapa recomendada: concluir o planejamento e, mediante nova aprovação, iniciar uma fundação paralela sem impacto funcional, conforme a [arquitetura de Temporadas e Bolões](docs/architecture/TEMPORADAS_E_BOLOES.md).
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -27,7 +27,7 @@ A classificação considera valor percebido, esforço restante e reaproveitament
 
 Situação das candidatas recentes:
 
-1. **Em definição:** próxima entrega funcional;
+1. **Direção aprovada, implementação não iniciada:** Temporadas e Bolões em transição paralela e reversível;
 2. **Reavaliar quando necessário:** testes automatizados por fluxo e narrativa assistida por IA;
 3. **Reavaliar quando necessário:** auditoria ampliada de acessibilidade.
 
@@ -99,8 +99,10 @@ Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e 
 
 ## E06 — Expansão do produto
 
-- 🔵 Ligas paralelas e múltiplos bolões.
-- 🔵 Convites e gestão por liga.
+- 🔵 **E06.1 — Fundação de Temporadas e Bolões:** separar campeonato, temporada e bolão sem alterar a operação oficial de 2026.
+- 🔵 **E06.2 — Gêmeo comparativo de 2026:** copiar dados para auditoria de equivalência, mantendo o modelo atual como fonte oficial.
+- 🔵 **E06.3 — Preparação da Temporada 2027:** criar a nova edição sem sobrescrever o histórico de 2026.
+- 🔵 **E06.4 — Piloto de Bolão Independente:** validar membros, palpites, ranking, convites e gestão isolados antes da expansão.
 - 🔵 Recursos sociais ampliados após a experiência inicial do Duelo entre participantes.
 - ✅ **QW1 técnico:** Pipeline inicial de qualidade no GitHub Actions.
 - 🔵 Pipeline automatizado de releases.
@@ -114,3 +116,5 @@ Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e 
 - previsões apresentadas como fatos;
 - mudanças nas regras de pontuação;
 - evolução ampla da Tela de Jogos enquanto estiver congelada.
+
+A sequência, os portões de segurança e os critérios de retorno da E06 estão definidos em [`docs/architecture/TEMPORADAS_E_BOLOES.md`](docs/architecture/TEMPORADAS_E_BOLOES.md). O planejamento não autoriza migrações, alterações de banco ou exposição da funcionalidade aos participantes.

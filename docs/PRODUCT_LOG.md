@@ -1,5 +1,11 @@
 # Registro de Decisões do Produto
 
+## 4 de agosto de 2026 — Preparação de Temporadas e Bolões em transição paralela
+
+**Decisão:** iniciar o planejamento da fundação de Temporadas e Bolões, preservar o Bolão 2026 como fonte oficial, usar uma cópia controlada de seus dados para auditoria e preparar 2027 como primeira temporada candidata a operar integralmente na nova arquitetura.
+
+**Motivo:** a simples substituição anual de dados eliminaria a separação histórica, enquanto uma migração direta para múltiplos bolões teria risco desproporcional. A [arquitetura aprovada](architecture/TEMPORADAS_E_BOLOES.md) adota evolução aditiva, equivalência comprovada, isolamento de permissões e retorno antes da exposição aos participantes.
+
 ## 3 de agosto de 2026 — Testes por fluxo e narrativa assistida por IA adiados
 
 **Decisão:** adiar a expansão dos testes automatizados por fluxo e as funcionalidades associadas à IA, preservando os testes determinísticos atuais e a fase de IA como direção futura sem prioridade imediata.

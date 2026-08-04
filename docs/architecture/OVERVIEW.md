@@ -29,3 +29,7 @@ O Bolão Brasileirão 2026 é uma aplicação web mobile-first construída com H
 - 1 ponto: empate correto com placar diferente.
 
 Mudanças nessas regras exigem Sprint específica, testes e atualização explícita da documentação.
+
+## Evolução para novas temporadas e bolões
+
+A separação futura entre campeonato, temporada, bolão, membros e palpites está definida em [`TEMPORADAS_E_BOLOES.md`](TEMPORADAS_E_BOLOES.md). A direção preserva 2026 como fonte oficial durante uma transição paralela e prepara 2027 sem autorizar ainda mudanças funcionais ou de banco.
