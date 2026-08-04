@@ -23,9 +23,18 @@ Contexto:
 Escopo:
 - [Item incluído ou excluído]
 
+Risco:
+[baixo | médio | alto]
+
+Justificativa do risco:
+[Explique brevemente o maior nível aplicável.]
+
 Critérios de aceite:
-1. [Resultado verificável]
-2. [Resultado verificável]
+- CA1 — [resultado verificável]
+- CA2 — [resultado verificável]
+
+Evidências previstas:
+[Para risco baixo, liste as validações pertinentes. Para risco médio ou alto, associe cada CA à evidência que o comprovará.]
 
 Autorizações Git:
 - Commit: [autorizado | não autorizado]
@@ -51,9 +60,19 @@ Consolidação da documentação de governança.
 Escopo:
 - Atualizar os documentos de governança indicados.
 
+Risco:
+baixo
+
+Justificativa do risco:
+Alteração exclusivamente documental, sem efeito funcional.
+
 Critérios de aceite:
-- Documentos sem responsabilidades duplicadas.
-- Links internos e terminologia consistentes.
+- CA1 — Documentos sem responsabilidades duplicadas.
+- CA2 — Links internos e terminologia consistentes.
+
+Evidências previstas:
+- Revisão cruzada dos documentos.
+- Verificação de links e terminologia.
 
 Autorizações Git:
 - Commit: não autorizado
