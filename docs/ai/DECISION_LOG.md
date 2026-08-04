@@ -112,3 +112,30 @@ Considerar a D01 oficialmente homologada pela H00 e consolidar no workflow:
 - O Encerramento exige aprovação explícita para começar, mas suas ações previamente aprovadas não exigem autorizações individuais adicionais.
 - A leitura documental torna-se proporcional ao tipo e ao risco da tarefa.
 - A consolidação não altera funcionalidades, regras de negócio, banco, infraestrutura ou versão do produto.
+
+## DEC-2026-003 — Temporadas e Bolões como entidades distintas
+
+- Data: 2026-08-04
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: alto
+
+### Contexto
+
+O aplicativo opera atualmente como um único bolão associado ao Campeonato Brasileiro de 2026. A preparação de 2027 e a expansão para bolões independentes exigem preservar o histórico atual, evitar substituição destrutiva de dados e impedir que participantes acessem contextos aos quais não pertencem.
+
+### Decisão
+
+Adotar campeonato, temporada e bolão como entidades distintas. Jogos, resultados, clubes e classificação pertencem à temporada; membros, funções, convites e palpites pertencem ao bolão; contas e perfis permanecem globais; regras de fechamento e pontuação continuam centralizadas.
+
+A transição será aditiva, paralela e reversível. O Bolão 2026 permanecerá como fonte oficial enquanto uma representação paralela servir para auditoria de equivalência. A Temporada 2027 será a primeira candidata a nascer integralmente na nova arquitetura. A especificação e os portões de avanço estão em [`../architecture/TEMPORADAS_E_BOLOES.md`](../architecture/TEMPORADAS_E_BOLOES.md).
+
+### Consequências
+
+- A preparação de 2027 não sobrescreverá o histórico de 2026.
+- Bolões independentes poderão compartilhar jogos e resultados sem compartilhar membros ou palpites.
+- Banco, políticas de acesso, sincronização e interface exigirão entregas próprias e aprovações específicas.
+- A administração da plataforma será separada da administração de cada bolão.
+- Nenhuma funcionalidade será exposta antes de equivalência, isolamento e retorno serem comprovados.
+- Esta decisão documental não altera código, Supabase, Netlify, versão ou experiência atual.

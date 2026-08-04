@@ -34,7 +34,10 @@ O calendário consolidado foi atendido pela E02.1 como uma visão mensal interat
 | Push e e-mail | Não iniciado | Adicionar serviços, consentimento e backend | Alto | Alto | **LP** | Backend e PWA |
 | Probabilidades e simulações | Não iniciado | Criar modelos explicáveis e validação | Alto | Alto | **LP** | Base histórica ampliada |
 | Copiloto completo | Não iniciado | Criar interface, backend, linguagem natural e contexto | Muito alto | Muito alto | **LP após E04** | E04.1 e E04.2 |
-| Múltiplos bolões e ligas | Não iniciado | Alterar dados, permissões, administração e navegação | Muito alto | Alto | **LP** | Redesenho da plataforma |
+| Fundação de Temporadas e Bolões | Planejamento aprovado; implementação não iniciada | Representar 2026 de forma paralela e reversível, sem alterar a operação oficial | Alto | Alto estratégico | **LP em fases** | [Arquitetura aprovada](architecture/TEMPORADAS_E_BOLOES.md), revisão de dados e segurança |
+| Gêmeo comparativo de 2026 | Não iniciado | Copiar e reconciliar membros, palpites, ranking e indicadores sem dupla fonte oficial | Alto | Alto técnico | **LP em fases** | Fundação, auditoria de equivalência e retorno testado |
+| Preparação da Temporada 2027 | Não iniciado | Parametrizar a temporada, preservar 2026 e validar calendário, clubes e renovação | Alto | Muito alto | **LP em fases** | Fundação e gêmeo comparativo validados |
+| Piloto de Bolão Independente | Não iniciado | Isolar membros, palpites, ranking, convites, administração e visibilidade | Muito alto | Alto | **LP** | Temporadas, segurança, equivalência e piloto controlado |
 | Backup administrativo completo | Não iniciado | Exportar e restaurar dados com segurança | Alto | Médio | **LP** | Backend e políticas |
 
 ## Ideias futuras
