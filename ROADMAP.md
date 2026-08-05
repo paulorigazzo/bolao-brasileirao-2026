@@ -5,8 +5,8 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 ## Referência atual
 
 - Versão funcional: `v6.14.1`.
-- Prioridade: **preparar o bootstrap isolado do Bolão Brasileirão Rigazzo, preservando integralmente o Bolão 2026**.
-- Próxima etapa recomendada: planejar a **R01A — Bootstrap do Rigazzo** neste projeto e, mediante aprovação própria, criar somente o repositório e a documentação inicial que permitirão abrir o novo workspace, conforme sua [arquitetura principal](docs/architecture/BOLAO_BRASILEIRAO_RIGAZZO.md).
+- Prioridade: **manter o Bolão 2026 estável e independente enquanto o desenvolvimento estrutural do Rigazzo segue em workspace próprio**.
+- Próxima etapa do novo produto: planejar a **R01B — Fundação local isolada** no [repositório oficial do Rigazzo](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo). Neste projeto, o próximo trabalho relacionado permanece a **R03 — Inventário somente leitura de 2026**, somente quando houver plano e aprovação próprios.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -27,7 +27,7 @@ A classificação considera valor percebido, esforço restante e reaproveitament
 
 Situação das candidatas recentes:
 
-1. **Direção aprovada, implementação não iniciada:** Bolão Brasileirão Rigazzo como produto independente, com Temporadas, Ligas e importação manual de snapshots de 2026;
+1. **Produto independente inicializado:** Bolão Brasileirão Rigazzo com repositório e governança próprios; implementação funcional ainda não iniciada e reservada ao novo workspace;
 2. **Reavaliar quando necessário:** testes automatizados por fluxo e narrativa assistida por IA;
 3. **Reavaliar quando necessário:** auditoria ampliada de acessibilidade.
 
@@ -100,7 +100,7 @@ Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e 
 ## E06 — Expansão do produto
 
 - ✅ **R00 e R00.1 — Estratégia e handoff:** novo produto formalizado, responsabilidades separadas e sequência corrigida, sem código ou serviço externo.
-- 🔵 **R01A — Bootstrap do Rigazzo:** criar o repositório privado e transferir a documentação inicial, ainda a partir da tarefa do Bolão 2026.
+- ✅ **R01A — Bootstrap do Rigazzo:** repositório privado e documentação inicial criados; fonte oficial transferida para o [novo projeto](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo), sem alteração funcional do Bolão 2026.
 - 🔵 **R01B–R05 — Fundação isolada:** abrir o novo workspace, criar o modelo de Temporadas e Ligas, inventariar a origem, formalizar o contrato de snapshot e homologar o importador sintético.
 - 🔵 **R06–R09 — Equivalência de 2026:** exportar somente por leitura e importar snapshots manuais, versionados e auditáveis.
 - 🔵 **R09.1 e R10.1 — Operação administrativa futura:** avaliar os botões Exportar e Importar somente após homologação das ferramentas locais e pacotes reais.
@@ -120,4 +120,4 @@ Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e 
 - mudanças nas regras de pontuação;
 - evolução ampla da Tela de Jogos enquanto estiver congelada.
 
-A sequência, os portões de segurança, a política de identidade e o transporte manual por snapshots estão definidos em [`docs/architecture/BOLAO_BRASILEIRAO_RIGAZZO.md`](docs/architecture/BOLAO_BRASILEIRAO_RIGAZZO.md). O planejamento não autoriza criação de repositório externo, migrações, alterações de banco, exportações, importações, botões ou exposição aos participantes.
+A sequência vigente do novo produto está no [repositório oficial do Rigazzo](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo). Este projeto preserva a [`decisão histórica, a divisão de responsabilidades e os contratos da origem`](docs/architecture/BOLAO_BRASILEIRAO_RIGAZZO.md). A conclusão da R01A não autoriza migrações, alterações de banco, exportações, importações, botões ou exposição aos participantes.
