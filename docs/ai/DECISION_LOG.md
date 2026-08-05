@@ -298,3 +298,34 @@ A arquitetura e o programa R00–R11 estão definidos em [`../architecture/BOLAO
 - A Temporada 2027 é a primeira candidata operacional nativa do Rigazzo.
 - A eventual importação histórica de 2026 permanece opcional e reversível.
 - Esta decisão documental não cria projeto externo, não exporta dados e não altera código, versão, Supabase ou Netlify.
+
+## DEC-2026-009 — Handoff e responsabilidade entre os produtos
+
+- Data: 2026-08-05
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: alto
+
+### Contexto
+
+A R00 definiu o Rigazzo como produto independente, mas deixou implícito quem criaria o novo repositório, qual tarefa executaria cada fase e quando a fonte da verdade seria transferida. A sequência também posicionava o Contrato de Snapshot antes do inventário real da origem e o botão de exportação antes da homologação dos pacotes reais.
+
+### Decisão
+
+Dividir a fundação em R01A, executada a partir da tarefa do Bolão 2026 para criar somente o repositório e a documentação inicial, e R01B, executada em nova tarefa associada ao workspace Rigazzo.
+
+O Bolão 2026 responde por inventário, consentimento de exportação, exportador e futura interface de exportação. O Rigazzo responde por modelo novo, contrato canônico, importador, novo Auth, associação de histórico, piloto e 2027. Equivalência e revogação exigem evidências coordenadas, sem conexão automática.
+
+O inventário da origem antecede o Contrato de Snapshot v1; o importador sintético permanece anterior ao exportador. A interface de exportação passa a R09.1, depois de snapshot-base e pacotes incrementais homologados.
+
+Após a R01A, o novo repositório se torna a fonte oficial do Rigazzo. Este projeto preserva a decisão e somente os contratos necessários ao lado exportador.
+
+### Consequências
+
+- Elimina-se o problema circular entre criar o repositório e abrir a nova tarefa.
+- Cada alteração ocorre no projeto que possui seus dados, credenciais e responsabilidades.
+- O Contrato de Snapshot tem uma fonte canônica e versões explícitas.
+- Consentimento de exportação não é confundido com autenticação ou participação no Rigazzo.
+- R00 e R00.1 ficam concluídas; R01A torna-se o próximo passo planejado.
+- Esta decisão documental não cria repositório, tarefa, serviço, exportação ou importação e não altera a versão funcional.

@@ -4,7 +4,7 @@
 
 ## Finalidade
 
-Este documento é a fonte principal para a evolução do Bolão Brasileirão 2026 em uma plataforma capaz de preservar temporadas encerradas, preparar o Campeonato Brasileiro de 2027 e, futuramente, operar bolões independentes.
+Este documento foi a fonte principal da alternativa que evoluiria o Bolão Brasileirão 2026 dentro do mesmo projeto. Ele é preservado para explicar a decisão anterior, mas não representa mais a direção vigente.
 
 A direção foi aprovada em 4 de agosto de 2026. A implementação ainda não foi iniciada. Qualquer mudança em código, banco, Supabase, Netlify ou interface exige plano e aprovação próprios.
 

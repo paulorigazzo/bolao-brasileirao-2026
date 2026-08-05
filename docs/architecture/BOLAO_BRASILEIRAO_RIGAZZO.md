@@ -80,6 +80,29 @@ O novo projeto deve falhar quando detectar:
 
 O exportador conhecerá somente a origem e gerará arquivos locais. O importador conhecerá somente o destino e consumirá arquivos aprovados. Nenhum executável terá credenciais de escrita nos dois projetos.
 
+## Responsabilidade e handoff entre projetos
+
+| Trabalho | Fonte responsável |
+| --- | --- |
+| R00, R00.1 e R01A | Bolão Brasileirão 2026 |
+| R01B, R02, R04, R05, R07, R08, R09, R10, R10.1 e R11 | Bolão Brasileirão Rigazzo |
+| R03 — inventário da origem | Bolão Brasileirão 2026 |
+| R06 e R09.1 — exportação | Bolão Brasileirão 2026 |
+| Contrato de Snapshot | Fonte canônica no Rigazzo; implementação compatível no Bolão 2026 |
+| Equivalência | Exportação evidenciada no Bolão 2026 e importação evidenciada no Rigazzo |
+| Consentimento de exportação | Bolão Brasileirão 2026 |
+| Participação, novo Auth e associação de histórico | Bolão Brasileirão Rigazzo |
+| Revogação | Decisão coordenada e registrada nos dois produtos, sem conexão automática |
+
+A R01A será executada nesta tarefa porque o novo workspace ainda não existe. Ela poderá criar somente o repositório privado, instalar a documentação inicial e comprovar a ausência de segredos ou vínculos externos. Depois disso, o desenvolvimento do Rigazzo continuará em nova tarefa associada ao novo workspace.
+
+Até a conclusão da R01A, este documento é a fonte oficial do planejamento. Durante o handoff, ele será transferido ao novo repositório. A partir da aceitação da R01A:
+
+- o repositório Rigazzo passa a ser a fonte oficial do novo produto;
+- este projeto mantém apenas a decisão histórica, o link para a fonte nova e os contratos necessários ao exportador;
+- o Contrato de Snapshot usa versão explícita e não pode ser alterado silenciosamente em duas cópias;
+- mudanças que afetem os dois lados exigem entregas e aprovações independentes em cada projeto.
+
 ## Transferência de dados
 
 ### Meio de transporte
@@ -209,7 +232,7 @@ O botão futuro será considerado somente após a homologação do importador lo
 7. recalcular resultados;
 8. apresentar relatório de equivalência.
 
-Os botões não fazem parte da R00 e exigirão entregas próprias de risco alto.
+Os botões não fazem parte da R00 nem da R00.1 e exigirão entregas próprias de risco alto.
 
 ## Programa de entregas
 
@@ -217,37 +240,37 @@ Os botões não fazem parte da R00 e exigirão entregas próprias de risco alto.
 
 Registrar a independência do produto, a arquitetura, o transporte por arquivos, a política de identidade e os portões das fases seguintes, sem criar serviços ou código funcional.
 
-### R01 — Fundação isolada
+### R01A — Bootstrap do Rigazzo
 
-Criar o repositório privado, a governança própria, a execução local, as fixtures sintéticas e os bloqueios contra referências de produção.
+Criar, a partir da tarefa do Bolão 2026, somente o repositório privado e a documentação inicial do Rigazzo. Não criar Supabase, Netlify, autenticação, código funcional ou dados reais.
+
+### R01B — Fundação local isolada
+
+Abrir uma nova tarefa associada ao workspace Rigazzo e instalar sua governança, execução local, fixtures sintéticas e bloqueios contra referências de produção.
 
 ### R02 — Modelo de Temporadas e Ligas
 
 Implementar e testar no Supabase isolado as entidades, índices, permissões, auditoria e RLS, sem dados reais.
 
-### R03 — Contrato de Snapshot 2026 v1
+### R03 — Inventário somente leitura de 2026
 
-Formalizar formatos, revisões, integridade, consentimento, compatibilidade e critérios de rejeição usando exemplos sintéticos.
+Documentar no projeto de origem esquema, relações, funções, políticas, fontes e campos necessários, mediante autorização própria e sem alterar produção.
 
-### R04 — Importador sintético
+### R04 — Contrato de Snapshot 2026 v1
 
-Construir primeiro o importador local, com simulação, idempotência, transação, rollback e equivalência.
+Formalizar no Rigazzo formatos, revisões, integridade, consentimento, compatibilidade e critérios de rejeição, usando o inventário da origem e exemplos sintéticos.
 
-### R05 — Inventário somente leitura de 2026
+### R05 — Importador sintético
 
-Documentar esquema, relações, funções, políticas e fontes necessárias, mediante autorização própria e sem alterar produção.
+Construir no Rigazzo o importador local, com simulação, idempotência, transação, rollback e equivalência, antes de implementar o exportador real.
 
 ### R06 — Exportador somente leitura
 
 Criar ferramenta local e manual que gere pacotes sem conhecer o Rigazzo e sem modificar o projeto atual.
 
-### R06.1 — Exportação administrativa
-
-Depois da homologação do exportador e dos pacotes reais, avaliar e implementar o botão **Exportar rodada** na Área ADM do Bolão 2026.
-
 ### R07 — Identidades e consentimento
 
-Implementar cofre de identidades, pseudonimização, consentimento, revogação e associação segura ao novo Auth.
+Implementar o cofre de identidades, a pseudonimização e a associação segura ao novo Auth no Rigazzo. A origem controla separadamente o consentimento para exportar nome, e-mail e telefone; exceções e revogações exigem registro nos dois produtos.
 
 ### R08 — Snapshot-base real
 
@@ -256,6 +279,10 @@ Importar uma fotografia aprovada de 2026 e comprovar equivalência antes de acei
 ### R09 — Pacotes incrementais por rodada
 
 Validar pacotes provisórios, parciais, consolidados e revisões decorrentes de jogos adiados.
+
+### R09.1 — Exportação administrativa
+
+Depois da homologação do exportador, do snapshot-base e dos pacotes incrementais reais, avaliar e implementar o botão **Exportar rodada** na Área ADM do Bolão 2026.
 
 ### R10 — Piloto privado
 
@@ -294,10 +321,10 @@ Cada fase exige plano próprio. Não avançar quando houver:
 - migração obrigatória de 2026;
 - descontinuação do projeto atual;
 - regras de pontuação personalizadas por liga;
-- criação dos botões de exportação e importação durante a R00.
+- criação dos botões de exportação e importação durante a R00 ou a R00.1.
 
 ## Versionamento deste planejamento
 
 Esta direção substitui o plano de evolução estrutural dentro do mesmo projeto descrito anteriormente em [`TEMPORADAS_E_BOLOES.md`](TEMPORADAS_E_BOLOES.md). O documento anterior permanece como registro histórico da alternativa avaliada.
 
-A R00 não representa entrega funcional e não altera a versão do Bolão Brasileirão 2026.
+A R00 e a R00.1 não representam entregas funcionais e não alteram a versão do Bolão Brasileirão 2026.

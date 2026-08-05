@@ -5,8 +5,8 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 ## Referência atual
 
 - Versão funcional: `v6.14.1`.
-- Prioridade: **formalizar o Bolão Brasileirão Rigazzo como produto independente para Temporadas e Ligas, preservando integralmente o Bolão 2026**.
-- Próxima etapa recomendada: concluir a R00 documental e, mediante nova aprovação em projeto próprio, iniciar a fundação isolada do Rigazzo conforme sua [arquitetura principal](docs/architecture/BOLAO_BRASILEIRAO_RIGAZZO.md).
+- Prioridade: **preparar o bootstrap isolado do Bolão Brasileirão Rigazzo, preservando integralmente o Bolão 2026**.
+- Próxima etapa recomendada: planejar a **R01A — Bootstrap do Rigazzo** neste projeto e, mediante aprovação própria, criar somente o repositório e a documentação inicial que permitirão abrir o novo workspace, conforme sua [arquitetura principal](docs/architecture/BOLAO_BRASILEIRAO_RIGAZZO.md).
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -99,10 +99,11 @@ Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e 
 
 ## E06 — Expansão do produto
 
-- 🔵 **R00 — Formalização estratégica:** registrar o Rigazzo como novo produto, sem código ou serviço externo.
-- 🔵 **R01–R04 — Fundação isolada:** criar repositório próprio, modelo de Temporadas e Ligas, contrato de snapshot e importador sintético.
-- 🔵 **R05–R09 — Equivalência de 2026:** inventariar a origem, exportar somente por leitura e importar snapshots manuais, versionados e auditáveis.
-- 🔵 **R06.1 e R10.1 — Operação administrativa futura:** avaliar os botões Exportar e Importar somente após homologação das ferramentas locais.
+- ✅ **R00 e R00.1 — Estratégia e handoff:** novo produto formalizado, responsabilidades separadas e sequência corrigida, sem código ou serviço externo.
+- 🔵 **R01A — Bootstrap do Rigazzo:** criar o repositório privado e transferir a documentação inicial, ainda a partir da tarefa do Bolão 2026.
+- 🔵 **R01B–R05 — Fundação isolada:** abrir o novo workspace, criar o modelo de Temporadas e Ligas, inventariar a origem, formalizar o contrato de snapshot e homologar o importador sintético.
+- 🔵 **R06–R09 — Equivalência de 2026:** exportar somente por leitura e importar snapshots manuais, versionados e auditáveis.
+- 🔵 **R09.1 e R10.1 — Operação administrativa futura:** avaliar os botões Exportar e Importar somente após homologação das ferramentas locais e pacotes reais.
 - 🔵 **R10 — Piloto privado:** validar autenticação, identidades consentidas, experiência e isolamento entre Ligas.
 - 🔵 **R11 — Preparação de 2027:** criar a primeira temporada operacional nativa do Rigazzo sem sobrescrever 2026.
 - 🔵 Recursos sociais ampliados após a experiência inicial do Duelo entre participantes.
