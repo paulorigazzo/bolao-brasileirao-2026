@@ -1,6 +1,14 @@
 # Registro de Decisões do Produto
 
+## 5 de agosto de 2026 — Bolão Brasileirão Rigazzo como produto independente
+
+**Decisão:** desenvolver Temporadas e Ligas no novo produto Bolão Brasileirão Rigazzo, com repositório, Supabase, autenticação e Netlify próprios. O Bolão 2026 permanece oficial e fornecerá dados somente por snapshots manuais, unidirecionais e aprovados.
+
+**Motivo:** a separação física elimina a fundação experimental do ambiente atual e permite validar importação, identidade, segurança e equivalência antes de qualquer piloto. A [arquitetura vigente](architecture/BOLAO_BRASILEIRAO_RIGAZZO.md) define o handoff entre projetos e substitui a implementação paralela anteriormente planejada.
+
 ## 4 de agosto de 2026 — Preparação de Temporadas e Bolões em transição paralela
+
+> **Status:** substituída em 5 de agosto de 2026 pela criação do Bolão Brasileirão Rigazzo como produto independente.
 
 **Decisão:** iniciar o planejamento da fundação de Temporadas e Bolões, preservar o Bolão 2026 como fonte oficial, usar uma cópia controlada de seus dados para auditoria e preparar 2027 como primeira temporada candidata a operar integralmente na nova arquitetura.
 
