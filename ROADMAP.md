@@ -5,8 +5,8 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 ## Referência atual
 
 - Versão funcional: `v6.14.1`.
-- Prioridade: **formalizar a fundação de Temporadas e Bolões, preservando 2026 e preparando 2027**.
-- Próxima etapa recomendada: concluir o planejamento e, mediante nova aprovação, iniciar uma fundação paralela sem impacto funcional, conforme a [arquitetura de Temporadas e Bolões](docs/architecture/TEMPORADAS_E_BOLOES.md).
+- Prioridade: **formalizar o Bolão Brasileirão Rigazzo como produto independente para Temporadas e Ligas, preservando integralmente o Bolão 2026**.
+- Próxima etapa recomendada: concluir a R00 documental e, mediante nova aprovação em projeto próprio, iniciar a fundação isolada do Rigazzo conforme sua [arquitetura principal](docs/architecture/BOLAO_BRASILEIRAO_RIGAZZO.md).
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -27,7 +27,7 @@ A classificação considera valor percebido, esforço restante e reaproveitament
 
 Situação das candidatas recentes:
 
-1. **Direção aprovada, implementação não iniciada:** Temporadas e Bolões em transição paralela e reversível;
+1. **Direção aprovada, implementação não iniciada:** Bolão Brasileirão Rigazzo como produto independente, com Temporadas, Ligas e importação manual de snapshots de 2026;
 2. **Reavaliar quando necessário:** testes automatizados por fluxo e narrativa assistida por IA;
 3. **Reavaliar quando necessário:** auditoria ampliada de acessibilidade.
 
@@ -99,10 +99,12 @@ Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e 
 
 ## E06 — Expansão do produto
 
-- 🔵 **E06.1 — Fundação de Temporadas e Bolões:** separar campeonato, temporada e bolão sem alterar a operação oficial de 2026.
-- 🔵 **E06.2 — Gêmeo comparativo de 2026:** copiar dados para auditoria de equivalência, mantendo o modelo atual como fonte oficial.
-- 🔵 **E06.3 — Preparação da Temporada 2027:** criar a nova edição sem sobrescrever o histórico de 2026.
-- 🔵 **E06.4 — Piloto de Bolão Independente:** validar membros, palpites, ranking, convites e gestão isolados antes da expansão.
+- 🔵 **R00 — Formalização estratégica:** registrar o Rigazzo como novo produto, sem código ou serviço externo.
+- 🔵 **R01–R04 — Fundação isolada:** criar repositório próprio, modelo de Temporadas e Ligas, contrato de snapshot e importador sintético.
+- 🔵 **R05–R09 — Equivalência de 2026:** inventariar a origem, exportar somente por leitura e importar snapshots manuais, versionados e auditáveis.
+- 🔵 **R06.1 e R10.1 — Operação administrativa futura:** avaliar os botões Exportar e Importar somente após homologação das ferramentas locais.
+- 🔵 **R10 — Piloto privado:** validar autenticação, identidades consentidas, experiência e isolamento entre Ligas.
+- 🔵 **R11 — Preparação de 2027:** criar a primeira temporada operacional nativa do Rigazzo sem sobrescrever 2026.
 - 🔵 Recursos sociais ampliados após a experiência inicial do Duelo entre participantes.
 - ✅ **QW1 técnico:** Pipeline inicial de qualidade no GitHub Actions.
 - 🔵 Pipeline automatizado de releases.
@@ -117,4 +119,4 @@ Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e 
 - mudanças nas regras de pontuação;
 - evolução ampla da Tela de Jogos enquanto estiver congelada.
 
-A sequência, os portões de segurança e os critérios de retorno da E06 estão definidos em [`docs/architecture/TEMPORADAS_E_BOLOES.md`](docs/architecture/TEMPORADAS_E_BOLOES.md). O planejamento não autoriza migrações, alterações de banco ou exposição da funcionalidade aos participantes.
+A sequência, os portões de segurança, a política de identidade e o transporte manual por snapshots estão definidos em [`docs/architecture/BOLAO_BRASILEIRAO_RIGAZZO.md`](docs/architecture/BOLAO_BRASILEIRAO_RIGAZZO.md). O planejamento não autoriza criação de repositório externo, migrações, alterações de banco, exportações, importações, botões ou exposição aos participantes.
