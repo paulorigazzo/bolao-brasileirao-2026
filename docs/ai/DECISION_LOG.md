@@ -327,5 +327,5 @@ Após a R01A, o novo repositório se torna a fonte oficial do Rigazzo. Este proj
 - Cada alteração ocorre no projeto que possui seus dados, credenciais e responsabilidades.
 - O Contrato de Snapshot tem uma fonte canônica e versões explícitas.
 - Consentimento de exportação não é confundido com autenticação ou participação no Rigazzo.
-- R00 e R00.1 ficam concluídas; R01A torna-se o próximo passo planejado.
-- Esta decisão documental não cria repositório, tarefa, serviço, exportação ou importação e não altera a versão funcional.
+- R00, R00.1 e R01A ficam concluídas; R01B torna-se o próximo passo do Rigazzo em seu próprio workspace.
+- A R01A criou somente o repositório privado e sua documentação inicial pelo PR [`paulorigazzo/bolao-brasileirao-rigazzo#1`](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo/pull/1), sem serviço, exportação, importação ou alteração da versão funcional do Bolão 2026.

@@ -2,9 +2,9 @@
 
 ## Finalidade
 
-Este documento é a fonte principal para o planejamento do **Bolão Brasileirão Rigazzo**, novo produto destinado a operar múltiplas temporadas e ligas sem alterar o Bolão Brasileirão 2026.
+Este documento preserva a decisão histórica, a divisão de responsabilidades e os contratos pertencentes ao lado de origem do **Bolão Brasileirão Rigazzo**. Desde a conclusão da R01A, a fonte oficial do novo produto é o repositório privado [`paulorigazzo/bolao-brasileirao-rigazzo`](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo).
 
-O Rigazzo será desenvolvido em repositório, Supabase, autenticação e Netlify próprios. O projeto atual permanece como aplicação oficial e fonte histórica de 2026. Esta documentação não cria o novo projeto nem autoriza código, banco, serviço externo, exportação ou importação.
+O Rigazzo será desenvolvido com Supabase, autenticação e Netlify próprios, quando cada serviço receber plano e aprovação específicos. O projeto atual permanece como aplicação oficial e fonte histórica de 2026. Esta documentação não autoriza código, banco, serviço externo, exportação ou importação.
 
 ## Decisão estratégica
 
@@ -94,9 +94,9 @@ O exportador conhecerá somente a origem e gerará arquivos locais. O importador
 | Participação, novo Auth e associação de histórico | Bolão Brasileirão Rigazzo |
 | Revogação | Decisão coordenada e registrada nos dois produtos, sem conexão automática |
 
-A R01A será executada nesta tarefa porque o novo workspace ainda não existe. Ela poderá criar somente o repositório privado, instalar a documentação inicial e comprovar a ausência de segredos ou vínculos externos. Depois disso, o desenvolvimento do Rigazzo continuará em nova tarefa associada ao novo workspace.
+A R01A foi concluída pelo Pull Request [`paulorigazzo/bolao-brasileirao-rigazzo#1`](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo/pull/1): o repositório privado e a documentação inicial foram criados sem segredos, vínculos externos, código funcional ou serviços. O desenvolvimento do Rigazzo continua em nova tarefa associada ao novo workspace.
 
-Até a conclusão da R01A, este documento é a fonte oficial do planejamento. Durante o handoff, ele será transferido ao novo repositório. A partir da aceitação da R01A:
+O handoff da R01A está concluído. A partir de sua aceitação:
 
 - o repositório Rigazzo passa a ser a fonte oficial do novo produto;
 - este projeto mantém apenas a decisão histórica, o link para a fonte nova e os contratos necessários ao exportador;
@@ -240,9 +240,9 @@ Os botões não fazem parte da R00 nem da R00.1 e exigirão entregas próprias d
 
 Registrar a independência do produto, a arquitetura, o transporte por arquivos, a política de identidade e os portões das fases seguintes, sem criar serviços ou código funcional.
 
-### R01A — Bootstrap do Rigazzo
+### R01A — Bootstrap do Rigazzo — concluída
 
-Criar, a partir da tarefa do Bolão 2026, somente o repositório privado e a documentação inicial do Rigazzo. Não criar Supabase, Netlify, autenticação, código funcional ou dados reais.
+O repositório privado e a documentação inicial do Rigazzo foram criados a partir da tarefa do Bolão 2026. Não foram criados Supabase, Netlify, autenticação, código funcional ou dados reais.
 
 ### R01B — Fundação local isolada
 
