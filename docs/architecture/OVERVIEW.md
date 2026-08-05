@@ -30,6 +30,6 @@ O Bolão Brasileirão 2026 é uma aplicação web mobile-first construída com H
 
 Mudanças nessas regras exigem Sprint específica, testes e atualização explícita da documentação.
 
-## Evolução para novas temporadas e bolões
+## Evolução para Temporadas e Ligas
 
-A separação futura entre campeonato, temporada, bolão, membros e palpites está definida em [`TEMPORADAS_E_BOLOES.md`](TEMPORADAS_E_BOLOES.md). A direção preserva 2026 como fonte oficial durante uma transição paralela e prepara 2027 sem autorizar ainda mudanças funcionais ou de banco.
+A evolução estrutural ocorrerá no produto independente **Bolão Brasileirão Rigazzo**, conforme [`BOLAO_BRASILEIRAO_RIGAZZO.md`](BOLAO_BRASILEIRAO_RIGAZZO.md). O aplicativo atual permanece como fonte oficial de 2026 e não receberá a fundação experimental. A transferência futura de dados será manual, unidirecional e sujeita a entregas próprias, sem autorização atual para código, banco ou serviços externos.

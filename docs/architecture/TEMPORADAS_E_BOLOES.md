@@ -1,5 +1,7 @@
 # Arquitetura de Temporadas e Bolões
 
+> **Status histórico:** a evolução estrutural dentro deste mesmo projeto foi substituída pela criação do produto independente **Bolão Brasileirão Rigazzo**. A direção vigente está em [`BOLAO_BRASILEIRAO_RIGAZZO.md`](BOLAO_BRASILEIRAO_RIGAZZO.md). Este documento permanece preservado como registro da alternativa anteriormente aprovada e não autoriza implementação.
+
 ## Finalidade
 
 Este documento é a fonte principal para a evolução do Bolão Brasileirão 2026 em uma plataforma capaz de preservar temporadas encerradas, preparar o Campeonato Brasileiro de 2027 e, futuramente, operar bolões independentes.

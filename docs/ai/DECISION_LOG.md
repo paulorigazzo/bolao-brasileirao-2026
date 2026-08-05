@@ -262,3 +262,39 @@ Versões históricas legítimas não são tratadas como fontes da versão atual.
 - Links externos não dependem de disponibilidade de rede.
 - Validações interpretativas permanecem fora do bloqueio automatizado.
 - Esta decisão não altera funcionalidade, versão, Supabase, Netlify, regras de negócio ou prioridade do produto.
+
+## DEC-2026-008 — Bolão Brasileirão Rigazzo como produto independente
+
+- Data: 2026-08-05
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: DEC-2026-003 quanto à implementação estrutural dentro do projeto atual
+- Impacto: alto
+
+### Contexto
+
+A arquitetura anterior previa criar uma fundação aditiva de temporadas e bolões no mesmo Supabase do Bolão 2026. Embora preservasse as leituras e gravações legadas durante a validação, qualquer migração, política ou função experimental ainda compartilharia o ambiente oficial. A prioridade humana é impedir que a preparação da nova arquitetura afete a operação atual.
+
+Também foi aprovada a utilização controlada dos dados reais de 2026 para equivalência e piloto, incluindo nome, e-mail e telefone de participantes consentidos, sem copiar contas, sessões ou tokens de autenticação.
+
+### Decisão
+
+Criar o **Bolão Brasileirão Rigazzo** como novo produto, com repositório, Supabase, autenticação e Netlify independentes. O Bolão Brasileirão 2026 permanece oficial e não receberá a fundação experimental.
+
+A transferência ocorrerá somente por pacotes manuais, versionados, imutáveis, validados e unidirecionais. SQL será usado internamente para leitura na origem e transação no destino, sem conexão direta entre bancos. Dados competitivos ficarão separados de um cofre criptografado de identidades consentidas.
+
+Exportador e importador serão homologados primeiro como ferramentas locais. Os futuros botões **Exportar rodada** no projeto atual e **Importar pacote** no Rigazzo exigirão entregas próprias de risco alto depois dessa homologação.
+
+A arquitetura e o programa R00–R11 estão definidos em [`../architecture/BOLAO_BRASILEIRAO_RIGAZZO.md`](../architecture/BOLAO_BRASILEIRAO_RIGAZZO.md).
+
+### Consequências
+
+- O projeto atual não recebe tabelas, políticas, funções ou código experimental do Rigazzo.
+- Nenhum processo possui permissão de escrita nos dois produtos.
+- O Rigazzo começa com dados sintéticos e bloqueios contra referências de produção.
+- Snapshots reais dependem de importador homologado, consentimento e autorização específica.
+- Participantes não consentidos preservam equivalência somente de forma pseudonimizada.
+- Contas e sessões Auth nunca são transferidas; a associação usa nova autenticação e confirmação.
+- A Temporada 2027 é a primeira candidata operacional nativa do Rigazzo.
+- A eventual importação histórica de 2026 permanece opcional e reversível.
+- Esta decisão documental não cria projeto externo, não exporta dados e não altera código, versão, Supabase ou Netlify.

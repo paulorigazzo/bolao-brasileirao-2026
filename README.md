@@ -6,6 +6,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 
 - Versão funcional: `v6.14.1`.
 - Prioridade, status e sequência atuais: [`ROADMAP.md`](ROADMAP.md).
+- Evolução para Temporadas e Ligas: planejada no produto independente [Bolão Brasileirão Rigazzo](docs/architecture/BOLAO_BRASILEIRAO_RIGAZZO.md), sem alteração funcional deste aplicativo.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Funcionalidades disponíveis
@@ -60,7 +61,7 @@ O comando verifica versões e referências, sintaxe, motor estatístico e polít
 - [Estratégia de IA](docs/AI_STRATEGY.md)
 - [Visão do produto](docs/PRODUCT_VISION.md)
 - [Arquitetura](docs/architecture/OVERVIEW.md)
-- [Temporadas e Bolões](docs/architecture/TEMPORADAS_E_BOLOES.md)
+- [Bolão Brasileirão Rigazzo — Temporadas e Ligas](docs/architecture/BOLAO_BRASILEIRAO_RIGAZZO.md)
 - [Fluxo do Codex](docs/ai/CODEX_WORKFLOW.md)
 - [Deploy no Netlify](docs/deployment/NETLIFY.md)
 - [Notas detalhadas das versões](docs/releases/)
