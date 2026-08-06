@@ -6,7 +6,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 - Versão funcional: `v6.14.1`.
 - Prioridade: **manter o Bolão 2026 estável e independente enquanto o desenvolvimento estrutural do Rigazzo segue em workspace próprio**.
-- Próxima etapa coordenada: planejar a **R07A — Identidades, cofre e pseudonimização** no [Rigazzo](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo), inicialmente apenas com dados sintéticos. A futura **R07B — Consentimento de exportação** pertence a este projeto e exigirá entrega independente de risco alto. A R06A foi homologada pela [PR #94](https://github.com/paulorigazzo/bolao-brasileirao-2026/pull/94); o adaptador real R06B permanece bloqueado pelos portões aplicáveis da R07, por credencial somente leitura e por autorização específica para dados reais.
+- Próxima etapa coordenada: propor no [Rigazzo](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo) a **R04.1 — Contrato para teste pseudonimizado** e, depois, a R05.1 para compatibilidade do importador. A R06A foi homologada pela [PR #94](https://github.com/paulorigazzo/bolao-brasileirao-2026/pull/94); o adaptador real R06B permanece bloqueado por R04.1, R05.1, credencial somente leitura e autorização específica para dados reais.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -102,9 +102,11 @@ Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e 
 - ✅ **R00 e R00.1 — Estratégia e handoff:** novo produto formalizado, responsabilidades separadas e sequência corrigida, sem código ou serviço externo.
 - ✅ **R01A — Bootstrap do Rigazzo:** repositório privado e documentação inicial criados; fonte oficial transferida para o [novo projeto](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo), sem alteração funcional do Bolão 2026.
 - ✅ **R03 — Inventário somente leitura de 2026:** fontes, esquema, relações, funções, políticas, volumes agregados, dados pessoais e limitações documentados sem copiar dados nem modificar produção.
-- 🟡 **R06 — Exportador somente leitura:** R06A concluída e homologada exclusivamente com dados sintéticos; a R06B permanece bloqueada pela R07A, pela R07B e pelos demais portões para acesso real somente leitura.
-- 🔵 **R07A — Identidades, cofre e pseudonimização:** responsabilidade do Rigazzo, inicialmente com identidades sintéticas e sem acesso aos participantes de 2026.
-- 🔵 **R07B — Consentimento de exportação:** responsabilidade do Bolão 2026, em entrega independente de risco alto e sem transferir contas ou sessões Auth.
+- 🟡 **R06 — Exportador somente leitura:** R06A concluída e homologada exclusivamente com dados sintéticos; a R06B permanece bloqueada por R04.1, R05.1 e pelos demais portões para acesso real somente leitura.
+- 🔵 **R04.1 e R05.1 — Teste pseudonimizado:** responsabilidades futuras do Rigazzo para estender o contrato e o importador sem aceitar identidade direta.
+- 🔵 **R07A — Identidades, cofre e associação:** adiada enquanto os testes não associarem pessoas reais ao novo Auth do Rigazzo.
+- ✅ **R07B.0 — Diretriz de transferência pseudonimizada:** os testes iniciais usarão somente dados competitivos necessários, sem nome, e-mail, telefone, `user_id` ou identificadores Auth; não há alteração funcional no Bolão 2026.
+- 🔵 **R07B — Consentimento de exportação identificada:** adiada e necessária somente se uma fase futura pretender transferir identidade direta.
 - 🔵 **R01B–R02 e R04–R05 — Fundação isolada:** manter a fundação e o modelo de Temporadas e Ligas no novo workspace, formalizar o contrato de snapshot a partir da R03 concluída e homologar o importador sintético.
 - 🔵 **R06–R09 — Equivalência de 2026:** exportar somente por leitura e importar snapshots manuais, versionados e auditáveis.
 - 🔵 **R09.1 e R10.1 — Operação administrativa futura:** avaliar os botões Exportar e Importar somente após homologação das ferramentas locais e pacotes reais.

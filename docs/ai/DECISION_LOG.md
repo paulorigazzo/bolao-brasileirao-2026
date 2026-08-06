@@ -329,3 +329,30 @@ Após a R01A, o novo repositório se torna a fonte oficial do Rigazzo. Este proj
 - Consentimento de exportação não é confundido com autenticação ou participação no Rigazzo.
 - R00, R00.1 e R01A ficam concluídas; R01B torna-se o próximo passo do Rigazzo em seu próprio workspace.
 - A R01A criou somente o repositório privado e sua documentação inicial pelo PR [`paulorigazzo/bolao-brasileirao-rigazzo#1`](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo/pull/1), sem serviço, exportação, importação ou alteração da versão funcional do Bolão 2026.
+
+## DEC-2026-010 — Testes iniciais com dados competitivos pseudonimizados
+
+- Data: 2026-08-06
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: parcialmente DEC-2026-008 e DEC-2026-009 quanto ao requisito de consentimento para os testes iniciais sem identidade direta
+- Impacto: alto
+
+### Contexto
+
+O uso inicial dos dados de 2026 no Rigazzo tem finalidade privada, experimental e não comercial. Para evitar alterações no Bolão 2026 e reduzir a exposição de participantes, foi descartada neste momento a implementação de um mecanismo funcional de consentimento para transferência identificada.
+
+### Decisão
+
+Os testes iniciais poderão futuramente usar dados competitivos reais pseudonimizados, sem transportar nome, e-mail, telefone, `user_id`, identificadores Auth ou a correspondência entre referências opacas e pessoas reais. A ausência de identificadores diretos reduz o risco, mas não será descrita como anonimização absoluta.
+
+A R07A e a R07B para identidade direta ficam adiadas. Antes da R06B, o Rigazzo deverá aprovar uma R04.1 com classificação própria para teste pseudonimizado e uma R05.1 compatível. Cada acesso ou transferência real continuará dependendo de plano e autorização específicos.
+
+### Consequências
+
+- o Bolão 2026 não recebe tela, tabela, migração ou fluxo de consentimento nesta etapa;
+- dados pessoais diretos e identidades Auth permanecem fora dos snapshots de teste;
+- o vínculo competitivo usa apenas referências opacas estáveis;
+- a tabela de correspondência, se tecnicamente necessária na origem, não integra pacote, Git, logs ou Rigazzo;
+- a decisão não autoriza exportação, acesso remoto, criação de credencial ou importação de dados reais;
+- eventual piloto identificado exigirá retomar R07A e R07B em entregas independentes de risco alto.

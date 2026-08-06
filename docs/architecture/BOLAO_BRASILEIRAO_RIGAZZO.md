@@ -50,8 +50,8 @@ Bolão Brasileirão Rigazzo
 4. A transferência de dados será manual, unidirecional e baseada em arquivos.
 5. Não haverá sincronização automática, escrita dupla, trigger, webhook ou conexão SQL entre os projetos.
 6. O Rigazzo começará com dados sintéticos.
-7. Dados reais só serão transferidos depois da homologação do importador.
-8. Participantes identificados dependerão de consentimento registrado.
+7. Dados competitivos reais pseudonimizados só serão transferidos depois da homologação específica do contrato, do importador e do exportador.
+8. Participantes identificados dependerão de consentimento registrado; os testes iniciais não transferirão identidade direta.
 9. Contas, sessões e tokens do Supabase Auth nunca serão copiados.
 10. Qualquer mudança futura no projeto oficial exigirá plano e aprovação próprios de risco alto.
 
@@ -88,7 +88,7 @@ O exportador conhecerá somente a origem e gerará arquivos locais. O importador
 | R01B, R02, R04, R05, R07A, R08, R09, R10, R10.1 e R11 | Bolão Brasileirão Rigazzo |
 | R03 — inventário da origem | Bolão Brasileirão 2026 |
 | R06 e R09.1 — exportação | Bolão Brasileirão 2026 |
-| R07B — consentimento de exportação | Bolão Brasileirão 2026 |
+| R07B — consentimento de exportação identificada, se retomada | Bolão Brasileirão 2026 |
 | Contrato de Snapshot | Fonte canônica no Rigazzo; implementação compatível no Bolão 2026 |
 | Equivalência | Exportação evidenciada no Bolão 2026 e importação evidenciada no Rigazzo |
 | Consentimento de exportação | Bolão Brasileirão 2026 |
@@ -164,7 +164,7 @@ Palpites futuros, ao vivo ou ainda sigilosos nunca serão exportados. Uma nova i
 
 ## Identidade e consentimento
 
-Para participantes consentidos, poderão ser preservados:
+Uma fase futura com participantes identificados e consentidos poderá preservar:
 
 - nome de exibição;
 - time favorito;
@@ -177,7 +177,9 @@ E-mail, telefone e consentimento ficarão em `identidades.enc`, separados dos da
 
 O telefone não será usado como autenticação e poderá ser confirmado, alterado ou removido. Não haverá envio automático de mensagens.
 
-Participantes sem consentimento terão e-mail e telefone excluídos e identidade pseudonimizada. Seus dados competitivos poderão permanecer anonimamente quando necessários para preservar ranking e equivalência.
+Participantes sem consentimento terão e-mail e telefone excluídos e identidade pseudonimizada. Seus dados competitivos poderão permanecer sob referência pseudonimizada quando necessários para preservar ranking e equivalência.
+
+Nos testes iniciais, todos os participantes serão tratados de forma pseudonimizada: nome, e-mail, telefone, `user_id` e identificadores Auth ficam fora do pacote. Referências opacas estáveis poderão relacionar palpites e partidas, mas a correspondência com pessoas reais não será transportada ao Rigazzo. Essa proteção reduz o risco de identificação, sem declarar anonimização absoluta em um grupo pequeno.
 
 ## Importação e equivalência
 
@@ -269,13 +271,17 @@ Construir no Rigazzo o importador local, com simulação, idempotência, transa�
 
 Criar ferramenta local e manual que gere pacotes sem conhecer o Rigazzo e sem modificar o projeto atual.
 
-### R07A — Identidades, cofre e pseudonimização
+### R07B.0 — Diretriz de transferência pseudonimizada
 
-Implementar no Rigazzo o cofre de identidades, a pseudonimização e a associação segura ao novo Auth, começando exclusivamente com identidades sintéticas. Esta etapa não coleta consentimento no Bolão 2026 nem autoriza dados reais.
+Registrar no Bolão 2026 que os testes iniciais poderão usar somente dados competitivos reais pseudonimizados, sem identidade direta, sem alterar o aplicativo e sem autorizar ainda qualquer exportação.
 
-### R07B — Consentimento de exportação
+### R04.1 e R05.1 — Contrato e importador para teste pseudonimizado
 
-Implementar no Bolão 2026, em entrega independente de risco alto, o registro explícito do consentimento para exportar nome, e-mail e telefone. Exceções e revogações exigem tratamento coordenado nos dois produtos, sem conexão automática entre eles.
+Estender no Rigazzo o contrato e o importador para uma classificação própria de teste pseudonimizado, mantendo bloqueados nome, e-mail, telefone e identificadores Auth. Essas etapas não autorizam dados reais por si mesmas.
+
+### R07A e R07B identificada — adiadas
+
+O cofre, a associação de pessoas reais ao novo Auth e o consentimento para exportação identificada serão retomados somente se uma fase futura precisar transferir identidade direta ou convidar participantes reais para um piloto identificado.
 
 ### R08 — Snapshot-base real
 

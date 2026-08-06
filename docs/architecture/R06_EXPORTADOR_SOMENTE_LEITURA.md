@@ -45,16 +45,18 @@ O prazo é calculado como 30 minutos antes do início. Estados convergem para `s
 
 O adaptador real permanece bloqueado. Seu plano deverá exigir, no mínimo:
 
-1. R07A concluída no Rigazzo para cofre, pseudonimização e associação segura, e R07B concluída neste projeto para consentimento de exportação;
-2. autorização específica para acesso a dados reais;
-3. credencial PostgreSQL dedicada sem qualquer privilégio de escrita;
-4. transação `READ ONLY` e `REPEATABLE READ`;
-5. lista fechada de tabelas e colunas selecionadas pela R03/R04;
-6. testes negativos de escrita e proteção dos artefatos reais.
+1. R04.1 concluída no Rigazzo com classificação própria para teste pseudonimizado, sem reutilizar semanticamente `consented-pseudonymous`;
+2. R05.1 concluída no Rigazzo para aceitar essa classificação sem identidade direta;
+3. autorização específica para acesso a dados reais;
+4. credencial PostgreSQL dedicada sem qualquer privilégio de escrita;
+5. transação `READ ONLY` e `REPEATABLE READ`;
+6. lista fechada de tabelas e colunas selecionadas pela R03/R04.1;
+7. geração de referências opacas estáveis sem transportar a correspondência com pessoas reais;
+8. testes negativos de escrita, identidade direta e proteção dos artefatos reais.
 
 `SUPABASE_SERVICE_ROLE_KEY` é incompatível com essa garantia e não poderá ser usada pelo exportador.
 
-O próximo trabalho coordenado pertence ao repositório Rigazzo: planejar a R07A — Identidades, cofre e pseudonimização, inicialmente apenas com dados sintéticos. O consentimento de exportação pertence à futura R07B neste projeto e exigirá plano próprio de risco alto. A conclusão da R06A não autoriza iniciar a R06B, acessar dados reais ou criar mecanismos de consentimento.
+O próximo trabalho coordenado pertence ao repositório Rigazzo: planejar a R04.1 e a R05.1 para pacotes de teste pseudonimizados. A R07A e a R07B identificada ficam adiadas enquanto nenhuma pessoa real for associada ao Auth do Rigazzo e nenhuma identidade direta for transferida. A conclusão da R06A e esta diretriz documental não autorizam iniciar a R06B nem acessar dados reais.
 
 ## Exclusões preservadas
 
