@@ -2,7 +2,7 @@
 
 ## Estado
 
-A R06A implementa somente o núcleo sintético local. Ela não conecta ao Supabase, não lê dados reais e não conclui a homologação do exportador de produção.
+A R06A está concluída e homologada pela [PR #94](https://github.com/paulorigazzo/bolao-brasileirao-2026/pull/94), integrada à `main` pelo commit `a2f84de`. A entrega implementa somente o núcleo sintético local: não conecta ao Supabase, não lê dados reais e não conclui a homologação do exportador de produção.
 
 O contrato canônico pertence ao Rigazzo. Esta implementação está travada em `snapshot-2026/v1`, definido no commit `300c23a` e verificado até o merge `764fdad` da R05. Mudança incompatível exige atualização explícita e testes de compatibilidade.
 
@@ -53,6 +53,8 @@ O adaptador real permanece bloqueado. Seu plano deverá exigir, no mínimo:
 6. testes negativos de escrita e proteção dos artefatos reais.
 
 `SUPABASE_SERVICE_ROLE_KEY` é incompatível com essa garantia e não poderá ser usada pelo exportador.
+
+O próximo trabalho coordenado pertence ao repositório Rigazzo: planejar e concluir a R07 — Identidades e consentimento. A conclusão da R06A não autoriza iniciar a R06B, acessar dados reais ou criar mecanismos de consentimento neste projeto.
 
 ## Exclusões preservadas
 
