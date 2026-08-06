@@ -1,3 +1,11 @@
+# v6.14.2 — Preservação de resultados encerrados
+
+- Impede que uma regressão isolada da fonte externa apague o status e o placar de uma partida já encerrada.
+- Registra a divergência nos logs da sincronização para revisão administrativa.
+- Mantém a remoção automática de placares incompatíveis em partidas que nunca estiveram encerradas.
+- Versiona a restauração auditável dos oito resultados confirmados da rodada 20.
+- Preserva palpites, regras de pontuação, rodadas 19 e 21, autenticação, RLS e interface.
+
 # v6.14.1 — Time do coração na gestão de participantes
 
 - Mostra o escudo e o nome do time do coração de cada participante na Área ADM.

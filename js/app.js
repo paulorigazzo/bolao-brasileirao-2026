@@ -6,7 +6,7 @@ import { buildAdminRoundSummary } from "./admin-round-share.js";
 import { buildParticipantDuelModel } from "./participant-duel-engine.js";
 import { buildMatchCalendarModel } from "./match-calendar-engine.js";
 
-const APP_VERSION = "6.14.1";
+const APP_VERSION = "6.14.2";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();

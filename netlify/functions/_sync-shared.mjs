@@ -262,6 +262,7 @@ export async function syncGames(options = {}) {
     finishedWithScore: merged.filter((g) => g.gols_casa != null && g.gols_fora != null).length,
     venuesFilled: merged.filter((g) => Boolean(g.local_partida)).length,
     repairedCount: repairs.length,
+    preservedFinishedCount: repairs.filter((repair) => repair.action === "resultado_encerrado_preservado").length,
     repairs: repairs.slice(0, 50),
     atomicUpdate: true,
     recoveredRounds: recoveredRounds.sort((a, b) => a - b),
