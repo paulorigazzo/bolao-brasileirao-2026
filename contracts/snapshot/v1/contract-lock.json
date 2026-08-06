@@ -1,0 +1,19 @@
+{
+  "contractVersion": "snapshot-2026/v1",
+  "canonicalSource": "paulorigazzo/bolao-brasileirao-rigazzo",
+  "canonicalCommit": "300c23a",
+  "verifiedThroughMerge": "764fdad",
+  "canonicalization": "json-sort-keys-and-arrays-v1",
+  "integrityAlgorithm": "sha256",
+  "dataClassification": "synthetic-only",
+  "collections": [
+    "competitions",
+    "seasons",
+    "teams",
+    "matches",
+    "leagues",
+    "participants",
+    "memberships",
+    "predictions"
+  ]
+}
