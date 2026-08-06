@@ -6,7 +6,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 - Versão funcional: `v6.14.1`.
 - Prioridade: **manter o Bolão 2026 estável e independente enquanto o desenvolvimento estrutural do Rigazzo segue em workspace próprio**.
-- Próxima etapa do novo produto: planejar a **R01B — Fundação local isolada** no [repositório oficial do Rigazzo](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo). Neste projeto, o próximo trabalho relacionado permanece a **R03 — Inventário somente leitura de 2026**, somente quando houver plano e aprovação próprios.
+- Próxima etapa do novo produto: preparar a **R04 — Contrato de Snapshot 2026 v1** no [repositório oficial do Rigazzo](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo), usando o inventário R03 concluído neste projeto como entrada, sem copiar dados entre os produtos.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -101,7 +101,8 @@ Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e 
 
 - ✅ **R00 e R00.1 — Estratégia e handoff:** novo produto formalizado, responsabilidades separadas e sequência corrigida, sem código ou serviço externo.
 - ✅ **R01A — Bootstrap do Rigazzo:** repositório privado e documentação inicial criados; fonte oficial transferida para o [novo projeto](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo), sem alteração funcional do Bolão 2026.
-- 🔵 **R01B–R05 — Fundação isolada:** abrir o novo workspace, criar o modelo de Temporadas e Ligas, inventariar a origem, formalizar o contrato de snapshot e homologar o importador sintético.
+- ✅ **R03 — Inventário somente leitura de 2026:** fontes, esquema, relações, funções, políticas, volumes agregados, dados pessoais e limitações documentados sem copiar dados nem modificar produção.
+- 🔵 **R01B–R02 e R04–R05 — Fundação isolada:** manter a fundação e o modelo de Temporadas e Ligas no novo workspace, formalizar o contrato de snapshot a partir da R03 concluída e homologar o importador sintético.
 - 🔵 **R06–R09 — Equivalência de 2026:** exportar somente por leitura e importar snapshots manuais, versionados e auditáveis.
 - 🔵 **R09.1 e R10.1 — Operação administrativa futura:** avaliar os botões Exportar e Importar somente após homologação das ferramentas locais e pacotes reais.
 - 🔵 **R10 — Piloto privado:** validar autenticação, identidades consentidas, experiência e isolamento entre Ligas.
