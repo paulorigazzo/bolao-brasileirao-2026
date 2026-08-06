@@ -6,7 +6,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 - Versão funcional: `v6.14.1`.
 - Prioridade: **manter o Bolão 2026 estável e independente enquanto o desenvolvimento estrutural do Rigazzo segue em workspace próprio**.
-- Próxima etapa coordenada: propor no [Rigazzo](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo) a **R04.1 — Contrato para teste pseudonimizado** e, depois, a R05.1 para compatibilidade do importador. A R06A foi homologada pela [PR #94](https://github.com/paulorigazzo/bolao-brasileirao-2026/pull/94); o adaptador real R06B permanece bloqueado por R04.1, R05.1, credencial somente leitura e autorização específica para dados reais.
+- Próxima etapa coordenada: homologar a **R06B.1 — adaptador pseudonimizado preparado**, sem conexão ou dados reais. A R04.1 e a R05.1 foram integradas no Rigazzo pelos merges `12c74f5` e `6648194`; a execução real R06B.2 permanece bloqueada por cliente PostgreSQL verificado, credencial dedicada somente leitura e autorização específica.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -102,8 +102,8 @@ Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e 
 - ✅ **R00 e R00.1 — Estratégia e handoff:** novo produto formalizado, responsabilidades separadas e sequência corrigida, sem código ou serviço externo.
 - ✅ **R01A — Bootstrap do Rigazzo:** repositório privado e documentação inicial criados; fonte oficial transferida para o [novo projeto](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo), sem alteração funcional do Bolão 2026.
 - ✅ **R03 — Inventário somente leitura de 2026:** fontes, esquema, relações, funções, políticas, volumes agregados, dados pessoais e limitações documentados sem copiar dados nem modificar produção.
-- 🟡 **R06 — Exportador somente leitura:** R06A concluída e homologada exclusivamente com dados sintéticos; a R06B permanece bloqueada por R04.1, R05.1 e pelos demais portões para acesso real somente leitura.
-- 🔵 **R04.1 e R05.1 — Teste pseudonimizado:** responsabilidades futuras do Rigazzo para estender o contrato e o importador sem aceitar identidade direta.
+- 🟡 **R06 — Exportador somente leitura:** R06A concluída; R06B.1 prepara localmente contrato v1.1, pseudonimização e leitura injetável, enquanto R06B.2 continua bloqueada para qualquer conexão real.
+- ✅ **R04.1 e R05.1 — Teste pseudonimizado:** contrato e importador homologados no Rigazzo sem aceitar identidade direta.
 - 🔵 **R07A — Identidades, cofre e associação:** adiada enquanto os testes não associarem pessoas reais ao novo Auth do Rigazzo.
 - ✅ **R07B.0 — Diretriz de transferência pseudonimizada:** os testes iniciais usarão somente dados competitivos necessários, sem nome, e-mail, telefone, `user_id` ou identificadores Auth; não há alteração funcional no Bolão 2026.
 - 🔵 **R07B — Consentimento de exportação identificada:** adiada e necessária somente se uma fase futura pretender transferir identidade direta.

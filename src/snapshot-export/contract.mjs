@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 
 export const CONTRACT_VERSION = "snapshot-2026/v1";
+export const PSEUDONYMOUS_CONTRACT_VERSION = "snapshot-2026/v1.1";
 export const COLLECTIONS = Object.freeze([
   "competitions", "seasons", "teams", "matches", "leagues",
   "participants", "memberships", "predictions",
@@ -9,6 +10,11 @@ export const COLLECTIONS = Object.freeze([
 const REF = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const HASH = /^[0-9a-f]{64}$/;
+const OPAQUE = Object.freeze({
+  participant: /^participant-[0-9a-f]{32}$/,
+  membership: /^membership-[0-9a-f]{32}$/,
+  prediction: /^prediction-[0-9a-f]{32}$/,
+});
 const FORBIDDEN_KEY = /^(?:auth|authUserId|userId|user_id|email|phone|telefone|celular|token|session|password|secret|serviceRoleKey|databaseUrl|supabaseUrl|ranking|points|pontuacao|cache|logs?|sql)$/i;
 const FORBIDDEN_VALUE = /(?:postgres(?:ql)?:\/\/|https?:\/\/[^\s]*\.supabase\.co|\b(?:service[_-]?role|jwt[_-]?secret)\b|\b(?:select|insert|update|delete|drop|alter|create|grant|revoke)\b[\s\S]*\b(?:from|into|table|on)\b)/i;
 const SETS = Object.freeze({
@@ -70,9 +76,11 @@ function index(items, name, allowedKeys, errors) {
 export function validateSnapshot(snapshot) {
   const errors = scanForbidden(snapshot, "snapshot", []);
   exact(snapshot, ["contractVersion", "packageId", "dataClassification", "source", "integrity", "payload"], "snapshot", errors);
-  if (snapshot?.contractVersion !== CONTRACT_VERSION) errors.push(`contractVersion deve ser ${CONTRACT_VERSION}`);
+  if (!new Set([CONTRACT_VERSION, PSEUDONYMOUS_CONTRACT_VERSION]).has(snapshot?.contractVersion)) errors.push("contractVersion não homologada");
   if (!UUID.test(snapshot?.packageId ?? "")) errors.push("packageId deve ser UUID");
-  if (snapshot?.dataClassification !== "synthetic-only") errors.push("R06A aceita somente synthetic-only");
+  const validClassification = snapshot?.dataClassification === "synthetic-only"
+    || (snapshot?.contractVersion === PSEUDONYMOUS_CONTRACT_VERSION && snapshot?.dataClassification === "pseudonymous-test");
+  if (!validClassification) errors.push("dataClassification não homologada para contractVersion");
   exact(snapshot?.source, ["product", "seasonRef", "exportedAt", "mode", "sourceRevision"], "source", errors);
   if (snapshot?.source?.product !== "bolao-brasileirao-2026") errors.push("source.product inválido");
   if (!REF.test(snapshot?.source?.seasonRef ?? "")) errors.push("source.seasonRef inválida");
@@ -120,19 +128,25 @@ export function validateSnapshot(snapshot) {
     if (item.status === "finished" ? (!score(item.homeScore) || !score(item.awayScore)) : (item.homeScore !== null || item.awayScore !== null)) errors.push(`${path} contém placar incompatível com o estado`);
   });
   p.leagues?.forEach((item, i) => { if (!seasons.has(item.seasonRef) || !item.name || !SETS.league.has(item.status)) errors.push(`payload.leagues[${i}] inválida`); });
-  p.participants?.forEach((item, i) => { if (!item.syntheticLabel) errors.push(`payload.participants[${i}].syntheticLabel inválido`); });
+  p.participants?.forEach((item, i) => {
+    if (snapshot.dataClassification === "synthetic-only" && !item.syntheticLabel) errors.push(`payload.participants[${i}].syntheticLabel inválido`);
+    if (snapshot.dataClassification === "pseudonymous-test" && (item.syntheticLabel !== undefined || !OPAQUE.participant.test(item.ref))) errors.push(`payload.participants[${i}] expõe rótulo ou referência não opaca`);
+  });
   const memberKeys = new Set();
   p.memberships?.forEach((item, i) => {
     const key = `${item.leagueRef}:${item.participantRef}`;
     if (!leagues.has(item.leagueRef) || !participants.has(item.participantRef) || !SETS.role.has(item.role) || !SETS.member.has(item.status) || memberKeys.has(key)) errors.push(`payload.memberships[${i}] inválida ou duplicada`);
     memberKeys.add(key);
+    if (snapshot.dataClassification === "pseudonymous-test" && !OPAQUE.membership.test(item.ref)) errors.push(`payload.memberships[${i}].ref não é opaca`);
   });
   const predictionKeys = new Set();
   p.predictions?.forEach((item, i) => {
     const league = leagues.get(item.leagueRef); const match = matches.get(item.matchRef); const key = `${item.leagueRef}:${item.participantRef}:${item.matchRef}`;
     if (!league || !match || !participants.has(item.participantRef) || !memberKeys.has(`${item.leagueRef}:${item.participantRef}`) || league?.seasonRef !== match?.seasonRef || !score(item.homeScore) || !score(item.awayScore) || !timestamp(item.submittedAt) || !timestamp(item.updatedAt) || Date.parse(item.updatedAt) < Date.parse(item.submittedAt) || Date.parse(item.updatedAt) > Date.parse(match?.predictionDeadlineAt) || predictionKeys.has(key)) errors.push(`payload.predictions[${i}] inválida ou duplicada`);
     predictionKeys.add(key);
+    if (snapshot.dataClassification === "pseudonymous-test" && (!OPAQUE.prediction.test(item.ref) || match?.status !== "finished")) errors.push(`payload.predictions[${i}] não atende pseudonymous-test`);
   });
+  if (snapshot.dataClassification === "pseudonymous-test") p.matches?.forEach((item, i) => { if (item.status !== "finished") errors.push(`payload.matches[${i}] deve estar encerrada em pseudonymous-test`); });
   if (snapshot?.integrity?.payloadHash !== computePayloadHash(p)) errors.push("integrity.payloadHash não corresponde ao payload canônico");
   return { ok: errors.length === 0, errors };
 }
