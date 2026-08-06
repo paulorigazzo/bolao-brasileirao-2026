@@ -45,7 +45,7 @@ O prazo é calculado como 30 minutos antes do início. Estados convergem para `s
 
 O adaptador real permanece bloqueado. Seu plano deverá exigir, no mínimo:
 
-1. R07 concluída para consentimento e pseudonimização;
+1. R07A concluída no Rigazzo para cofre, pseudonimização e associação segura, e R07B concluída neste projeto para consentimento de exportação;
 2. autorização específica para acesso a dados reais;
 3. credencial PostgreSQL dedicada sem qualquer privilégio de escrita;
 4. transação `READ ONLY` e `REPEATABLE READ`;
@@ -54,7 +54,7 @@ O adaptador real permanece bloqueado. Seu plano deverá exigir, no mínimo:
 
 `SUPABASE_SERVICE_ROLE_KEY` é incompatível com essa garantia e não poderá ser usada pelo exportador.
 
-O próximo trabalho coordenado pertence ao repositório Rigazzo: planejar e concluir a R07 — Identidades e consentimento. A conclusão da R06A não autoriza iniciar a R06B, acessar dados reais ou criar mecanismos de consentimento neste projeto.
+O próximo trabalho coordenado pertence ao repositório Rigazzo: planejar a R07A — Identidades, cofre e pseudonimização, inicialmente apenas com dados sintéticos. O consentimento de exportação pertence à futura R07B neste projeto e exigirá plano próprio de risco alto. A conclusão da R06A não autoriza iniciar a R06B, acessar dados reais ou criar mecanismos de consentimento.
 
 ## Exclusões preservadas
 
