@@ -85,9 +85,10 @@ O exportador conhecerá somente a origem e gerará arquivos locais. O importador
 | Trabalho | Fonte responsável |
 | --- | --- |
 | R00, R00.1 e R01A | Bolão Brasileirão 2026 |
-| R01B, R02, R04, R05, R07, R08, R09, R10, R10.1 e R11 | Bolão Brasileirão Rigazzo |
+| R01B, R02, R04, R05, R07A, R08, R09, R10, R10.1 e R11 | Bolão Brasileirão Rigazzo |
 | R03 — inventário da origem | Bolão Brasileirão 2026 |
 | R06 e R09.1 — exportação | Bolão Brasileirão 2026 |
+| R07B — consentimento de exportação | Bolão Brasileirão 2026 |
 | Contrato de Snapshot | Fonte canônica no Rigazzo; implementação compatível no Bolão 2026 |
 | Equivalência | Exportação evidenciada no Bolão 2026 e importação evidenciada no Rigazzo |
 | Consentimento de exportação | Bolão Brasileirão 2026 |
@@ -268,9 +269,13 @@ Construir no Rigazzo o importador local, com simulação, idempotência, transa�
 
 Criar ferramenta local e manual que gere pacotes sem conhecer o Rigazzo e sem modificar o projeto atual.
 
-### R07 — Identidades e consentimento
+### R07A — Identidades, cofre e pseudonimização
 
-Implementar o cofre de identidades, a pseudonimização e a associação segura ao novo Auth no Rigazzo. A origem controla separadamente o consentimento para exportar nome, e-mail e telefone; exceções e revogações exigem registro nos dois produtos.
+Implementar no Rigazzo o cofre de identidades, a pseudonimização e a associação segura ao novo Auth, começando exclusivamente com identidades sintéticas. Esta etapa não coleta consentimento no Bolão 2026 nem autoriza dados reais.
+
+### R07B — Consentimento de exportação
+
+Implementar no Bolão 2026, em entrega independente de risco alto, o registro explícito do consentimento para exportar nome, e-mail e telefone. Exceções e revogações exigem tratamento coordenado nos dois produtos, sem conexão automática entre eles.
 
 ### R08 — Snapshot-base real
 
