@@ -31,3 +31,6 @@ coverage/
 # Cache
 .cache/
 
+# Artefatos locais gerados
+.artifacts/
+

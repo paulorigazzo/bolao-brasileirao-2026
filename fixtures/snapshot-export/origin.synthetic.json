@@ -1,0 +1,29 @@
+{
+  "dataClassification": "synthetic-only",
+  "sourceRevision": "r06a-synthetic-fixture-v1",
+  "competition": { "ref": "competition-demo", "name": "Campeonato Demonstrativo" },
+  "season": { "ref": "season-demo-2026", "label": "Demonstração 2026", "status": "closed" },
+  "league": { "ref": "league-demo", "name": "Liga Demonstrativa", "status": "closed" },
+  "games": [
+    {
+      "id": "demo-9001", "round": 1, "status": "encerrado", "kickoffAt": "2026-04-10T21:00:00Z",
+      "homeTeamExternalRef": "demo-101", "homeTeamName": "Clube Aurora",
+      "awayTeamExternalRef": "demo-102", "awayTeamName": "Estrela do Sul",
+      "homeScore": 2, "awayScore": 1
+    },
+    {
+      "id": "demo-9002", "round": 2, "status": "adiado", "kickoffAt": "2026-04-17T21:00:00Z",
+      "homeTeamExternalRef": "demo-102", "homeTeamName": "Estrela do Sul",
+      "awayTeamExternalRef": "demo-101", "awayTeamName": "Clube Aurora",
+      "homeScore": null, "awayScore": null
+    }
+  ],
+  "participants": [
+    { "ref": "participant-alpha", "syntheticLabel": "Participante Alfa", "role": "admin", "status": "active" },
+    { "ref": "participant-beta", "syntheticLabel": "Participante Beta", "role": "member", "status": "active" }
+  ],
+  "predictions": [
+    { "participantRef": "participant-alpha", "gameId": "demo-9001", "homeScore": 2, "awayScore": 1, "submittedAt": "2026-04-10T18:00:00Z", "updatedAt": "2026-04-10T18:00:00Z" },
+    { "participantRef": "participant-beta", "gameId": "demo-9001", "homeScore": 1, "awayScore": 0, "submittedAt": "2026-04-10T19:00:00Z", "updatedAt": "2026-04-10T19:30:00Z" }
+  ]
+}
