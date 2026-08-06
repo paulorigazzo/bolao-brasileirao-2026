@@ -1,4 +1,4 @@
-import { computePayloadHash, scanForbidden, validateSnapshot } from "./contract.mjs";
+import { CONTRACT_VERSION, computePayloadHash, scanForbidden, validateSnapshot } from "./contract.mjs";
 
 const STATUS = Object.freeze({ agendado: "scheduled", adiado: "postponed", encerrado: "finished", cancelado: "cancelled" });
 const ref = (prefix, value) => `${prefix}-${String(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
@@ -64,7 +64,7 @@ export function buildSnapshot(origin, { packageId, exportedAt } = {}) {
     })),
   };
   const snapshot = {
-    contractVersion: "snapshot-2026/v1", packageId, dataClassification: "synthetic-only",
+    contractVersion: CONTRACT_VERSION, packageId, dataClassification: "synthetic-only",
     source: { product: "bolao-brasileirao-2026", seasonRef, exportedAt: iso(exportedAt, "exportedAt"), mode: "full", sourceRevision: origin.sourceRevision },
     integrity: { algorithm: "sha256", canonicalization: "json-sort-keys-and-arrays-v1", payloadHash: computePayloadHash(payload) },
     payload,

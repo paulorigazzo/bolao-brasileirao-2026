@@ -4,7 +4,7 @@
 
 A R06A está concluída e homologada pela [PR #94](https://github.com/paulorigazzo/bolao-brasileirao-2026/pull/94), integrada à `main` pelo commit `a2f84de`. A entrega implementa somente o núcleo sintético local: não conecta ao Supabase, não lê dados reais e não conclui a homologação do exportador de produção.
 
-O contrato canônico pertence ao Rigazzo. Esta implementação está travada em `snapshot-2026/v1`, definido no commit `300c23a` e verificado até o merge `764fdad` da R05. Mudança incompatível exige atualização explícita e testes de compatibilidade.
+O contrato canônico pertence ao Rigazzo. Esta implementação está travada em `snapshot-2026/v1.1`, definido na R04.1 pelo commit `cec847c` e verificado até o merge `6648194` da R05.1. Mudança incompatível exige atualização explícita e testes de compatibilidade.
 
 ## Limites da R06A
 
@@ -56,7 +56,32 @@ O adaptador real permanece bloqueado. Seu plano deverá exigir, no mínimo:
 
 `SUPABASE_SERVICE_ROLE_KEY` é incompatível com essa garantia e não poderá ser usada pelo exportador.
 
-O próximo trabalho coordenado pertence ao repositório Rigazzo: planejar a R04.1 e a R05.1 para pacotes de teste pseudonimizados. A R07A e a R07B identificada ficam adiadas enquanto nenhuma pessoa real for associada ao Auth do Rigazzo e nenhuma identidade direta for transferida. A conclusão da R06A e esta diretriz documental não autorizam iniciar a R06B nem acessar dados reais.
+R04.1 e R05.1 estão concluídas no Rigazzo. A R07A e a R07B identificada ficam adiadas enquanto nenhuma pessoa real for associada ao Auth do Rigazzo e nenhuma identidade direta for transferida. Esses portões não autorizam conexão ou acesso a dados reais.
+
+## Limites da R06B.1
+
+A R06B.1 prepara somente componentes locais e injetáveis:
+
+- validação de `snapshot-2026/v1.1` com `pseudonymous-test`;
+- HMAC-SHA-256 com chave mínima de 32 bytes e separação por domínio;
+- consultas fechadas somente a `public.jogos` e `public.palpites`;
+- seleção exclusiva de partidas encerradas e palpites vinculados a elas;
+- preflight de `SELECT` e rejeição de `INSERT`, `UPDATE`, `DELETE` ou `TRUNCATE`;
+- transação `REPEATABLE READ READ ONLY` com rollback diante de falha;
+- ausência de cliente de rede concreto, credencial, endpoint e acesso remoto.
+
+O `user_id` aparece apenas como chave transitória dentro do adaptador injetável e é convertido em referência opaca antes da montagem do snapshot. Nome, e-mail, telefone, `usuario`, Auth e a chave HMAC não integram pacote ou logs.
+
+## Portão da R06B.2
+
+A execução real exigirá nova autorização e, adicionalmente:
+
+1. cliente PostgreSQL fixado e verificado;
+2. credencial dedicada com `SELECT` somente nas fontes permitidas;
+3. custódia definida para a chave HMAC;
+4. preflight remoto limitado à função, aos privilégios e às contagens;
+5. revisão humana antes de gerar qualquer arquivo real;
+6. arquivo fora do Git e validação canônica no Rigazzo.
 
 ## Exclusões preservadas
 
