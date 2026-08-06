@@ -6,6 +6,23 @@ Este documento preserva a decisão histórica, a divisão de responsabilidades e
 
 O Rigazzo será desenvolvido com Supabase, autenticação e Netlify próprios, quando cada serviço receber plano e aprovação específicos. O projeto atual permanece como aplicação oficial e fonte histórica de 2026. Esta documentação não autoriza código, banco, serviço externo, exportação ou importação.
 
+## Direção vigente — simplificação estratégica
+
+Em 6 de agosto de 2026, o Rigazzo foi redefinido como uma evolução caseira, familiar e incremental do Bolão 2026. A prioridade deixa de ser a transferência completa e auditável do histórico e passa a ser um MVP direto de **Temporadas e Ligas**, desenvolvido no workspace próprio com dados sintéticos.
+
+O MVP deve:
+
+- reutilizar seletivamente identidade visual, design system, ativos, componentes e regras comprovadas do Bolão 2026;
+- implementar somente perfis, temporadas, ligas, participantes, partidas, palpites e ranking necessários ao primeiro uso;
+- validar localmente antes de criar Supabase ou Netlify próprios;
+- manter o histórico de 2026 no aplicativo original;
+- adicionar estatísticas e experiências existentes apenas depois de necessidade demonstrada no uso familiar;
+- evitar dependências ou serviços pagos sem aprovação específica e teto de custo explícito.
+
+O programa R04.1, R05.1 e R06B.2–R11 fica congelado por tempo indeterminado. A R06B.1 não será integrada à `main`: seu commit permanece preservado na branch histórica `feature/r06b-read-only-pseudonymous-exporter` apenas como referência técnica recuperável. R06A e os contratos já integrados permanecem como histórico do trabalho realizado, mas não são dependências do MVP.
+
+As seções seguintes preservam a arquitetura e o programa anteriores como registro histórico. Elas não representam a sequência vigente e não autorizam sua retomada. Qualquer importação futura de 2026 deverá partir de uma necessidade demonstrada e receber novo plano proporcional, preferindo uma solução única e simples a uma plataforma permanente de transferência.
+
 ## Decisão estratégica
 
 | Bolão Brasileirão 2026 | Bolão Brasileirão Rigazzo |

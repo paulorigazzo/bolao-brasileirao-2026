@@ -356,3 +356,38 @@ A R07A e a R07B para identidade direta ficam adiadas. Antes da R06B, o Rigazzo d
 - a tabela de correspondência, se tecnicamente necessária na origem, não integra pacote, Git, logs ou Rigazzo;
 - a decisão não autoriza exportação, acesso remoto, criação de credencial ou importação de dados reais;
 - eventual piloto identificado exigirá retomar R07A e R07B em entregas independentes de risco alto.
+
+## DEC-2026-011 — Simplificação estratégica do Rigazzo
+
+- Data: 2026-08-06
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: DEC-2026-008, DEC-2026-009 e DEC-2026-010 quanto à sequência ativa de transferência, equivalência e importação de 2026
+- Impacto: alto
+
+### Contexto
+
+O programa R00–R11 evoluiu para uma arquitetura de migração entre produtos independentes com snapshots versionados, pseudonimização, equivalência, cofre de identidades e múltiplos ambientes. Embora tecnicamente defensável, esse nível de engenharia, governança, manutenção e custo não é proporcional à finalidade caseira, familiar e não comercial do aplicativo.
+
+A intenção original é criar, a partir do Bolão 2026 e em produto paralelo, uma evolução simples que preserve sua identidade e experiência visual e acrescente Temporadas e Ligas.
+
+### Decisão
+
+Redefinir o Rigazzo como evolução caseira e incremental do Bolão 2026. O novo produto continua isolado em repositório próprio, mas seu MVP começa localmente, com dados sintéticos, e fica restrito a perfis, temporadas, ligas, participantes, partidas, palpites e ranking.
+
+Reutilizar seletivamente a identidade visual, o design system, os ativos, os componentes e as regras comprovadas do Bolão 2026, sem copiar automaticamente toda a lógica, infraestrutura, governança ou documentação acumulada.
+
+Congelar por tempo indeterminado R04.1, R05.1 e R06B.2–R11. A R06B.1 não será integrada à `main`; o commit preparado permanecerá preservado somente na branch histórica `feature/r06b-read-only-pseudonymous-exporter`, disponível para referência ou reaproveitamento seletivo se uma necessidade futura justificar importação.
+
+Manter o histórico de 2026 no aplicativo original. Supabase e Netlify próprios para o Rigazzo serão considerados apenas depois da validação local e dependerão de aprovação específica de escopo e custo. Serviços pagos não são presumidos.
+
+### Consequências
+
+- o Bolão 2026 permanece estável, independente e recebe somente manutenção necessária;
+- R06A e contratos já integrados permanecem como histórico, mas deixam de ser dependências do MVP;
+- não haverá acesso real, credencial, exportação, importação, cofre de identidades, equivalência automatizada ou botões de transferência no escopo inicial;
+- o Rigazzo nasce visualmente familiar, mas com modelo funcional mínimo e código reaproveitado seletivamente;
+- estatísticas, calendário, Meu Time, destaques e duelo serão avaliados individualmente após o primeiro uso;
+- a criação de infraestrutura remota depende de validação local, segurança proporcional e teto de custo aprovado;
+- eventual retomada do histórico de 2026 exigirá necessidade demonstrada e novo plano, preferindo importação única e simples;
+- esta decisão é documental e não altera código, versão, Supabase, Netlify, dados ou funcionalidades.
