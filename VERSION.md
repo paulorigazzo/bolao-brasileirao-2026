@@ -1,6 +1,6 @@
-6.16.0
+6.17.0
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.16.0-protecao-recuperacao-adm.md`](docs/releases/v6.16.0-protecao-recuperacao-adm.md)
+- Nota da versão atual: [`docs/releases/v6.17.0-whatsapp-situacao-rodada.md`](docs/releases/v6.17.0-whatsapp-situacao-rodada.md)
