@@ -6,8 +6,9 @@ import { buildAdminRoundSummary } from "./admin-round-share.js";
 import { buildParticipantDuelModel } from "./participant-duel-engine.js";
 import { buildMatchCalendarModel } from "./match-calendar-engine.js";
 import { resolveParticipantFavoriteTeam } from "./participant-team.js";
+import { buildRecoveryProtectionModel, recoveryOriginLabel } from "./recovery-protection.js";
 
-const APP_VERSION = "6.15.2";
+const APP_VERSION = "6.16.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -3458,6 +3459,32 @@ function renderAdminAudit(){
     <small class="muted-note">Auditoria executada com os dados atuais do Supabase. Status e placar são atualizados juntos; partidas futuras, adiadas ou canceladas não conservam placares incompatíveis após a sincronização.</small>`;
 }
 
+function recoveryDate(value){
+  return value?new Intl.DateTimeFormat("pt-BR",{dateStyle:"short",timeStyle:"short"}).format(new Date(value)):"—";
+}
+async function renderAdminRecoveryProtection(){
+  if(!isAdminUser()) return;
+  const content=$("adminRecoveryContent"),badge=$("adminRecoveryBadge");
+  if(!content) return;
+  content.innerHTML='<p class="muted-note">Consultando a última proteção realizada…</p>';
+  if(badge){badge.textContent="Verificando…";badge.className="admin-recovery-badge";}
+  try{
+    const {data,error}=await sb.rpc("obter_resumo_protecao_recuperacao");
+    if(error) throw error;
+    const model=buildRecoveryProtectionModel(data);
+    if(badge){badge.textContent=model.label;badge.className=`admin-recovery-badge is-${model.tone}`;}
+    const checkpoint=data.checkpoint_tipo==="rodada"?`Rodada ${data.checkpoint_rodada}`:"Baseline inicial";
+    content.innerHTML=`<div class="admin-recovery-status is-${model.tone}"><strong>${model.tone==="ok"?"✅":"⚠️"} ${escapeHtml(model.title)}</strong><p>${escapeHtml(model.detail)}</p></div>
+      <div class="admin-recovery-metrics"><article><span>Última captura</span><strong>${recoveryDate(data.ultima_captura)}</strong><small>${escapeHtml(recoveryOriginLabel(data.ultima_origem))}${data.ultima_rodada?` • rodada ${Number(data.ultima_rodada)}`:""}</small></article><article><span>Cobertura</span><strong>${Number(data.jogos_preservados)||0} jogos</strong><small>${Number(data.palpites_preservados)||0} palpites preservados</small></article><article><span>Último checkpoint</span><strong>${escapeHtml(checkpoint)}</strong><small>${recoveryDate(data.checkpoint_criado_em)}</small></article><article><span>Integridade</span><strong>${model.divergences} divergências</strong><small>${model.missing} jogos encerrados sem cópia</small></article></div>
+      <details class="admin-recovery-details"><summary>Ver detalhes da proteção</summary><p><strong>Alterações registradas:</strong> ${Number(data.alteracoes_registradas)||0}</p><p><strong>Próxima captura:</strong> após a finalização do próximo jogo.</p><p>Esta é uma proteção de recuperação competitiva e não substitui o backup integral do Supabase. A restauração permanece manual e revisada.</p></details>`;
+  }catch(error){
+    const model=buildRecoveryProtectionModel(null);
+    if(badge){badge.textContent=model.label;badge.className="admin-recovery-badge is-error";}
+    content.innerHTML=`<div class="admin-recovery-status is-error"><strong>🔴 ${escapeHtml(model.title)}</strong><p>${escapeHtml(error.message||model.detail)}</p><button id="adminRecoveryRetryBtn" class="secondary" type="button">Tentar novamente</button></div>`;
+    $("adminRecoveryRetryBtn")?.addEventListener("click",renderAdminRecoveryProtection);
+  }
+}
+
 function renderAdminExecutiveDashboard(){
   if(!isAdminUser() || !$('adminExecutiveContent')) return;
   const snapshot=state.adminSnapshot || buildAdminSnapshot();
@@ -3754,7 +3781,7 @@ async function refresh(){
   try{
     await loadData();
     renderGames(); renderRanking(); renderStats(); renderHome();
-    renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminDiagnostic(); renderAdminExecutiveDashboard(); renderAdminAudit();
+    renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminDiagnostic(); renderAdminExecutiveDashboard(); renderAdminAudit(); renderAdminRecoveryProtection();
     message("Dados atualizados.");
   }catch(err){
     message(err.message||"Não foi possível atualizar.",true);
@@ -3787,7 +3814,8 @@ async function refreshAllAdminData(){
       ["Central de Ações",renderAdminQuickActions],
       ["participantes",renderAdminParticipants],
       ["Dashboard Executivo",renderAdminExecutiveDashboard],
-      ["Auditoria",renderAdminAudit]
+      ["Auditoria",renderAdminAudit],
+      ["Proteção de recuperação",renderAdminRecoveryProtection]
     ];
     for(const [name,renderer] of renderers){
       try{ renderer(); }
@@ -3889,7 +3917,7 @@ function updateAdminExperience(snapshot=state.adminSnapshot || buildAdminSnapsho
   }
 }
 
-const ADMIN_CARD_IDS=["adminAttentionCard","adminRoundCard","adminQuickActionsCard","adminParticipantsCard","adminDiagnosticCard","adminAuditCard","adminExecutiveCard"];
+const ADMIN_CARD_IDS=["adminAttentionCard","adminRoundCard","adminQuickActionsCard","adminParticipantsCard","adminDiagnosticCard","adminAuditCard","adminRecoveryCard","adminExecutiveCard"];
 
 function setAdminCardCollapsed(card,collapsed,{animate=true}={}){
   if(!card) return;
@@ -3995,7 +4023,7 @@ async function refreshAdminSilently(reason="automática"){
   try{
     await loadData();
     renderGames(); renderRanking(); renderStats(); renderHome();
-    renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminDiagnostic(); renderAdminExecutiveDashboard(); renderAdminAudit();
+    renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminDiagnostic(); renderAdminExecutiveDashboard(); renderAdminAudit(); renderAdminRecoveryProtection();
     adminLastBackgroundRefresh=Date.now();
     if(status) status.textContent=`Atualizado automaticamente às ${new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}`;
   }catch(err){
@@ -4096,7 +4124,7 @@ function applyNavigationState(tabName){
   if(tabName==="ranking") renderRanking();
   if(tabName==="standings") loadStandings();
   if(tabName==="stats") renderStats();
-  if(tabName==="admin"){ renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminDiagnostic(); renderAdminExecutiveDashboard(); renderAdminAudit(); updateAdminExperience(); startAdminAutoRefresh(); }
+  if(tabName==="admin"){ renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminDiagnostic(); renderAdminExecutiveDashboard(); renderAdminAudit(); renderAdminRecoveryProtection(); updateAdminExperience(); startAdminAutoRefresh(); }
   else stopAdminAutoRefresh();
   if(!primaryTabs.includes(tabName)) document.querySelectorAll(".bottom-nav-item").forEach(item=>item.classList.remove("active"));
   updateBottomNavigationMotion(tabName);
@@ -4202,7 +4230,7 @@ async function initialize(session){
   renderFavoriteTeamSelector();
   show("welcome",false); show("app",true); show("loginBtn",false); show("headerUser",true);
   const isAdmin=isAdminUser(); show("adminPanel",isAdmin); show("adminMenuShortcut",isAdmin);
-  renderRounds(); renderGames(); renderRanking(); renderStats(); renderHome(); renderMyTeam(); startMatchClockRefresh(); startLiveScoreRefresh(); refreshLiveScoresSilently(); if(isAdmin){ renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminDiagnostic(); renderAdminExecutiveDashboard(); renderAdminAudit(); }
+  renderRounds(); renderGames(); renderRanking(); renderStats(); renderHome(); renderMyTeam(); startMatchClockRefresh(); startLiveScoreRefresh(); refreshLiveScoresSilently(); if(isAdmin){ renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminDiagnostic(); renderAdminExecutiveDashboard(); renderAdminAudit(); renderAdminRecoveryProtection(); }
 }
 
 

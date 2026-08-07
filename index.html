@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.15.2">
-  <link rel="stylesheet" href="./css/styles.css?v=6.15.2">
-  <link rel="stylesheet" href="./css/components.css?v=6.15.2">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.15.2">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.15.2">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.15.2">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.16.0">
+  <link rel="stylesheet" href="./css/styles.css?v=6.16.0">
+  <link rel="stylesheet" href="./css/components.css?v=6.16.0">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.16.0">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.16.0">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.16.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.15.2</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.16.0</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -355,9 +355,10 @@
           <button class="admin-quick-nav-button" type="button" data-admin-target="adminRoundCard"><span aria-hidden="true">⚽</span> Rodada <b id="adminNavRoundBadge" class="admin-nav-indicator hidden">0</b></button>
           <button class="admin-quick-nav-button" type="button" data-admin-target="adminQuickActionsCard"><span aria-hidden="true">⚡</span> Ações</button>
           <button class="admin-quick-nav-button" type="button" data-admin-target="adminParticipantsCard"><span aria-hidden="true">👥</span> Participantes</button>
-          <button class="admin-quick-nav-button" type="button" data-admin-target="adminExecutiveCard"><span aria-hidden="true">📊</span> Dashboard</button>
           <button class="admin-quick-nav-button" type="button" data-admin-target="adminDiagnosticCard"><span aria-hidden="true">🩺</span> Diagnóstico</button>
           <button class="admin-quick-nav-button" type="button" data-admin-target="adminAuditCard"><span aria-hidden="true">🧪</span> Auditoria</button>
+          <button class="admin-quick-nav-button" type="button" data-admin-target="adminRecoveryCard"><span aria-hidden="true">🛟</span> Proteção</button>
+          <button class="admin-quick-nav-button" type="button" data-admin-target="adminExecutiveCard"><span aria-hidden="true">📊</span> Dashboard</button>
         </nav>
 
         <article id="adminAttentionCard" class="card admin-attention-card is-loading" aria-live="polite">
@@ -474,6 +475,16 @@
           </div>
           <p class="admin-audit-intro">Verificação objetiva de jogos, palpites, ranking e pontuação.</p>
           <div id="adminAuditContent" class="admin-audit-content"><p class="muted-note">Analisando jogos, palpites, ranking e pontuação.</p></div>
+          <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
+        </article>
+
+        <article id="adminRecoveryCard" class="card admin-recovery-card" aria-live="polite">
+          <div class="admin-recovery-header" data-admin-card-header>
+            <div class="admin-card-title-block"><span class="eyebrow">RECUPERAÇÃO COMPETITIVA</span><h2><span class="admin-card-title-icon" aria-hidden="true">🛟</span><span>Proteção de recuperação</span></h2></div>
+            <div class="admin-card-header-actions"><span id="adminRecoveryBadge" class="admin-recovery-badge">Verificando…</span><button class="admin-card-toggle" type="button" data-admin-collapse="adminRecoveryCard" aria-expanded="true" aria-label="Recolher Proteção de recuperação">⌃</button></div>
+          </div>
+          <p class="admin-recovery-intro">Dados essenciais preservados para reconstruir resultados, pontos e posições.</p>
+          <div id="adminRecoveryContent" class="admin-recovery-content"><p class="muted-note">Consultando a última proteção realizada.</p></div>
           <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
         </article>
 
@@ -704,6 +715,6 @@
       if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.15.2"></script>
+  <script type="module" src="./js/app.js?v=6.16.0"></script>
 </body>
 </html>

@@ -51,6 +51,12 @@ Uma recuperação deve ser manual e revisada:
 
 Nenhum snapshot deve ser restaurado automaticamente apenas porque uma API externa divergiu.
 
+## Visibilidade administrativa
+
+O painel ADM apresenta somente um resumo agregado da proteção: última captura, origem, cobertura, checkpoint e contagens de itens ausentes ou divergentes. A consulta exige uma sessão de administrador ativo e aprovado e não expõe palpites, usuários ou placares preservados. O card é informativo e não oferece restauração automática.
+
+A idade da última captura, isoladamente, não caracteriza atraso: enquanto não houver novo jogo encerrado válido, a proteção permanece atualizada.
+
 ## Retorno operacional
 
 Se a captura causar impacto não previsto, desabilitar os triggers de `public.jogos` antes de qualquer outra ação. Os registros já preservados devem permanecer intactos. A remoção das funções ou tabelas exige decisão humana específica e migração própria.

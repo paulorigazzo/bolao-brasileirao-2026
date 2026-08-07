@@ -4,7 +4,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.15.2`.
+- Versão funcional: `v6.16.0`.
 - Prioridade: **manter o Bolão 2026 estável e independente e simplificar o Rigazzo como evolução caseira com Temporadas e Ligas**.
 - Próxima etapa coordenada: redefinir no [Rigazzo](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo) um MVP local com identidade visual reutilizada, dados sintéticos, Temporadas, Ligas, palpites e ranking. O programa R06B.2–R11 de transferência e equivalência de 2026 está congelado; a R06B.1 permanece somente na branch histórica `feature/r06b-read-only-pseudonymous-exporter`, sem merge na `main` e sem conexão real.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
@@ -41,7 +41,7 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - ✅ Palpites por rodada e fechamento no horário da partida.
 - ✅ Regras oficiais de pontuação, resultados e ranking.
 - ✅ Sincronização de jogos, datas, locais, placares e classificação.
-- ✅ Centro de Controle, diagnóstico e auditoria administrativa.
+- ✅ Centro de Controle, diagnóstico, auditoria e acompanhamento da proteção de recuperação.
 - ✅ E01.6 — Gestão Inteligente de Jogos Adiados.
 - ✅ E01.7 — Consolidação da Integridade da Rodada.
 - ✅ E01.8 — Recuperação competitiva com snapshots mínimos de jogos encerrados, palpites e checkpoints de Ranking.
