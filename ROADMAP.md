@@ -4,7 +4,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.14.2`.
+- Versão funcional: `v6.15.0`.
 - Prioridade: **manter o Bolão 2026 estável e independente e simplificar o Rigazzo como evolução caseira com Temporadas e Ligas**.
 - Próxima etapa coordenada: redefinir no [Rigazzo](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo) um MVP local com identidade visual reutilizada, dados sintéticos, Temporadas, Ligas, palpites e ranking. O programa R06B.2–R11 de transferência e equivalência de 2026 está congelado; a R06B.1 permanece somente na branch histórica `feature/r06b-read-only-pseudonymous-exporter`, sem merge na `main` e sem conexão real.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
@@ -44,6 +44,7 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - ✅ Centro de Controle, diagnóstico e auditoria administrativa.
 - ✅ E01.6 — Gestão Inteligente de Jogos Adiados.
 - ✅ E01.7 — Consolidação da Integridade da Rodada.
+- ✅ E01.8 — Recuperação competitiva com snapshots mínimos de jogos encerrados, palpites e checkpoints de Ranking.
 - 🟡 Testes automatizados: motores e sincronização cobertos; expansão por fluxo reavaliada e adiada até existir necessidade concreta.
 
 ## E02 — Experiência e personalização
@@ -119,7 +120,7 @@ Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e 
 - previsões apresentadas como fatos;
 - mudanças nas regras de pontuação;
 - transferência ou importação inicial do histórico de 2026 no Rigazzo;
-- snapshots incrementais, cofre de identidades, equivalência automatizada e botões de exportação ou importação;
+- snapshots incrementais de transferência para o Rigazzo, cofre de identidades, equivalência automatizada e botões de exportação ou importação;
 - Copiloto, IA generativa, pipeline automatizado de releases e aplicativo nativo no Rigazzo;
 - evolução ampla da Tela de Jogos enquanto estiver congelada.
 

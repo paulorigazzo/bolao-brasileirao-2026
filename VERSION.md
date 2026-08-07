@@ -1,6 +1,6 @@
-6.14.2
+6.15.0
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.14.2-preservacao-resultados-encerrados.md`](docs/releases/v6.14.2-preservacao-resultados-encerrados.md)
+- Nota da versão atual: [`docs/releases/v6.15.0-recuperacao-competitiva.md`](docs/releases/v6.15.0-recuperacao-competitiva.md)

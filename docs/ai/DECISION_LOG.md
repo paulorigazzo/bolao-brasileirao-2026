@@ -391,3 +391,33 @@ Manter o histórico de 2026 no aplicativo original. Supabase e Netlify próprios
 - a criação de infraestrutura remota depende de validação local, segurança proporcional e teto de custo aprovado;
 - eventual retomada do histórico de 2026 exigirá necessidade demonstrada e novo plano, preferindo importação única e simples;
 - esta decisão é documental e não altera código, versão, Supabase, Netlify, dados ou funcionalidades.
+
+## DEC-2026-012 — Recuperação competitiva mínima no Bolão 2026
+
+- Data: 2026-08-06
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: alto
+
+### Contexto
+
+Uma regressão da fonte esportiva apagou temporariamente oito resultados encerrados e alterou o Ranking. Os placares puderam ser confirmados online, mas os palpites originais não são recuperáveis externamente. Para um projeto familiar, quarentena, múltiplas fontes automáticas e uma interface ampla de auditoria seriam desproporcionais.
+
+### Decisão
+
+Adicionar ao Bolão 2026 uma camada interna e mínima de recuperação competitiva. Na primeira finalização válida de cada jogo, preservar em schema privado sua identificação, placar final, fonte e os palpites relacionados. Registrar alterações posteriores de status ou placar sem bloquear a sincronização.
+
+Criar um baseline na implantação e checkpoints de pontos, exatos e posições quando uma rodada ficar integralmente encerrada. Pontos e Ranking continuam derivados pelas regras existentes; checkpoints são evidência de conferência, não nova fonte canônica.
+
+Os snapshots são imutáveis para o fluxo normal, não ficam expostos pela aplicação e não incluem e-mail, celular, sessões, tokens ou conteúdo do Auth. A recuperação será sempre manual, transacional e condicionada a precondições explícitas.
+
+### Consequências
+
+- resultados e palpites necessários para reconstrução permanecem disponíveis no próprio projeto;
+- consultas esportivas externas tornam-se confirmação independente, não dependência obrigatória;
+- a sincronização continua automática e sem quarentena;
+- não há tela administrativa, segunda fonte automática ou restauração automática;
+- a camada não substitui backups contra perda integral do projeto Supabase;
+- snapshots de recuperação do Bolão 2026 não integram nem reativam o programa de transferência para o Rigazzo;
+- schema, triggers, dados competitivos e produção tornam a entrega obrigatoriamente de risco alto.
