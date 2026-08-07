@@ -7,7 +7,7 @@ import { buildParticipantDuelModel } from "./participant-duel-engine.js";
 import { buildMatchCalendarModel } from "./match-calendar-engine.js";
 import { resolveParticipantFavoriteTeam } from "./participant-team.js";
 
-const APP_VERSION = "6.15.1";
+const APP_VERSION = "6.15.2";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();

@@ -1,3 +1,9 @@
+# v6.15.2 — Acesso consistente aos perfis no Ranking
+
+- Substitui a autorização legada por lista fixa por uma verificação dinâmica de participante ativo e aprovado.
+- Corrige perfis duplicados, palpites zerados e ausência de escudos para participantes comuns no Ranking.
+- Preserva pontos, posições, perfis, palpites e resultados existentes.
+
 # v6.15.1 — Time favorito consistente no Ranking
 
 - Exibe no Ranking o time favorito informado durante a solicitação, mesmo antes do primeiro acesso após a aprovação.
