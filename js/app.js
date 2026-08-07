@@ -5,8 +5,9 @@ import { buildRoundHighlightsModel, isPostponedRoundHighlightsEligible, selectLa
 import { buildAdminRoundSummary } from "./admin-round-share.js";
 import { buildParticipantDuelModel } from "./participant-duel-engine.js";
 import { buildMatchCalendarModel } from "./match-calendar-engine.js";
+import { resolveParticipantFavoriteTeam } from "./participant-team.js";
 
-const APP_VERSION = "6.15.0";
+const APP_VERSION = "6.15.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1347,20 +1348,23 @@ function calculateRanking(){
   const profilesByEmail=new Map((state.participants||[]).map(item=>[String(item?.email||"").toLowerCase(),item]));
   const profilesByName=new Map((state.participants||[]).map(item=>[String(item?.nome||"").trim().toLowerCase(),item]));
   const identityFor=(userId,name)=>userId ? `id:${String(userId)}` : `legacy:${String(name||"").trim().toLowerCase()}`;
-  const ensurePlayer=(userId,name)=>{
+  const ensurePlayer=(userId,name,email=null)=>{
     const displayName=String(name||"").trim();
     if(!displayName && !userId) return null;
     const key=identityFor(userId,displayName);
-    if(!players.has(key)) players.set(key,{key,userId:userId||null,name:displayName||"Participante",total:0,exact:0,count:0,scored:0});
-    else if(displayName) players.get(key).name=displayName;
+    if(!players.has(key)) players.set(key,{key,userId:userId||null,email:email||null,name:displayName||"Participante",total:0,exact:0,count:0,scored:0});
+    else {
+      if(displayName) players.get(key).name=displayName;
+      if(email) players.get(key).email=email;
+    }
     return players.get(key);
   };
 
   for(const [email,name] of Object.entries(participantDirectory())){
     const profile=profilesByEmail.get(String(email).toLowerCase()) || profilesByName.get(String(name||"").trim().toLowerCase());
-    ensurePlayer(profile?.user_id||null,profile?.nome||name);
+    ensurePlayer(profile?.user_id||null,profile?.nome||name,email);
   }
-  for(const profile of state.participants||[]) ensurePlayer(profile?.user_id||null,profile?.nome);
+  for(const profile of state.participants||[]) ensurePlayer(profile?.user_id||null,profile?.nome,profile?.email);
 
   for(const item of state.pickCounts||[]){
     const profile=item?.user_id
@@ -2036,14 +2040,13 @@ function renderHome(){
   renderHomeFavoriteTeam();
 }
 
-function participantTeam(name){
-  const participant=state.participants.find(item=>item.nome===name);
-  return findTeam(participant?.time_favorito || (name===state.participant?.nome ? state.participant?.time_favorito : null));
-}
-
-function participantProfileByEmail(email){
-  const normalizedEmail=String(email||"").trim().toLowerCase();
-  return state.participants.find(item=>String(item?.email||"").trim().toLowerCase()===normalizedEmail) || null;
+function participantTeam(participant){
+  const identity=typeof participant==="string"?{name:participant}:participant;
+  const favoriteTeam=resolveParticipantFavoriteTeam(identity,{
+    profiles:state.participants,
+    authorizations:state.authorizedParticipants
+  }) || (identity?.name===state.participant?.nome ? state.participant?.time_favorito : null);
+  return findTeam(favoriteTeam);
 }
 
 function participantAvatar(name, team, extraClass=""){
@@ -2051,8 +2054,9 @@ function participantAvatar(name, team, extraClass=""){
   return `<span class="ranking-avatar ${extraClass}">${team?.logo ? `<img src="${escapeHtml(team.logo)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove();this.parentElement.textContent='${escapeHtml(fallback)}'">` : escapeHtml(fallback)}</span>`;
 }
 
-function rankingAvatar(name, extraClass=""){
-  return participantAvatar(name,participantTeam(name),extraClass);
+function rankingAvatar(participant, extraClass=""){
+  const name=typeof participant==="string"?participant:participant?.name;
+  return participantAvatar(name,participantTeam(participant),extraClass);
 }
 
 function updateRankingMovement(){
@@ -2148,12 +2152,12 @@ function renderRanking(){
 
   $('rankingBody').innerHTML=state.ranking.map((r,i)=>{
     const isMe=isCurrentRankingParticipant(r), rate=r.scored?Math.round(r.total/(r.scored*10)*100):0;
-    const team=participantTeam(r.name);
+    const team=participantTeam(r);
     const placeClass=i<3?` top-${i+1}`:"";
     const medal=i===0?'gold':i===1?'silver':i===2?'bronze':'';
     return `<tr class="ranking-row ranking-premium-row${placeClass} ${isMe?"me-row":""}">
       <td><div class="rank-position"><span class="rank-medal ${medal}">${i<3?i+1:""}</span><span class="rank-number">${i+1}º</span>${movementBadge(r.name)}</div></td>
-      <td><div class="rank-participant">${rankingAvatar(r.name)}<div><strong title="${escapeHtml(r.name)}">${escapeHtml(r.name)}</strong>${isMe?'<span class="you-chip">VOCÊ</span>':""}<small>${team?escapeHtml(team.name):"Participante"}</small></div></div></td>
+      <td><div class="rank-participant">${rankingAvatar(r)}<div><strong title="${escapeHtml(r.name)}">${escapeHtml(r.name)}</strong>${isMe?'<span class="you-chip">VOCÊ</span>':""}<small>${team?escapeHtml(team.name):"Participante"}</small></div></div></td>
       <td data-label="Pontos"><strong class="rank-points">${r.total}</strong></td>
       <td data-label="Exatos"><strong>${r.exact}</strong></td>
       <td data-label="Aproveitamento"><div class="rank-rate"><div class="rank-rate-track"><span style="width:${rate}%"></span></div><strong>${rate}%</strong></div></td>
@@ -2164,11 +2168,11 @@ function renderRanking(){
   const medals=['🥇','🥈','🥉'];
   $('podium').innerHTML=state.ranking.slice(0,3).map((r,i)=>{
     const rate=r.scored?Math.round(r.total/(r.scored*10)*100):0;
-    const team=participantTeam(r.name);
+    const team=participantTeam(r);
     return `<article class="podium-card card place-${i+1} ${isCurrentRankingParticipant(r)?"is-me":""}">
       <div class="podium-crown">${medals[i]}</div>
       <div class="podium-top"><span class="podium-place">${i+1}º lugar</span>${movementBadge(r.name)}</div>
-      ${rankingAvatar(r.name,"podium-avatar")}
+      ${rankingAvatar(r,"podium-avatar")}
       <strong>${escapeHtml(r.name)}</strong>
       ${isCurrentRankingParticipant(r)?'<span class="podium-you">VOCÊ</span>':""}
       <span class="podium-points">${r.total} pontos</span>
@@ -3086,8 +3090,7 @@ function renderAdminParticipants(){
     const status=item.status || (item.ativo===false?"inactive":"approved");
     const phone=item.celular?formatBrazilPhone(item.celular):"Celular não informado";
     const requested=item.solicitado_em?new Date(item.solicitado_em).toLocaleDateString("pt-BR"):"";
-    const profile=participantProfileByEmail(item.email);
-    const team=findTeam(profile?.time_favorito || item.time_favorito || "");
+    const team=participantTeam({name:item.nome,email:item.email});
     const teamLabel=team?.name || "Time do coração não escolhido";
     const isCurrentUser=String(item.email||"").toLowerCase()===String(state.user?.email||"").toLowerCase();
     const canDelete=!item.administrador && !isCurrentUser;

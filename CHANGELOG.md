@@ -1,3 +1,9 @@
+# v6.15.1 — Time favorito consistente no Ranking
+
+- Exibe no Ranking o time favorito informado durante a solicitação, mesmo antes do primeiro acesso após a aprovação.
+- Prioriza o perfil consolidado e usa o cadastro de autorização como fallback por identidade normalizada.
+- Mantém Ranking e ADM consistentes sem alterar pontos, posições, palpites ou dados do Supabase.
+
 # v6.15.0 — Recuperação competitiva
 
 - Preserva o primeiro placar final válido e a identificação mínima de cada jogo encerrado.

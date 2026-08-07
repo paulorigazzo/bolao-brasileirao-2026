@@ -1,6 +1,6 @@
-6.15.0
+6.15.1
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.15.0-recuperacao-competitiva.md`](docs/releases/v6.15.0-recuperacao-competitiva.md)
+- Nota da versão atual: [`docs/releases/v6.15.1-time-favorito-ranking.md`](docs/releases/v6.15.1-time-favorito-ranking.md)
