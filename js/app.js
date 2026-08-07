@@ -9,7 +9,7 @@ import { resolveParticipantFavoriteTeam } from "./participant-team.js";
 import { buildRecoveryProtectionModel, recoveryOriginLabel } from "./recovery-protection.js";
 import { resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
 
-const APP_VERSION = "6.17.2";
+const APP_VERSION = "6.17.3";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2983,7 +2983,7 @@ function renderAdminAttention(){
     const icon=isComplete?"✅":item.status==="not-started"?"🔴":"🟡";
     const updated=item.lastUpdate?new Date(item.lastUpdate).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"Sem registro";
     const participant=resolveAttentionWhatsAppParticipant(item,state.authorizedParticipants);
-    return `<article class="admin-pending-person status-${item.status}"><button class="admin-pending-detail" type="button" data-admin-participant-detail="${escapeHtml(item.email)}" aria-label="Ver detalhes dos palpites de ${escapeHtml(item.name)}"><div class="admin-person-row"><strong>${icon} ${escapeHtml(item.name)}</strong><span>${item.count}/${item.total}</span></div><div class="admin-progress-track"><i style="width:${pct}%"></i></div><small>${status} • última atualização: ${updated}</small><span class="admin-person-detail-hint">Toque para ver os jogos <span aria-hidden="true">›</span></span></button><div class="admin-pending-actions">${adminWhatsAppButton(participant,"admin-attention-whatsapp")}</div></article>`;
+    return `<article class="admin-pending-person status-${item.status}"><button class="admin-pending-detail" type="button" data-admin-participant-detail="${escapeHtml(item.email)}" aria-label="Ver detalhes dos palpites de ${escapeHtml(item.name)}"><div class="admin-person-row"><strong>${icon} ${escapeHtml(item.name)}</strong><span>${item.count}/${item.total}</span></div><div class="admin-progress-track"><i style="width:${pct}%"></i></div><small>${status} • última atualização: ${updated}</small></button><div class="admin-pending-actions">${adminWhatsAppButton(participant,"admin-attention-whatsapp")}<button class="admin-person-detail-hint" type="button" data-admin-participant-detail="${escapeHtml(item.email)}">Toque para ver os jogos <span aria-hidden="true">›</span></button></div></article>`;
   };
   const showComplete=adminPendingFilter==="all" || adminPendingFilter==="complete";
   const showPending=adminPendingFilter==="all" || adminPendingFilter==="pending";

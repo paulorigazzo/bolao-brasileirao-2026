@@ -1,6 +1,6 @@
-6.17.2
+6.17.3
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.17.2-recorte-detalhes-participante.md`](docs/releases/v6.17.2-recorte-detalhes-participante.md)
+- Nota da versão atual: [`docs/releases/v6.17.3-acoes-participante-inline.md`](docs/releases/v6.17.3-acoes-participante-inline.md)
