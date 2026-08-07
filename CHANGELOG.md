@@ -1,3 +1,10 @@
+# v6.17.0 — WhatsApp na Situação da Rodada
+
+- Adiciona o botão individual de WhatsApp aos cards dos participantes na Central de Atenção.
+- Reutiliza o mesmo modal, os mesmos modelos e a mesma confirmação existentes na Lista de Participantes.
+- Mantém o acesso aos detalhes dos palpites como ação independente no restante do card.
+- Desabilita a ação quando não há celular válido e preserva o envio exclusivamente manual.
+
 # v6.16.0 — Proteção de recuperação no painel ADM
 
 - Adiciona um card administrativo entre Integridade dos Dados e Dashboard executivo.

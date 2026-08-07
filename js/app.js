@@ -7,8 +7,9 @@ import { buildParticipantDuelModel } from "./participant-duel-engine.js";
 import { buildMatchCalendarModel } from "./match-calendar-engine.js";
 import { resolveParticipantFavoriteTeam } from "./participant-team.js";
 import { buildRecoveryProtectionModel, recoveryOriginLabel } from "./recovery-protection.js";
+import { resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
 
-const APP_VERSION = "6.16.0";
+const APP_VERSION = "6.17.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2981,7 +2982,8 @@ function renderAdminAttention(){
     const status=isComplete?"Completo":item.status==="not-started"?"Nenhum palpite":"Parcial";
     const icon=isComplete?"✅":item.status==="not-started"?"🔴":"🟡";
     const updated=item.lastUpdate?new Date(item.lastUpdate).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"Sem registro";
-    return `<button class="admin-pending-person status-${item.status}" type="button" data-admin-participant="${escapeHtml(item.email)}" aria-label="Ver detalhes dos palpites de ${escapeHtml(item.name)}"><div class="admin-person-row"><strong>${icon} ${escapeHtml(item.name)}</strong><span>${item.count}/${item.total}</span></div><div class="admin-progress-track"><i style="width:${pct}%"></i></div><small>${status} • última atualização: ${updated}</small><span class="admin-person-detail-hint">Toque para ver os jogos <span aria-hidden="true">›</span></span></button>`;
+    const participant=resolveAttentionWhatsAppParticipant(item,state.authorizedParticipants);
+    return `<article class="admin-pending-person status-${item.status}"><button class="admin-pending-detail" type="button" data-admin-participant-detail="${escapeHtml(item.email)}" aria-label="Ver detalhes dos palpites de ${escapeHtml(item.name)}"><div class="admin-person-row"><strong>${icon} ${escapeHtml(item.name)}</strong><span>${item.count}/${item.total}</span></div><div class="admin-progress-track"><i style="width:${pct}%"></i></div><small>${status} • última atualização: ${updated}</small><span class="admin-person-detail-hint">Toque para ver os jogos <span aria-hidden="true">›</span></span></button><div class="admin-pending-actions">${adminWhatsAppButton(participant,"admin-attention-whatsapp")}</div></article>`;
   };
   const showComplete=adminPendingFilter==="all" || adminPendingFilter==="complete";
   const showPending=adminPendingFilter==="all" || adminPendingFilter==="pending";
@@ -3095,8 +3097,7 @@ function renderAdminParticipants(){
     const teamLabel=team?.name || "Time do coração não escolhido";
     const isCurrentUser=String(item.email||"").toLowerCase()===String(state.user?.email||"").toLowerCase();
     const canDelete=!item.administrador && !isCurrentUser;
-    const hasPhone=Boolean(normalizeWhatsAppPhone(item.celular));
-    const whatsappButton=`<button type="button" class="whatsapp admin-member-whatsapp" data-participant-whatsapp="${escapeHtml(item.id)}" ${hasPhone?"":"disabled"} title="${hasPhone?"Enviar mensagem individual pelo WhatsApp":"Cadastre o celular do participante para habilitar"}">WhatsApp</button>`;
+    const whatsappButton=adminWhatsAppButton(item);
     const pendingActions=status==="pending"?`<div class="admin-member-actions">${whatsappButton}<button type="button" class="primary" data-membership-decision="approve" data-participant-id="${escapeHtml(item.id)}" ${atLimit?'disabled title="Aumente o limite ou desative um participante ativo para aprovar"':''}>${atLimit?"Limite atingido":"Aprovar"}</button><button type="button" class="secondary" data-membership-decision="reject" data-participant-id="${escapeHtml(item.id)}">Recusar</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`:
       `<div class="admin-member-actions">${whatsappButton}<button type="button" class="secondary admin-member-toggle" data-participant-id="${escapeHtml(item.id)}" data-participant-active="${item.ativo!==false}">${item.ativo===false?"Reativar":"Desativar"}</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`;
     return `<div class="admin-member-row status-${escapeHtml(status)}">
@@ -3115,6 +3116,13 @@ function normalizeWhatsAppPhone(value){
   if(digits.startsWith("55")) return digits.length>=12 && digits.length<=13?digits:"";
   if(digits.length===10 || digits.length===11) return `55${digits}`;
   return "";
+}
+
+function adminWhatsAppButton(participant,extraClass=""){
+  const hasPhone=Boolean(participant?.id && normalizeWhatsAppPhone(participant.celular));
+  const title=hasPhone?"Enviar mensagem individual pelo WhatsApp":"Cadastre o celular do participante para habilitar";
+  const className=["whatsapp","admin-member-whatsapp",extraClass].filter(Boolean).join(" ");
+  return `<button type="button" class="${className}" data-participant-whatsapp="${escapeHtml(participant?.id||"")}" ${hasPhone?"":"disabled"} title="${title}" aria-label="${title}">WhatsApp</button>`;
 }
 
 function whatsappTemplateText(type,participant){
@@ -4429,8 +4437,10 @@ $("adminRoundShareCopy")?.addEventListener("click",copyAdminRoundShare);
 $("adminRoundShareSend")?.addEventListener("click",shareAdminRoundSummary);
 $("adminRoundShareModal")?.addEventListener("click",event=>{if(event.target===$("adminRoundShareModal")) closeAdminRoundShare();});
 $("adminAttentionContent").onclick=event=>{
-  const card=event.target.closest("[data-admin-participant]");
-  if(card) openAdminParticipantDetail(card.dataset.adminParticipant);
+  const whatsapp=event.target.closest("[data-participant-whatsapp]");
+  if(whatsapp){ openParticipantWhatsApp(whatsapp.dataset.participantWhatsapp); return; }
+  const detail=event.target.closest("[data-admin-participant-detail]");
+  if(detail) openAdminParticipantDetail(detail.dataset.adminParticipantDetail);
 };
 $("adminAttentionCard")?.addEventListener("click",event=>{
   const filter=event.target.closest("[data-admin-pending-filter]");
