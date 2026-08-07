@@ -1,3 +1,9 @@
+# v6.17.1 — Ajustes visuais no WhatsApp e cadastro
+
+- Reduz o arredondamento somente do botão de WhatsApp exibido na Situação da Rodada.
+- Garante contraste consistente para texto, cursor, placeholder e preenchimento automático nos campos do cadastro inicial.
+- Preserva os cards, os demais botões e o fluxo funcional de cadastro.
+
 # v6.17.0 — WhatsApp na Situação da Rodada
 
 - Adiciona o botão individual de WhatsApp aos cards dos participantes na Central de Atenção.
