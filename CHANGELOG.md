@@ -1,3 +1,11 @@
+# v6.15.0 — Recuperação competitiva
+
+- Preserva o primeiro placar final válido e a identificação mínima de cada jogo encerrado.
+- Preserva os palpites vinculados ao jogo na mesma transação do snapshot.
+- Registra alterações posteriores de status ou placar sem bloquear a sincronização.
+- Cria baseline da implantação e checkpoints de pontuação e posições quando uma rodada fica integralmente encerrada.
+- Mantém os dados de recuperação em schema privado, imutável para o fluxo normal e sem exposição pela aplicação.
+
 # v6.14.2 — Preservação de resultados encerrados
 
 - Impede que uma regressão isolada da fonte externa apague o status e o placar de uma partida já encerrada.

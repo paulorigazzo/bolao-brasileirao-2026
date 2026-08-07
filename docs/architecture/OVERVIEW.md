@@ -20,6 +20,10 @@ O Bolão Brasileirão 2026 é uma aplicação web mobile-first construída com H
 - Netlify: hospedagem, deploy e execução das Functions.
 - GitHub: fonte oficial do código, histórico e revisão por Pull Request.
 
+## Recuperação competitiva
+
+Resultados encerrados, palpites relacionados e checkpoints de Ranking possuem uma camada interna mínima de preservação no Supabase. O desenho, os limites de acesso e o procedimento manual de reconstrução estão em [`RECUPERACAO_COMPETITIVA.md`](RECUPERACAO_COMPETITIVA.md).
+
 ## Regras protegidas
 
 - palpites fecham no horário do jogo;
