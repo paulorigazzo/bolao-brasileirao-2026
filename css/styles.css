@@ -3604,6 +3604,12 @@ button,[role="button"],.chip,.filter-chip{
              border-color var(--motion-fast) var(--motion-standard),
              color var(--motion-fast) var(--motion-standard);
 }
+#adminAttentionCard button.admin-pending-detail{
+  min-height:0;
+  overflow:visible;
+  border-radius:0;
+  transform:none;
+}
 button.motion-pressed,[role="button"].motion-pressed,.chip.motion-pressed,.filter-chip.motion-pressed{
   transform:scale(.97);
 }

@@ -9,7 +9,7 @@ import { resolveParticipantFavoriteTeam } from "./participant-team.js";
 import { buildRecoveryProtectionModel, recoveryOriginLabel } from "./recovery-protection.js";
 import { resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
 
-const APP_VERSION = "6.17.1";
+const APP_VERSION = "6.17.2";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
