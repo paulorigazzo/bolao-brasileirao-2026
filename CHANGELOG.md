@@ -1,3 +1,10 @@
+# v6.16.0 — Proteção de recuperação no painel ADM
+
+- Adiciona um card administrativo entre Integridade dos Dados e Dashboard executivo.
+- Exibe status, última captura, cobertura de jogos e palpites, checkpoint e divergências.
+- Mantém o schema privado inacessível diretamente e libera somente um resumo agregado para administradores ativos e aprovados.
+- Não executa restauração automática nem substitui o backup integral do Supabase.
+
 # v6.15.2 — Acesso consistente aos perfis no Ranking
 
 - Substitui a autorização legada por lista fixa por uma verificação dinâmica de participante ativo e aprovado.
