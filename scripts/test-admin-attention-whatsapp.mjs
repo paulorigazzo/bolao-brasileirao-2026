@@ -16,5 +16,6 @@ assert.match(app,/function adminWhatsAppButton\(/);
 assert.match(app,/resolveAttentionWhatsAppParticipant\(item,state\.authorizedParticipants\)/);
 assert.match(app,/data-admin-participant-detail=/);
 assert.match(app,/adminAttentionContent[\s\S]*data-participant-whatsapp/);
+assert.match(app,/admin-pending-actions[^`]*admin-attention-whatsapp[^`]*admin-person-detail-hint/);
 
 console.log("WhatsApp individual na Situação da Rodada verificado com sucesso.");

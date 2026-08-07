@@ -1,3 +1,9 @@
+# v6.17.2 — WhatsApp compacto na Situação da Rodada
+
+- Reorganiza as ações do participante em uma única linha, com WhatsApp à esquerda e acesso aos jogos à direita.
+- Restaura no WhatsApp o mesmo raio visual utilizado pelos demais botões do aplicativo.
+- Reduz a altura dos cards sem alterar conteúdo, modal ou modelos de mensagem.
+
 # v6.17.1 — Ajustes visuais no WhatsApp e cadastro
 
 - Reduz o arredondamento somente do botão de WhatsApp exibido na Situação da Rodada.
