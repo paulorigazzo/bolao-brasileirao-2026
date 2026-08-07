@@ -2,6 +2,7 @@
 
 - Reorganiza as ações do participante em uma única linha, com WhatsApp à esquerda e acesso aos jogos à direita.
 - Restaura no WhatsApp o mesmo raio visual utilizado pelos demais botões do aplicativo.
+- Reduz o raio dos cards de participantes para evitar recortes visuais nas extremidades.
 - Reduz a altura dos cards sem alterar conteúdo, modal ou modelos de mensagem.
 
 # v6.17.1 — Ajustes visuais no WhatsApp e cadastro
