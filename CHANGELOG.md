@@ -1,3 +1,9 @@
+# v6.17.3 — Ações alinhadas nos cards dos participantes
+
+- Posiciona o botão compacto de WhatsApp à esquerda e o acesso aos jogos à direita, na mesma linha.
+- Mantém a correção de recorte do frame superior introduzida na `v6.17.2`.
+- Preserva cards externos, modal, modelos de mensagem, dados e demais telas.
+
 # v6.17.2 — Correção do recorte nos detalhes dos participantes
 
 - Impede que o botão invisível de detalhes recorte o ícone, o nome e o contador de palpites.
