@@ -1,3 +1,9 @@
+# v6.17.2 — Correção do recorte nos detalhes dos participantes
+
+- Impede que o botão invisível de detalhes recorte o ícone, o nome e o contador de palpites.
+- Restringe a correção à Situação da Rodada na Central de Atenção administrativa.
+- Preserva cards, posições, botão WhatsApp e demais telas do aplicativo.
+
 # v6.17.1 — Ajustes visuais no WhatsApp e cadastro
 
 - Reduz o arredondamento somente do botão de WhatsApp exibido na Situação da Rodada.
