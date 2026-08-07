@@ -1,11 +1,11 @@
 {
   "name": "bolao-br-2026",
-  "version": "6.15.1",
+  "version": "6.15.2",
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node scripts/check-project.mjs && node scripts/check-documentation-contracts.mjs && npm run check:syntax && npm run test:documentation-contracts && npm run test:snapshot-exporter && npm run test:competitive-snapshots && npm run test:stats && npm run test:round-highlights && npm run test:participant-duel && npm run test:admin-round-share && npm run test:match-calendar && npm run test:participant-team && npm run test:sync-status",
-    "check:syntax": "node --check js/app.js && node --check js/statistics-engine.js && node --check js/round-highlights-engine.js && node --check js/participant-duel-engine.js && node --check js/admin-round-share.js && node --check js/match-calendar-engine.js && node --check js/participant-team.js && node --check js/motion.js && node --check netlify/functions/_api-helpers.mjs && node --check netlify/functions/_constants.mjs && node --check netlify/functions/_sync-policy.mjs && node --check netlify/functions/_sync-shared.mjs && node --check netlify/functions/classificacao-brasileirao.mjs && node --check netlify/functions/diagnostico-sistema.mjs && node --check netlify/functions/sincronizar-jogos.mjs && node --check netlify/functions/sincronizar-jogos-agendado.mjs && node --check src/snapshot-export/contract.mjs && node --check src/snapshot-export/map-origin.mjs && node --check src/snapshot-export/write-package.mjs && node --check scripts/export-snapshot.mjs && node --check scripts/test-snapshot-exporter.mjs && node --check scripts/test-competitive-snapshots.mjs && node --check scripts/test-participant-team.mjs",
+    "check": "node scripts/check-project.mjs && node scripts/check-documentation-contracts.mjs && npm run check:syntax && npm run test:documentation-contracts && npm run test:snapshot-exporter && npm run test:competitive-snapshots && npm run test:stats && npm run test:round-highlights && npm run test:participant-duel && npm run test:admin-round-share && npm run test:match-calendar && npm run test:participant-team && npm run test:participant-profile-access && npm run test:sync-status",
+    "check:syntax": "node --check js/app.js && node --check js/statistics-engine.js && node --check js/round-highlights-engine.js && node --check js/participant-duel-engine.js && node --check js/admin-round-share.js && node --check js/match-calendar-engine.js && node --check js/participant-team.js && node --check js/motion.js && node --check netlify/functions/_api-helpers.mjs && node --check netlify/functions/_constants.mjs && node --check netlify/functions/_sync-policy.mjs && node --check netlify/functions/_sync-shared.mjs && node --check netlify/functions/classificacao-brasileirao.mjs && node --check netlify/functions/diagnostico-sistema.mjs && node --check netlify/functions/sincronizar-jogos.mjs && node --check netlify/functions/sincronizar-jogos-agendado.mjs && node --check src/snapshot-export/contract.mjs && node --check src/snapshot-export/map-origin.mjs && node --check src/snapshot-export/write-package.mjs && node --check scripts/export-snapshot.mjs && node --check scripts/test-snapshot-exporter.mjs && node --check scripts/test-competitive-snapshots.mjs && node --check scripts/test-participant-team.mjs && node --check scripts/test-participant-profile-access.mjs",
     "snapshot:export": "node scripts/export-snapshot.mjs",
     "test:snapshot-exporter": "node scripts/test-snapshot-exporter.mjs",
     "test:documentation-contracts": "node scripts/test-documentation-contracts.mjs",
@@ -16,6 +16,7 @@
     "test:match-calendar": "node scripts/test-match-calendar-engine.mjs",
     "test:sync-status": "node scripts/test-sync-status-policy.mjs",
     "test:participant-team": "node scripts/test-participant-team.mjs",
+    "test:participant-profile-access": "node scripts/test-participant-profile-access.mjs",
     "test:competitive-snapshots": "node scripts/test-competitive-snapshots.mjs"
   },
   "dependencies": {
