@@ -2731,7 +2731,8 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
 .premium-toggle-time strong{color:#f2cc58;font-size:.9rem}
 .premium-toggle-time small{overflow:hidden;color:var(--muted);font-size:.62rem;text-overflow:ellipsis;white-space:nowrap}
 .premium-toggle-match{display:flex;align-items:center;justify-content:center;gap:7px;min-width:0}
-.premium-toggle-match .game-summary-team strong{display:none}
+.premium-toggle-match .game-summary-team{flex-direction:column;gap:2px}
+.premium-toggle-match .game-summary-team strong{display:block;color:var(--muted);font-size:.5rem;line-height:1;font-weight:900;letter-spacing:.06em}
 .premium-toggle-match .game-summary-crest{width:30px;height:30px;flex-basis:30px;border-radius:9px}
 .premium-toggle-score{min-width:76px;overflow:hidden;color:var(--text);font-size:.75rem;font-weight:850;text-align:center;text-overflow:ellipsis;white-space:nowrap}
 .premium-toggle-side{display:flex;align-items:center;gap:6px}
