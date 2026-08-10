@@ -8,8 +8,9 @@ import { buildMatchCalendarModel } from "./match-calendar-engine.js";
 import { resolveParticipantFavoriteTeam } from "./participant-team.js";
 import { buildRecoveryProtectionModel, recoveryOriginLabel } from "./recovery-protection.js";
 import { resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
+import { hasOfficialLiveStatus, shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
 
-const APP_VERSION = "6.17.3";
+const APP_VERSION = "6.17.4";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -18,6 +19,7 @@ const sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonK
 const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{} };
 let matchClockRefreshTimer=null;
 let liveScoreRefreshTimer=null;
+let liveScoreRefreshInFlight=false;
 let rankingPicksParticipant=null;
 let rankingPicksReturnFocus=null;
 let rankingPicksModalView="picks";
@@ -4180,8 +4182,9 @@ function startMatchClockRefresh(){
 
 async function refreshLiveScoresSilently(){
   if(document.hidden || !state.user) return;
-  const hasLiveGame=state.games.some(game=>gameStatusDisplay(game).key==="live");
-  if(!hasLiveGame) return;
+  if(!shouldRefreshGamesFromSupabase(state.games) || liveScoreRefreshInFlight) return;
+  const hasLiveGame=state.games.some(hasOfficialLiveStatus);
+  liveScoreRefreshInFlight=true;
   try{
     // A sincronização da fonte é restrita ao administrador. Para os demais
     // participantes, o agendamento do Netlify atualiza o Supabase e o app apenas
@@ -4208,10 +4211,13 @@ async function refreshLiveScoresSilently(){
       renderRanking();
       renderMyTeam();
       renderStats();
+      renderHome();
       if(!$("adminTab")?.classList.contains("hidden")) renderAdminRoundStatus();
     }
   }catch(error){
     console.warn("Não foi possível atualizar os placares ao vivo silenciosamente.",error);
+  }finally{
+    liveScoreRefreshInFlight=false;
   }
 }
 
@@ -4528,7 +4534,9 @@ setupAdminCollapsibleCards();
 setupTabs();
 prepareRegistrationForm();
 document.addEventListener("visibilitychange",()=>{
-  if(!document.hidden && !$("adminTab")?.classList.contains("hidden") && Date.now()-adminLastBackgroundRefresh>30000) refreshAdminSilently("ao retornar à aba");
+  if(document.hidden) return;
+  refreshLiveScoresSilently();
+  if(!$("adminTab")?.classList.contains("hidden") && Date.now()-adminLastBackgroundRefresh>30000) refreshAdminSilently("ao retornar à aba");
 });
 try{ const {data:{session}}=await sb.auth.getSession(); if(session) await initialize(session); }
 catch(err){message(err.message||"Não foi possível iniciar o aplicativo.",true);}

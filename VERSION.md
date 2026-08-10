@@ -1,6 +1,6 @@
-6.17.3
+6.17.4
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.17.3-acoes-participante-inline.md`](docs/releases/v6.17.3-acoes-participante-inline.md)
+- Nota da versão atual: [`docs/releases/v6.17.4-atualizacao-jogos-navegador.md`](docs/releases/v6.17.4-atualizacao-jogos-navegador.md)

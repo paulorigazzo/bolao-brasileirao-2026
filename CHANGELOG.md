@@ -1,3 +1,11 @@
+# v6.17.4 — Atualização de jogos em sessões abertas
+
+- O navegador passa a reler o Supabase perto do horário das partidas, sem depender de já conhecer um jogo como ao vivo.
+- A Home acompanha as mudanças de status e placar recebidas pela atualização silenciosa.
+- O retorno a uma aba visível verifica imediatamente se os jogos precisam ser atualizados.
+- Requisições simultâneas de atualização são bloqueadas na mesma sessão.
+- A API externa, as Netlify Functions, o Supabase e as regras competitivas permanecem inalterados.
+
 # v6.17.3 — Ações alinhadas nos cards dos participantes
 
 - Posiciona o botão compacto de WhatsApp à esquerda e o acesso aos jogos à direita, na mesma linha.
