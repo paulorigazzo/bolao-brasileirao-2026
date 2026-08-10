@@ -108,6 +108,10 @@ function normalizeMatch(match) {
   };
 }
 
+export function matchDetailUrl(matchId) {
+  return `${FOOTBALL_API_BASE}/matches/${Number(matchId)}`;
+}
+
 
 export async function syncGames(options = {}) {
   const startedAt = Date.now();
@@ -202,7 +206,7 @@ export async function syncGames(options = {}) {
 
   for (const item of missingFinals.slice(0, Math.max(0, maxApiCalls - apiCalls))) {
     try {
-      const detailResponse = await footballFetch(`${API_BASE}/matches/${item.game.id_jogo}`, {
+      const detailResponse = await footballFetch(matchDetailUrl(item.game.id_jogo), {
         headers: {
           "X-Auth-Token": token,
           "X-Unfold-Goals": "true",

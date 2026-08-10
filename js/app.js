@@ -10,7 +10,7 @@ import { buildRecoveryProtectionModel, recoveryOriginLabel } from "./recovery-pr
 import { resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
 import { shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
 
-const APP_VERSION = "6.17.5";
+const APP_VERSION = "6.17.6";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
