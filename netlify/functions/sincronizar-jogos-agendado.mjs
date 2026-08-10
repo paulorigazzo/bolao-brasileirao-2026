@@ -2,6 +2,15 @@ import { syncGames } from "./_sync-shared.mjs";
 import { serviceClient, isMissingTableError, safeErrorMessage } from "./_api-helpers.mjs";
 import { MAX_API_CALLS_PER_SYNC, MAINTENANCE_INTERVAL_MS } from "./_constants.mjs";
 
+const TERMINAL_STATUSES = new Set(["encerrado", "adiado", "cancelado"]);
+
+export function selectNearbyMatchIds(games = []) {
+  return [...new Set((Array.isArray(games) ? games : [])
+    .filter((game) => !TERMINAL_STATUSES.has(String(game?.status || "").toLowerCase()))
+    .map((game) => Number(game?.id_jogo))
+    .filter((id) => Number.isInteger(id) && id > 0))];
+}
+
 async function shouldSynchronize() {
   const supabase = serviceClient();
   const now = Date.now();
@@ -12,10 +21,10 @@ async function shouldSynchronize() {
     .from("jogos")
     .select("id_jogo,status,inicio")
     .gte("inicio", windowStart)
-    .lte("inicio", windowEnd)
-    .limit(1);
+    .lte("inicio", windowEnd);
   if (gamesError) throw gamesError;
-  if ((nearby || []).length) return { run: true, reason: "janela_de_jogo" };
+  const matchIds = selectNearbyMatchIds(nearby);
+  if (matchIds.length) return { run: true, reason: "janela_de_jogo", mode: "live", matchIds };
 
   const { data: logs, error: logError } = await supabase
     .from("api_sync_log")
@@ -29,7 +38,7 @@ async function shouldSynchronize() {
     throw logError;
   }
   const last = logs?.[0]?.criado_em ? new Date(logs[0].criado_em).getTime() : 0;
-  return { run: !last || now - last >= MAINTENANCE_INTERVAL_MS, reason: "manutencao_6h" };
+  return { run: !last || now - last >= MAINTENANCE_INTERVAL_MS, reason: "manutencao_6h", mode: "full", matchIds: [] };
 }
 
 export default async () => {
@@ -39,7 +48,11 @@ export default async () => {
       console.log("Sincronização ignorada: fora da janela de jogos e manutenção ainda recente.");
       return;
     }
-    const result = await syncGames({ trigger: `agendado:${decision.reason}`, maxApiCalls: MAX_API_CALLS_PER_SYNC });
+    const result = await syncGames({
+      trigger: `agendado:${decision.reason}`,
+      maxApiCalls: MAX_API_CALLS_PER_SYNC,
+      matchIds: decision.matchIds,
+    });
     console.log("Sincronização concluída:", result);
   } catch (error) {
     console.error("Falha na sincronização:", error);

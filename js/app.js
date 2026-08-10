@@ -10,7 +10,7 @@ import { buildRecoveryProtectionModel, recoveryOriginLabel } from "./recovery-pr
 import { resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
 import { shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
 
-const APP_VERSION = "6.17.6";
+const APP_VERSION = "6.18.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -4209,7 +4209,7 @@ async function refreshLiveScoresSilently(){
 
 function startLiveScoreRefresh(){
   if(liveScoreRefreshTimer) return;
-  liveScoreRefreshTimer=setInterval(refreshLiveScoresSilently,2*60*1000);
+  liveScoreRefreshTimer=setInterval(refreshLiveScoresSilently,60*1000);
 }
 
 async function initialize(session){

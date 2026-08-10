@@ -1,3 +1,11 @@
+# v6.18.0 — Sincronização ao vivo por minuto
+
+- A função agendada passa a verificar a janela de jogos a cada minuto.
+- Durante a janela, a football-data.org recebe somente os IDs das partidas próximas ainda não terminais.
+- A sincronização completa permanece disponível para manutenção a cada seis horas e para a ação administrativa manual.
+- Sessões abertas passam a reler o Supabase a cada minuto, sem chamar automaticamente a API externa.
+- Logs distinguem o modo ao vivo do modo completo e registram quantas partidas foram solicitadas.
+
 # v6.17.6 — Fallback de resultado final
 
 - Corrige a URL usada para consultar o detalhe de uma partida encerrada sem placar completo na listagem da competição.

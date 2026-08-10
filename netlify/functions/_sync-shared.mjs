@@ -112,6 +112,14 @@ export function matchDetailUrl(matchId) {
   return `${FOOTBALL_API_BASE}/matches/${Number(matchId)}`;
 }
 
+export function matchesListUrl(matchIds = []) {
+  const ids = [...new Set((Array.isArray(matchIds) ? matchIds : [])
+    .map((id) => Number(id))
+    .filter((id) => Number.isInteger(id) && id > 0))];
+  if (ids.length) return `${FOOTBALL_API_BASE}/matches?ids=${ids.join(",")}`;
+  return `${FOOTBALL_API_BASE}/competitions/${COMPETITION_CODE}/matches?season=${SEASON_YEAR}`;
+}
+
 
 export async function syncGames(options = {}) {
   const startedAt = Date.now();
@@ -119,6 +127,10 @@ export async function syncGames(options = {}) {
   const maxApiCalls = Math.max(1, Math.min(Number(options.maxApiCalls) || MAX_API_CALLS_PER_SYNC, MAX_API_CALLS_PER_SYNC));
   let apiCalls = 0;
   let lastRateLimit = null;
+  const requestedMatchIds = [...new Set((Array.isArray(options.matchIds) ? options.matchIds : [])
+    .map((id) => Number(id))
+    .filter((id) => Number.isInteger(id) && id > 0))];
+  const syncMode = requestedMatchIds.length ? "live" : "full";
   const token = requireEnv("FOOTBALL_DATA_TOKEN");
   const supabase = serviceClient();
 
@@ -137,7 +149,7 @@ export async function syncGames(options = {}) {
   };
 
   const response = await footballFetch(
-    `${FOOTBALL_API_BASE}/competitions/${COMPETITION_CODE}/matches?season=${SEASON_YEAR}`,
+    matchesListUrl(requestedMatchIds),
     {
       headers: {
         "X-Auth-Token": token,
@@ -161,13 +173,17 @@ export async function syncGames(options = {}) {
   // jogos omitidos. Limitamos a 12 rodadas por execução para respeitar limites
   // da API; sincronizações seguintes completam as demais automaticamente.
   const roundCounts = new Map();
-  for (const match of matches) {
-    const round = Number(match?.matchday);
-    if (Number.isFinite(round)) roundCounts.set(round, (roundCounts.get(round) || 0) + 1);
+  if (syncMode === "full") {
+    for (const match of matches) {
+      const round = Number(match?.matchday);
+      if (Number.isFinite(round)) roundCounts.set(round, (roundCounts.get(round) || 0) + 1);
+    }
   }
-  const incompleteRounds = Array.from({ length: 38 }, (_, index) => index + 1)
-    .filter((round) => (roundCounts.get(round) || 0) > 0 && (roundCounts.get(round) || 0) < 10)
-    .slice(0, 4);
+  const incompleteRounds = syncMode === "full"
+    ? Array.from({ length: 38 }, (_, index) => index + 1)
+      .filter((round) => (roundCounts.get(round) || 0) > 0 && (roundCounts.get(round) || 0) < 10)
+      .slice(0, 4)
+    : [];
   const recoveredRounds = [];
 
   if (incompleteRounds.length) {
@@ -273,6 +289,8 @@ export async function syncGames(options = {}) {
     incompleteRoundsChecked: incompleteRounds,
     apiCalls,
     apiCallLimit: maxApiCalls,
+    syncMode,
+    requestedMatches: requestedMatchIds.length,
     trigger,
     durationMs: Date.now() - startedAt,
     rateLimitRetryAfter: lastRateLimit,
