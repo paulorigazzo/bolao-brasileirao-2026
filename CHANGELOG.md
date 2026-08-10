@@ -1,3 +1,10 @@
+# v6.17.5 — Centralização da sincronização automática
+
+- A sincronização automática com a fonte esportiva passa a pertencer exclusivamente ao agendamento do Netlify.
+- Sessões comuns e administrativas continuam relendo os jogos no Supabase sem chamar automaticamente a API externa.
+- O botão administrativo de sincronização manual permanece disponível como contingência autenticada.
+- Frequência do agendamento, Functions, Supabase, fornecedor e regras competitivas permanecem inalterados.
+
 # v6.17.4 — Atualização de jogos em sessões abertas
 
 - O navegador passa a reler o Supabase perto do horário das partidas, sem depender de já conhecer um jogo como ao vivo.
