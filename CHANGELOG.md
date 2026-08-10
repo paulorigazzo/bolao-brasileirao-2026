@@ -1,3 +1,11 @@
+# v6.18.1 — Contratos e rastreabilidade
+
+- Formaliza o fechamento dos palpites 30 minutos antes de cada partida, alinhando as fontes oficiais ao comportamento existente no cliente e no Supabase.
+- Registra a restauração das siglas de três letras abaixo dos escudos nos cards recolhidos da Tela de Jogos.
+- Renova o identificador de cache dos ativos para distribuir a correção visual integrada pelo PR #114.
+- Substitui orientações SQL antigas por mensagens operacionais baseadas no diagnóstico e nas migrações versionadas.
+- Preserva fechamento, pontuação, banco, autenticação, sincronização e demais comportamentos funcionais.
+
 # v6.18.0 — Sincronização ao vivo por minuto
 
 - A função agendada passa a verificar a janela de jogos a cada minuto.

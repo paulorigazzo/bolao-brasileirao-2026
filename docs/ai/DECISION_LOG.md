@@ -421,3 +421,30 @@ Os snapshots são imutáveis para o fluxo normal, não ficam expostos pela aplic
 - a camada não substitui backups contra perda integral do projeto Supabase;
 - snapshots de recuperação do Bolão 2026 não integram nem reativam o programa de transferência para o Rigazzo;
 - schema, triggers, dados competitivos e produção tornam a entrega obrigatoriamente de risco alto.
+
+## DEC-2026-013 — Prazo canônico de fechamento dos palpites
+
+- Data: 2026-08-10
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: declarações documentais que indicavam fechamento no horário da partida
+- Impacto: alto
+
+### Contexto
+
+O cliente usa `lockMinutesBefore: 30`, a Tela de Regras informa o fechamento 30 minutos antes e o inventário do Supabase confirma que `palpite_no_prazo` e `validar_palpite` aplicam o corte em `inicio - 30 minutos`. Entretanto, fontes oficiais vivas ainda descreviam o fechamento como ocorrendo no horário da partida.
+
+Essa divergência não alterava o comportamento em produção, mas tornava ambígua uma regra competitiva protegida e poderia orientar incorretamente uma manutenção futura.
+
+### Decisão
+
+Formalizar como regra canônica do Bolão Brasileirão 2026 que cada palpite fecha 30 minutos antes do horário de início da respectiva partida.
+
+A v6.18.1 alinha as fontes oficiais a esse comportamento existente. Não modifica `lockMinutesBefore`, funções do Supabase, validações de escrita, palpites armazenados ou qualquer prazo operacional.
+
+### Consequências
+
+- documentação, governança e interface passam a descrever o mesmo prazo;
+- mudanças futuras no intervalo de fechamento continuam sendo de risco alto e exigem tarefa específica, critérios de aceite e testes;
+- a entrega não altera pontuação, resultados, Ranking, Supabase, RLS, autenticação, sincronização ou produção;
+- testes automatizados diretos do fechamento permanecem como entrega posterior independente.

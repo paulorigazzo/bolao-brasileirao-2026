@@ -10,7 +10,7 @@ import { buildRecoveryProtectionModel, recoveryOriginLabel } from "./recovery-pr
 import { resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
 import { shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
 
-const APP_VERSION = "6.18.0";
+const APP_VERSION = "6.18.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -339,7 +339,7 @@ async function saveFavoriteTeam(){
     $("favoriteTeamStatus").textContent=value ? `Time do coração salvo: ${value}.` : "Preferência removida.";
     message("Time do coração atualizado com sucesso.");
   }catch(err){
-    $("favoriteTeamStatus").textContent="Não foi possível salvar. Execute primeiro o SQL da versão 3.10 no Supabase.";
+    $("favoriteTeamStatus").textContent="Não foi possível salvar o time favorito. Consulte o diagnóstico administrativo e as migrações versionadas do Supabase.";
     message(err.message||"Não foi possível salvar o time do coração.",true);
   }finally{button.disabled=false;button.textContent="Salvar escolha";}
 }
@@ -783,11 +783,11 @@ async function loadData(){
     isAdminUser() ? sb.rpc("obter_limite_participantes_ativos") : Promise.resolve({data:10,error:null})
   ]);
   if(gErr) throw gErr; if(pErr) throw pErr; if(pubErr) console.warn(pubErr);
-  if(countsErr) console.warn("Não foi possível carregar a contagem geral de palpites. Execute a atualização SQL da versão 3.8.", countsErr);
+  if(countsErr) console.warn("Não foi possível carregar a contagem geral de palpites. Verifique a view correspondente e as migrações versionadas do Supabase.", countsErr);
   if(participantsErr) console.warn("Os times dos demais participantes não puderam ser carregados.", participantsErr);
-  if(adminProgressErr) console.warn("O progresso administrativo não pôde ser carregado. Execute o SQL da versão 4.4.1.", adminProgressErr);
-  if(authorizedErr) console.warn("O cadastro dinâmico de participantes ainda não está disponível. Execute o SQL da versão 4.7.0.",authorizedErr);
-  if(participantLimitErr) console.warn("O limite configurável de participantes ainda não está disponível. Execute o SQL da versão 6.7.1.",participantLimitErr);
+  if(adminProgressErr) console.warn("O progresso administrativo não pôde ser carregado. Verifique a view correspondente e as migrações versionadas do Supabase.", adminProgressErr);
+  if(authorizedErr) console.warn("O cadastro dinâmico de participantes não pôde ser carregado. Verifique a estrutura de participantes e as migrações versionadas do Supabase.",authorizedErr);
+  if(participantLimitErr) console.warn("O limite configurável de participantes não pôde ser carregado. Verifique as funções administrativas e as migrações versionadas do Supabase.",participantLimitErr);
   state.games=games||[]; state.ownPicks=picks||[]; state.publicPicks=pub||[]; state.pickCounts=counts||[]; state.participants=participants||[]; state.adminPickProgress=adminProgress||[]; state.authorizedParticipants=authorized||[]; state.participantLimit=Math.max(1,Number(participantLimit)||10);
   applyCanonicalParticipantNames();
   renderSyncStatus();
@@ -3250,7 +3250,7 @@ async function saveAuthorizedParticipant(event){
     await loadData(); renderAdminParticipants(); renderAdminAttention(); renderAdminExecutiveDashboard();
     closeParticipantManager();
     message(`${nome} foi autorizado a entrar no bolão.`);
-  }catch(err){ status.textContent=err.message||"Não foi possível salvar. Execute o SQL da versão 4.7.0."; }
+  }catch(err){ status.textContent=err.message||"Não foi possível salvar o participante. Consulte o diagnóstico administrativo e as migrações versionadas do Supabase."; }
   finally{ button.disabled=false; button.textContent="Salvar participante"; }
 }
 

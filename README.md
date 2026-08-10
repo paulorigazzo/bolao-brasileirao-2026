@@ -1,17 +1,17 @@
 # Bolão Brasileirão 2026
 
-Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login Google, fechamento dos palpites no horário da partida, ranking, estatísticas, classificação oficial e área administrativa.
+Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login Google, fechamento dos palpites 30 minutos antes de cada partida, ranking, estatísticas, classificação oficial e área administrativa.
 
 ## Estado atual
 
-- Versão funcional: `v6.18.0`.
+- Versão funcional: `v6.18.1`.
 - Prioridade, status e sequência atuais: [`ROADMAP.md`](ROADMAP.md).
 - Evolução para Temporadas e Ligas: conduzida no produto independente [Bolão Brasileirão Rigazzo](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo) como evolução caseira e incremental, reutilizando seletivamente a experiência visual de 2026. O programa de transferência R06B.2–R11 está congelado e a [direção vigente e o histórico da decisão](docs/architecture/BOLAO_BRASILEIRAO_RIGAZZO.md) permanecem documentados sem alteração funcional deste aplicativo.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Funcionalidades disponíveis
 
-- palpites por rodada com fechamento individual no horário da partida;
+- palpites por rodada com fechamento individual 30 minutos antes de cada partida;
 - pontuação, ranking, histórico e estatísticas pessoais;
 - destaques pessoais e coletivos por rodada, com resumo controlado na Home e detalhamento acessível;
 - explicação determinística das mudanças de posição no Ranking pelos Destaques da Rodada;

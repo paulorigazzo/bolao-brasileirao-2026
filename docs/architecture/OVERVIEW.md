@@ -26,7 +26,7 @@ Resultados encerrados, palpites relacionados e checkpoints de Ranking possuem um
 
 ## Regras protegidas
 
-- palpites fecham no horário do jogo;
+- palpites fecham 30 minutos antes do horário do jogo;
 - 10 pontos: placar exato;
 - 5 pontos: vencedor e saldo de gols;
 - 3 pontos: vencedor;
