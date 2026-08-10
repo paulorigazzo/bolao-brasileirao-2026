@@ -8,9 +8,9 @@ import { buildMatchCalendarModel } from "./match-calendar-engine.js";
 import { resolveParticipantFavoriteTeam } from "./participant-team.js";
 import { buildRecoveryProtectionModel, recoveryOriginLabel } from "./recovery-protection.js";
 import { resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
-import { hasOfficialLiveStatus, shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
+import { shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
 
-const APP_VERSION = "6.17.4";
+const APP_VERSION = "6.17.5";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -4183,25 +4183,11 @@ function startMatchClockRefresh(){
 async function refreshLiveScoresSilently(){
   if(document.hidden || !state.user) return;
   if(!shouldRefreshGamesFromSupabase(state.games) || liveScoreRefreshInFlight) return;
-  const hasLiveGame=state.games.some(hasOfficialLiveStatus);
   liveScoreRefreshInFlight=true;
   try{
-    // A sincronização da fonte é restrita ao administrador. Para os demais
-    // participantes, o agendamento do Netlify atualiza o Supabase e o app apenas
-    // relê os dados, evitando expor uma rota de escrita pública.
-    if(isAdminUser()){
-      const {data:{session}}=await sb.auth.getSession();
-      if(session?.access_token){
-        const response=await fetch("/.netlify/functions/sincronizar-jogos",{
-          method:"POST",
-          cache:"no-store",
-          headers:{"Authorization":`Bearer ${session.access_token}`,"Accept":"application/json"}
-        });
-        const syncResult=await response.json().catch(()=>({}));
-        if(response.ok) state.lastSyncReport=syncResult;
-        else console.warn(syncResult.error||syncResult.message||"Falha na sincronização ao vivo");
-      }
-    }
+    // A sincronização automática da fonte pertence exclusivamente ao agendamento
+    // do Netlify. Todas as sessões apenas releem o Supabase; administradores ainda
+    // podem usar a ação manual explícita quando uma contingência exigir.
     const {data,error}=await sb.from("jogos").select("*").order("rodada").order("inicio");
     if(error) throw error;
     if(Array.isArray(data)){
