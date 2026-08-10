@@ -1,3 +1,11 @@
+# v6.18.2 — Autorização centralizada no Supabase
+
+- Fixa o Supabase JS em `2.110.9` no pacote e no carregamento pelo CDN.
+- Remove do cliente a lista fixa de participantes e o e-mail administrativo de compatibilidade.
+- Faz a primeira carga administrativa usar o cadastro individual ativo e aprovado retornado pelo Supabase.
+- Remove a exceção `ADMIN_EMAILS` das Netlify Functions; ações administrativas exigem cadastro ativo, aprovado e marcado como administrador.
+- Mantém tabelas, migrações, RLS, dados, regras de palpites e pontuação inalterados.
+
 # v6.18.1 — Contratos e rastreabilidade
 
 - Formaliza o fechamento dos palpites 30 minutos antes de cada partida, alinhando as fontes oficiais ao comportamento existente no cliente e no Supabase.

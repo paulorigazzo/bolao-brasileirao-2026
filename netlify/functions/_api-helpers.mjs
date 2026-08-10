@@ -42,6 +42,12 @@ export function methodNotAllowed(allowedMethods) {
   });
 }
 
+export function isApprovedAdministrator(participant) {
+  return participant?.administrador === true
+    && participant?.ativo === true
+    && (participant?.status ?? "approved") === "approved";
+}
+
 export async function requireAdmin(request) {
   const auth = request.headers.get("authorization") || "";
   const token = auth.match(/^Bearer\s+(.+)$/i)?.[1];
@@ -57,7 +63,7 @@ export async function requireAdmin(request) {
   const email = user.email.trim().toLowerCase();
   const { data: participant, error: participantError } = await supabase
     .from("participantes_autorizados")
-    .select("administrador,ativo")
+    .select("administrador,ativo,status")
     .eq("email", email)
     .maybeSingle();
 
@@ -65,11 +71,7 @@ export async function requireAdmin(request) {
     return { ok: false, status: 503, error: `Não foi possível validar o administrador: ${participantError.message}` };
   }
 
-  const envAdmins = String(process.env.ADMIN_EMAILS || "")
-    .split(",")
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
-  const allowed = participant?.ativo !== false && (participant?.administrador === true || envAdmins.includes(email));
+  const allowed = isApprovedAdministrator(participant);
   if (!allowed) return { ok: false, status: 403, error: "Apenas administradores podem sincronizar jogos." };
 
   return { ok: true, user, email, supabase };
