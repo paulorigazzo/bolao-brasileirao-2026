@@ -1,3 +1,10 @@
+# v6.17.6 — Fallback de resultado final
+
+- Corrige a URL usada para consultar o detalhe de uma partida encerrada sem placar completo na listagem da competição.
+- O fallback passa a reutilizar explicitamente a base oficial configurada para a football-data.org.
+- Adiciona teste direto para a composição da URL de detalhe.
+- Frequência, janela, fornecedor, banco e política de gravação permanecem inalterados.
+
 # v6.17.5 — Centralização da sincronização automática
 
 - A sincronização automática com a fonte esportiva passa a pertencer exclusivamente ao agendamento do Netlify.
