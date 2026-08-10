@@ -9,8 +9,9 @@ import { resolveParticipantFavoriteTeam } from "./participant-team.js";
 import { buildRecoveryProtectionModel, recoveryOriginLabel } from "./recovery-protection.js";
 import { resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
 import { shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
+import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./access-control.js";
 
-const APP_VERSION = "6.18.1";
+const APP_VERSION = "6.18.2";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -102,10 +103,7 @@ function gameStatusDisplay(game){
 }
 
 function participantDirectory(){
-  if(state.authorizedParticipants?.length){
-    return Object.fromEntries(state.authorizedParticipants.filter(item=>item.ativo!==false && (!item.status || item.status==="approved")).map(item=>[String(item.email||"").toLowerCase(),item.nome]));
-  }
-  return CONFIG.participants || {};
+  return buildParticipantDirectory(state.participants,state.authorizedParticipants);
 }
 
 const TEAM_THEMES = {
@@ -580,35 +578,31 @@ async function loadParticipant(){
     if(error) throw error;
     authorization=data;
   }catch(err){
-    console.warn("Consulta dinâmica de autorização indisponível; usando a lista de compatibilidade.",err);
+    console.error("Consulta dinâmica de autorização indisponível.",err);
+    throw new Error("Não foi possível validar seu acesso ao bolão. Tente novamente em instantes.");
   }
 
-  const fallbackName=CONFIG.participants?.[email];
-  if(!authorization && !fallbackName){
+  if(!authorization){
     if(!isRegistrationLink()) throw new Error("Esta conta ainda não está autorizada. Use o link de cadastro enviado pelo administrador.");
     authorization=await requestMembership(email);
     sessionStorage.removeItem(REGISTRATION_DRAFT_KEY);
   }
 
   if(authorization){
-    const status=authorization.ativo===false && authorization.status==="approved" ? "inactive" : (authorization.status || (authorization.ativo===false?"inactive":"approved"));
+    const status=membershipStatus(authorization);
     state.membership={...authorization,status};
     if(status!=="approved" || authorization.ativo===false){
       state.participant={nome:authorization.nome || state.user.user_metadata?.full_name || email.split("@")[0],email,user_id:state.user.id,celular:authorization.celular||"",time_favorito:authorization.time_favorito||null};
       return;
     }
-  }else{
-    state.membership={status:"approved",nome:fallbackName,email,ativo:true};
   }
 
   const {data,error}=await sb.from("participantes").select("*").eq("user_id",state.user.id).maybeSingle();
   if(error) throw error;
   if(data){ state.participant=data; return; }
-  const profileName=authorization?.nome || fallbackName || state.user.user_metadata?.full_name || email.split("@")[0];
+  const profileName=authorization.nome || state.user.user_metadata?.full_name || email.split("@")[0];
   try{
-    const profileRpc=authorization?"registrar_meu_perfil_consolidado":"registrar_meu_perfil";
-    const profileArgs=authorization?{}:{p_nome:profileName};
-    const {data:created,error:createError}=await sb.rpc(profileRpc,profileArgs);
+    const {data:created,error:createError}=await sb.rpc("registrar_meu_perfil_consolidado",{});
     if(createError) throw createError;
     state.participant=Array.isArray(created)?created[0]:created;
   }catch(err){
@@ -777,7 +771,7 @@ async function loadData(){
     sb.from("palpites").select("*").eq("user_id",state.user.id),
     sb.from("palpites_encerrados_publicos").select("*"),
     sb.from("contagem_palpites_participantes").select("*"),
-    sb.from("participantes").select("user_id,nome,email,time_favorito"),
+    sb.from("participantes").select("user_id,nome,email,time_favorito,ativo"),
     isAdminUser() ? sb.from("progresso_palpites_adm").select("user_id,usuario,id_jogo,atualizado_em") : Promise.resolve({data:[],error:null}),
     sb.from("participantes_autorizados").select("id,nome,email,celular,time_favorito,ativo,administrador,status,solicitado_em,aprovado_em,criado_em,atualizado_em").order("nome"),
     isAdminUser() ? sb.rpc("obter_limite_participantes_ativos") : Promise.resolve({data:10,error:null})
@@ -2841,7 +2835,7 @@ async function loadStandings(force=false){
 function isAdminUser(){
   const email=String(state.user?.email||"").toLowerCase();
   const dynamic=state.authorizedParticipants?.find(item=>String(item.email||"").toLowerCase()===email);
-  return Boolean(email) && (dynamic?.administrador===true || email===(CONFIG.adminEmail||"").toLowerCase());
+  return Boolean(email) && isAdministrator(dynamic || state.membership);
 }
 
 function adminCurrentRound(){
