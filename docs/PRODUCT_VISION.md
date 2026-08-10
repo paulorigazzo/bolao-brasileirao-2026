@@ -10,7 +10,7 @@ Oferecer uma experiência divertida e confiável para pequenos grupos registrare
 
 ## Capacidades atuais
 
-- fechamento individual de palpites no horário de cada partida;
+- fechamento individual de palpites 30 minutos antes do horário de cada partida;
 - pontuação transparente, ranking e resultados;
 - estatísticas determinísticas avançadas;
 - personalização pelo time favorito;

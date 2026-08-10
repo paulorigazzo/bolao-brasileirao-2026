@@ -127,7 +127,7 @@ O procedimento detalhado está em `docs/ai/CODEX_WORKFLOW.md`.
 
 Não alterar sem tarefa específica, critérios de aceite e testes:
 
-- fechamento dos palpites no horário do jogo;
+- fechamento dos palpites 30 minutos antes do horário do jogo;
 - 10 pontos para placar exato;
 - 5 pontos para vencedor e saldo de gols;
 - 3 pontos para vencedor;
