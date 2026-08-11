@@ -226,12 +226,37 @@
   background:rgba(100,217,148,.065);color:#a8eac0
 }
 
+/* v6.20.0 — ocorrências explicadas da recuperação competitiva. */
+.admin-recovery-badge.is-info{color:#a9d8ff;background:rgba(91,166,224,.12)}
+.admin-recovery-status.is-info{background:rgba(91,166,224,.09)}
+.admin-recovery-occurrences{display:grid;gap:10px;margin:14px 0}
+.admin-recovery-occurrence{
+  padding:14px;border:1px solid var(--admin-line);border-radius:14px;
+  background:rgba(255,255,255,.028)
+}
+.admin-recovery-occurrence.is-info{border-color:rgba(91,166,224,.20);background:rgba(91,166,224,.055)}
+.admin-recovery-occurrence.is-warning{border-color:rgba(255,173,79,.22);background:rgba(255,173,79,.055)}
+.admin-recovery-occurrence.is-critical{border-color:rgba(255,112,112,.24);background:rgba(255,112,112,.06)}
+.admin-recovery-occurrence.is-checked{opacity:.78}
+.admin-recovery-occurrence header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.admin-recovery-occurrence header div{min-width:0}
+.admin-recovery-occurrence header small,.admin-recovery-occurrence header strong{display:block}
+.admin-recovery-occurrence header small{color:#91a69a;font-size:.72rem}
+.admin-recovery-occurrence header strong{margin-top:3px;color:#edf8f1}
+.admin-recovery-occurrence header>span{flex:0 0 auto;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.07);color:#c9d8cf;font-size:.68rem;font-weight:800}
+.admin-recovery-occurrence p{margin:12px 0 8px!important}
+.admin-recovery-comparison{padding:9px 10px;border-radius:10px;background:rgba(0,0,0,.13);color:#dce8e0;font-size:.82rem;font-weight:700}
+.admin-recovery-occurrence ul{margin:10px 0 0;padding-left:18px;color:#9fb1a5;font-size:.76rem;line-height:1.55}
+.admin-recovery-checked-at{display:block;margin-top:10px;color:#9fb1a5}
+.admin-recovery-check{width:100%;margin-top:12px}
+
 @media(max-width:620px){
   #adminTab{--admin-card-gap:14px;--admin-card-padding:17px;--admin-card-title-size:1.12rem}
   #adminTab>.card{padding:var(--admin-card-padding);border-radius:20px}
   #adminTab>#adminAttentionCard,
   #adminTab>#adminAttentionCard~.card{border-radius:20px}
   .admin-pending-toolbar{padding:10px}
+  .admin-recovery-occurrence header{flex-direction:column}
 }
 
 

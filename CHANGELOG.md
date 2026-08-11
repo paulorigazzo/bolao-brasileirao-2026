@@ -1,3 +1,11 @@
+# v6.20.0 — Detalhes da recuperação competitiva
+
+- Explica cada ocorrência no card administrativo com jogo, rodada, valores preservados e atuais e uma descrição curta e determinística.
+- Separa alterações posteriores registradas, pendências de conferência e impactos em checkpoints, evitando tratar toda diferença histórica como problema atual.
+- Permite registrar a conferência administrativa somente nas pendências reais, com identificação do administrador e horário preservados em área privada.
+- Mantém jogos, palpites, snapshots, pontos e posições inalterados; não introduz restauração automática.
+- Restringe leitura e conferência detalhadas a administradores ativos e aprovados e não retorna palpites individuais ou dados pessoais.
+
 # v6.19.3 — Harmonia visual dos cards administrativos
 
 - Uniformiza largura, preenchimento, cantos e espaçamento vertical dos cards da Central de Atenção ao Dashboard executivo.
