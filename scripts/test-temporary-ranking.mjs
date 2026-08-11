@@ -53,6 +53,7 @@ assert.equal(fixture.rows.every(row=>row.total_projetado===row.pontos_oficiais+r
 const root=fileURLToPath(new URL("../",import.meta.url));
 const sql=readFileSync(`${root}supabase/migrations/20260811111102_corrige_ranking_provisorio_atualizado_em.sql`,"utf8");
 const app=readFileSync(`${root}js/app.js`,"utf8");
+const html=readFileSync(`${root}index.html`,"utf8");
 assert.match(sql,/security definer/i);
 assert.match(sql,/set search_path = pg_catalog, public/i);
 assert.match(sql,/public\.email_autorizado\(\)/i);
@@ -67,5 +68,9 @@ assert.match(app,/if\(TEMPORARY_RANKING_SYNTHETIC_PREVIEW\)[\s\S]*installTempora
 assert.match(app,/temporary-ranking-result-main[\s\S]*temporaryMovementLabel\(item\.movement\)[\s\S]*temporary-ranking-points[\s\S]*temporary-ranking-comparison/i);
 assert.match(app,/Atual <b>\$\{officialPosition\}<\/b>[\s\S]*Prov\. <b>\$\{item\.position\}º<\/b>/i);
 assert.match(app,/aria-label="Posição mantida">—<\/span>/i);
+assert.match(html,/data-admin-quick-action="temporary-ranking"/i);
+assert.match(app,/allowUnavailable && isAdminUser\(\)/i);
+assert.match(app,/temporaryRankingAllowUnavailable && isAdminUser\(\)/i);
+assert.match(app,/openTemporaryRanking\(button,\{allowUnavailable:true\}\)/i);
 
 console.log("Ranking provisório e contrato agregado do Supabase verificados com sucesso.");

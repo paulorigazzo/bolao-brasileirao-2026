@@ -13,7 +13,7 @@ import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./
 import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temporary-ranking-engine.js";
 import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
 
-const APP_VERSION = "6.19.1";
+const APP_VERSION = "6.19.2";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -36,6 +36,7 @@ let matchCalendarReturnFocus=null;
 let matchCalendarModel=null;
 let matchCalendarMonthKey=null;
 let temporaryRankingReturnFocus=null;
+let temporaryRankingAllowUnavailable=false;
 const $ = id => document.getElementById(id);
 const show = (id, visible=true) => $(id)?.classList.toggle("hidden", !visible);
 const REGISTRATION_DRAFT_KEY="bolaoRegistrationDraft";
@@ -1448,7 +1449,7 @@ function renderTemporaryRankingModal(model,rows,{synthetic=false,currentUserId=n
 
 async function refreshTemporaryRankingModal({silent=false}={}){
   const context=temporaryRankingContext();
-  if(!context.available){ closeTemporaryRanking(); return; }
+  if(!context.available && !(temporaryRankingAllowUnavailable && isAdminUser())){ closeTemporaryRanking(); return; }
   const content=$('temporaryRankingContent');
   if(TEMPORARY_RANKING_PREVIEW_FIXTURE){
     const fixture=TEMPORARY_RANKING_PREVIEW_FIXTURE;
@@ -1465,8 +1466,10 @@ async function refreshTemporaryRankingModal({silent=false}={}){
   renderTemporaryRankingModal(buildTemporaryRankingModel({rows:data||[],officialRanking:state.ranking,games:state.games,round:context.round}),data||[]);
 }
 
-function openTemporaryRanking(trigger){
-  if(!temporaryRankingContext().available) return message('O Ranking provisório estará disponível quando a rodada possuir resultados relevantes.',true);
+function openTemporaryRanking(trigger,{allowUnavailable=false}={}){
+  const adminOverride=allowUnavailable && isAdminUser();
+  if(!temporaryRankingContext().available && !adminOverride) return message('O Ranking provisório estará disponível quando a rodada possuir resultados relevantes.',true);
+  temporaryRankingAllowUnavailable=adminOverride;
   temporaryRankingReturnFocus=trigger||document.activeElement;
   $('temporaryRankingModal')?.classList.remove('hidden');
   document.body.classList.add('modal-open');
@@ -1479,6 +1482,7 @@ function closeTemporaryRanking(){
   document.body.classList.remove('modal-open');
   const target=temporaryRankingReturnFocus;
   temporaryRankingReturnFocus=null;
+  temporaryRankingAllowUnavailable=false;
   target?.focus?.();
 }
 
@@ -3860,6 +3864,7 @@ async function handleAdminQuickAction(event){
     if(status) status.textContent="Executando ação…";
     if(action==="sync") await syncGames(button);
     else if(action==="ranking"){ await refresh(); renderRanking(); message("Ranking atualizado com os dados mais recentes."); }
+    else if(action==="temporary-ranking") openTemporaryRanking(button,{allowUnavailable:true});
     else if(action==="share-round") openAdminRoundShare(button);
     else if(action==="next-round") goToNextAdminRound();
     else if(action==="copy-pool-link") await copyPoolLink();
