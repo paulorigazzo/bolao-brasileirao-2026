@@ -12,7 +12,7 @@ assert.equal(recoveryOccurrenceModel({tipo:"impacto_checkpoint",severidade:"crit
 assert.equal(recoveryOccurrenceModel({tipo:"impacto_checkpoint",severidade:"critica",pode_conferir:true,conferida:true}).canCheck,false);
 assert.equal(recoveryOriginLabel("finalizacao"),"Finalização de jogo");
 
-const sql=readFileSync(new URL("../supabase/migrations/20260811194739_detalhes_recuperacao_competitiva.sql",import.meta.url),"utf8");
+const sql=readFileSync(new URL("../supabase/migrations/20260811200719_detalhes_recuperacao_competitiva.sql",import.meta.url),"utf8");
 assert.match(sql,/security definer\s+set search_path = pg_catalog, public, private/i);
 assert.match(sql,/auth\.uid\(\) is null/i);
 assert.match(sql,/administrador is true/i);
