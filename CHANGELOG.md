@@ -1,3 +1,11 @@
+# v6.20.2 — Harmonia do resumo das Estatísticas
+
+- Reorganiza o card inicial em uma área objetiva de desempenho e um rodapé interno de largura total.
+- Impede que momento, título e círculo de eficiência disputem a mesma coluna no celular.
+- Restaura de forma permanentemente visível a explicação do significado do título atual.
+- Mantém eficiência, pontos, participação, momento e título no mesmo card, com hierarquia mais clara.
+- Preserva cálculos estatísticos, pontuação, dados, Supabase e demais telas.
+
 # v6.20.1 — Consolidação da tela de Estatísticas
 
 - Reúne “Meu desempenho” e “Seu momento” em um único card inicial mais compacto.

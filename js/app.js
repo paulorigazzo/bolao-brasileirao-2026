@@ -13,7 +13,7 @@ import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./
 import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temporary-ranking-engine.js";
 import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
 
-const APP_VERSION = "6.20.1";
+const APP_VERSION = "6.20.2";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2549,9 +2549,8 @@ function renderStatsMoment(model){
   if($("statsMomentText")) $("statsMomentText").textContent=moment.text;
   if($("statsMomentBadge")){
     $("statsMomentBadge").textContent=`${title.icon} ${title.title}`;
-    $("statsMomentBadge").title=title.description;
-    $("statsMomentBadge").setAttribute("aria-label",`${title.title}. ${title.description}`);
   }
+  if($("statsMomentDescription")) $("statsMomentDescription").textContent=title.description;
 }
 
 function renderStatsRecommendations(model){
