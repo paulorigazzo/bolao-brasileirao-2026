@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.18.2">
-  <link rel="stylesheet" href="./css/styles.css?v=6.18.2">
-  <link rel="stylesheet" href="./css/components.css?v=6.18.2">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.18.2">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.18.2">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.18.2">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.19.0">
+  <link rel="stylesheet" href="./css/styles.css?v=6.19.0">
+  <link rel="stylesheet" href="./css/components.css?v=6.19.0">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.19.0">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.19.0">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.19.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.18.2</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.19.0</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -119,6 +119,7 @@
       <section id="homeTab" class="tab-content home-tab">
         <section id="homeHero" class="home-hero card" aria-live="polite"></section>
         <section id="homePriority" class="home-priority card" aria-live="polite"></section>
+        <section id="temporaryRankingHomeAccess" class="temporary-ranking-access temporary-ranking-home-access card hidden" aria-live="polite"></section>
 
         <section class="home-section-heading">
           <div><span class="eyebrow">VISÃO GERAL</span><h2>Seu bolão agora</h2></div>
@@ -173,6 +174,7 @@
 
       <section id="rankingTab" class="tab-content hidden ranking-premium-tab">
         <article id="rankingHero" class="ranking-hero card"></article>
+        <section id="temporaryRankingRankingAccess" class="temporary-ranking-access temporary-ranking-page-access card hidden" aria-live="polite"></section>
         <div id="rankingHighlights" class="ranking-highlights ranking-premium-highlights"></div>
 
         <section class="ranking-section" aria-labelledby="podiumTitle">
@@ -571,6 +573,22 @@
     </section>
   </main>
 
+  <div id="temporaryRankingModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="temporaryRankingModalTitle" aria-describedby="temporaryRankingModalSummary">
+    <section class="temporary-ranking-modal card" tabindex="-1">
+      <header class="temporary-ranking-modal-header">
+        <div>
+          <span class="eyebrow">CLASSIFICAÇÃO PROVISÓRIA</span>
+          <h2 id="temporaryRankingModalTitle">Se a rodada terminasse agora</h2>
+          <p id="temporaryRankingModalSummary" class="muted-note">Projeção informativa baseada nos placares disponíveis.</p>
+        </div>
+        <button id="temporaryRankingModalClose" class="modal-close" type="button" aria-label="Fechar Ranking provisório">✕</button>
+      </header>
+      <div id="temporaryRankingStatus" class="temporary-ranking-status" aria-live="polite"></div>
+      <div id="temporaryRankingContent" class="temporary-ranking-content" aria-live="polite"></div>
+      <p class="temporary-ranking-privacy">Os palpites individuais permanecem protegidos. Pontos provisórios não são gravados nem alteram o Ranking oficial.</p>
+    </section>
+  </div>
+
   <div id="rankingPicksModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="rankingPicksModalTitle">
     <section class="ranking-picks-modal card" tabindex="-1">
       <div class="ranking-picks-header">
@@ -715,6 +733,6 @@
       if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.18.2"></script>
+  <script type="module" src="./js/app.js?v=6.19.0"></script>
 </body>
 </html>
