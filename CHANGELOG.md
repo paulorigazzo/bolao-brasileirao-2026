@@ -1,3 +1,12 @@
+# v6.20.1 — Consolidação da tela de Estatísticas
+
+- Reúne “Meu desempenho” e “Seu momento” em um único card inicial mais compacto.
+- Mantém eficiência, participação, leitura do momento e título atual sem repetir um card completo.
+- Ordena o Histórico do Ranking da rodada mais recente para a mais antiga.
+- Substitui a classificação duplicada por um acesso à tela completa de Ranking.
+- Move ressalvas informativas para o final da tela e mantém alertas de dados inválidos no topo.
+- Preserva cálculos estatísticos, pontuação, dados, Supabase e demais telas.
+
 # v6.20.0 — Detalhes da recuperação competitiva
 
 - Explica cada ocorrência no card administrativo com jogo, rodada, valores preservados e atuais e uma descrição curta e determinística.
