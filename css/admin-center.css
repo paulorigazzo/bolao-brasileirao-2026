@@ -52,6 +52,50 @@
 #adminTab>.card p,
 #adminTab>.card .muted-note{color:var(--admin-muted)}
 
+/* v6.19.3 — ritmo uniforme dos cards operacionais, da Central de Atenção em diante. */
+#adminTab{
+  --admin-card-gap:16px;
+  --admin-card-padding:20px;
+  --admin-card-title-size:1.35rem;
+}
+#adminTab>#adminAttentionCard,
+#adminTab>#adminAttentionCard~.card{
+  box-sizing:border-box;
+  width:100%;
+  margin-inline:0;
+  padding:var(--admin-card-padding);
+  border-radius:22px;
+}
+#adminTab>#adminAttentionCard~.card{margin-top:var(--admin-card-gap)}
+#adminTab>#adminAttentionCard>[data-admin-card-header],
+#adminTab>#adminAttentionCard~.card>[data-admin-card-header]{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  min-width:0;
+}
+#adminTab>#adminAttentionCard>[data-admin-card-header] h2,
+#adminTab>#adminAttentionCard~.card>[data-admin-card-header] h2{
+  margin:5px 0 0;
+  font-size:var(--admin-card-title-size);
+  line-height:1.2;
+}
+#adminTab>#adminAttentionCard .admin-card-header-actions,
+#adminTab>#adminAttentionCard~.card .admin-card-header-actions{flex:0 0 auto;gap:8px}
+#adminTab>#adminAttentionCard~.card>:is(
+  .admin-quick-actions-intro,
+  .admin-participants-intro,
+  .admin-diagnostic-intro,
+  .admin-audit-intro,
+  .admin-recovery-intro,
+  .admin-executive-intro
+){margin:12px 0 18px;line-height:1.5}
+#adminTab>#adminAttentionCard>.admin-back-to-nav,
+#adminTab>#adminAttentionCard~.card>.admin-back-to-nav{margin-top:18px}
+#adminTab>#adminAttentionCard.is-collapsed,
+#adminTab>#adminAttentionCard~.card.is-collapsed{padding-block:16px}
+
 /* Centro de Controle: remove brilho e gradiente excessivos. */
 .admin-control-center{overflow:hidden}
 .admin-control-center::after{opacity:.32;background:radial-gradient(circle,rgba(100,217,148,.11),transparent 70%)}
@@ -183,7 +227,10 @@
 }
 
 @media(max-width:620px){
-  #adminTab>.card{padding:17px;border-radius:20px}
+  #adminTab{--admin-card-gap:14px;--admin-card-padding:17px;--admin-card-title-size:1.12rem}
+  #adminTab>.card{padding:var(--admin-card-padding);border-radius:20px}
+  #adminTab>#adminAttentionCard,
+  #adminTab>#adminAttentionCard~.card{border-radius:20px}
   .admin-pending-toolbar{padding:10px}
 }
 

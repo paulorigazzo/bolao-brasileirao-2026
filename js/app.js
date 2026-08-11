@@ -13,7 +13,7 @@ import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./
 import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temporary-ranking-engine.js";
 import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
 
-const APP_VERSION = "6.19.2";
+const APP_VERSION = "6.19.3";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
