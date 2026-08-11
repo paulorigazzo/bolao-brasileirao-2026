@@ -2733,9 +2733,12 @@ function renderStats(){
     if(quality.invalid) reasons.push(`<li><strong>${quality.invalid}</strong> com dados incompletos para revisão</li>`);
     qualityPanel.classList.toggle("hidden",!quality.hasAttention);
     qualityPanel.classList.toggle("is-warning",quality.level==="warning");
+    qualityPanel.classList.toggle("is-note",quality.level==="info");
+    if(quality.level==="warning") $("statsAdvancedComparison")?.before(qualityPanel);
+    else $("statsTab")?.append(qualityPanel);
     qualityPanel.innerHTML=quality.hasAttention?`
       <div class="stats-quality-icon" aria-hidden="true">${quality.level==="warning"?"⚠️":"ℹ️"}</div>
-      <div><span class="eyebrow">QUALIDADE DAS ESTATÍSTICAS</span><h2>${quality.level==="warning"?"Alguns dados precisam de atenção":"Números calculados com ressalvas"}</h2>
+      <div><span class="eyebrow">${quality.level==="warning"?"QUALIDADE DAS ESTATÍSTICAS":"SOBRE ESTES DADOS"}</span><h2>${quality.level==="warning"?"Alguns dados precisam de atenção":"Como estes números foram calculados"}</h2>
       <p>Os indicadores exibidos consideram somente partidas com situação e resultado válidos.</p><ul>${reasons.join("")}</ul>${postponedDetails}</div>`:"";
   }
 
@@ -2771,9 +2774,6 @@ function renderStats(){
   if(rankingHistoryPanel){
     const history=rankingHistory.selectedSeries;
     const summary=rankingHistory.summary;
-    const participantSeries=rankingHistory.participants
-      .filter(item=>item.series.length)
-      .sort((a,b)=>(a.series.at(-1)?.position||999)-(b.series.at(-1)?.position||999));
     const maxParticipants=Math.max(1,summary.participantCount);
     const chartRows=history.map((item,index)=>{
       const previous=index?history[index-1]:null;
@@ -2782,13 +2782,7 @@ function renderStats(){
       const movementClass=!previous||movement===0?"stable":movement>0?"up":"down";
       const positionPercent=maxParticipants===1?50:((maxParticipants-item.position)/(maxParticipants-1))*100;
       return `<div class="ranking-history-point ${movementClass}"><span>R${item.round}</span><div class="ranking-history-axis"><i style="left:${Math.max(0,Math.min(100,positionPercent))}%" aria-hidden="true"></i></div><strong>${item.position}º</strong><small>${item.points} pts</small><em>${movementLabel}</em></div>`;
-    }).join("");
-    const comparisonRows=participantSeries.slice(0,8).map(item=>{
-      const latest=item.series.at(-1);
-      const isMe=isCurrentRankingParticipant(item);
-      const width=summary.currentPoints||latest.points?Math.max(6,(latest.points/Math.max(1,...participantSeries.map(row=>row.series.at(-1)?.points||0)))*100):0;
-      return `<div class="ranking-history-competitor ${isMe?'is-me':''}"><span>${latest.position}º</span><div><strong>${escapeHtml(item.name)}${isMe?' <small>VOCÊ</small>':''}</strong><div><i style="width:${width}%"></i></div></div><b>${latest.points} pts</b></div>`;
-    }).join("");
+    }).reverse().join("");
     const movementText=summary.biggestClimb?`R${summary.biggestClimb.round} · +${summary.biggestClimb.places}`:"—";
     const dropText=summary.biggestDrop?`R${summary.biggestDrop.round} · -${summary.biggestDrop.places}`:"—";
     rankingHistoryPanel.innerHTML=history.length?`
@@ -2801,7 +2795,7 @@ function renderStats(){
       </div>
       <div class="ranking-history-layout">
         <div class="ranking-history-chart" aria-label="Evolução da posição por rodada">${chartRows}</div>
-        <div class="ranking-history-comparison"><span class="eyebrow">CLASSIFICAÇÃO ATUAL</span>${comparisonRows}</div>
+        <div class="ranking-history-action"><span class="eyebrow">RANKING</span><strong>Veja a classificação completa</strong><p>Confira sua posição e o desempenho de todos os participantes.</p><button type="button" class="primary" data-stats-action="ranking">Ver classificação completa</button></div>
       </div>`:'<div class="stats-empty-state"><span aria-hidden="true">🏆</span><strong>Histórico do ranking em formação</strong><p>As posições por rodada aparecerão quando houver resultados oficiais e palpites pontuáveis.</p></div>';
   }
 
@@ -4492,6 +4486,10 @@ $("standingsMobileList")?.addEventListener("click",async event=>{
 $("rankingBody")?.addEventListener("click",event=>{
   const action=event.target.closest("[data-ranking-picks-key]");
   if(action) openRankingParticipantPicks(action.dataset.rankingPicksKey,action);
+});
+$("statsTab")?.addEventListener("click",event=>{
+  const action=event.target.closest("[data-stats-action]");
+  if(action?.dataset.statsAction==="ranking") navigateTo("ranking");
 });
 document.addEventListener("click",event=>{
   const open=event.target.closest?.("[data-temporary-ranking-open]");
