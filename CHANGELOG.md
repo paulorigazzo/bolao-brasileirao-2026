@@ -1,3 +1,10 @@
+# v6.19.2 — Ranking provisório permanente na Área ADM
+
+- Adiciona às Ações rápidas administrativas um acesso permanente ao modal existente do Ranking provisório.
+- Permite ao administrador consultar a projeção da rodada atual mesmo sem jogos ou resultados em andamento.
+- Preserva o critério de disponibilidade da Home e da Tela de Ranking para participantes comuns.
+- Mantém cálculo, dados agregados, Supabase, pontuação oficial e demais experiências do modal inalterados.
+
 # v6.19.1 — Preview sintético do Ranking provisório
 
 - Permite abrir uma demonstração do modal com `?preview=ranking-provisorio` em localhost e Deploy Previews da Netlify.
