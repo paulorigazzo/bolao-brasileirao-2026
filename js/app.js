@@ -13,7 +13,7 @@ import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./
 import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temporary-ranking-engine.js";
 import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
 
-const APP_VERSION = "6.20.0";
+const APP_VERSION = "6.20.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2540,12 +2540,18 @@ function ownFinishedEntries(){
 
 
 function renderStatsMoment(model){
-  const panel=$("statsParticipantMoment");
-  if(!panel) return;
   const moment=model.moment;
   const title=model.dynamicTitle;
-  panel.className=`card stats-moment-card tone-${moment.tone}`;
-  panel.innerHTML=`<div class="stats-moment-icon" aria-hidden="true">${moment.icon}</div><div class="stats-moment-copy"><span class="eyebrow">${escapeHtml(moment.eyebrow)}</span><h2>${escapeHtml(moment.title)}</h2><p>${escapeHtml(moment.text)}</p></div><div class="stats-dynamic-title"><span>${title.icon}</span><div><small>TÍTULO ATUAL</small><strong>${escapeHtml(title.title)}</strong><p>${escapeHtml(title.description)}</p></div></div>`;
+  const hero=$("statsTab")?.querySelector(".stats-hero");
+  if(hero) hero.className=`stats-hero card tone-${moment.tone}`;
+  if($("statsMomentIcon")) $("statsMomentIcon").textContent=moment.icon;
+  if($("statsMomentTitle")) $("statsMomentTitle").textContent=moment.title;
+  if($("statsMomentText")) $("statsMomentText").textContent=moment.text;
+  if($("statsMomentBadge")){
+    $("statsMomentBadge").textContent=`${title.icon} ${title.title}`;
+    $("statsMomentBadge").title=title.description;
+    $("statsMomentBadge").setAttribute("aria-label",`${title.title}. ${title.description}`);
+  }
 }
 
 function renderStatsRecommendations(model){
