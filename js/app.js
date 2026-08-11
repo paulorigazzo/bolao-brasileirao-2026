@@ -11,13 +11,16 @@ import { resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
 import { shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
 import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./access-control.js";
 import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temporary-ranking-engine.js";
+import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
 
-const APP_VERSION = "6.19.0";
+const APP_VERSION = "6.19.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
 
 const sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
+const TEMPORARY_RANKING_SYNTHETIC_PREVIEW=isTemporaryRankingSyntheticPreview(window.location);
+const TEMPORARY_RANKING_PREVIEW_FIXTURE=TEMPORARY_RANKING_SYNTHETIC_PREVIEW?buildTemporaryRankingSyntheticFixture():null;
 const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{} };
 let matchClockRefreshTimer=null;
 let liveScoreRefreshTimer=null;
@@ -1395,6 +1398,7 @@ function calculateRanking(){
 }
 
 function temporaryRankingContext(){
+  if(TEMPORARY_RANKING_PREVIEW_FIXTURE) return temporaryRankingAvailability(TEMPORARY_RANKING_PREVIEW_FIXTURE.games,TEMPORARY_RANKING_PREVIEW_FIXTURE.round);
   const round=currentRoundNumber();
   return temporaryRankingAvailability(state.games,round);
 }
@@ -1420,22 +1424,25 @@ function renderTemporaryRankingAccess(){
 }
 
 function temporaryMovementLabel(value){
-  if(value>0) return `<span class="temporary-movement is-up" aria-label="Subiu ${value} posição${value===1?'':'ões'}">▲ ${value}</span>`;
-  if(value<0) return `<span class="temporary-movement is-down" aria-label="Caiu ${Math.abs(value)} posição${Math.abs(value)===1?'':'ões'}">▼ ${Math.abs(value)}</span>`;
+  if(value>0) return `<span class="temporary-movement is-up" aria-label="Subiu ${value} ${value===1?'posição':'posições'}">▲ ${value}</span>`;
+  if(value<0) return `<span class="temporary-movement is-down" aria-label="Caiu ${Math.abs(value)} ${Math.abs(value)===1?'posição':'posições'}">▼ ${Math.abs(value)}</span>`;
   return '<span class="temporary-movement is-stable" aria-label="Posição mantida">—</span>';
 }
 
-function renderTemporaryRankingModal(model,rows){
+function renderTemporaryRankingModal(model,rows,{synthetic=false,currentUserId=null}={}){
   const content=$('temporaryRankingContent');
   const status=$('temporaryRankingStatus');
   if(!content || !status) return;
   const meta=rows?.[0]||{};
   const updated=meta.atualizado_em?new Date(meta.atualizado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'agora';
   const context=model.availability;
-  status.innerHTML=`<strong>Rodada ${context.round} • atualizada às ${escapeHtml(updated)}</strong><span>${context.finished} encerrado${context.finished===1?'':'s'} · ${context.live} ao vivo · ${context.suspended} suspenso${context.suspended===1?'':'s'} · ${context.postponed} adiado${context.postponed===1?'':'s'} · ${context.future} futuro${context.future===1?'':'s'}</span>`;
+  $('temporaryRankingModalSummary').textContent=synthetic?'Demonstração visual com participantes e placares inteiramente fictícios.':'Projeção informativa baseada nos placares disponíveis.';
+  status.classList.toggle('is-preview',synthetic);
+  status.innerHTML=`<strong>${synthetic?'DEMONSTRAÇÃO SINTÉTICA · ':''}Rodada ${context.round} • atualizada às ${escapeHtml(updated)}</strong><span>${context.finished} encerrado${context.finished===1?'':'s'} · ${context.live} ao vivo · ${context.suspended} suspenso${context.suspended===1?'':'s'} · ${context.postponed} adiado${context.postponed===1?'':'s'} · ${context.future} futuro${context.future===1?'':'s'}</span>`;
   content.innerHTML=model.ranking.length?`<div class="temporary-ranking-list">${model.ranking.map(item=>{
-    const isMe=String(item.userId||'')===String(state.user?.id||'');
-    return `<article class="temporary-ranking-row ${isMe?'is-me':''}"><span class="temporary-ranking-position">${item.position}º</span>${rankingAvatar({userId:item.userId,name:item.name},'temporary-ranking-avatar')}<div class="temporary-ranking-player"><strong>${escapeHtml(item.name)}${isMe?' <em>VOCÊ</em>':''}</strong><small>${item.officialTotal} oficiais${item.livePoints?` · +${item.livePoints} provisórios`:''}</small></div>${temporaryMovementLabel(item.movement)}<strong class="temporary-ranking-points">${item.projectedTotal}<small>pts</small></strong></article>`;
+    const isMe=String(item.userId||'')===String(currentUserId||state.user?.id||'');
+    const officialPosition=item.officialPosition?`${item.officialPosition}º`:'—';
+    return `<article class="temporary-ranking-row ${isMe?'is-me':''}"><span class="temporary-ranking-position">${item.position}º<small>PROV.</small></span>${rankingAvatar({userId:item.userId,name:item.name},'temporary-ranking-avatar')}<div class="temporary-ranking-player"><strong><span>${escapeHtml(item.name)}</span>${isMe?' <em>VOCÊ</em>':''}</strong><small>${item.officialTotal} oficiais${item.livePoints?` · +${item.livePoints} provisórios`:''}</small></div><div class="temporary-ranking-result"><div class="temporary-ranking-result-main">${temporaryMovementLabel(item.movement)}<strong class="temporary-ranking-points">${item.projectedTotal}<small>pts</small></strong></div><small class="temporary-ranking-comparison"><span>Atual <b>${officialPosition}</b></span><i aria-hidden="true">→</i><span>Prov. <b>${item.position}º</b></span></small></div></article>`;
   }).join('')}</div>`:'<p class="muted-note">A projeção ainda não possui participantes disponíveis.</p>';
 }
 
@@ -1443,6 +1450,11 @@ async function refreshTemporaryRankingModal({silent=false}={}){
   const context=temporaryRankingContext();
   if(!context.available){ closeTemporaryRanking(); return; }
   const content=$('temporaryRankingContent');
+  if(TEMPORARY_RANKING_PREVIEW_FIXTURE){
+    const fixture=TEMPORARY_RANKING_PREVIEW_FIXTURE;
+    renderTemporaryRankingModal(buildTemporaryRankingModel({rows:fixture.rows,officialRanking:fixture.officialRanking,games:fixture.games,round:fixture.round}),fixture.rows,{synthetic:true,currentUserId:fixture.currentUserId});
+    return;
+  }
   if(!silent && content) content.innerHTML='<div class="temporary-ranking-loading"><span></span><strong>Calculando projeção…</strong></div>';
   const {data,error}=await sb.rpc('obter_ranking_provisorio',{p_rodada:context.round});
   if(error){
@@ -1468,6 +1480,17 @@ function closeTemporaryRanking(){
   const target=temporaryRankingReturnFocus;
   temporaryRankingReturnFocus=null;
   target?.focus?.();
+}
+
+function installTemporaryRankingSyntheticPreview(){
+  if(!TEMPORARY_RANKING_PREVIEW_FIXTURE) return;
+  const launcher=document.createElement('button');
+  launcher.type='button';
+  launcher.className='temporary-ranking-preview-launcher';
+  launcher.dataset.temporaryRankingOpen='';
+  launcher.textContent='Reabrir preview sintético';
+  document.body.append(launcher);
+  openTemporaryRanking(launcher);
 }
 
 function isCurrentRankingParticipant(item){
@@ -4609,10 +4632,15 @@ document.addEventListener("visibilitychange",()=>{
   refreshLiveScoresSilently();
   if(!$("adminTab")?.classList.contains("hidden") && Date.now()-adminLastBackgroundRefresh>30000) refreshAdminSilently("ao retornar à aba");
 });
-try{ const {data:{session}}=await sb.auth.getSession(); if(session) await initialize(session); }
-catch(err){message(err.message||"Não foi possível iniciar o aplicativo.",true);}
-finally{show("loading",false);}
-sb.auth.onAuthStateChange(async (_event,session)=>{ if(session&&!state.user){try{await initialize(session);}catch(err){message(err.message||"Falha de autenticação.",true);}} });
+if(TEMPORARY_RANKING_SYNTHETIC_PREVIEW){
+  show("loading",false);
+  installTemporaryRankingSyntheticPreview();
+}else{
+  try{ const {data:{session}}=await sb.auth.getSession(); if(session) await initialize(session); }
+  catch(err){message(err.message||"Não foi possível iniciar o aplicativo.",true);}
+  finally{show("loading",false);}
+  sb.auth.onAuthStateChange(async (_event,session)=>{ if(session&&!state.user){try{await initialize(session);}catch(err){message(err.message||"Falha de autenticação.",true);}} });
+}
 
 let gamesSpacingFrame=0;
 function scheduleGamesBottomSpacing(){

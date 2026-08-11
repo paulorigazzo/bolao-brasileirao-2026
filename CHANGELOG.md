@@ -1,3 +1,11 @@
+# v6.19.1 — Preview sintético do Ranking provisório
+
+- Permite abrir uma demonstração do modal com `?preview=ranking-provisorio` em localhost e Deploy Previews da Netlify.
+- Usa somente participantes, placares e posições fictícios, sem autenticação ou consulta ao Supabase.
+- Identifica visualmente o conteúdo como demonstração sintética e permite reabrir o modal após fechá-lo.
+- Explicita em cada linha a comparação entre posição oficial e provisória, além da variação já indicada por setas.
+- Ignora explicitamente o parâmetro no domínio oficial de produção.
+
 # v6.19.0 — Ranking provisório
 
 - Adiciona um modal compartilhado entre Home e Ranking para projetar a classificação durante uma rodada em aberto.
