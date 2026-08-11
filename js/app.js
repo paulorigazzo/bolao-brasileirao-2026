@@ -10,8 +10,9 @@ import { buildRecoveryProtectionModel, recoveryOriginLabel } from "./recovery-pr
 import { resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
 import { shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
 import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./access-control.js";
+import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temporary-ranking-engine.js";
 
-const APP_VERSION = "6.18.2";
+const APP_VERSION = "6.19.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -31,6 +32,7 @@ let adminRoundShareReturnFocus=null;
 let matchCalendarReturnFocus=null;
 let matchCalendarModel=null;
 let matchCalendarMonthKey=null;
+let temporaryRankingReturnFocus=null;
 const $ = id => document.getElementById(id);
 const show = (id, visible=true) => $(id)?.classList.toggle("hidden", !visible);
 const REGISTRATION_DRAFT_KEY="bolaoRegistrationDraft";
@@ -1392,6 +1394,82 @@ function calculateRanking(){
   state.ranking=[...players.values()].sort((a,b)=>b.total-a.total||b.exact-a.exact||a.name.localeCompare(b.name));
 }
 
+function temporaryRankingContext(){
+  const round=currentRoundNumber();
+  return temporaryRankingAvailability(state.games,round);
+}
+
+function renderTemporaryRankingAccess(){
+  const context=temporaryRankingContext();
+  const home=$('temporaryRankingHomeAccess');
+  const ranking=$('temporaryRankingRankingAccess');
+  if(!context.available){
+    home?.classList.add('hidden');
+    ranking?.classList.add('hidden');
+    return;
+  }
+  const pending=context.postponed+context.future;
+  if(home){
+    home.className='temporary-ranking-access temporary-ranking-home-access card';
+    home.innerHTML=`<span class="temporary-ranking-access-icon" aria-hidden="true">◉</span><div><span class="eyebrow">RODADA ${context.round} EM ABERTO</span><strong>Ranking provisório</strong><p>Veja como ficaria a classificação se a rodada terminasse agora.${pending?` ${pending} partida${pending===1?'':'s'} ainda sem pontuação.`:''}</p></div><button class="primary" type="button" data-home-action="temporary-ranking">Ver projeção</button>`;
+  }
+  if(ranking){
+    ranking.className='temporary-ranking-access temporary-ranking-page-access card';
+    ranking.innerHTML=`<div><span class="eyebrow">RODADA ${context.round} EM ABERTO</span><strong>Existe uma classificação provisória disponível</strong><p>Resultados ao vivo e jogos suspensos com placar podem alterar temporariamente as posições.</p></div><button class="secondary" type="button" data-temporary-ranking-open>Ver Ranking provisório</button>`;
+  }
+}
+
+function temporaryMovementLabel(value){
+  if(value>0) return `<span class="temporary-movement is-up" aria-label="Subiu ${value} posição${value===1?'':'ões'}">▲ ${value}</span>`;
+  if(value<0) return `<span class="temporary-movement is-down" aria-label="Caiu ${Math.abs(value)} posição${Math.abs(value)===1?'':'ões'}">▼ ${Math.abs(value)}</span>`;
+  return '<span class="temporary-movement is-stable" aria-label="Posição mantida">—</span>';
+}
+
+function renderTemporaryRankingModal(model,rows){
+  const content=$('temporaryRankingContent');
+  const status=$('temporaryRankingStatus');
+  if(!content || !status) return;
+  const meta=rows?.[0]||{};
+  const updated=meta.atualizado_em?new Date(meta.atualizado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'agora';
+  const context=model.availability;
+  status.innerHTML=`<strong>Rodada ${context.round} • atualizada às ${escapeHtml(updated)}</strong><span>${context.finished} encerrado${context.finished===1?'':'s'} · ${context.live} ao vivo · ${context.suspended} suspenso${context.suspended===1?'':'s'} · ${context.postponed} adiado${context.postponed===1?'':'s'} · ${context.future} futuro${context.future===1?'':'s'}</span>`;
+  content.innerHTML=model.ranking.length?`<div class="temporary-ranking-list">${model.ranking.map(item=>{
+    const isMe=String(item.userId||'')===String(state.user?.id||'');
+    return `<article class="temporary-ranking-row ${isMe?'is-me':''}"><span class="temporary-ranking-position">${item.position}º</span>${rankingAvatar({userId:item.userId,name:item.name},'temporary-ranking-avatar')}<div class="temporary-ranking-player"><strong>${escapeHtml(item.name)}${isMe?' <em>VOCÊ</em>':''}</strong><small>${item.officialTotal} oficiais${item.livePoints?` · +${item.livePoints} provisórios`:''}</small></div>${temporaryMovementLabel(item.movement)}<strong class="temporary-ranking-points">${item.projectedTotal}<small>pts</small></strong></article>`;
+  }).join('')}</div>`:'<p class="muted-note">A projeção ainda não possui participantes disponíveis.</p>';
+}
+
+async function refreshTemporaryRankingModal({silent=false}={}){
+  const context=temporaryRankingContext();
+  if(!context.available){ closeTemporaryRanking(); return; }
+  const content=$('temporaryRankingContent');
+  if(!silent && content) content.innerHTML='<div class="temporary-ranking-loading"><span></span><strong>Calculando projeção…</strong></div>';
+  const {data,error}=await sb.rpc('obter_ranking_provisorio',{p_rodada:context.round});
+  if(error){
+    if(content) content.innerHTML=`<div class="temporary-ranking-error"><strong>Projeção indisponível</strong><p>${escapeHtml(error.message||'Não foi possível calcular o Ranking provisório.')}</p><button class="secondary" type="button" data-temporary-ranking-retry>Tentar novamente</button></div>`;
+    return;
+  }
+  calculateRanking();
+  renderTemporaryRankingModal(buildTemporaryRankingModel({rows:data||[],officialRanking:state.ranking,games:state.games,round:context.round}),data||[]);
+}
+
+function openTemporaryRanking(trigger){
+  if(!temporaryRankingContext().available) return message('O Ranking provisório estará disponível quando a rodada possuir resultados relevantes.',true);
+  temporaryRankingReturnFocus=trigger||document.activeElement;
+  $('temporaryRankingModal')?.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+  refreshTemporaryRankingModal();
+  setTimeout(()=>$('temporaryRankingModalClose')?.focus(),40);
+}
+
+function closeTemporaryRanking(){
+  $('temporaryRankingModal')?.classList.add('hidden');
+  document.body.classList.remove('modal-open');
+  const target=temporaryRankingReturnFocus;
+  temporaryRankingReturnFocus=null;
+  target?.focus?.();
+}
+
 function isCurrentRankingParticipant(item){
   if(item?.userId && state.user?.id) return String(item.userId)===String(state.user.id);
   return String(item?.name||"").trim().toLowerCase()===String(state.participant?.nome||"").trim().toLowerCase();
@@ -2036,6 +2114,7 @@ function renderHome(){
   </article>`;
 
   renderHomeFavoriteTeam();
+  renderTemporaryRankingAccess();
 }
 
 function participantTeam(participant){
@@ -2179,6 +2258,7 @@ function renderRanking(){
     </article>`;
   }).join('') || '<p class="muted-note">O pódio será exibido após os primeiros resultados.</p>';
   renderDashboard();
+  renderTemporaryRankingAccess();
 }
 
 function rankingParticipantPick(picks,participant,gameId){
@@ -4192,6 +4272,7 @@ async function refreshLiveScoresSilently(){
       renderMyTeam();
       renderStats();
       renderHome();
+      if(!$('temporaryRankingModal')?.classList.contains('hidden')) await refreshTemporaryRankingModal({silent:true});
       if(!$("adminTab")?.classList.contains("hidden")) renderAdminRoundStatus();
     }
   }catch(error){
@@ -4340,6 +4421,14 @@ $("rankingBody")?.addEventListener("click",event=>{
   const action=event.target.closest("[data-ranking-picks-key]");
   if(action) openRankingParticipantPicks(action.dataset.rankingPicksKey,action);
 });
+document.addEventListener("click",event=>{
+  const open=event.target.closest?.("[data-temporary-ranking-open]");
+  if(open) openTemporaryRanking(open);
+  const retry=event.target.closest?.("[data-temporary-ranking-retry]");
+  if(retry) refreshTemporaryRankingModal();
+});
+$("temporaryRankingModalClose")?.addEventListener("click",closeTemporaryRanking);
+$("temporaryRankingModal")?.addEventListener("click",event=>{if(event.target===$("temporaryRankingModal")) closeTemporaryRanking();});
 $("rankingPicksRoundSelect")?.addEventListener("change",renderRankingParticipantPicks);
 $("rankingPicksRoundNumberStrip")?.addEventListener("click",event=>{
   const button=event.target.closest("[data-ranking-picks-round]");
@@ -4438,7 +4527,8 @@ $("adminParticipantModalClose").onclick=closeAdminParticipantDetail;
 $("adminParticipantModal").onclick=event=>{ if(event.target===$("adminParticipantModal")) closeAdminParticipantDetail(); };
 document.addEventListener("keydown",event=>{
   if(event.key!=="Escape") return;
-  if(!$("adminRoundShareModal")?.classList.contains("hidden")) closeAdminRoundShare();
+  if(!$("temporaryRankingModal")?.classList.contains("hidden")) closeTemporaryRanking();
+  else if(!$("adminRoundShareModal")?.classList.contains("hidden")) closeAdminRoundShare();
   else if(!$("matchCalendarModal")?.classList.contains("hidden")) closeMatchCalendar();
   else if(!$("roundHighlightsModal")?.classList.contains("hidden")) closeRoundHighlights();
   else if(!$("rankingPicksModal")?.classList.contains("hidden")) closeRankingParticipantPicks();
@@ -4477,6 +4567,7 @@ $("homeTab")?.addEventListener("click",async event=>{
   const target=event.target.closest("[data-home-action]");
   if(!target) return;
   const action=target.dataset.homeAction;
+  if(action==="temporary-ranking"){ openTemporaryRanking(target); return; }
   if(action==="calendar"){ openMatchCalendar(target); return; }
   if(action==="round-highlights"){ openRoundHighlights(target.dataset.roundHighlightsRound,target); return; }
   if(action==="refresh"){ target.disabled=true; try{ await refresh(); } finally{ target.disabled=false; } return; }

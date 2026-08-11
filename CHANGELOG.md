@@ -1,3 +1,10 @@
+# v6.19.0 — Ranking provisório
+
+- Adiciona um modal compartilhado entre Home e Ranking para projetar a classificação durante uma rodada em aberto.
+- Considera resultados encerrados, placares ao vivo e partidas suspensas com placar válido; jogos futuros ou adiados sem placar contribuem com zero temporário.
+- Calcula a projeção em uma RPC agregada que não revela palpites individuais nem persiste pontos provisórios.
+- Mantém Ranking oficial, Estatísticas, Destaques, histórico, compartilhamentos e snapshots isolados da projeção.
+
 # v6.18.2 — Autorização centralizada no Supabase
 
 - Fixa o Supabase JS em `2.110.9` no pacote e no carregamento pelo CDN.

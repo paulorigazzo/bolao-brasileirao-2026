@@ -448,3 +448,30 @@ A v6.18.1 alinha as fontes oficiais a esse comportamento existente. Não modific
 - mudanças futuras no intervalo de fechamento continuam sendo de risco alto e exigem tarefa específica, critérios de aceite e testes;
 - a entrega não altera pontuação, resultados, Ranking, Supabase, RLS, autenticação, sincronização ou produção;
 - testes automatizados diretos do fechamento permanecem como entrega posterior independente.
+
+## DEC-2026-014 — Isolamento do Ranking provisório
+
+- Data: 2026-08-11
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: alto
+
+### Contexto
+
+Durante uma rodada em aberto, o Ranking oficial considera somente partidas encerradas. A experiência desejada é mostrar como ficaria a classificação se os jogos terminassem no placar disponível, inclusive entre partidas e diante de jogos adiados, sem transformar pontos temporários em dados oficiais nem revelar palpites ainda protegidos.
+
+### Decisão
+
+Criar uma projeção agregada e transitória, acessível por um modal compartilhado entre Home e Ranking. Jogos encerrados permanecem consolidados; jogos ao vivo e suspensos com placar válido geram pontos provisórios; jogos futuros e adiados sem placar contribuem com zero temporário; cancelados não pontuam.
+
+O cálculo ocorre no Supabase e retorna somente totais por participante. Palpites individuais continuam protegidos. A projeção não é persistida e não substitui nem alimenta o Ranking oficial, Estatísticas, Destaques, histórico de movimentação, resumos compartilháveis, checkpoints ou snapshots competitivos.
+
+### Consequências
+
+- a interface deve distinguir explicitamente projeção e classificação oficial;
+- execução anônima da RPC permanece proibida;
+- alterações de placar podem mudar posição e pontos a cada atualização;
+- partidas adiadas não escondem o acesso, mas aparecem como pendentes sem pontuação quando não possuem placar;
+- rollback não exige restauração de dados, pois nenhum ponto provisório é gravado;
+- qualquer uso futuro da projeção por módulos oficiais exige nova decisão e tarefa de risco alto.
