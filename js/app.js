@@ -6,14 +6,14 @@ import { buildAdminRoundSummary } from "./admin-round-share.js";
 import { buildParticipantDuelModel } from "./participant-duel-engine.js";
 import { buildMatchCalendarModel } from "./match-calendar-engine.js";
 import { resolveParticipantFavoriteTeam } from "./participant-team.js";
-import { buildRecoveryProtectionModel, recoveryOriginLabel } from "./recovery-protection.js";
+import { buildRecoveryProtectionModel, recoveryOccurrenceModel, recoveryOriginLabel } from "./recovery-protection.js";
 import { resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
 import { shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
 import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./access-control.js";
 import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temporary-ranking-engine.js";
 import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
 
-const APP_VERSION = "6.19.3";
+const APP_VERSION = "6.20.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -3573,6 +3573,47 @@ function renderAdminAudit(){
 function recoveryDate(value){
   return value?new Intl.DateTimeFormat("pt-BR",{dateStyle:"short",timeStyle:"short"}).format(new Date(value)):"—";
 }
+function recoveryScore(home,away){
+  return home==null||away==null?"—":`${Number(home)} × ${Number(away)}`;
+}
+function renderRecoveryOccurrence(occurrence){
+  const model=recoveryOccurrenceModel(occurrence);
+  const preserved=recoveryScore(occurrence.gols_casa_preservado,occurrence.gols_fora_preservado);
+  const current=recoveryScore(occurrence.gols_casa_atual,occurrence.gols_fora_atual);
+  const checkpoint=occurrence.checkpoint_consistente===false
+    ?"Checkpoint divergente"
+    :occurrence.checkpoint_consistente===true
+      ?"Checkpoint consistente"
+      :"Sem checkpoint da rodada";
+  const comparison=occurrence.tipo==="jogo_sem_snapshot"
+    ?`Resultado atual: ${current}`
+    :`Primeira captura: ${preserved} · Atual: ${current}`;
+  return `<article class="admin-recovery-occurrence is-${model.tone}">
+    <header><div><small>Rodada ${Number(occurrence.rodada)||"—"} · jogo ${Number(occurrence.id_jogo)||"—"}</small><strong>${escapeHtml(occurrence.time_casa||"Mandante")} × ${escapeHtml(occurrence.time_fora||"Visitante")}</strong></div><span>${escapeHtml(model.label)}</span></header>
+    <p>${escapeHtml(occurrence.explicacao||"Ocorrência detectada pela proteção de recuperação.")}</p>
+    <div class="admin-recovery-comparison">${escapeHtml(comparison)}</div>
+    <ul><li>${occurrence.alteracao_registrada?"Alteração registrada no histórico":"Sem alteração correspondente no histórico"}</li><li>${Number(occurrence.palpites_afetados)||0} palpite(s) com pontuação diferente entre os placares</li><li>${escapeHtml(checkpoint)}</li></ul>
+    ${occurrence.conferida?`<small class="admin-recovery-checked-at">Conferida em ${recoveryDate(occurrence.conferido_em)}</small>`:""}
+    ${model.canCheck?`<button class="secondary admin-recovery-check" type="button" data-recovery-check="${encodeURIComponent(occurrence.chave||"")}">Marcar como conferida</button>`:""}
+  </article>`;
+}
+async function markRecoveryOccurrenceChecked(button){
+  const key=decodeURIComponent(button.dataset.recoveryCheck||"");
+  if(!key||!window.confirm("Marcar esta ocorrência como conferida? Isso registra a revisão administrativa, sem alterar jogos, palpites ou pontos.")) return;
+  button.disabled=true;
+  const original=button.textContent;
+  button.textContent="Registrando…";
+  try{
+    const {error}=await sb.rpc("marcar_divergencia_recuperacao_conferida",{p_chave:key});
+    if(error) throw error;
+    message("Conferência registrada sem alterar os dados competitivos.");
+    await renderAdminRecoveryProtection();
+  }catch(error){
+    button.disabled=false;
+    button.textContent=original;
+    message(error.message||"Não foi possível registrar a conferência.",true);
+  }
+}
 async function renderAdminRecoveryProtection(){
   if(!isAdminUser()) return;
   const content=$("adminRecoveryContent"),badge=$("adminRecoveryBadge");
@@ -3580,14 +3621,17 @@ async function renderAdminRecoveryProtection(){
   content.innerHTML='<p class="muted-note">Consultando a última proteção realizada…</p>';
   if(badge){badge.textContent="Verificando…";badge.className="admin-recovery-badge";}
   try{
-    const {data,error}=await sb.rpc("obter_resumo_protecao_recuperacao");
+    const {data,error}=await sb.rpc("obter_detalhes_protecao_recuperacao");
     if(error) throw error;
     const model=buildRecoveryProtectionModel(data);
     if(badge){badge.textContent=model.label;badge.className=`admin-recovery-badge is-${model.tone}`;}
     const checkpoint=data.checkpoint_tipo==="rodada"?`Rodada ${data.checkpoint_rodada}`:"Baseline inicial";
-    content.innerHTML=`<div class="admin-recovery-status is-${model.tone}"><strong>${model.tone==="ok"?"✅":"⚠️"} ${escapeHtml(model.title)}</strong><p>${escapeHtml(model.detail)}</p></div>
-      <div class="admin-recovery-metrics"><article><span>Última captura</span><strong>${recoveryDate(data.ultima_captura)}</strong><small>${escapeHtml(recoveryOriginLabel(data.ultima_origem))}${data.ultima_rodada?` • rodada ${Number(data.ultima_rodada)}`:""}</small></article><article><span>Cobertura</span><strong>${Number(data.jogos_preservados)||0} jogos</strong><small>${Number(data.palpites_preservados)||0} palpites preservados</small></article><article><span>Último checkpoint</span><strong>${escapeHtml(checkpoint)}</strong><small>${recoveryDate(data.checkpoint_criado_em)}</small></article><article><span>Integridade</span><strong>${model.divergences} divergências</strong><small>${model.missing} jogos encerrados sem cópia</small></article></div>
-      <details class="admin-recovery-details"><summary>Ver detalhes da proteção</summary><p><strong>Alterações registradas:</strong> ${Number(data.alteracoes_registradas)||0}</p><p><strong>Próxima captura:</strong> após a finalização do próximo jogo.</p><p>Esta é uma proteção de recuperação competitiva e não substitui o backup integral do Supabase. A restauração permanece manual e revisada.</p></details>`;
+    const statusIcon=model.tone==="warning"?"⚠️":model.tone==="info"?"ℹ️":"✅";
+    const occurrences=model.occurrences.length?model.occurrences.map(renderRecoveryOccurrence).join(""):'<p class="muted-note">Nenhuma ocorrência registrada.</p>';
+    content.innerHTML=`<div class="admin-recovery-status is-${model.tone}"><strong>${statusIcon} ${escapeHtml(model.title)}</strong><p>${escapeHtml(model.detail)}</p></div>
+      <div class="admin-recovery-metrics"><article><span>Última captura</span><strong>${recoveryDate(data.ultima_captura)}</strong><small>${escapeHtml(recoveryOriginLabel(data.ultima_origem))}${data.ultima_rodada?` • rodada ${Number(data.ultima_rodada)}`:""}</small></article><article><span>Cobertura</span><strong>${Number(data.jogos_preservados)||0} jogos</strong><small>${Number(data.palpites_preservados)||0} palpites preservados</small></article><article><span>Último checkpoint</span><strong>${escapeHtml(checkpoint)}</strong><small>${recoveryDate(data.checkpoint_criado_em)}</small></article><article><span>Integridade</span><strong>${model.pending} pendência(s)</strong><small>${model.informational} alteração(ões) registrada(s) · ${model.checked} conferida(s)</small></article></div>
+      <details class="admin-recovery-details"><summary>Ver detalhes da proteção</summary><div class="admin-recovery-occurrences">${occurrences}</div><p><strong>Alterações registradas no histórico:</strong> ${Number(data.alteracoes_registradas)||0}</p><p><strong>Próxima captura:</strong> após a finalização do próximo jogo.</p><p>Esta proteção não substitui o backup integral do Supabase. A restauração permanece manual e revisada.</p></details>`;
+    content.querySelectorAll("[data-recovery-check]").forEach(button=>button.addEventListener("click",()=>markRecoveryOccurrenceChecked(button)));
   }catch(error){
     const model=buildRecoveryProtectionModel(null);
     if(badge){badge.textContent=model.label;badge.className="admin-recovery-badge is-error";}
