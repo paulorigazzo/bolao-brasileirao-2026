@@ -1,3 +1,10 @@
+# v6.19.3 — Harmonia visual dos cards administrativos
+
+- Uniformiza largura, preenchimento, cantos e espaçamento vertical dos cards da Central de Atenção ao Dashboard executivo.
+- Padroniza escala dos títulos, alinhamento dos cabeçalhos, textos introdutórios e retorno à navegação rápida.
+- Harmoniza o acabamento dos cards recolhidos sem impor alturas fixas ao conteúdo dinâmico.
+- Preserva funcionalidades, ordem, conteúdo, identidade visual, Supabase e demais telas.
+
 # v6.19.2 — Ranking provisório permanente na Área ADM
 
 - Adiciona às Ações rápidas administrativas um acesso permanente ao modal existente do Ranking provisório.
