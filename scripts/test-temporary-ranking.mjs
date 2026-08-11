@@ -37,7 +37,7 @@ assert.equal(model.ranking[0].movement,1);
 assert.equal(model.ranking[1].movement,-1);
 
 const root=fileURLToPath(new URL("../",import.meta.url));
-const sql=readFileSync(`${root}supabase/migrations/20260811073250_ranking_provisorio.sql`,"utf8");
+const sql=readFileSync(`${root}supabase/migrations/20260811111102_corrige_ranking_provisorio_atualizado_em.sql`,"utf8");
 assert.match(sql,/security definer/i);
 assert.match(sql,/set search_path = pg_catalog, public/i);
 assert.match(sql,/public\.email_autorizado\(\)/i);
