@@ -2,7 +2,7 @@
 
 - Remove o indicador circular do estado estável no Pódio e na Classificação completa.
 - Exibe somente subida ou queda, com quantidade no computador e apenas seta no celular.
-- Preserva a movimentação calculada durante renderizações repetidas da mesma classificação e usa a identidade canônica do participante.
+- Reconstrói a movimentação entre as duas últimas rodadas disponíveis, sem depender de armazenamento no navegador.
 - Reorganiza Pontos e Palpites no celular para eliminar a sobreposição entre rótulos e valores.
 - Preserva pontuação, ordenação oficial, Ranking provisório, dados, Supabase e demais telas.
 

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { evaluateRankingMovement } from "../js/ranking-movement-engine.js";
+import { buildRankingMovementFromHistory } from "../js/ranking-movement-engine.js";
 
 const initial = [
   { userId: "user-a", name: "Ana" },
@@ -7,32 +7,29 @@ const initial = [
   { userId: "user-c", name: "Carla" }
 ];
 
-const firstLoad = evaluateRankingMovement({ ranking: initial });
-assert.deepEqual(firstLoad.movement, { "user-a": 0, "user-b": 0, "user-c": 0 });
-
 const changed = [initial[1], initial[0], initial[2]];
-const afterChange = evaluateRankingMovement({ ranking: changed, persistedPositions: firstLoad.positions });
-assert.equal(afterChange.movement["user-b"], 1);
-assert.equal(afterChange.movement["user-a"], -1);
-assert.equal(afterChange.movement["user-c"], 0);
+const rounds = [
+  { round: 21, ranking: initial.map((item, index) => ({ ...item, position: index + 1 })) },
+  { round: 22, ranking: changed.map((item, index) => ({ ...item, position: index + 1 })) }
+];
+const movement = buildRankingMovementFromHistory({ ranking: changed, rounds });
+assert.equal(movement["user-b"], 1);
+assert.equal(movement["user-a"], -1);
+assert.equal(movement["user-c"], 0);
 
-const repeatedRender = evaluateRankingMovement({
+const repeatedCalculation = buildRankingMovementFromHistory({ ranking: changed, rounds });
+assert.deepEqual(repeatedCalculation, movement);
+
+const firstRoundOnly = buildRankingMovementFromHistory({
+  ranking: initial,
+  rounds: rounds.slice(0, 1)
+});
+assert.deepEqual(firstRoundOnly, { "user-a": 0, "user-b": 0, "user-c": 0 });
+
+const stableRounds = buildRankingMovementFromHistory({
   ranking: changed,
-  persistedPositions: afterChange.positions,
-  previousSignature: afterChange.signature,
-  previousMovement: afterChange.movement
+  rounds: [rounds[1], { round: 23, ranking: rounds[1].ranking }]
 });
-assert.equal(repeatedRender.reused, true);
-assert.deepEqual(repeatedRender.movement, afterChange.movement);
-
-const renamed = changed.map(item => item.userId === "user-b" ? { ...item, name: "Bruno Silva" } : item);
-const afterRename = evaluateRankingMovement({
-  ranking: renamed,
-  persistedPositions: afterChange.positions,
-  previousSignature: afterChange.signature,
-  previousMovement: afterChange.movement
-});
-assert.equal(afterRename.reused, true);
-assert.deepEqual(afterRename.movement, afterChange.movement);
+assert.deepEqual(stableRounds, { "user-b": 0, "user-a": 0, "user-c": 0 });
 
 console.log("Movimentação do Ranking verificada com sucesso.");

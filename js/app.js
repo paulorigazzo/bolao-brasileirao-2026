@@ -12,7 +12,7 @@ import { shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
 import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./access-control.js";
 import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temporary-ranking-engine.js";
 import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
-import { evaluateRankingMovement, rankingMovementKey } from "./ranking-movement-engine.js";
+import { buildRankingMovementFromHistory, rankingMovementKey } from "./ranking-movement-engine.js";
 
 const APP_VERSION = "6.20.3";
 installMotionTokens();
@@ -38,7 +38,6 @@ let matchCalendarModel=null;
 let matchCalendarMonthKey=null;
 let temporaryRankingReturnFocus=null;
 let temporaryRankingAllowUnavailable=false;
-let rankingMovementSignature=null;
 const $ = id => document.getElementById(id);
 const show = (id, visible=true) => $(id)?.classList.toggle("hidden", !visible);
 const REGISTRATION_DRAFT_KEY="bolaoRegistrationDraft";
@@ -2165,13 +2164,20 @@ function rankingAvatar(participant, extraClass=""){
   return participantAvatar(name,participantTeam(participant),extraClass);
 }
 
+function currentRankingHistory(selectedParticipant=""){
+  return analyzeRankingHistory({
+    games:state.games,
+    picks:state.publicPicks,
+    participantNames:state.ranking.map(item=>item.name),
+    selectedParticipant,
+    isScorableGame,
+    pointsForPick:(pick,game)=>points(pick,game),
+  });
+}
+
 function updateRankingMovement(){
-  let persistedPositions={};
-  try{ persistedPositions=JSON.parse(localStorage.getItem("bolaoRankingPositionsV2")||"{}"); }catch(_){ persistedPositions={}; }
-  const result=evaluateRankingMovement({ranking:state.ranking,persistedPositions,previousSignature:rankingMovementSignature,previousMovement:state.rankingMovement});
-  state.rankingMovement=result.movement;
-  rankingMovementSignature=result.signature;
-  if(!result.reused) localStorage.setItem("bolaoRankingPositionsV2",JSON.stringify(result.positions));
+  const history=currentRankingHistory();
+  state.rankingMovement=buildRankingMovementFromHistory({ranking:state.ranking,rounds:history.rounds});
 }
 
 function movementBadge(participant){
@@ -2649,14 +2655,7 @@ function renderStats(){
   const predictionProfile=analyzePredictionProfile({entries,pointsForEntry:({pick,game})=>points(pick,game)});
   const rounds=roundAnalysis.rounds;
   const bestRound=roundAnalysis.bestRound;
-  const rankingHistory=analyzeRankingHistory({
-    games:state.games,
-    picks:state.publicPicks,
-    participantNames:Object.values(participantDirectory()),
-    selectedParticipant:state.participant?.nome,
-    isScorableGame,
-    pointsForPick:(pick,game)=>points(pick,game),
-  });
+  const rankingHistory=currentRankingHistory(state.participant?.nome);
   const advancedStats=analyzeAdvancedStatistics({
     entries,
     rounds,

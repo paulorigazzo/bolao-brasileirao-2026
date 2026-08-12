@@ -2,29 +2,19 @@ export function rankingMovementKey(participant, index = 0) {
   return String(participant?.userId || participant?.key || participant?.name || `position-${index}`);
 }
 
-export function buildRankingPositions(ranking = []) {
-  return Object.fromEntries(ranking.map((participant, index) => [rankingMovementKey(participant, index), index + 1]));
-}
-
-export function evaluateRankingMovement({
-  ranking = [],
-  persistedPositions = {},
-  previousSignature = null,
-  previousMovement = {}
-} = {}) {
-  const positions = buildRankingPositions(ranking);
-  const signature = JSON.stringify(positions);
-
-  if (signature === previousSignature) {
-    return { positions, signature, movement: previousMovement, reused: true };
-  }
-
+export function buildRankingMovementFromHistory({ ranking = [], rounds = [] } = {}) {
+  const latestRounds = rounds.slice(-2);
+  const previousByName = new Map((latestRounds[0]?.ranking || []).map(item => [String(item?.name || ""), Number(item?.position)]));
+  const currentByName = new Map((latestRounds[1]?.ranking || []).map(item => [String(item?.name || ""), Number(item?.position)]));
   const movement = {};
   ranking.forEach((participant, index) => {
     const key = rankingMovementKey(participant, index);
-    const previousPosition = Number(persistedPositions?.[key]);
-    movement[key] = Number.isFinite(previousPosition) ? previousPosition - (index + 1) : 0;
+    const name = String(participant?.name || "");
+    const previousPosition = previousByName.get(name);
+    const currentPosition = currentByName.get(name);
+    movement[key] = Number.isFinite(previousPosition) && Number.isFinite(currentPosition)
+      ? previousPosition - currentPosition
+      : 0;
   });
-
-  return { positions, signature, movement, reused: false };
+  return movement;
 }
