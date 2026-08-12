@@ -1,6 +1,6 @@
-6.20.4
+6.20.5
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.20.4-topo-ranking-consolidado.md`](docs/releases/v6.20.4-topo-ranking-consolidado.md)
+- Nota da versão atual: [`docs/releases/v6.20.5-hero-ranking-harmonizado.md`](docs/releases/v6.20.5-hero-ranking-harmonizado.md)

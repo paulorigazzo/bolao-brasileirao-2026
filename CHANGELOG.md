@@ -1,3 +1,11 @@
+# v6.20.5 — Hero do Ranking harmonizado
+
+- Aplica ao card principal do Ranking a mesma lógica estrutural do hero da Home.
+- Cria no computador um painel lateral dedicado ao troféu e à pontuação, com divisor visual.
+- Transforma esse painel em uma composição compacta no celular, preservando espaço e legibilidade.
+- Faz “Para subir” e “Vantagem” ocuparem toda a faixa inferior do card.
+- Mantém tamanho e acabamento do troféu, cálculos, Pódio, classificação, dados e Supabase inalterados.
+
 # v6.20.4 — Topo consolidado do Ranking
 
 - Incorpora “Para subir” e “Vantagem” ao card principal da Tela de Ranking.
