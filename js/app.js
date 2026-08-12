@@ -14,7 +14,7 @@ import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temp
 import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
 import { buildRankingMovementFromHistory, rankingMovementKey } from "./ranking-movement-engine.js";
 
-const APP_VERSION = "6.20.3";
+const APP_VERSION = "6.20.4";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2231,8 +2231,6 @@ function renderRanking(){
   const leaderGap=me&&leader?Math.max(0,leader.total-me.total):0;
   const aboveGap=me&&nextAbove?Math.max(0,nextAbove.total-me.total):0;
   const belowLead=me&&nextBelow?Math.max(0,me.total-nextBelow.total):0;
-  const meRate=me&&me.scored?Math.round(me.total/(me.scored*10)*100):0;
-
   if($('rankingHero')) $('rankingHero').innerHTML=`
     <div class="ranking-hero-copy">
       <span class="ranking-hero-kicker">🏆 CLASSIFICAÇÃO GERAL ${lifecycle.isProvisional?'<b class="ranking-provisional-badge">PROVISÓRIO</b>':""}</span>
@@ -2241,7 +2239,11 @@ function renderRanking(){
       <p>${escapeHtml(rankingGapText(me,meIndex,leader))}</p>
       <div class="ranking-hero-meta"><span>${me?`${me.total} pontos`:'Sem pontuação'}</span><span>${updatedLabel}</span></div>
     </div>
-    <div class="ranking-hero-orbit" aria-hidden="true"><span>🏆</span><small>BR 2026</small></div>`;
+    <div class="ranking-hero-orbit" aria-hidden="true"><span>🏆</span><small>BR 2026</small></div>
+    ${me?`<div class="ranking-hero-comparisons">
+      <div><span>Para subir</span><strong>${meIndex===0?"Você lidera":aboveGap===0?"Empatado":`${aboveGap} pts`}</strong><small>${nextAbove?`até ${escapeHtml(nextAbove.name)}`:"melhor posição"}</small></div>
+      <div><span>Vantagem</span><strong>${nextBelow?(belowLead===0?"Empatado":`+${belowLead} pts`):"—"}</strong><small>${nextBelow?`sobre ${escapeHtml(nextBelow.name)}`:"sem participante atrás"}</small></div>
+    </div>`:""}`;
 
   if($('rankingHighlights')) $('rankingHighlights').innerHTML=`
     <article><span>Líder</span><strong>${leader?escapeHtml(leader.name):"—"}</strong><small>${leader?`${leader.total} pontos`:"Ranking ainda vazio"}</small></article>
@@ -2250,18 +2252,6 @@ function renderRanking(){
 
   if($('rankingRoundLabel')) $('rankingRoundLabel').textContent=lifecycle.isProvisional?`${lifecycle.postponed} jogo${lifecycle.postponed===1?"":"s"} adiado${lifecycle.postponed===1?"":"s"}`:completedRound?`Após a rodada ${completedRound}`:"Classificação geral";
   if($('rankingUpdatedAt')) $('rankingUpdatedAt').innerHTML=`<span>✓ ${escapeHtml(updatedLabel)}</span><small>${lifecycle.isProvisional?"A classificação poderá mudar quando as partidas adiadas forem disputadas.":"Os pontos são recalculados com base nos resultados registrados."}</small>`;
-
-  if($('myRankingCard')) $('myRankingCard').innerHTML=me?`
-    <div class="my-ranking-main">
-      <span class="my-ranking-label">SUA POSIÇÃO</span>
-      <div class="my-ranking-identity">${rankingAvatar(me.name,"my-ranking-avatar")}<div><strong>${escapeHtml(me.name)}</strong><span>Você está em ${rankingOrdinal(meIndex+1)} lugar</span></div></div>
-    </div>
-    <div class="my-ranking-score"><strong>${me.total}</strong><span>pontos</span></div>
-    <div class="my-ranking-comparisons">
-      <div><span>Para subir</span><strong>${meIndex===0?"Você lidera":aboveGap===0?"Empatado":`${aboveGap} pts`}</strong><small>${nextAbove?`até ${escapeHtml(nextAbove.name)}`:"melhor posição"}</small></div>
-      <div><span>Vantagem</span><strong>${nextBelow?(belowLead===0?"Empatado":`+${belowLead} pts`):"—"}</strong><small>${nextBelow?`sobre ${escapeHtml(nextBelow.name)}`:"sem participante atrás"}</small></div>
-      <div><span>Aproveitamento</span><strong>${meRate}%</strong><small>${me.exact} placar${me.exact===1?"":"es"} exato${me.exact===1?"":"s"}</small></div>
-    </div>`:'<p class="muted-note">Sua posição aparecerá quando você entrar na classificação.</p>';
 
   $('rankingBody').innerHTML=state.ranking.map((r,i)=>{
     const isMe=isCurrentRankingParticipant(r), rate=r.scored?Math.round(r.total/(r.scored*10)*100):0;
