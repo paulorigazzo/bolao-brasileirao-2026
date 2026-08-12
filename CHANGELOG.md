@@ -1,3 +1,11 @@
+# v6.20.3 — Movimentação legível no Ranking
+
+- Remove o indicador circular do estado estável no Pódio e na Classificação completa.
+- Exibe somente subida ou queda, com quantidade no computador e apenas seta no celular.
+- Reconstrói a movimentação entre as duas últimas rodadas disponíveis, sem depender de armazenamento no navegador.
+- Reorganiza Pontos e Palpites no celular para eliminar a sobreposição entre rótulos e valores.
+- Preserva pontuação, ordenação oficial, Ranking provisório, dados, Supabase e demais telas.
+
 # v6.20.2 — Harmonia do resumo das Estatísticas
 
 - Reorganiza o card inicial em uma área objetiva de desempenho e um rodapé interno de largura total.
