@@ -1,3 +1,10 @@
+# v6.20.4 — Topo consolidado do Ranking
+
+- Incorpora “Para subir” e “Vantagem” ao card principal da Tela de Ranking.
+- Remove o card separado “Sua posição” e reduz a repetição de posição e pontos antes da classificação completa.
+- Mantém inalterada a presença decorativa do troféu no card principal.
+- Preserva Pódio, setas de movimentação, Pontos e Palpites, Ranking provisório, pontuação, dados e Supabase.
+
 # v6.20.3 — Movimentação legível no Ranking
 
 - Remove o indicador circular do estado estável no Pódio e na Classificação completa.
