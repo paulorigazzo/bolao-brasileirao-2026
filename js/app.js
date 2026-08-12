@@ -14,7 +14,7 @@ import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temp
 import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
 import { buildRankingMovementFromHistory, rankingMovementKey } from "./ranking-movement-engine.js";
 
-const APP_VERSION = "6.20.4";
+const APP_VERSION = "6.20.5";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2237,9 +2237,13 @@ function renderRanking(){
       <span class="ranking-hero-greeting">${me?"Sua posição atual":"Ranking do bolão"}</span>
       <div class="ranking-hero-position"><strong>${me?rankingOrdinal(meIndex+1):"—"}</strong><span>${me?"lugar":"posição"}</span></div>
       <p>${escapeHtml(rankingGapText(me,meIndex,leader))}</p>
-      <div class="ranking-hero-meta"><span>${me?`${me.total} pontos`:'Sem pontuação'}</span><span>${updatedLabel}</span></div>
+      <div class="ranking-hero-meta"><span>${updatedLabel}</span></div>
     </div>
-    <div class="ranking-hero-orbit" aria-hidden="true"><span>🏆</span><small>BR 2026</small></div>
+    <div class="ranking-hero-side">
+      <div class="ranking-hero-orbit" aria-hidden="true"><span>🏆</span><small>BR 2026</small></div>
+      <strong>${me?me.total:"—"}</strong>
+      <span>${me?"pontos":"sem pontuação"}</span>
+    </div>
     ${me?`<div class="ranking-hero-comparisons">
       <div><span>Para subir</span><strong>${meIndex===0?"Você lidera":aboveGap===0?"Empatado":`${aboveGap} pts`}</strong><small>${nextAbove?`até ${escapeHtml(nextAbove.name)}`:"melhor posição"}</small></div>
       <div><span>Vantagem</span><strong>${nextBelow?(belowLead===0?"Empatado":`+${belowLead} pts`):"—"}</strong><small>${nextBelow?`sobre ${escapeHtml(nextBelow.name)}`:"sem participante atrás"}</small></div>
