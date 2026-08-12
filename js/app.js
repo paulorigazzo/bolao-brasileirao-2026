@@ -12,8 +12,9 @@ import { shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
 import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./access-control.js";
 import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temporary-ranking-engine.js";
 import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
+import { evaluateRankingMovement, rankingMovementKey } from "./ranking-movement-engine.js";
 
-const APP_VERSION = "6.20.2";
+const APP_VERSION = "6.20.3";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -37,6 +38,7 @@ let matchCalendarModel=null;
 let matchCalendarMonthKey=null;
 let temporaryRankingReturnFocus=null;
 let temporaryRankingAllowUnavailable=false;
+let rankingMovementSignature=null;
 const $ = id => document.getElementById(id);
 const show = (id, visible=true) => $(id)?.classList.toggle("hidden", !visible);
 const REGISTRATION_DRAFT_KEY="bolaoRegistrationDraft";
@@ -2164,22 +2166,23 @@ function rankingAvatar(participant, extraClass=""){
 }
 
 function updateRankingMovement(){
-  let previous={};
-  try{ previous=JSON.parse(localStorage.getItem("bolaoRankingPositions")||"{}"); }catch(_){ previous={}; }
-  const movement={};
-  state.ranking.forEach((item,index)=>{
-    const old=previous[item.name];
-    movement[item.name]=Number.isFinite(old) ? old-(index+1) : 0;
-  });
-  state.rankingMovement=movement;
-  localStorage.setItem("bolaoRankingPositions",JSON.stringify(Object.fromEntries(state.ranking.map((item,index)=>[item.name,index+1]))));
+  let persistedPositions={};
+  try{ persistedPositions=JSON.parse(localStorage.getItem("bolaoRankingPositionsV2")||"{}"); }catch(_){ persistedPositions={}; }
+  const result=evaluateRankingMovement({ranking:state.ranking,persistedPositions,previousSignature:rankingMovementSignature,previousMovement:state.rankingMovement});
+  state.rankingMovement=result.movement;
+  rankingMovementSignature=result.signature;
+  if(!result.reused) localStorage.setItem("bolaoRankingPositionsV2",JSON.stringify(result.positions));
 }
 
-function movementBadge(name){
-  const change=state.rankingMovement[name]||0;
-  if(change>0) return `<span class="rank-movement up" title="Subiu ${change} posição${change===1?"":"ões"}">▲ ${change}</span>`;
-  if(change<0) return `<span class="rank-movement down" title="Caiu ${Math.abs(change)} posição${Math.abs(change)===1?"":"ões"}">▼ ${Math.abs(change)}</span>`;
-  return `<span class="rank-movement stable" title="Posição mantida">•</span>`;
+function movementBadge(participant){
+  const change=state.rankingMovement[rankingMovementKey(participant)]||0;
+  if(!change) return "";
+  const amount=Math.abs(change);
+  const direction=change>0?"up":"down";
+  const action=change>0?"Subiu":"Caiu";
+  const arrow=change>0?"▲":"▼";
+  const label=`${action} ${amount} posição${amount===1?"":"ões"}`;
+  return `<span class="rank-movement ${direction}" title="${label}" aria-label="${label}"><span class="rank-movement-arrow" aria-hidden="true">${arrow}</span><span class="rank-movement-count" aria-hidden="true">${amount}</span></span>`;
 }
 
 function rankingOrdinal(position){
@@ -2260,12 +2263,12 @@ function renderRanking(){
     const placeClass=i<3?` top-${i+1}`:"";
     const medal=i===0?'gold':i===1?'silver':i===2?'bronze':'';
     return `<tr class="ranking-row ranking-premium-row${placeClass} ${isMe?"me-row":""}">
-      <td><div class="rank-position"><span class="rank-medal ${medal}">${i<3?i+1:""}</span><span class="rank-number">${i+1}º</span>${movementBadge(r.name)}</div></td>
+      <td><div class="rank-position"><span class="rank-medal ${medal}">${i<3?i+1:""}</span><span class="rank-number">${i+1}º</span>${movementBadge(r)}</div></td>
       <td><div class="rank-participant">${rankingAvatar(r)}<div><strong title="${escapeHtml(r.name)}">${escapeHtml(r.name)}</strong>${isMe?'<span class="you-chip">VOCÊ</span>':""}<small>${team?escapeHtml(team.name):"Participante"}</small></div></div></td>
       <td data-label="Pontos"><strong class="rank-points">${r.total}</strong></td>
       <td data-label="Exatos"><strong>${r.exact}</strong></td>
       <td data-label="Aproveitamento"><div class="rank-rate"><div class="rank-rate-track"><span style="width:${rate}%"></span></div><strong>${rate}%</strong></div></td>
-      <td data-label="Palpites"><button class="ranking-picks-action" type="button" data-ranking-picks-key="${escapeHtml(r.key)}" aria-label="Ver ${r.count} palpites de ${escapeHtml(r.name)}, que tem ${r.total} pontos"><span class="ranking-picks-mobile-summary" aria-hidden="true"><span><small>Pontos</small><strong>${r.total}</strong></span><i></i><span><small>Palpites</small><strong>${r.count}</strong><b>👁</b></span></span><span class="ranking-picks-desktop-count">${r.count}</span><span class="ranking-picks-desktop-eye" aria-hidden="true">👁</span><em>Ver palpites</em></button></td>
+      <td data-label="Palpites"><button class="ranking-picks-action" type="button" data-ranking-picks-key="${escapeHtml(r.key)}" aria-label="Ver ${r.count} palpites de ${escapeHtml(r.name)}, que tem ${r.total} pontos"><span class="ranking-picks-mobile-summary" aria-hidden="true"><span><small>Pontos</small><span class="ranking-picks-mobile-value"><strong>${r.total}</strong></span></span><i></i><span><small>Palpites</small><span class="ranking-picks-mobile-value"><strong>${r.count}</strong><b>👁</b></span></span></span><span class="ranking-picks-desktop-count">${r.count}</span><span class="ranking-picks-desktop-eye" aria-hidden="true">👁</span><em>Ver palpites</em></button></td>
     </tr>`;
   }).join('') || '<tr><td colspan="6"><p class="muted-note">A classificação aparecerá após os primeiros resultados.</p></td></tr>';
 
@@ -2275,7 +2278,7 @@ function renderRanking(){
     const team=participantTeam(r);
     return `<article class="podium-card card place-${i+1} ${isCurrentRankingParticipant(r)?"is-me":""}">
       <div class="podium-crown">${medals[i]}</div>
-      <div class="podium-top"><span class="podium-place">${i+1}º lugar</span>${movementBadge(r.name)}</div>
+      <div class="podium-top"><span class="podium-place">${i+1}º lugar</span>${movementBadge(r)}</div>
       ${rankingAvatar(r,"podium-avatar")}
       <strong>${escapeHtml(r.name)}</strong>
       ${isCurrentRankingParticipant(r)?'<span class="podium-you">VOCÊ</span>':""}

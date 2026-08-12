@@ -1113,7 +1113,7 @@ footer{padding-bottom:24px}
 .podium-card.place-2{background:linear-gradient(160deg,rgba(211,220,230,.10),rgba(17,49,32,.98))}.podium-card.place-3{background:linear-gradient(160deg,rgba(210,139,84,.10),rgba(17,49,32,.98))}.podium-card.is-me{box-shadow:0 0 0 2px rgba(53,220,131,.24),var(--shadow)}
 .podium-top{width:100%;display:flex;align-items:center;justify-content:space-between}.podium-top .medal{margin:0}.ranking-avatar{width:38px;height:38px;border-radius:13px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;background:linear-gradient(145deg,#246441,#123522);border:1px solid rgba(255,255,255,.12);font-weight:900;font-size:.72rem;overflow:hidden}.ranking-avatar img{width:76%;height:76%;object-fit:contain}.podium-avatar{width:72px;height:72px;border-radius:24px;margin:10px 0 12px;font-size:1rem;box-shadow:0 10px 24px rgba(0,0,0,.25)}
 .podium-card strong{line-height:1.2}.podium-points{font-weight:900;color:var(--green2)!important;margin-top:8px}.podium-you{margin-top:6px;padding:3px 9px;border-radius:999px;background:rgba(53,220,131,.15);color:var(--green2);font-size:.7rem;font-weight:900}.podium-card em{font-style:normal;color:var(--muted);font-size:.72rem;margin-top:5px}.podium-rate{width:100%;height:5px;border-radius:999px;background:rgba(255,255,255,.08);margin-top:auto;overflow:hidden}.podium-rate span{height:100%;display:block;background:linear-gradient(90deg,var(--green2),#9cf5bd);border-radius:inherit}
-.ranking-row td{vertical-align:middle}.rank-position{display:flex;align-items:center;gap:7px}.rank-movement{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:22px;padding:0 5px;border-radius:999px;font-size:.66rem;font-weight:900}.rank-movement.up{background:rgba(53,220,131,.14);color:#70eca5}.rank-movement.down{background:rgba(255,105,105,.13);color:#ff9a9a}.rank-movement.stable{background:rgba(255,255,255,.06);color:var(--muted)}
+.ranking-row td{vertical-align:middle}.rank-position{display:flex;align-items:center;gap:7px}.rank-movement{display:inline-flex;align-items:center;justify-content:center;gap:3px;min-width:24px;height:22px;padding:0 5px;border-radius:999px;font-size:.66rem;font-weight:900}.rank-movement.up{background:rgba(53,220,131,.14);color:#70eca5}.rank-movement.down{background:rgba(255,105,105,.13);color:#ff9a9a}
 .rank-participant{display:flex;align-items:center;gap:10px;min-width:180px}.rank-participant>div{min-width:0}.rank-participant strong{display:inline}.rank-participant small{display:block;color:var(--muted);font-size:.72rem;margin-top:3px}.rank-points{font-size:1.15rem;color:var(--green2)}.rank-rate{display:flex;align-items:center;gap:8px;min-width:125px}.rank-rate-track{height:7px;flex:1;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}.rank-rate-track span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--green2),#9cf5bd)}.rank-rate strong{font-size:.75rem;min-width:34px;text-align:right}
 @media(max-width:780px){.ranking-highlights{grid-template-columns:1fr 1fr}.ranking-highlights article:first-child{grid-column:1/-1}.podium{grid-template-columns:repeat(3,minmax(0,1fr));overflow-x:auto;padding-bottom:4px}.podium-card,.podium-card.place-1{min-width:160px;min-height:242px;padding:16px 12px}.podium-avatar{width:58px;height:58px;border-radius:19px}.podium-card strong{font-size:.95rem}.podium-card small{font-size:.68rem}.table-wrap table:not(.championship-table) thead{display:none}.table-wrap table:not(.championship-table),.table-wrap table:not(.championship-table) tbody{display:block}.table-wrap table:not(.championship-table) .ranking-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px 12px;margin:0 0 10px;padding:14px;border:1px solid var(--border);border-radius:18px;background:rgba(17,49,32,.82)}.table-wrap table:not(.championship-table) .ranking-row td{display:block;padding:0;border:0}.table-wrap table:not(.championship-table) .ranking-row td:nth-child(1){grid-row:1;grid-column:1}.table-wrap table:not(.championship-table) .ranking-row td:nth-child(2){grid-row:1;grid-column:2}.table-wrap table:not(.championship-table) .ranking-row td:nth-child(3){grid-row:1;grid-column:3;text-align:right}.table-wrap table:not(.championship-table) .ranking-row td:nth-child(n+4){font-size:.76rem;color:var(--muted)}.table-wrap table:not(.championship-table) .ranking-row td:nth-child(4){grid-column:1}.table-wrap table:not(.championship-table) .ranking-row td:nth-child(5){grid-column:2/4}.table-wrap table:not(.championship-table) .ranking-row td:nth-child(6){grid-column:3;text-align:right}.table-wrap table:not(.championship-table) .ranking-row td[data-label]::before{content:attr(data-label) " ";font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:800}.rank-participant{min-width:0}.rank-rate{display:inline-flex;min-width:150px;margin-left:4px}.me-row{box-shadow:0 0 0 2px rgba(53,220,131,.2)}}
 @media(max-width:420px){.podium{grid-template-columns:repeat(3,148px)}.ranking-highlights strong{font-size:1rem}.ranking-highlights article{padding:12px}.rank-participant small{max-width:125px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
@@ -2566,11 +2566,19 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
   }
   #rankingTab .ranking-picks-mobile-summary>span{
     display:flex;
-    align-items:baseline;
+    flex-direction:column;
+    align-items:center;
     justify-content:center;
-    gap:4px;
+    gap:3px;
     min-width:0;
     white-space:nowrap;
+  }
+  #rankingTab .ranking-picks-mobile-value{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    min-width:0;
   }
   #rankingTab .ranking-picks-mobile-summary small{
     color:var(--muted);
@@ -4158,6 +4166,24 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
   #rankingTab .ranking-picks-mobile-summary>span{gap:2px}
   #rankingTab .ranking-picks-mobile-summary small{font-size:.41rem}
   #rankingTab .ranking-picks-mobile-summary strong{font-size:.8rem}
+}
+
+/* v6.20.3 — movimentação legível e sem sobreposição no Ranking */
+@media(max-width:780px){
+  #rankingTab .rank-movement-count{display:none}
+  #rankingTab .ranking-premium-podium .rank-movement{
+    min-width:0;width:auto;height:auto;padding:0;border-radius:0;background:transparent;
+    font-size:.58rem;line-height:1
+  }
+  #rankingTab .ranking-premium-row .rank-position{position:relative}
+  #rankingTab .ranking-premium-row .rank-movement{
+    position:absolute;top:-6px;left:19px;z-index:1;
+    min-width:0;width:auto;height:auto;padding:0;border-radius:0;background:transparent;
+    font-size:.55rem;line-height:1;text-shadow:0 1px 2px rgba(0,0,0,.8)
+  }
+}
+@media(max-width:360px){
+  #rankingTab .ranking-premium-row .rank-movement{left:17px}
 }
 
 @media(max-width:520px){
