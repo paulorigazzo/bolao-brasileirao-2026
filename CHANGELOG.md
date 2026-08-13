@@ -1,3 +1,10 @@
+# v6.21.1 — Progresso compacto na Tela de Jogos
+
+- Substitui os quatro blocos fixos por uma leitura única de palpites preenchidos.
+- Adiciona barra proporcional e situação objetiva da rodada selecionada.
+- Exibe jogos adiados, fechados e rodada parcial somente quando relevantes.
+- Mantém navegação, filtros, cards, edição, fechamento e salvamento dos palpites inalterados.
+
 # v6.21.0 — Hero híbrido de Meu Time
 
 - Reorganiza o topo de Meu Time em identidade do clube, situação no campeonato, momento recente e próximo compromisso.

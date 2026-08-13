@@ -2642,17 +2642,8 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
 .games-premium-tab .game-filters{display:flex;gap:8px;overflow:auto;padding:8px!important;border-radius:18px!important;scrollbar-width:none}
 .games-premium-tab .game-filters::-webkit-scrollbar{display:none}
 .games-premium-tab .filter-chip{flex:0 0 auto;white-space:nowrap}
-.games-premium-progress{display:grid!important;grid-template-columns:repeat(3,1fr);padding:18px 12px!important;border-radius:20px!important;background:linear-gradient(135deg,rgba(9,72,45,.92),rgba(4,43,29,.92))!important;border:1px solid rgba(58,216,126,.28)!important}
-.games-progress-stat{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:9px;padding:0 10px;min-width:0;border-right:1px solid rgba(255,255,255,.09)}
-.games-progress-stat:last-child{border-right:0}
-.games-progress-icon{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:1.25rem;background:rgba(255,255,255,.07)}
-.games-progress-stat.is-done .games-progress-icon{color:#6af49b;border:2px solid rgba(75,235,132,.55);box-shadow:0 0 0 5px rgba(75,235,132,.08)}
-.games-progress-stat.is-pending .games-progress-icon{color:#ffd652;border:2px solid rgba(255,214,82,.6)}
-.games-progress-stat.is-closed .games-progress-icon{color:#c6d0ca}
-.games-progress-stat strong,.games-progress-stat b,.games-progress-stat small{display:block}
-.games-progress-stat strong{font-size:1.55rem;line-height:1;color:#fff}
-.games-progress-stat b{font-size:.64rem;letter-spacing:.05em;margin-top:4px;color:#fff}
-.games-progress-stat small{font-size:.66rem;color:#b5c7bd;margin-top:3px}
+.games-premium-progress{display:grid!important;gap:12px;padding:17px 18px!important;border-radius:20px!important;background:linear-gradient(135deg,rgba(9,72,45,.92),rgba(4,43,29,.92))!important;border:1px solid rgba(58,216,126,.28)!important}
+.games-progress-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0}.games-progress-heading>div{display:grid;gap:3px;min-width:0}.games-progress-heading strong{font-size:1rem;color:#fff}.games-progress-heading small{color:#b5c7bd;font-size:.7rem}.games-progress-status{flex:0 0 auto;padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.08);color:#c6d0ca;font-size:.64rem;font-weight:900}.games-progress-status.is-complete{background:rgba(75,235,132,.13);color:#78efa3}.games-progress-status.is-pending{background:rgba(255,214,82,.13);color:#ffd652}.games-progress-status.is-closed{color:#c6d0ca}.games-progress-track{height:9px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.09);box-shadow:inset 0 1px 2px rgba(0,0,0,.2)}.games-progress-track i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#24bd68,#6af49b);box-shadow:0 0 14px rgba(75,235,132,.2);transition:width .3s ease}.games-progress-notes{display:flex;flex-wrap:wrap;gap:7px}.games-progress-notes span{padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.055);color:#b5c7bd;font-size:.63rem;font-weight:800}.games-progress-notes .is-postponed{background:rgba(242,164,65,.1);color:#f2b65d}
 .games-list-heading{display:flex;align-items:end;justify-content:space-between;gap:12px;padding:0 2px}
 .games-list-heading h2{margin:4px 0 0;font-size:1.08rem}
 .games-list-heading>span{font-size:.76rem;color:#aabbb1}
@@ -2699,12 +2690,8 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
   .games-premium-tab{gap:14px;padding-inline:0}
   .games-page-heading{padding-inline:2px}
   .games-page-heading h1{font-size:1.75rem}
-  .games-premium-progress{padding:15px 8px!important}
-  .games-progress-stat{grid-template-columns:1fr;text-align:center;padding:0 5px;gap:5px}
-  .games-progress-icon{width:34px;height:34px;margin:auto;font-size:1rem}
-  .games-progress-stat strong{font-size:1.25rem}
-  .games-progress-stat b{font-size:.55rem}
-  .games-progress-stat small{font-size:.58rem}
+  .games-premium-progress{padding:15px!important;gap:10px}
+  .games-progress-heading{align-items:flex-start}.games-progress-heading strong{font-size:.9rem}.games-progress-heading small{font-size:.64rem}.games-progress-status{font-size:.59rem}
   .premium-match-card{grid-template-columns:62px minmax(54px,1fr) minmax(96px,1.25fr) minmax(54px,1fr) 58px;gap:4px;padding:12px 6px}
   .premium-team .team-badge{width:40px;height:40px}
   .premium-team .team-badge img{max-width:40px;max-height:40px}
@@ -4080,8 +4067,6 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 
 
 /* v6.7.0a — Gestão Inteligente de Jogos Adiados */
-.games-premium-progress{grid-template-columns:repeat(4,minmax(0,1fr))}
-.games-progress-stat.is-postponed{border-color:rgba(242,164,65,.28);background:rgba(242,164,65,.08)}
 .round-provisional-note{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid rgba(242,164,65,.25);border-radius:14px;background:rgba(242,164,65,.08)}
 .round-provisional-note strong{color:#f2b65d}.round-provisional-note span{color:var(--muted)}
 .postponed-match-notice{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;padding:14px;border:1px solid rgba(242,164,65,.28);border-radius:14px;background:rgba(242,164,65,.09)}
@@ -4097,7 +4082,8 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 .admin-postponed-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 12px;margin-top:12px;padding-top:11px;border-top:1px solid rgba(242,164,65,.14)}.admin-postponed-meta span{color:var(--muted);font-size:.7rem;line-height:1.35}.admin-postponed-meta b{color:var(--text)}.admin-postponed-original{display:block;margin-top:9px;line-height:1.4}
 @media(max-width:520px){.admin-postponed-games>summary{align-items:flex-start}.admin-postponed-meta{grid-template-columns:1fr}.admin-postponed-team strong{font-size:.72rem}.admin-postponed-crest{width:26px;height:26px;min-width:26px;max-width:26px;min-height:26px;max-height:26px;flex-basis:26px}.admin-postponed-crest>img{max-width:22px;max-height:22px}}
 .admin-round-game.status-postponed{border-left-color:#f2a441}
-@media(max-width:700px){.games-premium-progress{grid-template-columns:repeat(2,minmax(0,1fr))}.round-provisional-note{flex-direction:column}}
+@media(max-width:700px){.round-provisional-note{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){.games-progress-track i{transition:none}}
 
 /* v6.7.0b — E01.7 Consolidação da Integridade da Rodada */
 .segment-postponed{background:#f2a441}.segment-cancelled{background:#7f8b94}
