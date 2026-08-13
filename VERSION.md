@@ -1,6 +1,6 @@
-6.20.5
+6.21.0
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.20.5-hero-ranking-harmonizado.md`](docs/releases/v6.20.5-hero-ranking-harmonizado.md)
+- Nota da versão atual: [`docs/releases/v6.21.0-hero-hibrido-meu-time.md`](docs/releases/v6.21.0-hero-hibrido-meu-time.md)
