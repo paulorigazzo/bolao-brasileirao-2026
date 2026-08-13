@@ -14,7 +14,7 @@ import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temp
 import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
 import { buildRankingMovementFromHistory, rankingMovementKey } from "./ranking-movement-engine.js";
 
-const APP_VERSION = "6.20.5";
+const APP_VERSION = "6.21.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1957,14 +1957,24 @@ function renderMyTeam(){
   const stars=Math.max(1,Math.min(5,Math.round(synergy/20)));
   const formPoints=context.recent.reduce((sum,game)=>sum+({V:3,E:1,D:0}[favoriteTeamResult(game,team)]||0),0);
   host.innerHTML=`
-    <article class="my-team-hero card my-team-hero-link" data-my-team-action="standings" role="button" tabindex="0" aria-label="Abrir tabela completa do campeonato">
-      <span class="home-card-chevron" aria-hidden="true">›</span>
-      <div class="my-team-hero-main"><span class="my-team-crest">${crest}</span><div><span class="eyebrow">MEU TIME 2.0</span><h1 id="myTeamPageTitle">${escapeHtml(team.name)}</h1><p>${row?`${row.position}º colocado · ${row.points} pontos · ${Number(row.goalDifference)>0?'+':''}${row.goalDifference} de saldo`:'Classificação em atualização'}</p></div></div>
-      <div class="my-team-hero-form"><span>Momento recente</span>${favoriteFormMarkup(context)}<small>${formPoints} ponto${formPoints===1?'':'s'} nos últimos ${context.recent.length} jogos</small></div>
+    <article class="my-team-hero card">
+      <div class="my-team-hero-overview">
+        <div class="my-team-hero-main"><span class="my-team-crest">${crest}</span><div><span class="eyebrow">MEU TIME</span><h1 id="myTeamPageTitle">${escapeHtml(team.name)}</h1><p>Brasileirão 2026</p></div></div>
+        <button class="my-team-standing-summary" type="button" data-my-team-action="standings" aria-label="${escapeHtml(`Abrir classificação completa${row?`. ${team.name} está em ${row.position}º lugar com ${row.points} pontos`:''}`)}">
+          ${row?`<span><strong>${row.position}º</strong><small>posição</small></span><span><strong>${row.points}</strong><small>pontos</small></span><em>${Number(row.goalDifference)>0?'+':''}${row.goalDifference} saldo</em>`:'<span class="my-team-standing-unavailable"><strong>—</strong><small>Classificação em atualização</small></span>'}
+          <i aria-hidden="true">›</i>
+        </button>
+      </div>
+      <div class="my-team-hero-context">
+        <div class="my-team-hero-form"><span>Momento recente</span>${favoriteFormMarkup(context)}<small>${formPoints} ponto${formPoints===1?'':'s'} nos últimos ${context.recent.length} jogos</small></div>
+        <div class="my-team-hero-next">
+          <div><span class="eyebrow">PRÓXIMO JOGO</span>${next?`<strong>${escapeHtml(team.name)} × ${escapeHtml(nextOpponent)}</strong><small>${escapeHtml(nextDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'}))} · ${escapeHtml(nextDate.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}))} · ${escapeHtml(nextVenue)}</small>`:'<strong>Próxima partida a definir</strong><small>Aguardando atualização da tabela.</small>'}</div>
+          <button class="secondary" type="button" data-my-team-action="games">${next?'Ver jogo':'Ver jogos'} <span aria-hidden="true">›</span></button>
+        </div>
+      </div>
     </article>
 
-    <section class="my-team-grid my-team-grid-primary">
-      <article class="card my-team-next-card"><span class="eyebrow">PRÓXIMO JOGO</span>${next?`<div class="my-team-next-opponent"><span>${crest}</span><b>×</b><span>${teamLogo(normalizeTeamKey(next.time_casa)===team.key?next.time_fora_logo:next.time_casa_logo,nextOpponent)}</span></div><h2>${escapeHtml(team.name)} × ${escapeHtml(nextOpponent)}</h2><p>${escapeHtml(nextDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'}))} · ${escapeHtml(nextDate.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}))}</p><span class="my-team-venue">${nextVenue}${next.local?` · ${escapeHtml(next.local)}`:''}</span><button class="secondary" type="button" data-my-team-action="games">Abrir jogos</button>`:'<div class="my-team-no-next"><span>📅</span><strong>Próxima partida a definir</strong><p>Aguardando atualização da tabela.</p></div>'}</article>
+    <section class="my-team-grid my-team-grid-primary my-team-grid-synergy">
       <article class="card my-team-synergy-card"><span class="eyebrow">ÍNDICE DE SINTONIA</span><div class="my-team-synergy-score"><strong>${synergy}%</strong><span>${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</span></div><h2>${favoriteSynergyLabel(synergy)}</h2><p>Mede sua leitura dos resultados, placares exatos, regularidade e o momento recente do clube.</p><div class="my-team-progress"><i style="width:${synergy}%"></i></div></article>
     </section>
 

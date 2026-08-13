@@ -1,3 +1,11 @@
+# v6.21.0 — Hero híbrido de Meu Time
+
+- Reorganiza o topo de Meu Time em identidade do clube, situação no campeonato, momento recente e próximo compromisso.
+- Incorpora o próximo jogo ao rodapé interno do hero e remove o card duplicado abaixo dele.
+- Separa os acessos à classificação e à Tela de Jogos em ações explícitas e acessíveis.
+- Mantém o Índice de Sintonia como primeiro aprofundamento, agora em largura total.
+- Preserva cálculos, dados, Supabase, palpites, pontuação e demais telas.
+
 # v6.20.5 — Hero do Ranking harmonizado
 
 - Aplica ao card principal do Ranking a mesma lógica estrutural do hero da Home.
