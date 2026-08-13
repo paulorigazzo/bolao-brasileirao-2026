@@ -13,8 +13,9 @@ import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./
 import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temporary-ranking-engine.js";
 import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
 import { buildRankingMovementFromHistory, rankingMovementKey } from "./ranking-movement-engine.js";
+import { buildGamesProgressModel } from "./games-progress.js";
 
-const APP_VERSION = "6.21.0";
+const APP_VERSION = "6.21.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -992,13 +993,13 @@ function renderRoundProgress(games){
   const percentage=games.length?Math.round(completed/games.length*100):0;
   const round=Number($("roundSelect")?.value||0);
   const lifecycle=roundLifecycleSummary(games);
+  const progress=buildGamesProgressModel({total:games.length,completed,pending,closed,postponed,lifecycle});
   if($("gamesRoundTitle")) $("gamesRoundTitle").textContent=`Rodada ${round}`;
   $("roundProgress").innerHTML=`
-    <div class="games-progress-stat is-done"><span class="games-progress-icon">✓</span><div><strong>${completed}</strong><b>PALPITES FEITOS</b><small>de ${games.length} jogos</small></div></div>
-    <div class="games-progress-stat is-pending"><span class="games-progress-icon">◷</span><div><strong>${pending}</strong><b>PENDENTES</b><small>para palpitar</small></div></div>
-    <div class="games-progress-stat is-postponed"><span class="games-progress-icon">🟠</span><div><strong>${postponed}</strong><b>ADIADOS</b><small>${postponed?"palpites preservados":"nenhum nesta rodada"}</small></div></div>
-    <div class="games-progress-stat is-closed"><span class="games-progress-icon">▣</span><div><strong>${closed}</strong><b>FECHADOS</b><small>sem adiamentos</small></div></div>
-    ${lifecycle.isProvisional?`<div class="round-provisional-note"><strong>Rodada parcialmente concluída</strong><span>${lifecycle.concluded} de ${lifecycle.total} jogos concluídos • ${lifecycle.postponed} adiado${lifecycle.postponed===1?"":"s"}</span></div>`:""}`;
+    <div class="games-progress-heading"><div><strong>${progress.title}</strong><small>${progress.detail}</small></div><span class="games-progress-status ${progress.statusTone}">${progress.status}</span></div>
+    <div class="games-progress-track" role="progressbar" aria-label="${progress.ariaLabel}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress.percentage}"><i style="width:${progress.percentage}%"></i></div>
+    ${progress.notes.length?`<div class="games-progress-notes">${progress.notes.map(note=>`<span class="${note.tone}">${note.text}</span>`).join("")}</div>`:""}
+    ${progress.provisional?`<div class="round-provisional-note"><strong>Rodada parcialmente concluída</strong><span>${progress.provisional}</span></div>`:""}`;
   const counts={filterAllCount:games.length,filterOpenCount:games.filter(g=>!isPostponed(g)&&!locked(g)).length,filterPickedCount:completed,filterFinishedCount:games.filter(isFinished).length,filterPostponedCount:postponed};
   Object.entries(counts).forEach(([id,value])=>{if($(id))$(id).textContent=value;});
   if($("gamesSaveProgress")) $("gamesSaveProgress").textContent=`${completed} de ${games.length} palpites feitos`;
