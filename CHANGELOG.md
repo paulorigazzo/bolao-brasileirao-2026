@@ -1,3 +1,10 @@
+# v6.21.2 — Assinatura luminosa dos heroes
+
+- Leva aos heroes de Ranking, Estatísticas e Meu Time a iluminação verde lateral inspirada na Home.
+- Mantém a Home como referência mais luminosa e preserva as identidades próprias de cada tela.
+- Aplica o efeito internamente, sem alterar dimensões, conteúdo ou comportamento responsivo dos cards.
+- Preserva cálculos, dados, Supabase, Tela de Jogos e demais componentes.
+
 # v6.21.1 — Progresso compacto na Tela de Jogos
 
 - Substitui os quatro blocos fixos por uma leitura única de palpites preenchidos.
