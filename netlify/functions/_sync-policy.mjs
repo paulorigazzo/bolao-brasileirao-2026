@@ -41,7 +41,7 @@ export function sanitizeGameForStatus(game, previous = null, repairs = []) {
     return { ...game, gols_casa: null, gols_fora: null };
   }
 
-  if (game.status === "em_andamento" && !apiHasScore && previousHasScore) {
+  if (["em_andamento", "intervalo"].includes(game.status) && !apiHasScore && previousHasScore) {
     return { ...game, gols_casa: Number(previous.gols_casa), gols_fora: Number(previous.gols_fora) };
   }
 

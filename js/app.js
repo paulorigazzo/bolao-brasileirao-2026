@@ -15,7 +15,7 @@ import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPrevi
 import { buildRankingMovementFromHistory, rankingMovementKey } from "./ranking-movement-engine.js";
 import { buildGamesProgressModel } from "./games-progress.js";
 
-const APP_VERSION = "6.21.4";
+const APP_VERSION = "6.21.5";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
