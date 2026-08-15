@@ -1,3 +1,10 @@
+# v6.21.6 — Relógio oficial pelo detalhe da partida
+
+- Mantém a consulta compacta em lista para status e placares na janela ao vivo.
+- Complementa partidas efetivamente em andamento ou no intervalo pelo recurso individual da football-data.org.
+- Registra quantos detalhes foram consultados, falharam, ficaram fora do limite e retornaram minuto oficial.
+- Preserva o limite de oito chamadas por sincronização, o fallback “AO VIVO” e todas as regras competitivas.
+
 # v6.21.5 — Estado de intervalo preservado
 
 - Preserva como `intervalo` o status `PAUSED` recebido da fonte esportiva.
