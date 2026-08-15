@@ -44,10 +44,11 @@ function fallbackVenue(homeTeam) {
   return found?.[1] || null;
 }
 
-function mapStatus(status) {
+export function mapStatus(status) {
   const value = String(status || "").toUpperCase();
   if (["FINISHED", "AWARDED"].includes(value)) return "encerrado";
-  if (["IN_PLAY", "PAUSED", "LIVE"].includes(value)) return "em_andamento";
+  if (value === "PAUSED") return "intervalo";
+  if (["IN_PLAY", "LIVE"].includes(value)) return "em_andamento";
   if (["POSTPONED", "SUSPENDED"].includes(value)) return "adiado";
   if (["CANCELLED"].includes(value)) return "cancelado";
   return "agendado";
@@ -56,6 +57,12 @@ function mapStatus(status) {
 function numericScore(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
+}
+
+function numericClockValue(value, maximum) {
+  if (value === null || value === undefined || value === "") return null;
+  const number=Number(value);
+  return Number.isInteger(number) && number >= 0 && number <= maximum ? number : null;
 }
 
 function finalScore(match) {
@@ -86,7 +93,7 @@ function finalScore(match) {
   return { home: null, away: null };
 }
 
-function normalizeMatch(match) {
+export function normalizeMatch(match) {
   const score = finalScore(match);
   return {
     id_jogo: Number(match.id),
@@ -97,6 +104,8 @@ function normalizeMatch(match) {
     local_partida: match.venue || fallbackVenue(match.homeTeam),
     gols_casa: score.home,
     gols_fora: score.away,
+    minuto: numericClockValue(match.minute,130),
+    acrescimos: numericClockValue(match.injuryTime,30),
     status: mapStatus(match.status),
     atualizado_em: new Date().toISOString(),
     time_casa_id: match.homeTeam?.id ?? null,
@@ -275,8 +284,8 @@ export async function syncGames(options = {}) {
   const report = {
     ok: true,
     imported: merged.length,
-    live: merged.filter((g) => g.status === "em_andamento").length,
-    liveWithScore: merged.filter((g) => g.status === "em_andamento" && g.gols_casa != null && g.gols_fora != null).length,
+    live: merged.filter((g) => ["em_andamento", "intervalo"].includes(g.status)).length,
+    liveWithScore: merged.filter((g) => ["em_andamento", "intervalo"].includes(g.status) && g.gols_casa != null && g.gols_fora != null).length,
     firstMatch: merged[0]?.inicio ?? null,
     lastMatch: merged.at(-1)?.inicio ?? null,
     finishedWithScore: merged.filter((g) => g.gols_casa != null && g.gols_fora != null).length,

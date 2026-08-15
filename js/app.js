@@ -14,8 +14,9 @@ import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temp
 import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
 import { buildRankingMovementFromHistory, rankingMovementKey } from "./ranking-movement-engine.js";
 import { buildGamesProgressModel } from "./games-progress.js";
+import { officialLiveMatchMinute } from "./live-match-minute.js";
 
-const APP_VERSION = "6.21.4";
+const APP_VERSION = "6.21.5";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1129,19 +1130,6 @@ function premiumDayLabel(value){
 function premiumTime(value){
   const d=new Date(value); return Number.isNaN(d.getTime())?"--:--":d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
 }
-function liveMatchMinute(game){
-  const officialCandidates=[game?.minuto,game?.minute,game?.elapsed,game?.tempo_jogo,game?.match_minute];
-  for(const value of officialCandidates){
-    const parsed=Number.parseInt(String(value??"").replace(/[^0-9]/g,""),10);
-    if(Number.isFinite(parsed)&&parsed>0) return parsed>=90?"90+":String(Math.min(parsed,90));
-  }
-  const kickoff=new Date(game?.inicio).getTime();
-  if(!Number.isFinite(kickoff)) return "";
-  const wallMinutes=Math.floor((Date.now()-kickoff)/60000);
-  if(wallMinutes<0) return "";
-  const estimated=wallMinutes<=50?Math.min(Math.max(wallMinutes,1),45):Math.min(Math.max(wallMinutes-15,46),90);
-  return estimated>=90?"90+":String(estimated);
-}
 function premiumMatchCard(g){
   const favorite=favoriteTeamMatchData(g);
   const favoriteTeamName=favorite.homeFavorite?g.time_casa:favorite.awayFavorite?g.time_fora:"";
@@ -1152,7 +1140,7 @@ function premiumMatchCard(g){
   const suspended=rawStatus.includes("suspens");
   const interval=live&&(rawStatus.includes("intervalo")||rawStatus.includes("half-time")||rawStatus.includes("paused"));
   const stateClass=status.key==="cancelled"?"is-cancelled":suspended?"is-suspended":status.key==="postponed"?"is-postponed":finished?"is-finished":live?"is-live":isLocked?"is-soon":pick?"is-picked":"is-open";
-  const liveMinute=live&&!interval?liveMatchMinute(g):"";
+  const liveMinute=live&&!interval?officialLiveMatchMinute(g):"";
   const headerStatusLabel=status.key==="cancelled"?"CANCELADO":suspended?"SUSPENSO":status.key==="postponed"?"ADIADO":finished?"ENCERRADO":interval?"INTERVALO":live?`AO VIVO${liveMinute?` • ${liveMinute}'`:""}`:"";
   const expandedStatusLabel=headerStatusLabel|| (isLocked?"FECHADO":pick?"SALVO":"ABERTO");
   const summaryScore=finished&&hasScore?`${g.gols_casa} × ${g.gols_fora}`:live&&hasScore?`${g.gols_casa} × ${g.gols_fora}`:pick?`${pick.gols_casa} × ${pick.gols_fora}`:"Palpite pendente";
@@ -1243,7 +1231,7 @@ function refreshVisibleGameClocks(){
     const rawStatus=normalizeTeamKey(game?.status||"");
     const suspended=rawStatus.includes("suspens");
     const interval=status.key==="live"&&(rawStatus.includes("intervalo")||rawStatus.includes("half-time")||rawStatus.includes("paused"));
-    const liveMinute=status.key==="live"&&!interval?liveMatchMinute(game):"";
+    const liveMinute=status.key==="live"&&!interval?officialLiveMatchMinute(game):"";
     const headerLabel=status.key==="cancelled"?"CANCELADO":suspended?"SUSPENSO":status.key==="postponed"?"ADIADO":isFinished(game)?"ENCERRADO":interval?"INTERVALO":status.key==="live"?`AO VIVO${liveMinute?` • ${liveMinute}'`:""}`:"";
     const expandedLabel=headerLabel||(locked(game)?"FECHADO":ownPick(game.id_jogo)?"SALVO":"ABERTO");
     const deadline=card.querySelector("[data-game-deadline]");

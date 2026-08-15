@@ -8,11 +8,12 @@ assert.deepEqual(selectNearbyMatchIds([
   { id_jogo: 101, status: "agendado" },
   { id_jogo: 102, status: "em_andamento" },
   { id_jogo: 102, status: "em_andamento" },
+  { id_jogo: 106, status: "intervalo" },
   { id_jogo: 103, status: "encerrado" },
   { id_jogo: 104, status: "adiado" },
   { id_jogo: 105, status: "cancelado" },
   { id_jogo: "inválido", status: "agendado" },
-]), [101, 102]);
+]), [101, 102, 106]);
 
 assert.equal(
   matchesListUrl([102, 101, 102, "inválido"]),

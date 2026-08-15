@@ -1,3 +1,11 @@
+# v6.21.5 — Estado de intervalo preservado
+
+- Preserva como `intervalo` o status `PAUSED` recebido da fonte esportiva.
+- Exibe “INTERVALO” sem minuto estimado durante a pausa entre os tempos.
+- Sincroniza minuto e acréscimos oficiais da fonte esportiva, sem cálculo baseado no horário de início.
+- Mantém placar parcial, Ranking provisório e sincronização por minuto ativos durante o intervalo.
+- Não altera banco, pontuação, fechamento de palpites ou estados terminais.
+
 # v6.21.4 — Indicador único no card Ao Vivo
 
 - Remove a seta branca residual dos jogos ao vivo exibidos na Home.

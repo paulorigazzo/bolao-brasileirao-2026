@@ -1,5 +1,17 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { sanitizeGameForStatus } from "../netlify/functions/_sync-policy.mjs";
+import { mapStatus } from "../netlify/functions/_sync-shared.mjs";
+
+const app=readFileSync(new URL("../js/app.js",import.meta.url),"utf8");
+
+assert.equal(mapStatus("IN_PLAY"),"em_andamento");
+assert.equal(mapStatus("LIVE"),"em_andamento");
+assert.equal(mapStatus("PAUSED"),"intervalo");
+assert.equal(mapStatus("FINISHED"),"encerrado");
+assert.match(app,/rawStatus\.includes\("intervalo"\)/);
+assert.match(app,/interval\?"INTERVALO"/);
+assert.match(app,/officialLiveMatchMinute/);
 
 const previous={id_jogo:554775,status:"encerrado",gols_casa:2,gols_fora:1};
 for(const status of ["agendado","adiado","cancelado"]){
@@ -39,4 +51,9 @@ assert.equal(apiCorrection[0].apiScore,"0 × 0");
 const live=sanitizeGameForStatus({id_jogo:1,status:"em_andamento",gols_casa:null,gols_fora:null},{status:"em_andamento",gols_casa:1,gols_fora:0},[]);
 assert.equal(live.gols_casa,1);
 assert.equal(live.gols_fora,0);
+
+const interval=sanitizeGameForStatus({id_jogo:1,status:"intervalo",gols_casa:null,gols_fora:null},{status:"em_andamento",gols_casa:1,gols_fora:1},[]);
+assert.equal(interval.status,"intervalo");
+assert.equal(interval.gols_casa,1);
+assert.equal(interval.gols_fora,1);
 console.log("Política de status e placar verificada com sucesso.");
