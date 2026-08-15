@@ -1,3 +1,10 @@
+# v6.21.3 — Entrada direta de placares
+
+- Posiciona o foco no primeiro campo vazio quando um jogo editável é aberto pelo participante.
+- Reforça nos celulares a solicitação de teclado numérico para os dois campos do placar.
+- Mantém a abertura automática da tela sem acionar foco ou teclado.
+- Preserva rascunhos, salvamento, avanço automático, limites e fechamento dos palpites.
+
 # v6.21.2 — Assinatura luminosa dos heroes
 
 - Leva aos heroes de Ranking, Estatísticas e Meu Time a iluminação verde lateral inspirada na Home.
