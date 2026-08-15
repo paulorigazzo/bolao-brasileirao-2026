@@ -15,7 +15,7 @@ import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPrevi
 import { buildRankingMovementFromHistory, rankingMovementKey } from "./ranking-movement-engine.js";
 import { buildGamesProgressModel } from "./games-progress.js";
 
-const APP_VERSION = "6.21.2";
+const APP_VERSION = "6.21.3";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1069,6 +1069,16 @@ function toggleGameCard(card){
   const willExpand=!card.classList.contains("is-expanded");
   setGameCardExpanded(card,willExpand,true);
   state.openGameId=willExpand ? Number(card.dataset.id) : null;
+  if(willExpand) focusEditableScore(card);
+}
+
+function focusEditableScore(card){
+  if(!card) return false;
+  const inputs=[...card.querySelectorAll(".premium-pick-inputs input:not(:disabled)")];
+  const target=inputs.find(input=>input.value==="")||inputs[0];
+  if(!target) return false;
+  target.focus({preventScroll:true});
+  return true;
 }
 
 function nextEmptyGameCard(currentCard){
@@ -1150,7 +1160,7 @@ function premiumMatchCard(g){
     ? `<div class="premium-score-display"><strong>${g.gols_casa}</strong><span>×</span><strong>${g.gols_fora}</strong><small>Resultado final</small></div>`
     : live&&hasScore
       ? `<div class="premium-score-display live"><strong>${g.gols_casa}</strong><span>×</span><strong>${g.gols_fora}</strong><small>Placar ao vivo</small></div>`
-      : `<div class="premium-pick-inputs"><input class="home-score" inputmode="numeric" type="number" min="0" max="15" aria-label="Gols do ${escapeHtml(g.time_casa)}" value="${escapeHtml(draft?.gols_casa??pick?.gols_casa??"")}" ${isLocked?"disabled":""}><span>×</span><input class="away-score" inputmode="numeric" type="number" min="0" max="15" aria-label="Gols do ${escapeHtml(g.time_fora)}" value="${escapeHtml(draft?.gols_fora??pick?.gols_fora??"")}" ${isLocked?"disabled":""}><small>${draft?"Alteração não salva":pick?"Seu palpite":"Palpite não feito"}</small></div>`;
+      : `<div class="premium-pick-inputs"><input class="home-score" inputmode="numeric" pattern="[0-9]*" enterkeyhint="next" autocomplete="off" type="number" min="0" max="15" step="1" aria-label="Gols do ${escapeHtml(g.time_casa)}" value="${escapeHtml(draft?.gols_casa??pick?.gols_casa??"")}" ${isLocked?"disabled":""}><span>×</span><input class="away-score" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" autocomplete="off" type="number" min="0" max="15" step="1" aria-label="Gols do ${escapeHtml(g.time_fora)}" value="${escapeHtml(draft?.gols_fora??pick?.gols_fora??"")}" ${isLocked?"disabled":""}><small>${draft?"Alteração não salva":pick?"Seu palpite":"Palpite não feito"}</small></div>`;
   const showComparison=(finished||live)&&hasScore;
   const comparisonPoints=pick?(finished?points(pick,g):calculatePredictionPoints(pick,g)):0;
   const headerPointsLabel=finished&&hasScore?`${comparisonPoints}`:"";
