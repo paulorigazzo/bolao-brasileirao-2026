@@ -59,6 +59,12 @@ function numericScore(value) {
   return Number.isFinite(number) ? number : null;
 }
 
+function numericClockValue(value, maximum) {
+  if (value === null || value === undefined || value === "") return null;
+  const number=Number(value);
+  return Number.isInteger(number) && number >= 0 && number <= maximum ? number : null;
+}
+
 function finalScore(match) {
   const score = match?.score || {};
   // Na football-data.org, fullTime também representa o placar corrente
@@ -87,7 +93,7 @@ function finalScore(match) {
   return { home: null, away: null };
 }
 
-function normalizeMatch(match) {
+export function normalizeMatch(match) {
   const score = finalScore(match);
   return {
     id_jogo: Number(match.id),
@@ -98,6 +104,8 @@ function normalizeMatch(match) {
     local_partida: match.venue || fallbackVenue(match.homeTeam),
     gols_casa: score.home,
     gols_fora: score.away,
+    minuto: numericClockValue(match.minute,130),
+    acrescimos: numericClockValue(match.injuryTime,30),
     status: mapStatus(match.status),
     atualizado_em: new Date().toISOString(),
     time_casa_id: match.homeTeam?.id ?? null,

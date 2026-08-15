@@ -2,6 +2,7 @@
 
 - Preserva como `intervalo` o status `PAUSED` recebido da fonte esportiva.
 - Exibe “INTERVALO” sem minuto estimado durante a pausa entre os tempos.
+- Sincroniza minuto e acréscimos oficiais da fonte esportiva, sem cálculo baseado no horário de início.
 - Mantém placar parcial, Ranking provisório e sincronização por minuto ativos durante o intervalo.
 - Não altera banco, pontuação, fechamento de palpites ou estados terminais.
 
