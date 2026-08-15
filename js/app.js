@@ -15,7 +15,7 @@ import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPrevi
 import { buildRankingMovementFromHistory, rankingMovementKey } from "./ranking-movement-engine.js";
 import { buildGamesProgressModel } from "./games-progress.js";
 
-const APP_VERSION = "6.21.3";
+const APP_VERSION = "6.21.4";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2141,7 +2141,7 @@ function renderHome(){
     <article class="home-mini-card card mini-tone-gold home-navigable-card" role="button" tabindex="0" data-home-action="stats" aria-label="Abrir estatísticas"><span class="mini-card-icon">⭐</span><span>Pontos na rodada</span><b aria-hidden="true">›</b><strong>${roundPoints}</strong><small>${me.exact} placar${me.exact===1?"":"es"} exato${me.exact===1?"":"s"} no total</small></article>`;
 
   if(live.length){
-    $("homeLiveSection").innerHTML=`<article class="premium-feature-card premium-live-card home-navigable-card" role="button" tabindex="0" data-home-action="games" aria-label="Abrir partidas ao vivo"><header class="premium-card-header"><div><span class="premium-kicker"><i>●</i> AO VIVO</span><h2>Partidas em andamento</h2></div><span class="premium-inline-action">Ver jogos <b>›</b></span></header><div class="home-live-list">${live.slice(0,3).map(game=>`<div class="home-live-card"><span class="live-dot"></span><div><strong>${escapeHtml(teamAbbreviation(game.time_casa))} ${hasValidScore(game)?Number(game.gols_casa):"–"} × ${hasValidScore(game)?Number(game.gols_fora):"–"} ${escapeHtml(teamAbbreviation(game.time_fora))}</strong><small>${escapeHtml(game.time_casa)} × ${escapeHtml(game.time_fora)}</small></div><b>AO VIVO</b><span class="row-chevron">›</span></div>`).join("")}</div></article>`;
+    $("homeLiveSection").innerHTML=`<article class="premium-feature-card premium-live-card home-navigable-card" role="button" tabindex="0" data-home-action="games" aria-label="Abrir partidas ao vivo"><header class="premium-card-header"><div><span class="premium-kicker"><i>●</i> AO VIVO</span><h2>Partidas em andamento</h2></div><span class="premium-inline-action">Ver jogos <b>›</b></span></header><div class="home-live-list">${live.slice(0,3).map(game=>`<div class="home-live-card"><span class="live-dot"></span><div><strong>${escapeHtml(teamAbbreviation(game.time_casa))} ${hasValidScore(game)?Number(game.gols_casa):"–"} × ${hasValidScore(game)?Number(game.gols_fora):"–"} ${escapeHtml(teamAbbreviation(game.time_fora))}</strong><small>${escapeHtml(game.time_casa)} × ${escapeHtml(game.time_fora)}</small></div><b>AO VIVO</b></div>`).join("")}</div></article>`;
   }else{
     $("homeLiveSection").innerHTML="";
   }

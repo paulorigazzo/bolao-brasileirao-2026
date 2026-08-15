@@ -1,3 +1,9 @@
+# v6.21.4 — Indicador único no card Ao Vivo
+
+- Remove a seta branca residual dos jogos ao vivo exibidos na Home.
+- Mantém somente a seta verde circular como indicação de navegação.
+- Preserva placar, clubes, estado ao vivo, botão “Ver jogos” e ação do card.
+
 # v6.21.3 — Entrada direta de placares
 
 - Posiciona o foco no primeiro campo vazio quando um jogo editável é aberto pelo participante.
