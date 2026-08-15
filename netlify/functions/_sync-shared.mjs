@@ -129,6 +129,19 @@ export function matchesListUrl(matchIds = []) {
   return `${FOOTBALL_API_BASE}/competitions/${COMPETITION_CODE}/matches?season=${SEASON_YEAR}`;
 }
 
+export function needsLiveMatchDetail(match) {
+  return ["IN_PLAY", "PAUSED", "LIVE"].includes(String(match?.status || "").toUpperCase());
+}
+
+export function selectLiveMatchDetails(matches = [], maxApiCalls = MAX_API_CALLS_PER_SYNC, apiCalls = 0) {
+  const candidates = (Array.isArray(matches) ? matches : []).filter(needsLiveMatchDetail);
+  const available = Math.max(0, Number(maxApiCalls) - Number(apiCalls));
+  return {
+    selected: candidates.slice(0, available),
+    skipped: Math.max(0, candidates.length - available),
+  };
+}
+
 
 export async function syncGames(options = {}) {
   const startedAt = Date.now();
@@ -175,6 +188,46 @@ export async function syncGames(options = {}) {
 
   const payload = JSON.parse(rawText);
   let matches = Array.isArray(payload.matches) ? payload.matches : [];
+  let liveDetailRequests = 0;
+  let liveDetailFailures = 0;
+  let liveDetailSkipped = 0;
+
+  // A representação em lista atualiza status e placar, mas pode omitir o
+  // relógio oficial. Durante a janela ao vivo, complementamos somente partidas
+  // efetivamente em jogo pelo recurso individual documentado pela fonte.
+  if (syncMode === "live") {
+    const liveDetails = selectLiveMatchDetails(matches, maxApiCalls, apiCalls);
+    const detailsById = new Map();
+    liveDetailSkipped = liveDetails.skipped;
+
+    for (const match of liveDetails.selected) {
+      liveDetailRequests += 1;
+      try {
+        const detailResponse = await footballFetch(matchDetailUrl(match.id), {
+          headers: {
+            "X-Auth-Token": token,
+            "X-Unfold-Goals": "true",
+            Accept: "application/json",
+          },
+        });
+        if (!detailResponse.ok) {
+          liveDetailFailures += 1;
+          continue;
+        }
+        const detail = await detailResponse.json();
+        if (Number(detail?.id) !== Number(match.id)) {
+          liveDetailFailures += 1;
+          continue;
+        }
+        detailsById.set(Number(match.id), detail);
+      } catch (error) {
+        liveDetailFailures += 1;
+        console.warn(`Não foi possível obter o relógio oficial do jogo ${match.id}.`, error);
+      }
+    }
+
+    matches = matches.map((match) => detailsById.get(Number(match.id)) || match);
+  }
 
   // A listagem completa da competição pode chegar momentaneamente incompleta,
   // sobretudo após alterações de data ou status. Identificamos rodadas com menos
@@ -286,6 +339,10 @@ export async function syncGames(options = {}) {
     imported: merged.length,
     live: merged.filter((g) => ["em_andamento", "intervalo"].includes(g.status)).length,
     liveWithScore: merged.filter((g) => ["em_andamento", "intervalo"].includes(g.status) && g.gols_casa != null && g.gols_fora != null).length,
+    liveWithOfficialClock: merged.filter((g) => ["em_andamento", "intervalo"].includes(g.status) && g.minuto != null).length,
+    liveDetailRequests,
+    liveDetailFailures,
+    liveDetailSkipped,
     firstMatch: merged[0]?.inicio ?? null,
     lastMatch: merged.at(-1)?.inicio ?? null,
     finishedWithScore: merged.filter((g) => g.gols_casa != null && g.gols_fora != null).length,
