@@ -1,3 +1,15 @@
+# v6.22.4 — Início estimado pelo horário programado
+
+- Assume visualmente o início da partida quando o horário programado é atingido e a fonte ainda mantém o jogo como agendado.
+- Exibe o relógio com `~` e limita a estimativa do primeiro tempo a `45+15`.
+- Oculta o palpite no resumo retraído enquanto o placar oficial estiver indisponível, evitando que ele seja confundido com resultado ao vivo.
+- Mantém o status oficial armazenado, placares, pontuação, Ranking e liberação de palpites dependentes exclusivamente dos dados confirmados.
+- Faz estados oficiais posteriores prevalecerem imediatamente sobre a estimativa local.
+- Corrige a interpretação de placares nulos e registra diagnóstico seguro da permissão, status, placar, minuto e gols recebidos na janela ao vivo.
+- Separa disponibilidade técnica da API e atualidade dos dados, alertando jogos ainda agendados 30 minutos após o início.
+- Corrige “posições”, esclarece as métricas de palpites e apresenta Atlético-MG e Athletico-PR sem alterar dados persistidos.
+- Formaliza a contingência manual por duas fontes, IDs, precondições, transação e auditoria posterior.
+
 # v6.22.3 — Atualização dos palpites encerrados
 
 - Recarrega os palpites públicos quando uma partida passa a encerrada com placar válido.

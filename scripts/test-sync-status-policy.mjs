@@ -35,6 +35,7 @@ for(const status of ["agendado","adiado","cancelado"]){
   assert.equal(result.gols_fora,null);
   assert.equal(repairs.length,1);
   assert.equal(repairs[0].action,"placar_incompativel_removido");
+  assert.equal(repairs[0].apiScore,"3 × 2");
 }
 
 const apiCorrection=[];

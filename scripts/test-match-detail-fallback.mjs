@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { FOOTBALL_API_BASE } from "../netlify/functions/_constants.mjs";
-import { matchDetailUrl, needsLiveMatchDetail, normalizeMatch, selectLiveMatchDetails } from "../netlify/functions/_sync-shared.mjs";
+import { matchDetailUrl, needsLiveMatchDetail, normalizeMatch, rawMatchDiagnostic, selectLiveMatchDetails } from "../netlify/functions/_sync-shared.mjs";
 
 assert.equal(
   matchDetailUrl(123456),
@@ -42,5 +42,30 @@ assert.equal(detailWithClock.acrescimos, null);
 const detailWithoutClock = normalizeMatch(baseMatch);
 assert.equal(detailWithoutClock.minuto, null);
 assert.equal(detailWithoutClock.acrescimos, null);
+
+const scheduledWithoutScore=normalizeMatch({
+  ...baseMatch,
+  status:"TIMED",
+  score:{fullTime:{home:null,away:null}},
+});
+assert.equal(scheduledWithoutScore.gols_casa,null);
+assert.equal(scheduledWithoutScore.gols_fora,null);
+
+assert.deepEqual(rawMatchDiagnostic({
+  id:554968,
+  status:"TIMED",
+  minute:null,
+  injuryTime:null,
+  score:{fullTime:{home:0,away:2}},
+  goals:[{minute:null},{minute:72}],
+}),{
+  id:554968,
+  status:"TIMED",
+  scoreHome:0,
+  scoreAway:2,
+  minute:null,
+  injuryTime:null,
+  goalsReported:2,
+});
 
 console.log("Detalhe individual de resultado e relógio oficial verificado com sucesso.");

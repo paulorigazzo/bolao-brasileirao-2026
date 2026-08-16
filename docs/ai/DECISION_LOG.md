@@ -475,3 +475,28 @@ O cálculo ocorre no Supabase e retorna somente totais por participante. Palpite
 - partidas adiadas não escondem o acesso, mas aparecem como pendentes sem pontuação quando não possuem placar;
 - rollback não exige restauração de dados, pois nenhum ponto provisório é gravado;
 - qualquer uso futuro da projeção por módulos oficiais exige nova decisão e tarefa de risco alto.
+
+## DEC-2026-015 — Separação entre disponibilidade e atualidade esportiva
+
+- Data: 2026-08-16
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: alto
+
+### Contexto
+
+A fonte esportiva permaneceu acessível e as sincronizações terminaram com sucesso, mas partidas já iniciadas continuaram como agendadas e sem placar. Assim, disponibilidade técnica isolada não demonstrava que o conteúdo estava atual.
+
+### Decisão
+
+O diagnóstico passa a apresentar separadamente a disponibilidade inferida da API e a atualidade dos jogos armazenados. Uma partida ainda agendada 30 minutos após o início gera alerta administrativo, sem alterar automaticamente dados competitivos.
+
+Uma eventual contingência continua manual: o resultado deve ser confirmado em duas fontes independentes, aplicado somente por IDs e precondições explícitas, em transação revisada, com snapshots, histórico e verificação posterior. Não será integrada uma segunda provedora automática nesta entrega.
+
+### Consequências
+
+- uma resposta bem-sucedida da API não produz mais, sozinha, a mensagem de que todos os dados estão atuais;
+- o alerta não presume placar, encerramento ou pontuação;
+- banco, RLS, regras 10/5/3/1 e fechamento dos palpites permanecem inalterados;
+- qualquer automação de fallback exige decisão e escopo próprios.
