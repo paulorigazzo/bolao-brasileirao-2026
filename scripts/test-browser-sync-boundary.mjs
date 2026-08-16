@@ -9,6 +9,11 @@ assert.ok(silentStart >= 0 && silentEnd > silentStart, "ciclo silencioso não en
 const silentRefresh = app.slice(silentStart, silentEnd);
 
 assert.match(silentRefresh, /sb\.from\("jogos"\)\.select\("\*"\)/);
+assert.match(silentRefresh, /hasNewlyRevealablePublicPicks\(state\.games,data\)/);
+assert.match(silentRefresh, /sb\.from\("palpites_encerrados_publicos"\)\.select\("\*"\)/);
+assert.match(silentRefresh, /publicPicksRefreshPending=true/);
+assert.match(silentRefresh, /publicPicksRefreshPending=false/);
+assert.doesNotMatch(silentRefresh, /sb\.from\("palpites"\)/);
 assert.doesNotMatch(silentRefresh, /sincronizar-jogos/);
 assert.doesNotMatch(silentRefresh, /isAdminUser\(/);
 assert.doesNotMatch(silentRefresh, /\bfetch\(/);

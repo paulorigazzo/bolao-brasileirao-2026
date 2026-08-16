@@ -34,3 +34,23 @@ export function shouldRefreshGamesFromSupabase(games, now = Date.now()) {
       && kickoff <= now + LIVE_REFRESH_BEFORE_KICKOFF_MS;
   });
 }
+
+function hasScoreValue(value) {
+  if(value===null||value===undefined) return false;
+  if(typeof value==="string"&&!value.trim()) return false;
+  return Number.isFinite(Number(value));
+}
+
+function revealsPublicPicks(game) {
+  const status=normalizedStatus(game?.status);
+  const finished=["encerr", "finaliz", "awarded"].some((term)=>status.includes(term));
+  const excluded=["cancel", "anulad", "adiad", "postpon", "suspens"].some((term)=>status.includes(term));
+  return finished&&!excluded&&hasScoreValue(game?.gols_casa)&&hasScoreValue(game?.gols_fora);
+}
+
+export function hasNewlyRevealablePublicPicks(previousGames,nextGames) {
+  const previousById=new Map((Array.isArray(previousGames)?previousGames:[]).map((game)=>[String(game?.id_jogo),game]));
+  return (Array.isArray(nextGames)?nextGames:[]).some((game)=>
+    revealsPublicPicks(game)&&!revealsPublicPicks(previousById.get(String(game?.id_jogo)))
+  );
+}

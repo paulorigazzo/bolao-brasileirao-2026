@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  hasNewlyRevealablePublicPicks,
   hasOfficialLiveStatus,
   shouldRefreshGamesFromSupabase,
 } from "../js/live-game-refresh-policy.js";
@@ -26,5 +27,27 @@ assert.equal(hasOfficialLiveStatus(game("IN_PLAY", 0)), true);
 assert.equal(hasOfficialLiveStatus(game("paused", 0)), true);
 assert.equal(hasOfficialLiveStatus(game("suspenso", 0)), false);
 assert.equal(hasOfficialLiveStatus(game("encerrado", 0)), false);
+
+const match=(id,status,home=null,away=null)=>({id_jogo:id,status,gols_casa:home,gols_fora:away});
+assert.equal(hasNewlyRevealablePublicPicks(
+  [match(1,"em_andamento",1,0)],
+  [match(1,"encerrado",1,0)],
+),true);
+assert.equal(hasNewlyRevealablePublicPicks(
+  [match(1,"encerrado",1,0)],
+  [match(1,"encerrado",1,0)],
+),false);
+assert.equal(hasNewlyRevealablePublicPicks(
+  [match(1,"em_andamento",1,0)],
+  [match(1,"em_andamento",1,1)],
+),false);
+assert.equal(hasNewlyRevealablePublicPicks([], [match(2,"encerrado",3,3)]),true);
+for(const status of ["agendado","em_andamento","intervalo","adiado","cancelado","suspenso"]){
+  assert.equal(hasNewlyRevealablePublicPicks([], [match(3,status,2,1)]),false);
+}
+assert.equal(hasNewlyRevealablePublicPicks(
+  [match(4,"em_andamento",null,null)],
+  [match(4,"encerrado",null,null)],
+),false);
 
 console.log("Política de atualização de jogos no navegador verificada com sucesso.");
