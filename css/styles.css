@@ -2655,7 +2655,7 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
 .premium-day-group>div{display:grid}
 .premium-match-card{position:relative;display:grid;grid-template-columns:78px minmax(66px,1fr) minmax(108px,1.15fr) minmax(66px,1fr) 72px;align-items:center;gap:7px;padding:14px 10px;border-bottom:1px solid rgba(255,255,255,.07);border-left:4px solid #f5ca42;min-width:0;background:linear-gradient(90deg,rgba(10,66,41,.5),rgba(6,49,32,.32))}
 .premium-match-card:last-child{border-bottom:0}
-.premium-match-card.is-live{border-left-color:#42ef78;background:linear-gradient(90deg,rgba(25,139,73,.28),rgba(6,49,32,.35))}
+.premium-match-card.is-live,.premium-match-card.is-estimated-live{border-left-color:#42ef78;background:linear-gradient(90deg,rgba(25,139,73,.28),rgba(6,49,32,.35))}
 .premium-match-card.is-finished{border-left-color:#718078;opacity:.88}
 .premium-match-card.is-picked{border-left-color:#31d77b}
 .premium-match-card.has-unsaved{box-shadow:inset 0 0 0 1px rgba(255,215,83,.4)}
@@ -2676,7 +2676,7 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
 .premium-score-display.live strong{background:#0a7f42;color:#fff;border-color:#35e27d}
 .premium-match-state{text-align:center;min-width:0}
 .premium-match-state>span{display:inline-block;max-width:100%;padding:7px 8px;border-radius:12px;background:rgba(231,184,26,.18);color:#ffd652;font-size:.62rem;font-weight:900;white-space:nowrap}
-.is-live .premium-match-state>span{background:rgba(44,214,113,.18);color:#4bea8a}
+.is-live .premium-match-state>span,.is-estimated-live .premium-match-state>span{background:rgba(44,214,113,.18);color:#4bea8a}
 .is-finished .premium-match-state>span{background:rgba(155,168,161,.17);color:#d1d9d5}
 .is-picked .premium-match-state>span{background:rgba(44,214,113,.13);color:#62ee99}
 .premium-edit-pick{display:grid;place-items:center;width:34px;height:34px;margin:8px auto 0;border:1px solid rgba(255,255,255,.11);border-radius:9px;background:rgba(255,255,255,.05);color:#fff}
@@ -2741,7 +2741,7 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
 .premium-toggle-status{max-width:72px;padding:5px 7px;border-radius:999px;background:rgba(255,255,255,.06);color:var(--muted);font-size:.56rem;font-weight:900;text-align:center;white-space:nowrap}
 .is-open .premium-toggle-status,.is-picked .premium-toggle-status{background:rgba(53,220,131,.12);color:var(--green2)}
 .is-soon .premium-toggle-status{background:rgba(242,204,88,.13);color:#f2cc58}
-.is-live .premium-toggle-status{background:rgba(53,220,131,.15);color:#66efa0}
+.is-live .premium-toggle-status,.is-estimated-live .premium-toggle-status{background:rgba(53,220,131,.15);color:#66efa0}
 .game-chevron{font-size:1rem!important}
 .premium-game-body{display:grid!important;grid-template-columns:84px minmax(72px,1fr) auto minmax(72px,1fr) 78px!important;align-items:center!important;gap:10px!important;padding:4px 14px 14px!important;border-top:1px solid rgba(255,255,255,.055)}
 .premium-match-card.is-expanded .premium-game-toggle{background:rgba(255,255,255,.025)}
@@ -3142,20 +3142,23 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
 }
 
 /* v5.4.1 — minuto da partida no badge ao vivo */
-.premium-match-card.is-live .premium-toggle-status{
+.premium-match-card.is-live .premium-toggle-status,
+.premium-match-card.is-estimated-live .premium-toggle-status{
   max-width:none;
   white-space:nowrap;
   font-variant-numeric:tabular-nums;
 }
 @media(max-width:520px){
-  .premium-match-card.is-live .premium-toggle-status{
+  .premium-match-card.is-live .premium-toggle-status,
+  .premium-match-card.is-estimated-live .premium-toggle-status{
     max-width:82px;
     padding-inline:6px;
     letter-spacing:.015em;
   }
 }
 @media(max-width:380px){
-  .premium-match-card.is-live .premium-toggle-status{
+  .premium-match-card.is-live .premium-toggle-status,
+  .premium-match-card.is-estimated-live .premium-toggle-status{
     max-width:74px;
     padding-inline:5px;
     font-size:.42rem;
@@ -4257,3 +4260,8 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 .admin-member-avatar img{display:block;width:78%;height:78%;object-fit:contain}
 .admin-member-copy .admin-member-team{margin-top:3px;color:var(--green2);font-size:.68rem;font-weight:850}
 .admin-member-copy .admin-member-team.is-unset{color:var(--muted);font-weight:700}
+
+/* v6.22.4 — alerta de atualização tardia da fonte esportiva */
+.diagnostic-data-alert{margin-top:12px;padding:13px 15px;border:1px solid rgba(243,203,97,.34);border-radius:14px;background:rgba(243,203,97,.09);color:#f3cb61}
+.diagnostic-data-alert p{margin:6px 0;color:var(--text)}
+.diagnostic-data-alert ul{margin:8px 0 0;padding-left:20px;color:var(--muted)}

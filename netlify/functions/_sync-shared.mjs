@@ -56,6 +56,7 @@ export function mapStatus(status) {
 }
 
 function numericScore(value) {
+  if (value === null || value === undefined || value === "") return null;
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
 }
@@ -115,6 +116,19 @@ export function normalizeMatch(match) {
     time_fora_logo: match.awayTeam?.crest ?? null,
     fonte: "football-data.org",
     sincronizado_em: new Date().toISOString(),
+  };
+}
+
+export function rawMatchDiagnostic(match) {
+  const score=match?.score?.fullTime||{};
+  return {
+    id:Number(match?.id)||null,
+    status:String(match?.status||"")||null,
+    scoreHome:numericScore(score.home),
+    scoreAway:numericScore(score.away),
+    minute:numericClockValue(match?.minute,130),
+    injuryTime:numericClockValue(match?.injuryTime,30),
+    goalsReported:Array.isArray(match?.goals)?match.goals.length:0,
   };
 }
 
@@ -189,6 +203,8 @@ export async function syncGames(options = {}) {
 
   const payload = JSON.parse(rawText);
   let matches = Array.isArray(payload.matches) ? payload.matches : [];
+  const apiPermission=String(payload?.filters?.permission||"")||null;
+  const rawMatchDiagnostics=syncMode==="live"?matches.map(rawMatchDiagnostic):[];
   let liveDetailRequests = 0;
   let liveDetailFailures = 0;
   let liveDetailSkipped = 0;
@@ -365,6 +381,8 @@ export async function syncGames(options = {}) {
     apiCallLimit: maxApiCalls,
     syncMode,
     requestedMatches: requestedMatchIds.length,
+    apiPermission,
+    rawMatchDiagnostics,
     trigger,
     durationMs: Date.now() - startedAt,
     rateLimitRetryAfter: lastRateLimit,

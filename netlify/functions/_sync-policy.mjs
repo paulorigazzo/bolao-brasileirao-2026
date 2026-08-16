@@ -34,6 +34,7 @@ export function sanitizeGameForStatus(game, previous = null, repairs = []) {
         previousStatus: previous?.status ?? null,
         apiStatus: game.status,
         previousScore: previousHasScore ? `${previous.gols_casa} × ${previous.gols_fora}` : null,
+        apiScore: apiHasScore ? `${game.gols_casa} × ${game.gols_fora}` : null,
         action: "placar_incompativel_removido",
         reason: `placar incompatível removido de ${label}`,
       });

@@ -51,6 +51,22 @@ Uma recuperação deve ser manual e revisada:
 
 Nenhum snapshot deve ser restaurado automaticamente apenas porque uma API externa divergiu.
 
+## Contingência para atraso da fonte esportiva
+
+Quando a fonte principal responder normalmente, mas mantiver partidas como agendadas muito depois do início, a resposta técnica não deve ser confundida com dados esportivos atuais. O diagnóstico administrativo sinaliza esse estado após 30 minutos; o alerta não muda status, placar ou pontuação.
+
+Uma correção excepcional somente pode ocorrer com revisão humana e deve:
+
+1. confirmar o resultado em duas fontes independentes e confiáveis;
+2. identificar exatamente os jogos pelos respectivos IDs, rodada, clubes e horário;
+3. registrar precondições explícitas, inclusive o status e o placar encontrados antes da mudança;
+4. aplicar a correção de forma transacional, limitada aos registros revisados;
+5. preservar e consultar snapshots, palpites e histórico de alterações;
+6. recalcular Ranking e pontos pelas regras canônicas e comparar checkpoints;
+7. registrar a evidência e executar uma verificação global após a operação.
+
+Não existe fallback automático para outra provedora. Uma segunda fonte serve para confirmação independente; integrar ou automatizar uma nova provedora exige tarefa, avaliação de licença, critérios de aceite e aprovação próprios.
+
 ## Visibilidade administrativa
 
 O painel ADM apresenta somente um resumo agregado da proteção: última captura, origem, cobertura, checkpoint e contagens de itens ausentes ou divergentes. A consulta exige uma sessão de administrador ativo e aprovado e não expõe palpites, usuários ou placares preservados. O card é informativo e não oferece restauração automática.

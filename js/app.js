@@ -15,8 +15,9 @@ import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPrevi
 import { buildRankingMovementFromHistory, rankingMovementKey } from "./ranking-movement-engine.js";
 import { buildGamesProgressModel } from "./games-progress.js";
 import { liveMatchMinute } from "./live-match-minute.js";
+import { isScheduledLiveEstimate, scheduledLiveLabel } from "./scheduled-live-estimate.js";
 
-const APP_VERSION = "6.22.3";
+const APP_VERSION = "6.22.4";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -222,6 +223,11 @@ function teamAbbreviation(name){
   return getClubInfo(name).sigla;
 }
 
+function teamDisplayName(name){
+  const canonical={CAM:"Atlético-MG",CAP:"Athletico-PR"}[teamAbbreviation(name)];
+  return canonical || String(name||"");
+}
+
 function availableTeams(){
   const teams=new Map();
   state.games.forEach(game=>{
@@ -241,8 +247,8 @@ function renderTeamOptions(grid,teams,selectedTeam,onSelect){
     const selected=normalizeTeamKey(selectedTeam)===team.key;
     const image=team.logo
       ? `<img src="${escapeHtml(team.logo)}" alt="" loading="lazy" referrerpolicy="no-referrer">`
-      : `<span class="team-fallback">${initials(team.name).slice(0,3)}</span>`;
-    return `<button class="favorite-team-option ${selected?"selected":""}" type="button" role="radio" aria-checked="${selected}" data-team="${escapeHtml(team.name)}">${image}<strong>${escapeHtml(team.name)}</strong></button>`;
+      : `<span class="team-fallback">${initials(teamDisplayName(team.name)).slice(0,3)}</span>`;
+    return `<button class="favorite-team-option ${selected?"selected":""}" type="button" role="radio" aria-checked="${selected}" data-team="${escapeHtml(team.name)}">${image}<strong>${escapeHtml(teamDisplayName(team.name))}</strong></button>`;
   }).join("");
   grid.querySelectorAll(".favorite-team-option").forEach(button=>button.onclick=()=>{
     grid.querySelectorAll(".favorite-team-option").forEach(item=>{
@@ -1008,12 +1014,12 @@ function renderRoundProgress(games){
   if($("gamesSaveBar")) $("gamesSaveBar").style.width=`${percentage}%`;
 }
 function teamLogo(url,name){
-  const safe=escapeHtml(name), fallback=initials(name);
+  const displayName=teamDisplayName(name), safe=escapeHtml(displayName), fallback=initials(displayName);
   return url ? `<img src="${escapeHtml(url)}" alt="Escudo do ${safe}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove();this.parentElement.textContent='${fallback}'">` : fallback;
 }
 
 function compactTeam(url,name){
-  const safeName=escapeHtml(name);
+  const safeName=escapeHtml(teamDisplayName(name));
   const abbreviation=teamAbbreviation(name);
   const fallback=escapeHtml(abbreviation.slice(0,2));
   const crest=url
@@ -1136,16 +1142,16 @@ function premiumMatchCard(g){
   const favoriteTeamName=favorite.homeFavorite?g.time_casa:favorite.awayFavorite?g.time_fora:"";
   const favoriteStyle=favorite.isFavoriteMatch?` style="--favorite-primary:${favorite.colors[0]};--favorite-secondary:${favorite.colors[1]};--favorite-text:${favorite.colors[2]}"`:"";
   const pick=ownPick(g.id_jogo), draft=pickDraft(g.id_jogo), isLocked=locked(g), finished=isFinished(g), status=gameStatusDisplay(g);
-  const live=status.key==="live", hasScore=g.gols_casa!=null&&g.gols_fora!=null;
+  const live=status.key==="live", estimatedLive=isScheduledLiveEstimate(g), hasScore=g.gols_casa!=null&&g.gols_fora!=null;
   const rawStatus=normalizeTeamKey(g?.status||"");
   const suspended=rawStatus.includes("suspens");
   const interval=live&&(rawStatus.includes("intervalo")||rawStatus.includes("half-time")||rawStatus.includes("paused"));
-  const stateClass=status.key==="cancelled"?"is-cancelled":suspended?"is-suspended":status.key==="postponed"?"is-postponed":finished?"is-finished":live?"is-live":isLocked?"is-soon":pick?"is-picked":"is-open";
+  const stateClass=status.key==="cancelled"?"is-cancelled":suspended?"is-suspended":status.key==="postponed"?"is-postponed":finished?"is-finished":live?"is-live":estimatedLive?"is-estimated-live":isLocked?"is-soon":pick?"is-picked":"is-open";
   const liveMinute=live&&!interval?liveMatchMinute(g):"";
-  const liveMinuteTitle=liveMinute.startsWith("~")?' title="Minuto estimado; a fonte não informou o relógio oficial"':"";
-  const headerStatusLabel=status.key==="cancelled"?"CANCELADO":suspended?"SUSPENSO":status.key==="postponed"?"ADIADO":finished?"ENCERRADO":interval?"INTERVALO":live?`AO VIVO${liveMinute?` • ${liveMinute}'`:""}`:"";
+  const liveMinuteTitle=estimatedLive?' title="Início e minuto estimados pelo horário programado; aguardando confirmação da fonte"':liveMinute.startsWith("~")?' title="Minuto estimado; a fonte não informou o relógio oficial"':"";
+  const headerStatusLabel=status.key==="cancelled"?"CANCELADO":suspended?"SUSPENSO":status.key==="postponed"?"ADIADO":finished?"ENCERRADO":interval?"INTERVALO":live?`AO VIVO${liveMinute?` • ${liveMinute}'`:""}`:estimatedLive?scheduledLiveLabel(g):"";
   const expandedStatusLabel=headerStatusLabel|| (isLocked?"FECHADO":pick?"SALVO":"ABERTO");
-  const summaryScore=finished&&hasScore?`${g.gols_casa} × ${g.gols_fora}`:live&&hasScore?`${g.gols_casa} × ${g.gols_fora}`:pick?`${pick.gols_casa} × ${pick.gols_fora}`:"Palpite pendente";
+  const summaryScore=finished&&hasScore?`${g.gols_casa} × ${g.gols_fora}`:live&&hasScore?`${g.gols_casa} × ${g.gols_fora}`:estimatedLive?"– × –":pick?`${pick.gols_casa} × ${pick.gols_fora}`:"Palpite pendente";
   const center=finished&&hasScore
     ? `<div class="premium-score-display"><strong>${g.gols_casa}</strong><span>×</span><strong>${g.gols_fora}</strong><small>Resultado final</small></div>`
     : live&&hasScore
@@ -1166,7 +1172,7 @@ function premiumMatchCard(g){
     <button class="game-toggle premium-game-toggle" type="button" aria-expanded="false">
       <span class="premium-toggle-time"><strong>${premiumTime(g.inicio)}</strong><small title="${escapeHtml(g.local_partida||"Local a definir")}">${escapeHtml(g.local_partida||"Local a definir")}</small></span>
       <span class="premium-toggle-match">${compactTeam(g.time_casa_logo,g.time_casa).replace("game-summary-team",`game-summary-team${favorite.homeFavorite?" is-favorite-team":""}`)}<span class="premium-toggle-score">${escapeHtml(summaryScore)}</span>${compactTeam(g.time_fora_logo,g.time_fora).replace("game-summary-team",`game-summary-team${favorite.awayFavorite?" is-favorite-team":""}`)}</span>
-      <span class="premium-toggle-side">${favorite.isFavoriteMatch?favoriteHeartBadge(favoriteTeamName):""}${headerStatusLabel?`<span class="premium-toggle-status" data-game-header-status${liveMinuteTitle}>${headerStatusLabel}</span>`:""}${headerPointsLabel!==""?`<span class="premium-toggle-points" aria-label="${headerPointsLabel} pontos no jogo"><span aria-hidden="true">★</span>${headerPointsLabel}</span>`:""}<span class="game-chevron" aria-hidden="true">⌄</span></span>
+      <span class="premium-toggle-side">${favorite.isFavoriteMatch?favoriteHeartBadge(favoriteTeamName):""}<span class="premium-toggle-status" data-game-header-status${liveMinuteTitle}>${headerStatusLabel}</span>${headerPointsLabel!==""?`<span class="premium-toggle-points" aria-label="${headerPointsLabel} pontos no jogo"><span aria-hidden="true">★</span>${headerPointsLabel}</span>`:""}<span class="game-chevron" aria-hidden="true">⌄</span></span>
     </button>
     <div class="game-collapsible" style="max-height:0;opacity:0">
       <div class="game-collapsible-inner premium-game-body premium-game-body-v2">
@@ -1176,9 +1182,9 @@ function premiumMatchCard(g){
           <div class="premium-match-state"><span data-game-expanded-status${liveMinuteTitle}>${expandedStatusLabel}</span>${!isLocked&&!finished?`<button class="premium-edit-pick" type="button" aria-label="Editar palpite">✎</button>`:""}</div>
         </div>
         <div class="premium-expanded-matchup">
-          <div class="premium-team premium-team-home ${favorite.homeFavorite?"is-favorite-team":""}"><span class="team-badge">${teamLogo(g.time_casa_logo,g.time_casa)}</span><b>${escapeHtml(g.time_casa)}${favorite.homeFavorite?`<span class="favorite-team-name-heart" aria-hidden="true">♥</span>`:""}</b></div>
+          <div class="premium-team premium-team-home ${favorite.homeFavorite?"is-favorite-team":""}"><span class="team-badge">${teamLogo(g.time_casa_logo,g.time_casa)}</span><b>${escapeHtml(teamDisplayName(g.time_casa))}${favorite.homeFavorite?`<span class="favorite-team-name-heart" aria-hidden="true">♥</span>`:""}</b></div>
           <div class="premium-expanded-center">${center}</div>
-          <div class="premium-team premium-team-away ${favorite.awayFavorite?"is-favorite-team":""}"><span class="team-badge">${teamLogo(g.time_fora_logo,g.time_fora)}</span><b>${escapeHtml(g.time_fora)}${favorite.awayFavorite?`<span class="favorite-team-name-heart" aria-hidden="true">♥</span>`:""}</b></div>
+          <div class="premium-team premium-team-away ${favorite.awayFavorite?"is-favorite-team":""}"><span class="team-badge">${teamLogo(g.time_fora_logo,g.time_fora)}</span><b>${escapeHtml(teamDisplayName(g.time_fora))}${favorite.awayFavorite?`<span class="favorite-team-name-heart" aria-hidden="true">♥</span>`:""}</b></div>
         </div>
         ${!isLocked&&!finished?`<div class="premium-game-actions"><button class="primary premium-save-pick" type="button" ${validPickDraft(g.id_jogo)?"":"disabled"}>${draft?"Salvar palpite":pick?"✓ Palpite salvo":"Salvar palpite"}</button></div>`:""}
         ${resultComparison}
@@ -1212,7 +1218,8 @@ function gameStructuralSignature(game){
     locked(game)?1:0,
     isFinished(game)?1:0,
     game.gols_casa??"",
-    game.gols_fora??""
+    game.gols_fora??"",
+    isScheduledLiveEstimate(game)?1:0
   ].join(":");
 }
 
@@ -1230,11 +1237,12 @@ function refreshVisibleGameClocks(){
     const game=state.games.find(item=>Number(item.id_jogo)===Number(card.dataset.id));
     if(!game) return;
     const status=gameStatusDisplay(game);
+    const estimatedLive=isScheduledLiveEstimate(game);
     const rawStatus=normalizeTeamKey(game?.status||"");
     const suspended=rawStatus.includes("suspens");
     const interval=status.key==="live"&&(rawStatus.includes("intervalo")||rawStatus.includes("half-time")||rawStatus.includes("paused"));
     const liveMinute=status.key==="live"&&!interval?liveMatchMinute(game):"";
-    const headerLabel=status.key==="cancelled"?"CANCELADO":suspended?"SUSPENSO":status.key==="postponed"?"ADIADO":isFinished(game)?"ENCERRADO":interval?"INTERVALO":status.key==="live"?`AO VIVO${liveMinute?` • ${liveMinute}'`:""}`:"";
+    const headerLabel=status.key==="cancelled"?"CANCELADO":suspended?"SUSPENSO":status.key==="postponed"?"ADIADO":isFinished(game)?"ENCERRADO":interval?"INTERVALO":status.key==="live"?`AO VIVO${liveMinute?` • ${liveMinute}'`:""}`:estimatedLive?scheduledLiveLabel(game):"";
     const expandedLabel=headerLabel||(locked(game)?"FECHADO":ownPick(game.id_jogo)?"SALVO":"ABERTO");
     const deadline=card.querySelector("[data-game-deadline]");
     const header=card.querySelector("[data-game-header-status]");
@@ -1242,7 +1250,7 @@ function refreshVisibleGameClocks(){
     if(deadline) deadline.textContent=`◷ ${deadlineText(game)}`;
     if(header) header.textContent=headerLabel;
     if(expanded) expanded.textContent=expandedLabel;
-    const clockTitle=liveMinute.startsWith("~")?"Minuto estimado; a fonte não informou o relógio oficial":"";
+    const clockTitle=estimatedLive?"Início e minuto estimados pelo horário programado; aguardando confirmação da fonte":liveMinute.startsWith("~")?"Minuto estimado; a fonte não informou o relógio oficial":"";
     if(header) header.title=clockTitle;
     if(expanded) expanded.title=clockTitle;
   });
@@ -2073,6 +2081,8 @@ function renderHome(){
   const lifecycle=roundLifecycleSummary(roundGames);
   const lifecycleView=roundLifecyclePresentation(lifecycle);
   const live=roundGames.filter(game=>gameStatusDisplay(game).key==="live");
+  const estimatedLive=roundGames.filter(game=>isScheduledLiveEstimate(game,now));
+  const displayedLive=[...live,...estimatedLive];
   const finished=roundGames.filter(isScorableGame);
   const futureCount=lifecycle.future;
   const nextGame=state.games.filter(game=>!isFinished(game) && !isPostponed(game) && gameStatusDisplay(game).key!=="cancelled" && new Date(game.inicio).getTime()>now).sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
@@ -2082,8 +2092,8 @@ function renderHome(){
   let priority;
   if(pending.length){
     priority={tone:"warning",badge:"ATENÇÃO",icon:"📋",title:`Faltam ${pending.length} ${pending.length===1?"palpite":"palpites"}`,subtitle:`para a Rodada ${round}`,meta:nextPending?`Fecha ${homeDeadline(nextPending)}`:"Complete antes do fechamento",action:"games",label:"Fazer palpites"};
-  }else if(live.length){
-    priority={tone:"live",badge:"AO VIVO",icon:"🔥",title:`${live.length} ${live.length===1?"jogo ao vivo":"jogos ao vivo"}`,subtitle:"A rodada está acontecendo",meta:"Acompanhe os placares em tempo real",action:"games",label:"Acompanhar jogos"};
+  }else if(displayedLive.length){
+    priority={tone:"live",badge:estimatedLive.length&&!live.length?"AO VIVO • ESTIMADO":"AO VIVO",icon:"🔥",title:`${displayedLive.length} ${displayedLive.length===1?"jogo ao vivo":"jogos ao vivo"}`,subtitle:"A rodada está acontecendo",meta:estimatedLive.length?"Horário estimado; aguardando confirmação da fonte":"Acompanhe os placares em tempo real",action:"games",label:"Acompanhar jogos"};
   }else if(roundGames.length && lifecycle.status==="FINISHED"){
     priority={tone:"gold",badge:"RODADA ENCERRADA",icon:"🏆",title:`Rodada ${round} concluída`,subtitle:`Você fez ${me.total} ${me.total===1?"ponto":"pontos"}`,meta:"Confira sua posição final na rodada",action:"ranking",label:"Ver resultado"};
   }else{
@@ -2133,8 +2143,8 @@ function renderHome(){
     <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="games" aria-label="Abrir seus palpites"><span class="mini-card-icon">🎯</span><span>Seus palpites</span><b aria-hidden="true">›</b><strong>${completedPicks}/${roundGames.length}</strong><small>${pending.length?`${pending.length} pendente${pending.length===1?"":"s"}`:"Tudo preenchido"}</small></article>
     <article class="home-mini-card card mini-tone-gold home-navigable-card" role="button" tabindex="0" data-home-action="stats" aria-label="Abrir estatísticas"><span class="mini-card-icon">⭐</span><span>Pontos na rodada</span><b aria-hidden="true">›</b><strong>${roundPoints}</strong><small>${me.exact} placar${me.exact===1?"":"es"} exato${me.exact===1?"":"s"} no total</small></article>`;
 
-  if(live.length){
-    $("homeLiveSection").innerHTML=`<article class="premium-feature-card premium-live-card home-navigable-card" role="button" tabindex="0" data-home-action="games" aria-label="Abrir partidas ao vivo"><header class="premium-card-header"><div><span class="premium-kicker"><i>●</i> AO VIVO</span><h2>Partidas em andamento</h2></div><span class="premium-inline-action">Ver jogos <b>›</b></span></header><div class="home-live-list">${live.slice(0,3).map(game=>{const minute=liveMatchMinute(game);const title=minute.startsWith("~")?' title="Minuto estimado; a fonte não informou o relógio oficial"':"";return `<div class="home-live-card"><span class="live-dot"></span><div><strong>${escapeHtml(teamAbbreviation(game.time_casa))} ${hasValidScore(game)?Number(game.gols_casa):"–"} × ${hasValidScore(game)?Number(game.gols_fora):"–"} ${escapeHtml(teamAbbreviation(game.time_fora))}</strong><small>${escapeHtml(game.time_casa)} × ${escapeHtml(game.time_fora)}</small></div><b${title}>AO VIVO${minute?` • ${minute}'`:""}</b></div>`;}).join("")}</div></article>`;
+  if(displayedLive.length){
+    $("homeLiveSection").innerHTML=`<article class="premium-feature-card premium-live-card home-navigable-card" role="button" tabindex="0" data-home-action="games" aria-label="Abrir partidas ao vivo"><header class="premium-card-header"><div><span class="premium-kicker"><i>●</i> AO VIVO</span><h2>Partidas em andamento</h2></div><span class="premium-inline-action">Ver jogos <b>›</b></span></header><div class="home-live-list">${displayedLive.slice(0,3).map(game=>{const estimated=isScheduledLiveEstimate(game,now);const minute=estimated?"":liveMatchMinute(game);const title=estimated?' title="Início e minuto estimados pelo horário programado; aguardando confirmação da fonte"':minute.startsWith("~")?' title="Minuto estimado; a fonte não informou o relógio oficial"':"";const score=!estimated&&hasValidScore(game)?[Number(game.gols_casa),Number(game.gols_fora)]:["–","–"];const label=estimated?scheduledLiveLabel(game,now):`AO VIVO${minute?` • ${minute}'`:""}`;return `<div class="home-live-card${estimated?" is-estimated":""}"><span class="live-dot"></span><div><strong>${escapeHtml(teamAbbreviation(game.time_casa))} ${score[0]} × ${score[1]} ${escapeHtml(teamAbbreviation(game.time_fora))}</strong><small>${escapeHtml(game.time_casa)} × ${escapeHtml(game.time_fora)}</small></div><b${title}>${label}</b></div>`;}).join("")}</div></article>`;
   }else{
     $("homeLiveSection").innerHTML="";
   }
@@ -2201,7 +2211,7 @@ function movementBadge(participant){
   const direction=change>0?"up":"down";
   const action=change>0?"Subiu":"Caiu";
   const arrow=change>0?"▲":"▼";
-  const label=`${action} ${amount} posição${amount===1?"":"ões"}`;
+  const label=`${action} ${amount} ${amount===1?"posição":"posições"}`;
   return `<span class="rank-movement ${direction}" title="${label}" aria-label="${label}"><span class="rank-movement-arrow" aria-hidden="true">${arrow}</span><span class="rank-movement-count" aria-hidden="true">${amount}</span></span>`;
 }
 
@@ -2377,8 +2387,8 @@ function renderRankingParticipantPicks(){
     const reveal=isScorableGame(game);
     const pick=reveal?rankingParticipantPick(publicPicks,participant,game.id_jogo):null;
     const result=reveal?`${Number(game.gols_casa)} × ${Number(game.gols_fora)}`:"—";
-    const home=`<span class="ranking-pick-team"><span class="ranking-pick-crest">${teamLogo(game.time_casa_logo,game.time_casa)}</span><span>${escapeHtml(game.time_casa)}</span></span>`;
-    const away=`<span class="ranking-pick-team is-away"><span class="ranking-pick-crest">${teamLogo(game.time_fora_logo,game.time_fora)}</span><span>${escapeHtml(game.time_fora)}</span></span>`;
+    const home=`<span class="ranking-pick-team"><span class="ranking-pick-crest">${teamLogo(game.time_casa_logo,game.time_casa)}</span><span>${escapeHtml(teamDisplayName(game.time_casa))}</span></span>`;
+    const away=`<span class="ranking-pick-team is-away"><span class="ranking-pick-crest">${teamLogo(game.time_fora_logo,game.time_fora)}</span><span>${escapeHtml(teamDisplayName(game.time_fora))}</span></span>`;
     if(!reveal) return `<article class="ranking-pick-game is-locked">
       <div class="ranking-pick-match">${home}<strong>×</strong>${away}</div>
       <div class="ranking-pick-detail"><span aria-hidden="true">🔒</span><div><strong>Palpites protegidos</strong><small>${isPostponed(game)?"Partida adiada":"Disponíveis após o encerramento oficial"}</small></div></div>
@@ -3570,7 +3580,7 @@ function renderAdminAudit(){
     <div class="admin-audit-summary">
       <article><span>Jogos</span><strong>${s.games}</strong><small>${s.scoredGames} finalizados válidos</small></article>
       <article><span>Ao vivo</span><strong>${s.liveGames}</strong><small>${s.liveGamesWithScore} com placar parcial • não pontuam</small></article>
-      <article><span>Palpites</span><strong>${s.picks}</strong><small>${s.participants} participantes no ranking</small></article>
+      <article><span>Palpites registrados</span><strong>${s.picks}</strong><small>total da competição · ${s.participants} participantes</small></article>
       <article><span>Pontos</span><strong>${s.rankedPoints}</strong><small>soma geral calculada</small></article>
     </div>
     <div class="admin-audit-rule"><strong>Regra crítica aplicada:</strong> somente partidas oficialmente finalizadas, não canceladas e com placar válido geram pontos e estatísticas. Placar parcial em jogo ao vivo é uma condição normal e não gera alerta.</div>
@@ -3833,6 +3843,11 @@ function diagnosticStatusLabel(status){
   if(status==="degraded") return ["🟠","Atenção"];
   return ["⚪","Indeterminado"];
 }
+function diagnosticServiceLabel(item){
+  if(item?.dataStatus==="delayed") return ["🟠","Online · dados atrasados"];
+  if(item?.dataStatus==="unknown" && item?.status==="online") return ["🟡","Online · dados indeterminados"];
+  return diagnosticStatusLabel(item?.status);
+}
 function diagnosticDate(value){ return value ? new Intl.DateTimeFormat("pt-BR",{dateStyle:"short",timeStyle:"medium"}).format(new Date(value)) : "—"; }
 function diagnosticDuration(value){ return Number.isFinite(Number(value)) ? `${(Number(value)/1000).toFixed(Number(value)>=1000?1:2)} s` : "—"; }
 function diagnosticCacheStatus(cache){
@@ -3871,14 +3886,15 @@ async function renderAdminDiagnostic(){
     const last=d.sync.last, lastSuccess=d.sync.lastSuccess;
     const [cacheIcon,cacheLabel]=diagnosticCacheStatus(d.cache);
     content.innerHTML=`
-      <div class="diagnostic-health-grid">${services.map(([name,item])=>{const [icon,label]=diagnosticStatusLabel(item.status);return `<article><span>${escapeHtml(name)}</span><strong>${icon} ${label}</strong></article>`}).join("")}</div>
+      <div class="diagnostic-health-grid">${services.map(([name,item])=>{const [icon,label]=diagnosticServiceLabel(item);return `<article><span>${escapeHtml(name)}</span><strong>${icon} ${label}</strong></article>`}).join("")}</div>
+      ${d.sportsData?.status==="delayed"?`<div class="diagnostic-data-alert" role="alert"><strong>⚠ Dados esportivos aguardando atualização</strong><p>${Number(d.sportsData.delayedCount)||0} jogo(s) permanecem agendados mais de ${Number(d.sportsData.thresholdMinutes)||30} minutos após o início informado. A API pode estar online sem ter publicado o conteúdo atual.</p><ul>${(d.sportsData.delayedGames||[]).slice(0,6).map(game=>`<li>${escapeHtml(teamDisplayName(game.home))} × ${escapeHtml(teamDisplayName(game.away))} · ${diagnosticDate(game.kickoff)}</li>`).join("")}</ul></div>`:""}
       <div class="diagnostic-section"><h3>Sincronização</h3><div class="diagnostic-metrics">
         <div><span>Última execução</span><strong>${diagnosticDate(last?.criado_em)}</strong></div><div><span>Resultado</span><strong>${last?(last.sucesso?"🟢 Sucesso":"🔴 Erro"):"—"}</strong></div>
         <div><span>Duração</span><strong>${diagnosticDuration(last?.duracao_ms)}</strong></div><div><span>Jogos atualizados</span><strong>${last?.jogos_atualizados??"—"}</strong></div>
         <div><span>Chamadas API</span><strong>${last?.chamadas_api??"—"} / 8</strong></div><div><span>Próxima verificação</span><strong>${diagnosticDate(d.sync.nextScheduledCheck)}</strong></div>
       </div><small>${escapeHtml(d.sync.scheduleMode)}</small></div>
       <div class="diagnostic-section"><h3>Banco e cache</h3><div class="diagnostic-metrics">
-        <div><span>Jogos</span><strong>${d.database.jogos.count??"—"}</strong></div><div><span>Palpites</span><strong>${d.database.palpites.count??"—"}</strong></div>
+        <div><span>Jogos cadastrados</span><strong>${d.database.jogos.count??"—"}</strong></div><div><span>Palpites registrados</span><strong>${d.database.palpites.count??"—"}</strong></div>
         <div><span>Participantes</span><strong>${d.database.participantes.count??"—"}</strong></div><div><span>Cache da tabela</span><strong>${cacheIcon} ${cacheLabel}</strong></div>
         <div><span>Atualização do cache</span><strong>${diagnosticDate(d.cache.updatedAt)}</strong></div><div><span>Idade do cache</span><strong>${diagnosticAge(d.cache.ageMs)}</strong></div>
         <div><span>Clubes no cache</span><strong>${d.cache.clubs??"—"}</strong></div><div><span>Rodada atual</span><strong>${d.cache.currentMatchday??"—"}</strong></div>
@@ -3887,10 +3903,11 @@ async function renderAdminDiagnostic(){
       <div class="diagnostic-section"><div class="diagnostic-autotest-head"><h3>Autoteste detalhado</h3><strong>${d.autotest.score}/100</strong></div><div class="diagnostic-checks">${d.autotest.checks.map(c=>`<div class="${c.ok?"ok":"fail"}"><span>${c.ok?"✔":"✕"}</span><span>${escapeHtml(c.label)}${diagnosticCheckDetail(c)}</span></div>`).join("")}</div></div>
       <div class="diagnostic-section"><h3>Logs recentes</h3><div class="diagnostic-log-list">${d.logs.slice(0,8).map(log=>`<div><span>${diagnosticDate(log.criado_em)}</span><strong>${log.sucesso?"🟢":"🔴"} ${escapeHtml(log.origem||"sincronização")}</strong><small>${log.sucesso?`${log.jogos_atualizados??0} jogos • ${diagnosticDuration(log.duracao_ms)}`:escapeHtml(log.erro||"Falha sem detalhes")}</small></div>`).join("")||'<p class="muted-note">Nenhum log disponível.</p>'}</div></div>
       <div class="diagnostic-actions"><button id="diagnosticRefreshBtn" class="secondary" type="button">🔄 Atualizar diagnóstico</button><button id="diagnosticSyncBtn" class="primary" type="button">⚽ Sincronizar agora</button><button id="diagnosticExportBtn" class="secondary" type="button">📥 Exportar logs</button></div>
-      <small class="diagnostic-note">O status da Football Data API é inferido pelos logs para não consumir a cota apenas com testes.</small>`;
-    state.adminDiagnosticSummary={score:Number(d.autotest.score)||0,label:d.autotest.score>=90?"Saudável":d.autotest.score>=70?"Atenção":"Problemas"};
+      <small class="diagnostic-note">A disponibilidade da Football Data API é inferida pelos logs para não consumir cota; a atualidade do conteúdo é verificada separadamente nos jogos armazenados.</small>`;
+    const sportsDelayed=d.sportsData?.status==="delayed";
+    state.adminDiagnosticSummary={score:Number(d.autotest.score)||0,label:sportsDelayed?"Dados atrasados":d.autotest.score>=90?"Saudável":d.autotest.score>=70?"Atenção":"Problemas"};
     renderAdminControlCenter();
-    if(badge){ badge.textContent=d.autotest.score>=90?"Sistema saudável":d.autotest.score>=70?"Atenção":"Problemas"; badge.className=`admin-diagnostic-badge ${d.autotest.score>=90?"is-ok":d.autotest.score>=70?"is-warning":"is-error"}`; }
+    if(badge){ badge.textContent=sportsDelayed?"Dados esportivos atrasados":d.autotest.score>=90?"Sistema saudável":d.autotest.score>=70?"Atenção":"Problemas"; badge.className=`admin-diagnostic-badge ${sportsDelayed||d.autotest.score>=70&&d.autotest.score<90?"is-warning":d.autotest.score>=90?"is-ok":"is-error"}`; }
     $("diagnosticRefreshBtn")?.addEventListener("click",renderAdminDiagnostic);
     $("diagnosticSyncBtn")?.addEventListener("click",async e=>{await syncGames(e.currentTarget); await renderAdminDiagnostic();});
     $("diagnosticExportBtn")?.addEventListener("click",()=>{
