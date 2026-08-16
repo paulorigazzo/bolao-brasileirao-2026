@@ -1,3 +1,11 @@
+# v6.22.3 — Atualização dos palpites encerrados
+
+- Recarrega os palpites públicos quando uma partida passa a encerrada com placar válido.
+- Atualiza imediatamente Ranking, Estatísticas, Home e o modal individual já aberto.
+- Repete automaticamente a consulta após falhas temporárias, preservando os dados anteriores.
+- Evita consultas adicionais enquanto não houver novos palpites liberados.
+- Mantém protegidos os palpites de partidas futuras, ao vivo, adiadas ou canceladas.
+
 # v6.22.2 — Recuperação segura do início tardio
 
 - Usa o horário programado como referência auxiliar quando a API demora para declarar uma partida ao vivo.

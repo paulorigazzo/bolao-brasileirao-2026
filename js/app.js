@@ -8,7 +8,7 @@ import { buildMatchCalendarModel } from "./match-calendar-engine.js";
 import { resolveParticipantFavoriteTeam } from "./participant-team.js";
 import { buildRecoveryProtectionModel, recoveryOccurrenceModel, recoveryOriginLabel } from "./recovery-protection.js";
 import { resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
-import { shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
+import { hasNewlyRevealablePublicPicks, shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
 import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./access-control.js";
 import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temporary-ranking-engine.js";
 import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
@@ -16,7 +16,7 @@ import { buildRankingMovementFromHistory, rankingMovementKey } from "./ranking-m
 import { buildGamesProgressModel } from "./games-progress.js";
 import { liveMatchMinute } from "./live-match-minute.js";
 
-const APP_VERSION = "6.22.2";
+const APP_VERSION = "6.22.3";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -28,6 +28,7 @@ const state = { user:null, participant:null, participants:[], games:[], ownPicks
 let matchClockRefreshTimer=null;
 let liveScoreRefreshTimer=null;
 let liveScoreRefreshInFlight=false;
+let publicPicksRefreshPending=false;
 let rankingPicksParticipant=null;
 let rankingPicksReturnFocus=null;
 let rankingPicksModalView="picks";
@@ -4336,7 +4337,7 @@ function startMatchClockRefresh(){
 
 async function refreshLiveScoresSilently(){
   if(document.hidden || !state.user) return;
-  if(!shouldRefreshGamesFromSupabase(state.games) || liveScoreRefreshInFlight) return;
+  if((!shouldRefreshGamesFromSupabase(state.games)&&!publicPicksRefreshPending) || liveScoreRefreshInFlight) return;
   liveScoreRefreshInFlight=true;
   try{
     // A sincronização automática da fonte pertence exclusivamente ao agendamento
@@ -4345,6 +4346,18 @@ async function refreshLiveScoresSilently(){
     const {data,error}=await sb.from("jogos").select("*").order("rodada").order("inicio");
     if(error) throw error;
     if(Array.isArray(data)){
+      const shouldRefreshPublicPicks=publicPicksRefreshPending||hasNewlyRevealablePublicPicks(state.games,data);
+      if(shouldRefreshPublicPicks){
+        const {data:publicPicks,error:publicPicksError}=await sb.from("palpites_encerrados_publicos").select("*");
+        if(publicPicksError){
+          publicPicksRefreshPending=true;
+          console.warn("Os palpites recém-encerrados ainda não puderam ser atualizados; uma nova tentativa será feita automaticamente.",publicPicksError);
+        }else{
+          state.publicPicks=publicPicks||[];
+          publicPicksRefreshPending=false;
+          applyCanonicalParticipantNames();
+        }
+      }
       state.games=data;
       renderSyncStatus();
       renderGames();
@@ -4352,6 +4365,7 @@ async function refreshLiveScoresSilently(){
       renderMyTeam();
       renderStats();
       renderHome();
+      if(!$('rankingPicksModal')?.classList.contains('hidden')&&rankingPicksModalView==="picks") renderRankingParticipantPicks();
       if(!$('temporaryRankingModal')?.classList.contains('hidden')) await refreshTemporaryRankingModal({silent:true});
       if(!$("adminTab")?.classList.contains("hidden")) renderAdminRoundStatus();
     }
