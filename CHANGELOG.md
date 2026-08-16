@@ -1,3 +1,12 @@
+# v6.22.0 — Relógio estimado de baixo custo
+
+- Mantém o minuto oficial como fonte prioritária e usa um relógio estimado, identificado por `~`, somente quando a API não fornece esse dado.
+- Inicia a estimativa na primeira observação do jogo ao vivo, pausa no intervalo e retoma no segundo tempo.
+- Permite que eventos de gol avancem a referência sem jamais fazer o relógio retroceder.
+- Limita a exibição a `~45+15'` e `~90+15'`; depois disso, retorna ao estado seguro “AO VIVO”.
+- Adiciona estado mínimo e aditivo no Supabase, além de indicadores operacionais no relatório da sincronização.
+- Preserva placares, palpites, fechamento, pontuação, Ranking e demais regras competitivas.
+
 # v6.21.6 — Relógio oficial pelo detalhe da partida
 
 - Mantém a consulta compacta em lista para status e placares na janela ao vivo.

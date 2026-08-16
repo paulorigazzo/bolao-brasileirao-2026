@@ -1,6 +1,7 @@
 import { serviceClient, isMissingTableError, requireEnv } from "./_api-helpers.mjs";
 import { FOOTBALL_API_BASE, COMPETITION_CODE, SEASON_YEAR, MAX_API_CALLS_PER_SYNC } from "./_constants.mjs";
 import { sanitizeGameForStatus } from "./_sync-policy.mjs";
+import { evolveEstimatedLiveClock } from "../../js/live-match-minute.js";
 
 
 const HOME_STADIUMS = [
@@ -293,6 +294,7 @@ export async function syncGames(options = {}) {
       });
       if (!detailResponse.ok) continue;
       const detail = await detailResponse.json();
+      item.raw = detail;
       item.game = normalizeMatch(detail);
     } catch (error) {
       console.warn(`Não foi possível confirmar o placar final do jogo ${item.game.id_jogo}.`, error);
@@ -315,14 +317,16 @@ export async function syncGames(options = {}) {
   const ids = valid.map((game) => game.id_jogo);
   const { data: existing, error: existingError } = await supabase
     .from("jogos")
-    .select("id_jogo,status,gols_casa,gols_fora")
+    .select("id_jogo,status,gols_casa,gols_fora,minuto_estimado,periodo_estimado,relogio_referencia_em")
     .in("id_jogo", ids);
   if (existingError) throw new Error(`Supabase: ${existingError.message}`);
   const existingById = new Map((existing || []).map((game) => [Number(game.id_jogo), game]));
   const repairs = [];
+  const rawById=new Map(normalizedMatches.map(({raw,game})=>[Number(game.id_jogo),raw]));
   const merged = valid.map((game) => {
     const previous = existingById.get(Number(game.id_jogo));
-    return sanitizeGameForStatus(game, previous, repairs);
+    const sanitized=sanitizeGameForStatus(game, previous, repairs);
+    return evolveEstimatedLiveClock(sanitized,previous,rawById.get(Number(game.id_jogo)),new Date());
   });
 
   const batchSize = 100;
@@ -340,6 +344,8 @@ export async function syncGames(options = {}) {
     live: merged.filter((g) => ["em_andamento", "intervalo"].includes(g.status)).length,
     liveWithScore: merged.filter((g) => ["em_andamento", "intervalo"].includes(g.status) && g.gols_casa != null && g.gols_fora != null).length,
     liveWithOfficialClock: merged.filter((g) => ["em_andamento", "intervalo"].includes(g.status) && g.minuto != null).length,
+    liveWithEstimatedClock: merged.filter((g) => g.status === "em_andamento" && g.minuto == null && g.minuto_estimado != null && g.minuto_estimado <= (g.periodo_estimado === "segundo_tempo" ? 105 : 60)).length,
+    liveEstimatedClockFallbacks: merged.filter((g) => g.status === "em_andamento" && g.minuto == null && [61,106].includes(g.minuto_estimado)).length,
     liveDetailRequests,
     liveDetailFailures,
     liveDetailSkipped,
