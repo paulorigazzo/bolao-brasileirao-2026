@@ -16,7 +16,7 @@ import { buildRankingMovementFromHistory, rankingMovementKey } from "./ranking-m
 import { buildGamesProgressModel } from "./games-progress.js";
 import { liveMatchMinute } from "./live-match-minute.js";
 
-const APP_VERSION = "6.22.0";
+const APP_VERSION = "6.22.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();

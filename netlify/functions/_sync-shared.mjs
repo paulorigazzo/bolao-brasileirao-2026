@@ -1,7 +1,7 @@
 import { serviceClient, isMissingTableError, requireEnv } from "./_api-helpers.mjs";
 import { FOOTBALL_API_BASE, COMPETITION_CODE, SEASON_YEAR, MAX_API_CALLS_PER_SYNC } from "./_constants.mjs";
 import { sanitizeGameForStatus } from "./_sync-policy.mjs";
-import { evolveEstimatedLiveClock } from "../../js/live-match-minute.js";
+import { evolveEstimatedLiveClock, goalMinuteDiagnostics } from "../../js/live-match-minute.js";
 
 
 const HOME_STADIUMS = [
@@ -349,6 +349,8 @@ export async function syncGames(options = {}) {
     liveDetailRequests,
     liveDetailFailures,
     liveDetailSkipped,
+    liveGoalsReported:normalizedMatches.reduce((total,item)=>total+goalMinuteDiagnostics(item.raw).reported,0),
+    liveGoalsWithMinute:normalizedMatches.reduce((total,item)=>total+goalMinuteDiagnostics(item.raw).withMinute,0),
     firstMatch: merged[0]?.inicio ?? null,
     lastMatch: merged.at(-1)?.inicio ?? null,
     finishedWithScore: merged.filter((g) => g.gols_casa != null && g.gols_fora != null).length,
