@@ -1,3 +1,11 @@
+# v6.22.1 — Relógio estimado sem deriva
+
+- Preserva a referência temporal contínua entre sincronizações do relógio estimado.
+- Evita o descarte repetido de segundos que aumentava progressivamente a defasagem.
+- Mantém calibrações por minuto oficial ou gol somente quando elas avançam o relógio.
+- Registra separadamente gols recebidos e gols com minuto aproveitável no diagnóstico da sincronização.
+- Preserva banco, placares, palpites, pontuação, Ranking e limites de segurança existentes.
+
 # v6.22.0 — Relógio estimado de baixo custo
 
 - Mantém o minuto oficial como fonte prioritária e usa um relógio estimado, identificado por `~`, somente quando a API não fornece esse dado.

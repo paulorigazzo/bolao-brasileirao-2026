@@ -62,6 +62,14 @@ function latestGoalMinute(rawMatch) {
   },0);
 }
 
+export function goalMinuteDiagnostics(rawMatch) {
+  const goals=Array.isArray(rawMatch?.goals)?rawMatch.goals:[];
+  return {
+    reported:goals.length,
+    withMinute:goals.filter((goal)=>clockInteger(goal?.minute,105)!=null).length,
+  };
+}
+
 export function evolveEstimatedLiveClock(game,previous={},rawMatch={},now=new Date()) {
   const empty={minuto_estimado:null,periodo_estimado:null,relogio_referencia_em:null};
   if(!["em_andamento","intervalo"].includes(game?.status)) return {...game,...empty};
@@ -74,17 +82,33 @@ export function evolveEstimatedLiveClock(game,previous={},rawMatch={},now=new Da
       ? "segundo_tempo"
       : "primeiro_tempo";
   let minute=period==="segundo_tempo"?45:0;
+  let reference=nowIso;
   const previousMinute=clockInteger(previous?.minuto_estimado,106);
   if(previousMinute!=null&&previousPeriod===period){
     minute=previousMinute+elapsedMinutes(previous?.relogio_referencia_em,now);
+    reference=previous?.relogio_referencia_em||nowIso;
   }
 
   const official=clockInteger(game?.minuto,130);
   const officialInjury=clockInteger(game?.acrescimos,30)||0;
-  if(official!=null&&official>0) minute=Math.max(minute,official+officialInjury);
-  minute=Math.max(minute,latestGoalMinute(rawMatch));
+  const calibration=Math.max(
+    official!=null&&official>0?official+officialInjury:0,
+    latestGoalMinute(rawMatch),
+  );
+  if(calibration>minute){
+    minute=calibration;
+    reference=nowIso;
+  }else if(previousMinute!=null&&previousPeriod===period){
+    // Preserva o instante-base original. Atualizá-lo a cada sincronização
+    // descartaria os segundos ainda não convertidos em minutos e criaria deriva.
+    minute=previousMinute;
+  }
 
   const limit=period==="segundo_tempo"?SECOND_HALF_LIMIT:FIRST_HALF_LIMIT;
-  if(minute>limit) minute=limit+1;
-  return {...game,minuto_estimado:minute,periodo_estimado:period,relogio_referencia_em:game.status==="intervalo"||minute>limit?null:nowIso};
+  const displayedMinute=minute+elapsedMinutes(reference,now);
+  if(displayedMinute>limit){
+    minute=limit+1;
+    reference=null;
+  }
+  return {...game,minuto_estimado:minute,periodo_estimado:period,relogio_referencia_em:game.status==="intervalo"?null:reference};
 }

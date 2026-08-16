@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { estimatedLiveMatchMinute, evolveEstimatedLiveClock, liveMatchMinute, officialLiveMatchMinute } from "../js/live-match-minute.js";
+import { estimatedLiveMatchMinute, evolveEstimatedLiveClock, goalMinuteDiagnostics, liveMatchMinute, officialLiveMatchMinute } from "../js/live-match-minute.js";
 import { normalizeMatch } from "../netlify/functions/_sync-shared.mjs";
 
 assert.equal(officialLiveMatchMinute({ minuto: 37, acrescimos: null }),"37");
@@ -18,10 +18,31 @@ assert.equal(firstObservation.minuto_estimado,0);
 assert.equal(firstObservation.periodo_estimado,"primeiro_tempo");
 
 const advanced=evolveEstimatedLiveClock({id_jogo:1,status:"em_andamento",minuto:null,acrescimos:null},{...firstObservation,status:"em_andamento"},{},"2026-08-15T19:07:10Z");
-assert.equal(advanced.minuto_estimado,7);
+assert.equal(advanced.minuto_estimado,0);
+assert.equal(advanced.relogio_referencia_em,"2026-08-15T19:00:00.000Z");
+assert.equal(estimatedLiveMatchMinute(advanced,"2026-08-15T19:07:10Z"),"7");
+
+const irregularSyncs=["19:00:43","19:01:51","19:02:37","19:03:42"].reduce((clock,time)=>
+  evolveEstimatedLiveClock(
+    {id_jogo:1,status:"em_andamento",minuto:null,acrescimos:null},
+    {...clock,status:"em_andamento"},
+    {},
+    `2026-08-15T${time}Z`,
+  ),
+  firstObservation,
+);
+assert.equal(irregularSyncs.minuto_estimado,0);
+assert.equal(irregularSyncs.relogio_referencia_em,"2026-08-15T19:00:00.000Z");
+assert.equal(estimatedLiveMatchMinute(irregularSyncs,"2026-08-15T19:05:00Z"),"5");
 
 const calibrated=evolveEstimatedLiveClock({id_jogo:1,status:"em_andamento",minuto:null,acrescimos:null},{...advanced,status:"em_andamento"},{goals:[{minute:12,injuryTime:null}]},"2026-08-15T19:08:00Z");
 assert.equal(calibrated.minuto_estimado,12);
+assert.equal(calibrated.relogio_referencia_em,"2026-08-15T19:08:00.000Z");
+
+const goalWithoutMinute=evolveEstimatedLiveClock({id_jogo:1,status:"em_andamento",minuto:null,acrescimos:null},{...advanced,status:"em_andamento"},{goals:[{minute:null}]},"2026-08-15T19:08:00Z");
+assert.equal(goalWithoutMinute.minuto_estimado,0);
+assert.equal(goalWithoutMinute.relogio_referencia_em,"2026-08-15T19:00:00.000Z");
+assert.deepEqual(goalMinuteDiagnostics({goals:[{minute:12},{minute:null}]}),{reported:2,withMinute:1});
 
 const interval=evolveEstimatedLiveClock({id_jogo:1,status:"intervalo",minuto:null,acrescimos:null},{...calibrated,status:"em_andamento"},{},"2026-08-15T19:45:00Z");
 assert.equal(interval.periodo_estimado,"primeiro_tempo");
