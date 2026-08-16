@@ -17,6 +17,20 @@ const firstObservation=evolveEstimatedLiveClock({id_jogo:1,status:"em_andamento"
 assert.equal(firstObservation.minuto_estimado,0);
 assert.equal(firstObservation.periodo_estimado,"primeiro_tempo");
 
+const observedFourMinutesLate=evolveEstimatedLiveClock({id_jogo:2,inicio:"2026-08-15T19:00:00Z",status:"em_andamento",minuto:null,acrescimos:null},{id_jogo:2,status:"agendado"},{},"2026-08-15T19:04:30Z");
+assert.equal(observedFourMinutesLate.relogio_referencia_em,"2026-08-15T19:00:00.000Z");
+assert.equal(estimatedLiveMatchMinute(observedFourMinutesLate,"2026-08-15T19:04:30Z"),"4");
+
+const observedTwentyMinutesLate=evolveEstimatedLiveClock({id_jogo:3,inicio:"2026-08-15T19:00:00Z",status:"em_andamento",minuto:null,acrescimos:null},{id_jogo:3,status:"agendado"},{},"2026-08-15T19:20:30Z");
+assert.equal(observedTwentyMinutesLate.relogio_referencia_em,"2026-08-15T19:05:30.000Z");
+assert.equal(estimatedLiveMatchMinute(observedTwentyMinutesLate,"2026-08-15T19:20:30Z"),"15");
+
+const observedBeforeSchedule=evolveEstimatedLiveClock({id_jogo:4,inicio:"2026-08-15T19:10:00Z",status:"em_andamento",minuto:null,acrescimos:null},{id_jogo:4,status:"agendado"},{},"2026-08-15T19:05:00Z");
+assert.equal(estimatedLiveMatchMinute(observedBeforeSchedule,"2026-08-15T19:05:00Z"),"");
+
+const observedWithInvalidSchedule=evolveEstimatedLiveClock({id_jogo:5,inicio:"inválido",status:"em_andamento",minuto:null,acrescimos:null},{id_jogo:5,status:"agendado"},{},"2026-08-15T19:05:00Z");
+assert.equal(observedWithInvalidSchedule.relogio_referencia_em,"2026-08-15T19:05:00.000Z");
+
 const advanced=evolveEstimatedLiveClock({id_jogo:1,status:"em_andamento",minuto:null,acrescimos:null},{...firstObservation,status:"em_andamento"},{},"2026-08-15T19:07:10Z");
 assert.equal(advanced.minuto_estimado,0);
 assert.equal(advanced.relogio_referencia_em,"2026-08-15T19:00:00.000Z");
@@ -51,6 +65,7 @@ assert.equal(interval.relogio_referencia_em,null);
 const secondHalf=evolveEstimatedLiveClock({id_jogo:1,status:"em_andamento",minuto:null,acrescimos:null},{...interval,status:"intervalo"},{},"2026-08-15T20:00:00Z");
 assert.equal(secondHalf.minuto_estimado,45);
 assert.equal(secondHalf.periodo_estimado,"segundo_tempo");
+assert.equal(secondHalf.relogio_referencia_em,"2026-08-15T20:00:00.000Z");
 
 const capped=evolveEstimatedLiveClock({id_jogo:1,status:"em_andamento",minuto:null,acrescimos:null},{...secondHalf,minuto_estimado:105,relogio_referencia_em:"2026-08-15T20:00:00Z",status:"em_andamento"},{},"2026-08-15T20:01:00Z");
 assert.equal(capped.minuto_estimado,106);

@@ -1,3 +1,10 @@
+# v6.22.2 — Recuperação segura do início tardio
+
+- Usa o horário programado como referência auxiliar quando a API demora para declarar uma partida ao vivo.
+- Limita a recuperação inicial a 15 minutos para proteger partidas que realmente começaram atrasadas.
+- Mantém a referência contínua após a inicialização e não reaplica o horário programado no segundo tempo.
+- Preserva minuto oficial, calibração por gols, limites de segurança e todas as regras competitivas.
+
 # v6.22.1 — Relógio estimado sem deriva
 
 - Preserva a referência temporal contínua entre sincronizações do relógio estimado.
