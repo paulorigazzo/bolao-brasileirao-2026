@@ -14,6 +14,7 @@ export function officialLiveMatchMinute(game) {
 
 const FIRST_HALF_LIMIT=60;
 const SECOND_HALF_LIMIT=105;
+const MAX_INITIAL_KICKOFF_RECOVERY_MINUTES=15;
 
 function timestamp(value) {
   if(value===null||value===undefined||value==="") return null;
@@ -26,6 +27,14 @@ function elapsedMinutes(reference,now) {
   const nowTime=timestamp(now);
   if(referenceTime==null||nowTime==null||nowTime<=referenceTime) return 0;
   return Math.floor((nowTime-referenceTime)/60000);
+}
+
+function initialClockReference(game,now) {
+  const nowTime=timestamp(now);
+  const scheduledTime=timestamp(game?.inicio);
+  if(nowTime==null||scheduledTime==null||scheduledTime>=nowTime) return new Date(now).toISOString();
+  const earliestAllowed=nowTime-(MAX_INITIAL_KICKOFF_RECOVERY_MINUTES*60000);
+  return new Date(Math.max(scheduledTime,earliestAllowed)).toISOString();
 }
 
 function estimatedMinuteText(minute,period) {
@@ -82,7 +91,7 @@ export function evolveEstimatedLiveClock(game,previous={},rawMatch={},now=new Da
       ? "segundo_tempo"
       : "primeiro_tempo";
   let minute=period==="segundo_tempo"?45:0;
-  let reference=nowIso;
+  let reference=period==="primeiro_tempo"?initialClockReference(game,now):nowIso;
   const previousMinute=clockInteger(previous?.minuto_estimado,106);
   if(previousMinute!=null&&previousPeriod===period){
     minute=previousMinute+elapsedMinutes(previous?.relogio_referencia_em,now);
