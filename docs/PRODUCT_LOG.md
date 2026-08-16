@@ -1,5 +1,11 @@
 # Registro de Decisões do Produto
 
+## 15 de agosto de 2026 — Relógio estimado como Plano B viável de baixo custo
+
+**Decisão:** manter a football-data.org e complementar a ausência recorrente do minuto oficial com uma estimativa informativa baseada nas transições de status e calibrada por eventos de gol. O minuto oficial sempre prevalece; a estimativa é identificada por `~`, pausa no intervalo, não retrocede e deixa de ser exibida após 15 minutos extras em cada tempo.
+
+**Motivo:** preservar a fonte atual, os custos e as regras competitivas enquanto melhora a leitura ao vivo. A estimativa não participa de fechamento de palpites, pontuação, resultados ou Ranking.
+
 ## 5 de agosto de 2026 — Bolão Brasileirão Rigazzo como produto independente
 
 **Decisão:** desenvolver Temporadas e Ligas no novo produto Bolão Brasileirão Rigazzo, com repositório, Supabase, autenticação e Netlify próprios. O Bolão 2026 permanece oficial e fornecerá dados somente por snapshots manuais, unidirecionais e aprovados.

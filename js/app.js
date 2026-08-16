@@ -14,9 +14,9 @@ import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temp
 import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
 import { buildRankingMovementFromHistory, rankingMovementKey } from "./ranking-movement-engine.js";
 import { buildGamesProgressModel } from "./games-progress.js";
-import { officialLiveMatchMinute } from "./live-match-minute.js";
+import { liveMatchMinute } from "./live-match-minute.js";
 
-const APP_VERSION = "6.21.6";
+const APP_VERSION = "6.22.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1140,7 +1140,8 @@ function premiumMatchCard(g){
   const suspended=rawStatus.includes("suspens");
   const interval=live&&(rawStatus.includes("intervalo")||rawStatus.includes("half-time")||rawStatus.includes("paused"));
   const stateClass=status.key==="cancelled"?"is-cancelled":suspended?"is-suspended":status.key==="postponed"?"is-postponed":finished?"is-finished":live?"is-live":isLocked?"is-soon":pick?"is-picked":"is-open";
-  const liveMinute=live&&!interval?officialLiveMatchMinute(g):"";
+  const liveMinute=live&&!interval?liveMatchMinute(g):"";
+  const liveMinuteTitle=liveMinute.startsWith("~")?' title="Minuto estimado; a fonte não informou o relógio oficial"':"";
   const headerStatusLabel=status.key==="cancelled"?"CANCELADO":suspended?"SUSPENSO":status.key==="postponed"?"ADIADO":finished?"ENCERRADO":interval?"INTERVALO":live?`AO VIVO${liveMinute?` • ${liveMinute}'`:""}`:"";
   const expandedStatusLabel=headerStatusLabel|| (isLocked?"FECHADO":pick?"SALVO":"ABERTO");
   const summaryScore=finished&&hasScore?`${g.gols_casa} × ${g.gols_fora}`:live&&hasScore?`${g.gols_casa} × ${g.gols_fora}`:pick?`${pick.gols_casa} × ${pick.gols_fora}`:"Palpite pendente";
@@ -1164,14 +1165,14 @@ function premiumMatchCard(g){
     <button class="game-toggle premium-game-toggle" type="button" aria-expanded="false">
       <span class="premium-toggle-time"><strong>${premiumTime(g.inicio)}</strong><small title="${escapeHtml(g.local_partida||"Local a definir")}">${escapeHtml(g.local_partida||"Local a definir")}</small></span>
       <span class="premium-toggle-match">${compactTeam(g.time_casa_logo,g.time_casa).replace("game-summary-team",`game-summary-team${favorite.homeFavorite?" is-favorite-team":""}`)}<span class="premium-toggle-score">${escapeHtml(summaryScore)}</span>${compactTeam(g.time_fora_logo,g.time_fora).replace("game-summary-team",`game-summary-team${favorite.awayFavorite?" is-favorite-team":""}`)}</span>
-      <span class="premium-toggle-side">${favorite.isFavoriteMatch?favoriteHeartBadge(favoriteTeamName):""}${headerStatusLabel?`<span class="premium-toggle-status" data-game-header-status>${headerStatusLabel}</span>`:""}${headerPointsLabel!==""?`<span class="premium-toggle-points" aria-label="${headerPointsLabel} pontos no jogo"><span aria-hidden="true">★</span>${headerPointsLabel}</span>`:""}<span class="game-chevron" aria-hidden="true">⌄</span></span>
+      <span class="premium-toggle-side">${favorite.isFavoriteMatch?favoriteHeartBadge(favoriteTeamName):""}${headerStatusLabel?`<span class="premium-toggle-status" data-game-header-status${liveMinuteTitle}>${headerStatusLabel}</span>`:""}${headerPointsLabel!==""?`<span class="premium-toggle-points" aria-label="${headerPointsLabel} pontos no jogo"><span aria-hidden="true">★</span>${headerPointsLabel}</span>`:""}<span class="game-chevron" aria-hidden="true">⌄</span></span>
     </button>
     <div class="game-collapsible" style="max-height:0;opacity:0">
       <div class="game-collapsible-inner premium-game-body premium-game-body-v2">
         ${status.key==="postponed"?`<div class="postponed-match-notice" role="status"><span aria-hidden="true">🟠</span><div><strong>Partida adiada</strong><p>Nova data ainda não definida. ${pick?"Seu palpite foi preservado e permanece bloqueado.":"O período original de palpites foi encerrado."} A pontuação será calculada quando a partida for realizada.</p></div></div>`:""}
         <div class="premium-expanded-meta">
           <div class="premium-match-time"><strong>${status.key==="postponed"?"A definir":premiumTime(g.inicio)}</strong><span>${escapeHtml(g.local_partida||"Local a definir")}</span><small data-game-deadline>◷ ${deadlineText(g)}</small></div>
-          <div class="premium-match-state"><span data-game-expanded-status>${expandedStatusLabel}</span>${!isLocked&&!finished?`<button class="premium-edit-pick" type="button" aria-label="Editar palpite">✎</button>`:""}</div>
+          <div class="premium-match-state"><span data-game-expanded-status${liveMinuteTitle}>${expandedStatusLabel}</span>${!isLocked&&!finished?`<button class="premium-edit-pick" type="button" aria-label="Editar palpite">✎</button>`:""}</div>
         </div>
         <div class="premium-expanded-matchup">
           <div class="premium-team premium-team-home ${favorite.homeFavorite?"is-favorite-team":""}"><span class="team-badge">${teamLogo(g.time_casa_logo,g.time_casa)}</span><b>${escapeHtml(g.time_casa)}${favorite.homeFavorite?`<span class="favorite-team-name-heart" aria-hidden="true">♥</span>`:""}</b></div>
@@ -1231,7 +1232,7 @@ function refreshVisibleGameClocks(){
     const rawStatus=normalizeTeamKey(game?.status||"");
     const suspended=rawStatus.includes("suspens");
     const interval=status.key==="live"&&(rawStatus.includes("intervalo")||rawStatus.includes("half-time")||rawStatus.includes("paused"));
-    const liveMinute=status.key==="live"&&!interval?officialLiveMatchMinute(game):"";
+    const liveMinute=status.key==="live"&&!interval?liveMatchMinute(game):"";
     const headerLabel=status.key==="cancelled"?"CANCELADO":suspended?"SUSPENSO":status.key==="postponed"?"ADIADO":isFinished(game)?"ENCERRADO":interval?"INTERVALO":status.key==="live"?`AO VIVO${liveMinute?` • ${liveMinute}'`:""}`:"";
     const expandedLabel=headerLabel||(locked(game)?"FECHADO":ownPick(game.id_jogo)?"SALVO":"ABERTO");
     const deadline=card.querySelector("[data-game-deadline]");
@@ -1240,6 +1241,9 @@ function refreshVisibleGameClocks(){
     if(deadline) deadline.textContent=`◷ ${deadlineText(game)}`;
     if(header) header.textContent=headerLabel;
     if(expanded) expanded.textContent=expandedLabel;
+    const clockTitle=liveMinute.startsWith("~")?"Minuto estimado; a fonte não informou o relógio oficial":"";
+    if(header) header.title=clockTitle;
+    if(expanded) expanded.title=clockTitle;
   });
 }
 
@@ -2129,7 +2133,7 @@ function renderHome(){
     <article class="home-mini-card card mini-tone-gold home-navigable-card" role="button" tabindex="0" data-home-action="stats" aria-label="Abrir estatísticas"><span class="mini-card-icon">⭐</span><span>Pontos na rodada</span><b aria-hidden="true">›</b><strong>${roundPoints}</strong><small>${me.exact} placar${me.exact===1?"":"es"} exato${me.exact===1?"":"s"} no total</small></article>`;
 
   if(live.length){
-    $("homeLiveSection").innerHTML=`<article class="premium-feature-card premium-live-card home-navigable-card" role="button" tabindex="0" data-home-action="games" aria-label="Abrir partidas ao vivo"><header class="premium-card-header"><div><span class="premium-kicker"><i>●</i> AO VIVO</span><h2>Partidas em andamento</h2></div><span class="premium-inline-action">Ver jogos <b>›</b></span></header><div class="home-live-list">${live.slice(0,3).map(game=>`<div class="home-live-card"><span class="live-dot"></span><div><strong>${escapeHtml(teamAbbreviation(game.time_casa))} ${hasValidScore(game)?Number(game.gols_casa):"–"} × ${hasValidScore(game)?Number(game.gols_fora):"–"} ${escapeHtml(teamAbbreviation(game.time_fora))}</strong><small>${escapeHtml(game.time_casa)} × ${escapeHtml(game.time_fora)}</small></div><b>AO VIVO</b></div>`).join("")}</div></article>`;
+    $("homeLiveSection").innerHTML=`<article class="premium-feature-card premium-live-card home-navigable-card" role="button" tabindex="0" data-home-action="games" aria-label="Abrir partidas ao vivo"><header class="premium-card-header"><div><span class="premium-kicker"><i>●</i> AO VIVO</span><h2>Partidas em andamento</h2></div><span class="premium-inline-action">Ver jogos <b>›</b></span></header><div class="home-live-list">${live.slice(0,3).map(game=>{const minute=liveMatchMinute(game);const title=minute.startsWith("~")?' title="Minuto estimado; a fonte não informou o relógio oficial"':"";return `<div class="home-live-card"><span class="live-dot"></span><div><strong>${escapeHtml(teamAbbreviation(game.time_casa))} ${hasValidScore(game)?Number(game.gols_casa):"–"} × ${hasValidScore(game)?Number(game.gols_fora):"–"} ${escapeHtml(teamAbbreviation(game.time_fora))}</strong><small>${escapeHtml(game.time_casa)} × ${escapeHtml(game.time_fora)}</small></div><b${title}>AO VIVO${minute?` • ${minute}'`:""}</b></div>`;}).join("")}</div></article>`;
   }else{
     $("homeLiveSection").innerHTML="";
   }

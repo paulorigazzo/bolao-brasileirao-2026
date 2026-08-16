@@ -1,6 +1,6 @@
-6.21.6
+6.22.0
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.21.6-relogio-oficial-detalhe.md`](docs/releases/v6.21.6-relogio-oficial-detalhe.md)
+- Nota da versão atual: [`docs/releases/v6.22.0-relogio-estimado.md`](docs/releases/v6.22.0-relogio-estimado.md)

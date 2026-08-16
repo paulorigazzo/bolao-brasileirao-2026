@@ -11,7 +11,7 @@ assert.equal(mapStatus("PAUSED"),"intervalo");
 assert.equal(mapStatus("FINISHED"),"encerrado");
 assert.match(app,/rawStatus\.includes\("intervalo"\)/);
 assert.match(app,/interval\?"INTERVALO"/);
-assert.match(app,/officialLiveMatchMinute/);
+assert.match(app,/liveMatchMinute/);
 
 const previous={id_jogo:554775,status:"encerrado",gols_casa:2,gols_fora:1};
 for(const status of ["agendado","adiado","cancelado"]){
