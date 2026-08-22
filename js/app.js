@@ -17,7 +17,7 @@ import { buildGamesProgressModel } from "./games-progress.js";
 import { liveMatchMinute } from "./live-match-minute.js";
 import { isScheduledLiveEstimate, scheduledLiveLabel } from "./scheduled-live-estimate.js";
 
-const APP_VERSION = "6.22.5";
+const APP_VERSION = "6.22.6";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1756,7 +1756,7 @@ function changeMatchCalendarMonth(delta){
   if(target){ matchCalendarMonthKey=target.key; renderMatchCalendar(); }
 }
 
-function openGameFromCalendar(gameId){
+function openSelectedGame(gameId,sourceLabel){
   const game=state.games.find(item=>Number(item.id_jogo)===Number(gameId));
   if(!game) return message("A partida selecionada não está mais disponível.",true);
   closeMatchCalendar(false);
@@ -1780,7 +1780,15 @@ function openGameFromCalendar(gameId){
     card.querySelector(".game-toggle")?.focus({preventScroll:true});
     setTimeout(()=>card.classList.remove("is-calendar-target"),prefersReducedMotion()?1200:3200);
   },120);
-  message(`Exibindo ${game.time_casa} × ${game.time_fora}, da rodada ${Number(game.rodada)}, selecionado no calendário.`);
+  message(`Exibindo ${game.time_casa} × ${game.time_fora}, da rodada ${Number(game.rodada)}, ${sourceLabel}.`);
+}
+
+function openGameFromCalendar(gameId){
+  openSelectedGame(gameId,"selecionado no calendário");
+}
+
+function openLiveGameFromHome(gameId){
+  openSelectedGame(gameId,"selecionado na Home");
 }
 
 function favoriteTeamStandingsRow(team){
@@ -2144,7 +2152,7 @@ function renderHome(){
     <article class="home-mini-card card mini-tone-gold home-navigable-card" role="button" tabindex="0" data-home-action="stats" aria-label="Abrir estatísticas"><span class="mini-card-icon">⭐</span><span>Pontos na rodada</span><b aria-hidden="true">›</b><strong>${roundPoints}</strong><small>${me.exact} placar${me.exact===1?"":"es"} exato${me.exact===1?"":"s"} no total</small></article>`;
 
   if(displayedLive.length){
-    $("homeLiveSection").innerHTML=`<article class="premium-feature-card premium-live-card home-navigable-card" role="button" tabindex="0" data-home-action="games" aria-label="Abrir partidas ao vivo"><header class="premium-card-header"><div><span class="premium-kicker"><i>●</i> AO VIVO</span><h2>Partidas em andamento</h2></div><span class="premium-inline-action">Ver jogos <b>›</b></span></header><div class="home-live-list">${displayedLive.slice(0,3).map(game=>{const estimated=isScheduledLiveEstimate(game,now);const minute=estimated?"":liveMatchMinute(game);const title=estimated?' title="Início e minuto estimados pelo horário programado; aguardando confirmação da fonte"':minute.startsWith("~")?' title="Minuto estimado; a fonte não informou o relógio oficial"':"";const score=!estimated&&hasValidScore(game)?[Number(game.gols_casa),Number(game.gols_fora)]:["–","–"];const label=estimated?scheduledLiveLabel(game,now):`AO VIVO${minute?` • ${minute}'`:""}`;return `<div class="home-live-card${estimated?" is-estimated":""}"><span class="live-dot"></span><div><strong>${escapeHtml(teamAbbreviation(game.time_casa))} ${score[0]} × ${score[1]} ${escapeHtml(teamAbbreviation(game.time_fora))}</strong><small>${escapeHtml(game.time_casa)} × ${escapeHtml(game.time_fora)}</small></div><b${title}>${label}</b></div>`;}).join("")}</div></article>`;
+    $("homeLiveSection").innerHTML=`<article class="premium-feature-card premium-live-card" aria-label="Partidas ao vivo"><header class="premium-card-header"><div><span class="premium-kicker"><i>●</i> AO VIVO</span><h2>Partidas em andamento</h2></div><button class="premium-inline-action" type="button" data-home-action="games">Ver jogos <b aria-hidden="true">›</b></button></header><div class="home-live-list">${displayedLive.slice(0,3).map(game=>{const estimated=isScheduledLiveEstimate(game,now);const minute=estimated?"":liveMatchMinute(game);const title=estimated?' title="Início e minuto estimados pelo horário programado; aguardando confirmação da fonte"':minute.startsWith("~")?' title="Minuto estimado; a fonte não informou o relógio oficial"':"";const score=!estimated&&hasValidScore(game)?[Number(game.gols_casa),Number(game.gols_fora)]:["–","–"];const label=estimated?scheduledLiveLabel(game,now):`AO VIVO${minute?` • ${minute}'`:""}`;return `<button class="home-live-card${estimated?" is-estimated":""}" type="button" data-home-live-game="${Number(game.id_jogo)}" aria-label="Abrir ${escapeHtml(game.time_casa)} × ${escapeHtml(game.time_fora)} na Rodada ${Number(game.rodada)}"><span class="live-dot"></span><span class="home-live-match"><strong>${escapeHtml(teamAbbreviation(game.time_casa))} ${score[0]} × ${score[1]} ${escapeHtml(teamAbbreviation(game.time_fora))}</strong><small>${escapeHtml(game.time_casa)} × ${escapeHtml(game.time_fora)}</small></span><b${title}>${label}</b></button>`;}).join("")}</div></article>`;
   }else{
     $("homeLiveSection").innerHTML="";
   }
@@ -4679,6 +4687,8 @@ document.addEventListener("click",event=>{
 
 document.addEventListener("click",event=>{ if(!$("headerUser")?.contains(event.target)){ show("userMenu",false); $("userMenuBtn")?.setAttribute("aria-expanded","false"); } });
 $("homeTab")?.addEventListener("click",async event=>{
+  const liveGame=event.target.closest("[data-home-live-game]");
+  if(liveGame){ openLiveGameFromHome(liveGame.dataset.homeLiveGame); return; }
   const target=event.target.closest("[data-home-action]");
   if(!target) return;
   const action=target.dataset.homeAction;
