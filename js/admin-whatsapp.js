@@ -7,3 +7,10 @@ export function resolveAttentionWhatsAppParticipant(progress,authorizedParticipa
   if(!email) return null;
   return authorizedParticipants.find(participant=>normalizeParticipantEmail(participant?.email)===email)||null;
 }
+
+export function appendPoolLinkToWhatsAppMessage(message,poolUrl){
+  const text=String(message||"").trim();
+  const url=String(poolUrl||"").trim();
+  if(!text || !url) return text;
+  return `${text}\n\nAcesse o bolão:\n${url}`;
+}
