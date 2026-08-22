@@ -1,3 +1,9 @@
+# v6.22.5 — Link nas mensagens do WhatsApp
+
+- Acrescenta o endereço oficial do bolão aos quatro modelos de mensagem individual do WhatsApp.
+- Inclui o mesmo link no lembrete coletivo de palpites pendentes.
+- Reutiliza a URL oficial configurada no aplicativo e preserva a edição e o envio manual das mensagens.
+
 # v6.22.4 — Início estimado pelo horário programado
 
 - Assume visualmente o início da partida quando o horário programado é atingido e a fonte ainda mantém o jogo como agendado.

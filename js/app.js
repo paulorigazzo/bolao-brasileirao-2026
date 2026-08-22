@@ -7,7 +7,7 @@ import { buildParticipantDuelModel } from "./participant-duel-engine.js";
 import { buildMatchCalendarModel } from "./match-calendar-engine.js";
 import { resolveParticipantFavoriteTeam } from "./participant-team.js";
 import { buildRecoveryProtectionModel, recoveryOccurrenceModel, recoveryOriginLabel } from "./recovery-protection.js";
-import { resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
+import { appendPoolLinkToWhatsAppMessage, resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
 import { hasNewlyRevealablePublicPicks, shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
 import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./access-control.js";
 import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temporary-ranking-engine.js";
@@ -17,7 +17,7 @@ import { buildGamesProgressModel } from "./games-progress.js";
 import { liveMatchMinute } from "./live-match-minute.js";
 import { isScheduledLiveEstimate, scheduledLiveLabel } from "./scheduled-live-estimate.js";
 
-const APP_VERSION = "6.22.4";
+const APP_VERSION = "6.22.5";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -3260,7 +3260,7 @@ function whatsappTemplateText(type,participant){
     approved:`Olá, ${name}! ✅\n\nSua inscrição no Bolão Brasileirão 2026 foi aprovada. Você já pode entrar com sua conta Google e preencher os palpites.`,
     welcome:`Olá, ${name}! 🏆\n\nBem-vindo ao Bolão Brasileirão 2026! Faça seus palpites, acompanhe o ranking e boa sorte na disputa.`,
   };
-  return templates[type]||"";
+  return appendPoolLinkToWhatsAppMessage(templates[type]||"",configuredPoolUrl());
 }
 
 function selectWhatsAppTemplate(type){
@@ -3729,7 +3729,7 @@ async function sendAdminReminder(){
   const names=pending.map(item=>item.name).join(", ");
   const round=state.adminSnapshot.round;
   const close=state.adminSnapshot.closeAt?new Date(state.adminSnapshot.closeAt).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"em breve";
-  const text=`Olá! Ainda há palpites pendentes para a Rodada ${round} do Bolão Brasileirão 2026. Pendentes: ${names}. O próximo fechamento será ${close}. Por favor, concluam os palpites antes do prazo. Boa sorte!`;
+  const text=appendPoolLinkToWhatsAppMessage(`Olá! Ainda há palpites pendentes para a Rodada ${round} do Bolão Brasileirão 2026. Pendentes: ${names}. O próximo fechamento será ${close}. Por favor, concluam os palpites antes do prazo. Boa sorte!`,configuredPoolUrl());
   try{
     if(navigator.share) await navigator.share({title:`Bolão • Rodada ${round}`,text});
     else { await navigator.clipboard.writeText(text); message("Lembrete copiado. Agora cole no WhatsApp."); }
