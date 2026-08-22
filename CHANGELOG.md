@@ -1,3 +1,9 @@
+# v6.22.6 — Jogo ao vivo expandido pela Home
+
+- Faz cada confronto destacado no card Ao Vivo abrir sua rodada com o jogo correspondente expandido.
+- Mantém o botão “Ver jogos” como acesso independente à Tela de Jogos completa.
+- Reutiliza a navegação direta por partida e preserva foco, teclado, filtros, placares e atualização ao vivo.
+
 # v6.22.5 — Link nas mensagens do WhatsApp
 
 - Acrescenta o endereço oficial do bolão aos quatro modelos de mensagem individual do WhatsApp.
