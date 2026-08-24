@@ -16,8 +16,9 @@ import { buildRankingMovementFromHistory, rankingMovementKey } from "./ranking-m
 import { buildGamesProgressModel } from "./games-progress.js";
 import { liveMatchMinute } from "./live-match-minute.js";
 import { isScheduledLiveEstimate, scheduledLiveLabel } from "./scheduled-live-estimate.js";
+import { buildFriendlyRankingsModel } from "./friendly-rankings-engine.js";
 
-const APP_VERSION = "6.22.7";
+const APP_VERSION = "6.23.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -39,6 +40,9 @@ let adminRoundShareOriginalText="";
 let adminRoundShareReturnFocus=null;
 let matchCalendarReturnFocus=null;
 let matchCalendarModel=null;
+let friendlyRankingsModel=null;
+let friendlyRankingsReturnFocus=null;
+let friendlyRankingsView="efficiency";
 let matchCalendarMonthKey=null;
 let temporaryRankingReturnFocus=null;
 let temporaryRankingAllowUnavailable=false;
@@ -2289,6 +2293,19 @@ function renderRanking(){
   if($('rankingRoundLabel')) $('rankingRoundLabel').textContent=lifecycle.isProvisional?`${lifecycle.postponed} jogo${lifecycle.postponed===1?"":"s"} adiado${lifecycle.postponed===1?"":"s"}`:completedRound?`Após a rodada ${completedRound}`:"Classificação geral";
   if($('rankingUpdatedAt')) $('rankingUpdatedAt').innerHTML=`<span>✓ ${escapeHtml(updatedLabel)}</span><small>${lifecycle.isProvisional?"A classificação poderá mudar quando as partidas adiadas forem disputadas.":"Os pontos são recalculados com base nos resultados registrados."}</small>`;
 
+  friendlyRankingsModel=buildFriendlyRankingsModel({
+    games:state.games,
+    picks:state.publicPicks,
+    participants:state.participants,
+    currentParticipant:state.participant,
+    isScorableGame,
+    pointsForPick:(pick,game)=>points(pick,game),
+  });
+  if($('friendlyRankingsTeaser')) $('friendlyRankingsTeaser').innerHTML=`
+    <div><span class="eyebrow">TROFÉUS SEM VALIDADE NO CARTÓRIO</span><strong>Nem todo mundo concorda com a tabela…</strong><p>${escapeHtml(friendlyRankingsModel.teaser)}</p></div>
+    <button id="friendlyRankingsOpen" class="secondary" type="button">Ver disputas paralelas</button>
+    <small>Rankings recreativos. A classificação oficial continua mandando por aqui.</small>`;
+
   $('rankingBody').innerHTML=state.ranking.map((r,i)=>{
     const isMe=isCurrentRankingParticipant(r), rate=r.scored?Math.round(r.total/(r.scored*10)*100):0;
     const team=participantTeam(r);
@@ -2321,6 +2338,49 @@ function renderRanking(){
   }).join('') || '<p class="muted-note">O pódio será exibido após os primeiros resultados.</p>';
   renderDashboard();
   renderTemporaryRankingAccess();
+}
+
+function friendlyRankingRows(ranking,kind){
+  if(!ranking.length) return '<p class="muted-note friendly-rankings-empty">Ainda não há participantes com amostra suficiente.</p>';
+  return `<ol class="friendly-rankings-list">${ranking.map(item=>`<li class="${item.isCurrent?'is-me':''}">
+    <span class="friendly-ranking-position">${item.position}º</span>
+    <div><strong>${escapeHtml(item.name)}</strong>${item.isCurrent?'<small>VOCÊ</small>':''}<span>${kind==='hot'?`Rodadas ${item.rounds.join(', ')}`:`${item.evaluated} palpites avaliados`}</span></div>
+    <b>${item.average.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</b>
+    <em>pt/palpite</em>
+  </li>`).join('')}</ol>`;
+}
+
+function renderFriendlyRankingsModal(){
+  if(!friendlyRankingsModel) return;
+  const efficiency=friendlyRankingsView==='efficiency';
+  $('friendlyRankingsEfficiencyTab')?.classList.toggle('active',efficiency);
+  $('friendlyRankingsHotTab')?.classList.toggle('active',!efficiency);
+  $('friendlyRankingsEfficiencyTab')?.setAttribute('aria-selected',String(efficiency));
+  $('friendlyRankingsHotTab')?.setAttribute('aria-selected',String(!efficiency));
+  $('friendlyRankingsEfficiencyPanel')?.toggleAttribute('hidden',!efficiency);
+  $('friendlyRankingsHotPanel')?.toggleAttribute('hidden',efficiency);
+  if($('friendlyRankingsEfficiencyPhrase')) $('friendlyRankingsEfficiencyPhrase').textContent=`“${friendlyRankingsModel.efficiency.phrase}”`;
+  if($('friendlyRankingsHotPhrase')) $('friendlyRankingsHotPhrase').textContent=`“${friendlyRankingsModel.hot.phrase}”`;
+  if($('friendlyRankingsEfficiencyList')) $('friendlyRankingsEfficiencyList').innerHTML=friendlyRankingRows(friendlyRankingsModel.efficiency.ranking,'efficiency');
+  if($('friendlyRankingsHotList')) $('friendlyRankingsHotList').innerHTML=friendlyRankingRows(friendlyRankingsModel.hot.ranking,'hot');
+}
+
+function openFriendlyRankings(trigger){
+  if(!friendlyRankingsModel) renderRanking();
+  friendlyRankingsReturnFocus=trigger||document.activeElement;
+  friendlyRankingsView='efficiency';
+  renderFriendlyRankingsModal();
+  $('friendlyRankingsModal')?.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+  setTimeout(()=>$('friendlyRankingsModalClose')?.focus(),40);
+}
+
+function closeFriendlyRankings(){
+  $('friendlyRankingsModal')?.classList.add('hidden');
+  document.body.classList.remove('modal-open');
+  const target=friendlyRankingsReturnFocus;
+  friendlyRankingsReturnFocus=null;
+  target?.focus?.();
 }
 
 function rankingParticipantPick(picks,participant,gameId){
@@ -4540,6 +4600,18 @@ $("rankingBody")?.addEventListener("click",event=>{
   const action=event.target.closest("[data-ranking-picks-key]");
   if(action) openRankingParticipantPicks(action.dataset.rankingPicksKey,action);
 });
+$("friendlyRankingsTeaser")?.addEventListener("click",event=>{
+  const trigger=event.target.closest("#friendlyRankingsOpen");
+  if(trigger) openFriendlyRankings(trigger);
+});
+$("friendlyRankingsModal")?.addEventListener("click",event=>{
+  if(event.target===$("friendlyRankingsModal")) return closeFriendlyRankings();
+  const tab=event.target.closest("[data-friendly-ranking-view]");
+  if(!tab) return;
+  friendlyRankingsView=tab.dataset.friendlyRankingView;
+  renderFriendlyRankingsModal();
+});
+$("friendlyRankingsModalClose")?.addEventListener("click",closeFriendlyRankings);
 $("statsTab")?.addEventListener("click",event=>{
   const action=event.target.closest("[data-stats-action]");
   if(action?.dataset.statsAction==="ranking") navigateTo("ranking");
@@ -4652,6 +4724,7 @@ $("adminParticipantModal").onclick=event=>{ if(event.target===$("adminParticipan
 document.addEventListener("keydown",event=>{
   if(event.key!=="Escape") return;
   if(!$("temporaryRankingModal")?.classList.contains("hidden")) closeTemporaryRanking();
+  else if(!$("friendlyRankingsModal")?.classList.contains("hidden")) closeFriendlyRankings();
   else if(!$("adminRoundShareModal")?.classList.contains("hidden")) closeAdminRoundShare();
   else if(!$("matchCalendarModal")?.classList.contains("hidden")) closeMatchCalendar();
   else if(!$("roundHighlightsModal")?.classList.contains("hidden")) closeRoundHighlights();

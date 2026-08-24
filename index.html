@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.22.7">
-  <link rel="stylesheet" href="./css/styles.css?v=6.22.7">
-  <link rel="stylesheet" href="./css/components.css?v=6.22.7">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.22.7">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.22.7">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.22.7">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.23.0">
+  <link rel="stylesheet" href="./css/styles.css?v=6.23.0">
+  <link rel="stylesheet" href="./css/components.css?v=6.23.0">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.23.0">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.23.0">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.23.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.22.7</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.23.0</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -199,6 +199,7 @@
           </div>
           <footer id="rankingUpdatedAt" class="ranking-updated-at"></footer>
         </section>
+        <aside id="friendlyRankingsTeaser" class="friendly-rankings-teaser card" aria-live="polite"></aside>
       </section>
 
 
@@ -634,6 +635,29 @@
     </section>
   </div>
 
+  <div id="friendlyRankingsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="friendlyRankingsModalTitle" aria-describedby="friendlyRankingsModalSummary">
+    <section class="friendly-rankings-modal card" tabindex="-1">
+      <header class="friendly-rankings-modal-header">
+        <div><span class="eyebrow">DISPUTAS PARALELAS</span><h2 id="friendlyRankingsModalTitle">Troféus sem validade no cartório</h2><p id="friendlyRankingsModalSummary" class="muted-note">Outros jeitos de provocar os amigos usando os mesmos resultados.</p></div>
+        <button id="friendlyRankingsModalClose" class="modal-close" type="button" aria-label="Fechar disputas paralelas">✕</button>
+      </header>
+      <p class="friendly-rankings-official">Eles rendem conversa, não alteram a classificação oficial.</p>
+      <div class="friendly-rankings-tabs" role="tablist" aria-label="Classificações recreativas">
+        <button id="friendlyRankingsEfficiencyTab" class="active" type="button" role="tab" aria-selected="true" aria-controls="friendlyRankingsEfficiencyPanel" data-friendly-ranking-view="efficiency">Quem joga, resolve</button>
+        <button id="friendlyRankingsHotTab" type="button" role="tab" aria-selected="false" aria-controls="friendlyRankingsHotPanel" data-friendly-ranking-view="hot">Tá vindo quente</button>
+      </div>
+      <section id="friendlyRankingsEfficiencyPanel" class="friendly-rankings-panel" role="tabpanel" aria-labelledby="friendlyRankingsEfficiencyTab">
+        <div class="friendly-rankings-intro"><span aria-hidden="true">🎯</span><div><h3>Quem joga, resolve</h3><p>Média por palpite entre participantes com pelo menos 20 palpites avaliados.</p></div></div>
+        <p id="friendlyRankingsEfficiencyPhrase" class="friendly-rankings-phrase"></p><div id="friendlyRankingsEfficiencyList"></div>
+      </section>
+      <section id="friendlyRankingsHotPanel" class="friendly-rankings-panel" role="tabpanel" aria-labelledby="friendlyRankingsHotTab" hidden>
+        <div class="friendly-rankings-intro"><span aria-hidden="true">🔥</span><div><h3>Tá vindo quente</h3><p>Média nas três rodadas elegíveis mais recentes, com pelo menos 7 palpites avaliados em cada uma.</p></div></div>
+        <p id="friendlyRankingsHotPhrase" class="friendly-rankings-phrase"></p><div id="friendlyRankingsHotList"></div>
+      </section>
+      <p class="friendly-rankings-footnote">O Ranking principal continua soberano. Aqui o troféu é imaginário, mas a provocação é real.</p>
+    </section>
+  </div>
+
   <div id="roundHighlightsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="roundHighlightsModalTitle" aria-describedby="roundHighlightsModalSummary">
     <section class="round-highlights-modal card" tabindex="-1">
       <div class="round-highlights-modal-header">
@@ -744,6 +768,6 @@
       if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.22.7"></script>
+  <script type="module" src="./js/app.js?v=6.23.0"></script>
 </body>
 </html>

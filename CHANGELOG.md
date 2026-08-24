@@ -1,3 +1,11 @@
+# v6.23.0 — Disputas paralelas
+
+- Adiciona à Tela de Ranking uma provocação compacta, sem alongar a classificação principal.
+- Abre em modal os rankings recreativos “Quem joga, resolve” e “Tá vindo quente”.
+- Compara eficiência com mínimo de 20 palpites e momento recente em três rodadas elegíveis.
+- Usa frases determinísticas bem-humoradas e destaca o participante atual.
+- Preserva integralmente Ranking oficial, pontuação, palpites, Supabase e demais telas.
+
 # v6.22.7 — Calendário na Tela de Jogos
 
 - Adiciona ao cabeçalho da Tela de Jogos um acesso direto ao calendário mensal existente.
