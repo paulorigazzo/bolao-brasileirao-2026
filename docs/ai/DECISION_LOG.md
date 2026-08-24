@@ -500,3 +500,42 @@ Uma eventual contingência continua manual: o resultado deve ser confirmado em d
 - o alerta não presume placar, encerramento ou pontuação;
 - banco, RLS, regras 10/5/3/1 e fechamento dos palpites permanecem inalterados;
 - qualquer automação de fallback exige decisão e escopo próprios.
+
+## DEC-2026-016 — Migração controlada da fonte de dados esportivos
+
+- Data: 2026-08-24
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: alto
+
+### Contexto
+
+A fonte esportiva atual não entrega toda a minutagem ao vivo desejada. A
+API-Football apresentou viabilidade técnica inicial e uma oferta potencialmente
+mais completa, mas a troca afeta dados sensíveis da competição e precisa ser
+validada sem comprometer jogos, palpites, pontuação ou histórico.
+
+### Decisão
+
+- manter somente uma fonte externa oficial por vez;
+- usar a segunda API apenas em sombra, sem escrita no estado competitivo;
+- preservar `public.jogos.id_jogo` e adicionar identificadores do novo
+  fornecedor, se aprovados, como campos auxiliares;
+- não combinar campos de fornecedores diferentes na visão oficial;
+- observar uma a duas rodadas antes do corte e uma a duas depois dele;
+- manter a API anterior disponível durante a estabilização para rollback;
+- tratar a API-Football como candidata, condicionando a adoção definitiva às
+  evidências e a uma aprovação humana específica;
+- usar
+  [`docs/architecture/MIGRACAO_API_ESPORTIVA.md`](../architecture/MIGRACAO_API_ESPORTIVA.md)
+  como plano canônico e registro do estado da migração.
+
+### Consequências
+
+- mudanças futuras de banco, integração, configuração ou produção são de alto
+  risco e exigem tarefas e aprovações próprias;
+- o modelo de transição deve ser aditivo, observável e reversível;
+- a manutenção temporária de duas assinaturas é aceitável, sem tornar a solução
+  permanentemente híbrida;
+- este registro não autoriza contratação, implementação, deploy ou corte.
