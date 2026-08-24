@@ -1,6 +1,6 @@
 {
   "name": "bolao-br-2026",
-  "version": "6.22.7",
+  "version": "6.23.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -31,7 +31,8 @@
     "test:scheduled-live-estimate": "node scripts/test-scheduled-live-estimate.mjs",
     "test:access-control": "node scripts/test-access-control.mjs",
     "test:temporary-ranking": "node scripts/test-temporary-ranking.mjs",
-    "test:ranking-movement": "node scripts/test-ranking-movement.mjs",
+    "test:ranking-movement": "node scripts/test-ranking-movement.mjs && node scripts/test-friendly-rankings-engine.mjs",
+    "test:friendly-rankings": "node scripts/test-friendly-rankings-engine.mjs",
     "test:competitive-snapshots": "node scripts/test-competitive-snapshots.mjs",
     "test:recovery-protection": "node scripts/test-recovery-protection.mjs",
     "test:admin-attention-whatsapp": "node scripts/test-admin-attention-whatsapp.mjs"
