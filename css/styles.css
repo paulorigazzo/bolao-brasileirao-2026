@@ -2637,6 +2637,7 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
 .games-page-heading{display:flex;align-items:end;justify-content:space-between;gap:14px;margin:2px 0 0;padding:0 2px}
 .games-page-heading h1{margin:0;color:#fff;font-size:2rem;line-height:1}
 .games-page-heading strong{display:block;margin-top:8px;color:#37dc84;font-size:1.05rem}
+.games-calendar-action{grid-area:auto;flex:0 0 auto;width:auto;min-height:38px;padding-inline:16px;gap:12px}
 .games-round-toolbar{padding:0!important;border-radius:24px!important;display:grid!important;grid-template-columns:48px 1fr 48px!important;gap:0!important;overflow:hidden;background:rgba(4,40,27,.84)!important;border:1px solid rgba(60,216,126,.28)!important}
 .games-round-toolbar .round-selection{min-width:0;padding:8px}
 .games-round-toolbar .round-select-field{width:100%}
@@ -2694,6 +2695,7 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
   .games-premium-tab{gap:14px;padding-inline:0}
   .games-page-heading{padding-inline:2px}
   .games-page-heading h1{font-size:1.75rem}
+  .games-calendar-action{width:auto;max-width:52%;padding-inline:12px;gap:8px;white-space:nowrap}
   .games-premium-progress{padding:15px!important;gap:10px}
   .games-progress-heading{align-items:flex-start}.games-progress-heading strong{font-size:.9rem}.games-progress-heading small{font-size:.64rem}.games-progress-status{font-size:.59rem}
   .premium-match-card{grid-template-columns:62px minmax(54px,1fr) minmax(96px,1.25fr) minmax(54px,1fr) 58px;gap:4px;padding:12px 6px}
@@ -2710,6 +2712,7 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
   .games-save-dock{bottom:76px;grid-template-columns:1fr auto;gap:10px;padding:12px}
   .games-save-all{min-width:126px;padding:12px 13px!important;font-size:.82rem}
 }
+@media(max-width:380px){.games-calendar-action{font-size:0}.games-calendar-action::before{content:"Calendário";font-size:.72rem}.games-calendar-action b{font-size:1.15rem}}
 @media(max-width:380px){
   .premium-match-card{grid-template-columns:54px 48px minmax(86px,1fr) 48px 48px;padding-inline:4px}
   .premium-team .team-badge{width:36px;height:36px}

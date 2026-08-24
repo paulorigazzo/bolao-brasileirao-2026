@@ -17,7 +17,7 @@ import { buildGamesProgressModel } from "./games-progress.js";
 import { liveMatchMinute } from "./live-match-minute.js";
 import { isScheduledLiveEstimate, scheduledLiveLabel } from "./scheduled-live-estimate.js";
 
-const APP_VERSION = "6.22.6";
+const APP_VERSION = "6.22.7";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -4575,6 +4575,7 @@ $("roundHistory")?.addEventListener("click",event=>{
 $("roundHighlightsModalClose")?.addEventListener("click",closeRoundHighlights);
 $("roundHighlightsModal")?.addEventListener("click",event=>{if(event.target===$("roundHighlightsModal")) closeRoundHighlights();});
 $("matchCalendarClose")?.addEventListener("click",()=>closeMatchCalendar());
+$("gamesCalendarBtn")?.addEventListener("click",event=>openMatchCalendar(event.currentTarget));
 $("matchCalendarPrevious")?.addEventListener("click",()=>changeMatchCalendarMonth(-1));
 $("matchCalendarNext")?.addEventListener("click",()=>changeMatchCalendarMonth(1));
 $("matchCalendarGrid")?.addEventListener("click",event=>{
