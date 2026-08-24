@@ -31,23 +31,35 @@ Uma instrução humana não autoriza implicitamente ações destrutivas, exposi�
 
 ## Fonte da verdade
 
-Antes de implementar, consultar:
+Antes de implementar, consultar como núcleo obrigatório:
 
-- `README.md`;
-- `ROADMAP.md`;
-- `VERSION.md`;
-- `CHANGELOG.md`;
-- `docs/architecture/`;
-- `docs/process/`;
-- `docs/releases/`;
-- a documentação específica do escopo.
+- este `AGENTS.md`;
+- as partes aplicáveis de `docs/ai/CODEX_WORKFLOW.md`;
+- a especificação aprovada para a tarefa;
+- os arquivos diretamente relacionados ao escopo.
 
-Para trabalho com agentes, consultar também:
+Expandir a leitura conforme o tipo de tarefa, o impacto e o risco. Usar
+`docs/ai/CONTEXT_INDEX.md` somente para descobrir as fontes oficiais aplicáveis,
+sem tratá-lo como nova fonte normativa. Entre essas fontes estão, quando
+relacionadas ao trabalho:
 
-- `docs/ai/CODEX_WORKFLOW.md`;
-- `docs/ai/DEVELOPMENT_PRINCIPLES.md`;
-- `docs/ai/CODEX_PROMPT.md`;
-- `docs/ai/DECISION_LOG.md`.
+- `README.md`, para visão e operação geral do projeto;
+- `ROADMAP.md`, para prioridade e status;
+- `VERSION.md`, `CHANGELOG.md` e `docs/releases/`, para versão e histórico;
+- `docs/architecture/`, para decisões e contratos arquiteturais;
+- `docs/process/`, para processo;
+- `docs/ai/DEVELOPMENT_PRINCIPLES.md`, para princípios permanentes;
+- `docs/ai/CODEX_PROMPT.md`, para estruturar solicitações ao Codex;
+- `docs/ai/DECISION_LOG.md`, para decisões anteriores relacionadas;
+- a documentação específica do módulo, serviço ou domínio afetado.
+
+Em históricos extensos, preferir localizar o assunto e ler primeiro o trecho
+relevante, ampliando para a seção ou o documento completo quando necessário.
+Quanto maior o risco, maior pode e deve ser o contexto consultado. Em tarefas de
+risco alto, economia de contexto não é prioridade.
+
+Diante de dúvida material sobre a necessidade de uma fonte adicional, conflito
+entre fontes ou impacto incerto, expandir o contexto antes de implementar.
 
 O repositório prevalece sobre pacotes antigos, arquivos locais externos e memória de conversas.
 
