@@ -1,6 +1,6 @@
-6.23.0
+6.23.1
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.23.0-disputas-paralelas.md`](docs/releases/v6.23.0-disputas-paralelas.md)
+- Nota da versão atual: [`docs/releases/v6.23.1-frases-individuais-rankings.md`](docs/releases/v6.23.1-frases-individuais-rankings.md)

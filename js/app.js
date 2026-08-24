@@ -18,7 +18,7 @@ import { liveMatchMinute } from "./live-match-minute.js";
 import { isScheduledLiveEstimate, scheduledLiveLabel } from "./scheduled-live-estimate.js";
 import { buildFriendlyRankingsModel } from "./friendly-rankings-engine.js";
 
-const APP_VERSION = "6.23.0";
+const APP_VERSION = "6.23.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2344,7 +2344,7 @@ function friendlyRankingRows(ranking,kind){
   if(!ranking.length) return '<p class="muted-note friendly-rankings-empty">Ainda não há participantes com amostra suficiente.</p>';
   return `<ol class="friendly-rankings-list">${ranking.map(item=>`<li class="${item.isCurrent?'is-me':''}">
     <span class="friendly-ranking-position">${item.position}º</span>
-    <div><strong>${escapeHtml(item.name)}</strong>${item.isCurrent?'<small>VOCÊ</small>':''}<span>${kind==='hot'?`Rodadas ${item.rounds.join(', ')}`:`${item.evaluated} palpites avaliados`}</span></div>
+    <div><strong>${escapeHtml(item.name)}</strong>${item.isCurrent?'<small>VOCÊ</small>':''}<span>${kind==='hot'?`Rodadas ${item.rounds.join(', ')}`:`${item.evaluated} palpites avaliados`}</span><q>${escapeHtml(item.effectPhrase)}</q></div>
     <b>${item.average.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</b>
     <em>pt/palpite</em>
   </li>`).join('')}</ol>`;

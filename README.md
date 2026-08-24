@@ -4,7 +4,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 
 ## Estado atual
 
-- Versão funcional: `v6.23.0`.
+- Versão funcional: `v6.23.1`.
 - Prioridade, status e sequência atuais: [`ROADMAP.md`](ROADMAP.md).
 - Evolução para Temporadas e Ligas: conduzida no produto independente [Bolão Brasileirão Rigazzo](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo) como evolução caseira e incremental, reutilizando seletivamente a experiência visual de 2026. O programa de transferência R06B.2–R11 está congelado e a [direção vigente e o histórico da decisão](docs/architecture/BOLAO_BRASILEIRAO_RIGAZZO.md) permanecem documentados sem alteração funcional deste aplicativo.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
@@ -18,7 +18,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 - consulta individual de palpites de partidas encerradas pela classificação;
 - Ranking provisório agregado durante rodadas em aberto, com consulta permanente pela Área ADM, preview sintético restrito a ambientes de revisão e sem revelar palpites individuais;
 - duelo determinístico entre dois participantes, com placar por rodadas, títulos e momento recente;
-- disputas paralelas recreativas por eficiência e momento recente, acessíveis sem competir com o Ranking principal;
+- disputas paralelas recreativas por eficiência e momento recente, com frases individuais determinísticas e acesso sem competir com o Ranking principal;
 - dashboard estatístico com evolução, perfil, recordes, regularidade, comparações e medalhas;
 - tabela do Campeonato Brasileiro;
 - Meu Time 2.0, com forma, próximo jogo, desempenho pessoal, sintonia e história da temporada;

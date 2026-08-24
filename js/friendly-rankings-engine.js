@@ -36,6 +36,30 @@ function leaderPhrase(kind, ranking) {
   return `${leader.name} aumentou a temperatura. A humildade fica para a próxima rodada.`;
 }
 
+function participantPhrase(kind, item, ranking, criteria) {
+  const above = item.position > 1 ? ranking[item.position - 2] : null;
+  const gap = above ? Math.max(0, above.average - item.average) : 0;
+  if (kind === "efficiency") {
+    if (item.position === 1) return "Poucos ou muitos palpites: a calculadora só registrou o estrago.";
+    if (gap < 0.02) return "Separado da posição acima por um espirro estatístico.";
+    if (item.position <= 3) return "Eficiência em zona de medalha e argumentos em plena circulação.";
+    if (item.evaluated <= criteria.minimumEvaluated + 5) return "Amostra enxuta, confiança aparentemente ilimitada.";
+    if (item.exactRate >= 0.1) return "Placar exato aparece com frequência suspeitosamente conveniente.";
+    if (item.hitRate >= 0.45) return "Nem sempre crava, mas raramente sai sem assunto.";
+    return "Cada palpite ajuda a estatística a perder a timidez.";
+  }
+  if (item.position === 1) return "A fase está quente e a modéstia ficou para a próxima rodada.";
+  if (gap < 0.15) return "Já apareceu no retrovisor de quem está logo acima.";
+  if (item.position <= 3) return "Pódio recente: o campeonato recebeu uma ameaça educada.";
+  if (item.average >= 2) return "Três rodadas de bons argumentos e pouca cerimônia.";
+  if (item.hitRate >= 0.45) return "Pontuando o bastante para manter a conversa desconfortável.";
+  return "A reação está em construção e já trouxe capacete.";
+}
+
+function addParticipantPhrases(kind, ranking, criteria) {
+  return ranking.map(item => ({ ...item, effectPhrase: participantPhrase(kind, item, ranking, criteria) }));
+}
+
 export function buildFriendlyRankingsModel({
   games = [],
   picks = [],
@@ -94,8 +118,9 @@ export function buildFriendlyRankingsModel({
 
   const current = currentParticipant ? identity(currentParticipant) : null;
   const markCurrent = ranking => ranking.map(item => ({ ...item, isCurrent: Boolean(current && sameParticipant(item, current)) }));
-  const efficiencyRanking = markCurrent(efficiency);
-  const hotRanking = markCurrent(hot);
+  const criteria = { minimumEvaluated, minimumRoundPicks, recentRoundCount };
+  const efficiencyRanking = addParticipantPhrases("efficiency", markCurrent(efficiency), criteria);
+  const hotRanking = addParticipantPhrases("hot", markCurrent(hot), criteria);
   const efficiencyLeader = efficiencyRanking[0] || null;
   const hotLeader = hotRanking[0] || null;
   const teaser = efficiencyLeader && hotLeader
@@ -105,7 +130,7 @@ export function buildFriendlyRankingsModel({
     : "As disputas paralelas ainda estão aquecendo os números.";
 
   return {
-    criteria: { minimumEvaluated, minimumRoundPicks, recentRoundCount },
+    criteria,
     teaser,
     efficiency: { ranking: efficiencyRanking, phrase: leaderPhrase("efficiency", efficiencyRanking) },
     hot: { ranking: hotRanking, phrase: leaderPhrase("hot", hotRanking) },
