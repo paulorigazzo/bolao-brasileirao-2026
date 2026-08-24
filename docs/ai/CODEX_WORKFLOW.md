@@ -60,19 +60,46 @@ Nenhuma aprovação é presumida. Aprovar o plano não autoriza automaticamente 
 
 ## Leitura mínima por tipo de tarefa
 
-Toda tarefa exige `AGENTS.md`, este workflow e os arquivos diretamente relacionados ao escopo. Acrescentar:
+Toda tarefa exige como núcleo:
 
-| Tipo de tarefa | Leitura mínima adicional |
+- `AGENTS.md`;
+- as partes deste workflow aplicáveis ao modo e à fase atuais;
+- a especificação aprovada para a tarefa;
+- os arquivos diretamente relacionados ao escopo.
+
+Consultar `docs/ai/CONTEXT_INDEX.md` para localizar fontes adicionais conforme a
+necessidade. O índice é somente um roteador: não substitui `AGENTS.md`, este
+workflow nem a fonte oficial apontada.
+
+| Gatilho da tarefa | Expansão contextual esperada |
 | --- | --- |
-| Planejamento ou documentação de processo | `README.md`, `ROADMAP.md`, `VERSION.md`, `CHANGELOG.md`, `docs/ai/DEVELOPMENT_PRINCIPLES.md`, `docs/ai/CODEX_PROMPT.md`, `docs/ai/DECISION_LOG.md` e documentação específica |
-| Código ou interface | `README.md`, `ROADMAP.md`, `VERSION.md`, `CHANGELOG.md`, `docs/architecture/`, notas recentes em `docs/releases/` e documentação do módulo |
-| Banco, autenticação, RLS ou dados | Leituras de código, mais documentação e migrações do Supabase relacionadas |
-| Netlify, Functions, deploy ou infraestrutura | Leituras de código, mais documentação de deployment, configuração e Functions relacionadas |
-| Publicação | Plano e entrega aprovados, diff final, status Git, histórico da branch e regras de versão/release aplicáveis |
+| Visão geral, instalação ou operação | Trechos relacionados de `README.md` |
+| Prioridade, status ou escopo planejado | Trechos relacionados de `ROADMAP.md` |
+| Versão atual ou entrega funcional | `VERSION.md`, regras de versionamento e, quando aplicável, trecho relacionado do `CHANGELOG.md` e nota de release |
+| Histórico de uma mudança | Busca temática no `CHANGELOG.md`, em `docs/releases/` e, quando aplicável, no histórico Git |
+| Decisão técnica ou de governança anterior | Busca temática em `docs/ai/DECISION_LOG.md` e fonte relacionada |
+| Planejamento ou documentação de processo | Partes relacionadas de `docs/ai/DEVELOPMENT_PRINCIPLES.md`, `docs/ai/CODEX_PROMPT.md`, `docs/process/` e demais fontes apontadas pelo escopo |
+| Código, interface ou arquitetura | Código do módulo, documentação específica, documento arquitetural e release relacionados ao comportamento afetado |
+| Banco, autenticação, RLS ou dados | Código, documentação, políticas e migrações do Supabase relacionadas |
+| Netlify, Functions, deploy ou infraestrutura | Código, configuração e documentação de deployment ou Functions relacionadas |
+| Publicação | Plano e entrega aprovados, diff final, status Git, histórico da branch e regras de versão ou release aplicáveis |
 | Recuperação | Documentos do fluxo afetado, estado Git, evidências da falha e última referência conhecida como segura |
 | Encerramento | Resultado do merge, estado de `main`, branches local e remota envolvidas e pedido de preservação, se houver |
 
-Quando uma tarefa combinar tipos, aplicar cumulativamente as leituras correspondentes. Não é necessário ler arquivos sem relação com o escopo apenas por pertencerem a uma pasta indicada; deve-se selecionar os documentos relevantes e registrar qualquer fonte obrigatória indisponível.
+Quando uma tarefa combinar gatilhos, aplicar cumulativamente as expansões
+correspondentes. Para documentos históricos extensos, usar preferencialmente:
+
+1. buscar o assunto;
+2. ler o trecho ou a seção relevante;
+3. carregar o documento completo quando o contexto localizado for insuficiente.
+
+Não é necessário ler arquivos sem relação com o escopo apenas por pertencerem a
+uma pasta indicada. Registrar qualquer fonte necessária indisponível. Quanto
+maior o risco, maior pode e deve ser o contexto consultado; em tarefas de risco
+alto, economia de contexto não é prioridade.
+
+Diante de dúvida material sobre a necessidade de uma fonte adicional, conflito
+entre fontes ou impacto incerto, expandir o contexto antes de implementar.
 
 ## Fase 1 — Análise
 
