@@ -47,6 +47,11 @@ mantidas pagas, mas apenas uma será a fonte oficial da aplicação. A outra ser
 observada em sombra, sem escrever no estado competitivo. Não haverá solução
 híbrida permanente nem composição de campos entre fornecedores.
 
+A troca da fonte oficial deve ser atômica para jogos, classificação, cache,
+diagnóstico, relatórios e sincronizações manual e agendada. Não é permitido
+trocar apenas parte desse conjunto e manter dependências silenciosas da fonte
+anterior.
+
 ## Estado atual e evidências conhecidas
 
 ### Aplicação e banco
@@ -120,10 +125,50 @@ O período de sombra previsto é de **uma a duas rodadas antes do corte** e de
 **uma a duas rodadas após o corte**. A duração exata depende da qualidade das
 evidências e deve ser decidida no portão de cada fase.
 
+Durante a sombra, snapshots, caches e relatórios precisam identificar o
+fornecedor explicitamente. Um cache produzido por uma fonte não pode ser lido
+como se tivesse sido produzido pela outra. A configuração da fonte oficial deve
+ser única e controlar, no mínimo, jogos, classificação, diagnóstico e os dois
+modos de sincronização.
+
+## Contrato interno normalizado
+
+**DECIDIDO:** antes de qualquer escrita de sombra ou troca de fornecedor, deve
+existir um contrato interno independente das respostas externas:
+
+```text
+Resposta do fornecedor
+        ↓
+Adaptador específico
+        ↓
+Jogo ou classificação normalizados
+        ↓
+Reconciliação com a identidade interna
+        ↓
+Persistência autorizada
+```
+
+O adaptador é a única camada autorizada a conhecer nomes de campos, códigos de
+estado e formatos próprios do fornecedor. Regras como “se API-Football” não
+devem se espalhar por sincronização, cache, diagnóstico ou interface.
+
+O contrato deve preservar os conceitos já consumidos pela aplicação e separar:
+
+- identidade externa da identidade interna;
+- estado bruto do estado normalizado;
+- minuto oficial do relógio estimado existente;
+- instante informado pelo fornecedor do instante em que o Bolão observou o dado;
+- payload competitivo do diagnóstico operacional.
+
 ## Modelo de dados proposto
 
 Tudo nesta seção é **PROPOSTO** e requer tarefa específica de Supabase, revisão
 de segurança, migração aditiva e plano de rollback.
+
+O desenho físico abaixo permanece candidato até a conclusão da Prova Externa
+Instrumentada. A prova pode demonstrar que há campos desnecessários, ausentes ou
+que duas tabelas atendem melhor do que três. Nenhuma tabela ou coluna deve ser
+criada apenas porque aparece neste plano.
 
 ### Campos aditivos em `public.jogos`
 
@@ -180,8 +225,14 @@ em `jsonb`, hash, validade e erro sanitizado. Recomenda-se unicidade por
 ### Segurança e exposição
 
 - RLS habilitada desde a criação.
+- `REVOKE` explícito de tabela e sequência para `anon` e `authenticated`.
 - Sem políticas de leitura ou escrita para `anon` e `authenticated`.
 - Acesso apenas por função de backend com `service_role`.
+- Confirmação das configurações de schemas expostos na Data API.
+- Privilégios mínimos explícitos para o backend, sem depender apenas da ausência
+  de políticas RLS.
+- Nenhuma função administrativa exposta ao navegador; se uma função privilegiada
+  for indispensável, ela exige revisão específica de schema, `EXECUTE` e papel.
 - Não armazenar credenciais, dados pessoais, palpites nem payload bruto sem
   necessidade demonstrada.
 - Preferir dados normalizados e hashes para reduzir retenção e exposição.
@@ -207,6 +258,10 @@ da API-Football, devem ser avaliados pelo menos:
 - gols e placares por período → campos de placar existentes;
 - posição, pontos, jogos e critérios da tabela → classificação normalizada.
 
+O contrato normalizado também deve ser usado pela classificação, pelo cache e
+pelo diagnóstico. Esses consumidores não podem interpretar diretamente o
+payload de um fornecedor.
+
 O mapa completo de estados, incluindo intervalo, adiamento, suspensão,
 cancelamento, prorrogação e encerramento, permanece **PENDENTE** até ser
 documentado e testado contra respostas reais. Estados desconhecidos devem gerar
@@ -226,6 +281,14 @@ horário, com tolerância de horário explicitamente definida. O processo deve:
 Meta proposta: mapear os 380 jogos da temporada, ou documentar individualmente
 qualquer exceção antes do corte.
 
+Regras adicionais:
+
+- identificadores externos nunca se tornam chaves competitivas;
+- mapeamentos ambíguos permanecem nulos;
+- alteração posterior de time, horário ou rodada não pode remapear
+  automaticamente um jogo já confirmado;
+- todo remapeamento exige evidência, revisão humana e registro auditável.
+
 ## Critérios propostos de avanço
 
 Os números abaixo são **PROPOSTOS** e precisam ser confirmados antes da fase de
@@ -236,8 +299,13 @@ sombra. Eles não autorizam corte automático.
 - estados e placares finais compatíveis, sem divergência crítica inexplicada;
 - minutagem disponível e coerente em pelo menos 95% das observações nas quais o
   fornecedor declara a partida em andamento;
+- minuto sem regressões indevidas e coerente com o estado do período;
+- atraso de atualização medido entre observações e eventos conferíveis;
+- `elapsed` e `extra` interpretados separadamente e validados nos dois tempos;
 - transições de primeiro tempo, intervalo, segundo tempo e encerramento
   observadas sem regressões críticas;
+- amostras manuais nos principais marcos comparadas com transmissão ou fonte
+  independente, sem transformar essa conferência em integração híbrida;
 - classificação com 20 times e linhas normalizadas reconciliadas;
 - consumo de cota e frequência de atualização sustentáveis no plano contratado;
 - ausência de impacto nos palpites, pontuação e disponibilidade do app.
@@ -246,11 +314,23 @@ Toda divergência precisa ser classificada como diferença legítima de atualiza
 erro de normalização, ausência do fornecedor ou erro de identidade. O portão de
 troca exige relatório e decisão humana explícita.
 
+### Orçamento de chamadas
+
+A validação deve estimar e medir separadamente chamadas de agenda, jogos ao vivo,
+classificação, repetição por falha e margem operacional. Também deve registrar
+os cabeçalhos de cota diária e limite por minuto retornados pelo fornecedor.
+
+Na verificação de 2026-08-24, a API-Football informava 100 chamadas diárias no
+plano gratuito e 7.500 no primeiro plano pago. Esses valores são temporais e
+devem ser reconfirmados antes de contratação ou teste prolongado. O plano
+gratuito pode servir a ensaio curto, mas não deve ser presumido suficiente para
+uma observação completa com frequência de um minuto.
+
 ## Fases e portões
 
 | Fase | Estado em 2026-08-24 | Resultado necessário para avançar |
 | --- | --- | --- |
-| 0. Planejamento | em andamento | plano aprovado e registrado |
+| 0. Planejamento | concluída | plano aprovado e registrado |
 | 1. Validação externa | iniciada | respostas reais e limites compreendidos |
 | 2. Fundação no banco | não iniciada | migração aditiva revisada e aplicada |
 | 3. Adaptador e sombra | não iniciada | coleta isolada e observável |
@@ -261,6 +341,38 @@ troca exige relatório e decisão humana explícita.
 
 Cada fase deve ser uma tarefa separada quando envolver riscos, permissões ou
 artefatos diferentes. O estado desta tabela só deve mudar com evidência datada.
+
+## Próximo portão — Prova Externa Instrumentada
+
+O próximo passo prático é observar uma partida real da API-Football sem escrever
+no Supabase, sem alterar o app e sem mudar a fonte oficial.
+
+### Escopo mínimo
+
+1. coletar periodicamente a partida durante toda a janela relevante;
+2. registrar fora do banco de produção: instante da consulta, fixture ID,
+   estado, `elapsed`, `extra`, placar, instante informado pelo fornecedor,
+   duração, erro e cota restante;
+3. conferir manualmente início, intervalo, retorno do segundo tempo, acréscimos,
+   encerramento e gols quando existirem;
+4. consultar uma classificação para validar cobertura e contrato;
+5. produzir relatório de cobertura, coerência, atraso, chamadas e lacunas de
+   normalização.
+
+### Restrições
+
+- nenhum dado da prova pode alimentar `public.jogos` ou a classificação oficial;
+- credenciais ficam apenas em variável de ambiente local ou protegida;
+- capturas brutas não entram no Git e devem ser sanitizadas se usadas como
+  evidência;
+- o coletor e sua frequência exigem plano de implementação próprio;
+- a criação de tabelas de sombra permanece bloqueada até a revisão do relatório.
+
+### Critério de saída
+
+A prova termina com uma recomendação explícita: avançar, repetir com ajustes ou
+interromper a avaliação. Somente a opção “avançar”, aprovada pelo responsável,
+libera o desenho final da fundação no Supabase.
 
 ## Estratégia de rollback
 
@@ -300,6 +412,9 @@ não deve produzir operação híbrida.
 - tratamento futuro dos IDs legados de times e partidas;
 - momento de cancelar a assinatura antiga;
 - destino das tabelas de transição após estabilização.
+- forma exata do contrato interno normalizado;
+- estratégia de namespace do cache por fornecedor durante a sombra;
+- ferramenta, duração e frequência da Prova Externa Instrumentada.
 
 ## Protocolo de atualização para agentes
 
@@ -323,6 +438,7 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | Data | Versão | Alteração |
 | --- | --- | --- |
 | 2026-08-24 | 0.1 | Plano inicial da avaliação e migração controlada |
+| 2026-08-24 | 0.2 | Contrato normalizado, segurança, prova externa e critérios refinados |
 
 ## Referências internas
 
