@@ -1,3 +1,10 @@
+# v6.22.7 — Calendário na Tela de Jogos
+
+- Adiciona ao cabeçalho da Tela de Jogos um acesso direto ao calendário mensal existente.
+- Mantém o acionador na mesma linha de “Jogos” e da rodada selecionada, reutilizando o padrão visual da Home.
+- Preserva a seleção da rodada e a expansão da partida prioritária ao escolher uma data.
+- Mantém palpites, filtros, pontuação, Supabase e sincronização inalterados.
+
 # v6.22.6 — Jogo ao vivo expandido pela Home
 
 - Faz cada confronto destacado no card Ao Vivo abrir sua rodada com o jogo correspondente expandido.
