@@ -29,6 +29,11 @@ const model = buildFriendlyRankingsModel({
 assert.equal(model.efficiency.ranking.length, 2, "mínimo de 20 palpites deve ser aplicado");
 assert.equal(model.efficiency.ranking[0].name, "Ana");
 assert.equal(model.efficiency.ranking[1].isCurrent, true);
+assert.ok(model.efficiency.ranking.every(item => item.effectPhrase), "todos os elegíveis recebem uma frase de eficiência");
+assert.ok(model.hot.ranking.every(item => item.effectPhrase), "todos os elegíveis recebem uma frase de momento");
+assert.notEqual(model.efficiency.ranking[0].effectPhrase, model.hot.ranking[0].effectPhrase, "os repertórios devem refletir rankings diferentes");
+const repeatedModel = buildFriendlyRankingsModel({ games, picks, participants, currentParticipant: participants[1], isScorableGame: game => game.status === "encerrado", pointsForPick: pick => pick.score });
+assert.deepEqual(repeatedModel.efficiency.ranking.map(item => item.effectPhrase), model.efficiency.ranking.map(item => item.effectPhrase), "as frases devem ser determinísticas");
 assert.deepEqual(model.hot.ranking[0].rounds, [1, 2, 3]);
 assert.equal(model.hot.ranking.some(item => item.name === "Caio"), false, "rodadas com menos de 7 palpites não são elegíveis");
 
@@ -54,5 +59,6 @@ assert.match(html, /Quem joga, resolve[\s\S]*Tá vindo quente/i);
 assert.match(app, /minimumEvaluated = 20|buildFriendlyRankingsModel\([\s\S]*pointsForPick/i);
 assert.match(app, /friendlyRankingsReturnFocus[\s\S]*target\?\.focus/i, "o foco deve voltar ao acionador");
 assert.match(app, /event\.key!=="Escape"[\s\S]*closeFriendlyRankings/i);
+assert.match(app, /escapeHtml\(item\.effectPhrase\)/i, "a interface deve escapar e exibir a frase individual");
 
 console.log("Rankings recreativos verificados com sucesso.");

@@ -1,3 +1,10 @@
+# v6.23.1 — Frases individuais nas disputas paralelas
+
+- Acrescenta uma frase de efeito própria a cada participante nos dois rankings recreativos.
+- Deriva cada texto deterministicamente de posição, proximidade, eficiência, acertos e tamanho da amostra.
+- Mantém repertórios diferentes para eficiência e momento recente, com humor leve e não depreciativo.
+- Preserva cálculos, ordenação, critérios, Ranking principal, palpites e Supabase.
+
 # v6.23.0 — Disputas paralelas
 
 - Adiciona à Tela de Ranking uma provocação compacta, sem alongar a classificação principal.
