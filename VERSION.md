@@ -1,6 +1,6 @@
-6.23.1
+6.23.2
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.23.1-frases-individuais-rankings.md`](docs/releases/v6.23.1-frases-individuais-rankings.md)
+- Nota da versão atual: [`docs/releases/v6.23.2-agendamentos-divergentes.md`](docs/releases/v6.23.2-agendamentos-divergentes.md)

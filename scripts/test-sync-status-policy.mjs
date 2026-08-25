@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { sanitizeGameForStatus } from "../netlify/functions/_sync-policy.mjs";
+import { sanitizeGameForStatus, sanitizeGameSchedule } from "../netlify/functions/_sync-policy.mjs";
 import { mapStatus } from "../netlify/functions/_sync-shared.mjs";
 
 const app=readFileSync(new URL("../js/app.js",import.meta.url),"utf8");
@@ -57,4 +57,31 @@ const interval=sanitizeGameForStatus({id_jogo:1,status:"intervalo",gols_casa:nul
 assert.equal(interval.status,"intervalo");
 assert.equal(interval.gols_casa,1);
 assert.equal(interval.gols_fora,1);
+
+const scheduleRepairs=[];
+const protectedSchedule=sanitizeGameSchedule(
+  {id_jogo:554887,status:"encerrado",inicio:"2026-05-10T20:40:00Z"},
+  {id_jogo:554887,status:"encerrado",inicio:"2026-05-10T19:00:00Z",situacao_agendamento:"confirmado",fonte_agendamento:"cbf",agendamento_confirmado_em:"2026-08-25T00:00:00Z",data_base:null},
+  scheduleRepairs
+);
+assert.equal(protectedSchedule.inicio,"2026-05-10T19:00:00Z");
+assert.equal(scheduleRepairs[0].action,"agendamento_oficial_preservado");
+
+const postponed=sanitizeGameSchedule(
+  {id_jogo:554940,status:"adiado",inicio:"2026-07-29T00:00:00Z"},
+  {id_jogo:554940,status:"adiado",inicio:"2026-07-29T00:00:00Z",situacao_agendamento:"adiado_sem_data",fonte_agendamento:"cbf",agendamento_confirmado_em:null,data_base:null},
+  []
+);
+assert.equal(postponed.situacao_agendamento,"adiado_sem_data");
+assert.equal(postponed.inicio,"2026-07-29T00:00:00Z");
+
+const rescheduledRepairs=[];
+const rescheduled=sanitizeGameSchedule(
+  {id_jogo:554940,status:"agendado",inicio:"2026-10-01T22:00:00Z"},
+  postponed,
+  rescheduledRepairs
+);
+assert.equal(rescheduled.situacao_agendamento,"provisorio");
+assert.equal(rescheduled.data_base,"2026-10-01");
+assert.equal(rescheduledRepairs[0].action,"nova_agenda_provisoria_observada");
 console.log("Política de status e placar verificada com sucesso.");

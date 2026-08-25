@@ -1,6 +1,6 @@
 import { serviceClient, isMissingTableError, requireEnv } from "./_api-helpers.mjs";
 import { FOOTBALL_API_BASE, COMPETITION_CODE, SEASON_YEAR, MAX_API_CALLS_PER_SYNC } from "./_constants.mjs";
-import { sanitizeGameForStatus } from "./_sync-policy.mjs";
+import { sanitizeGameForStatus, sanitizeGameSchedule } from "./_sync-policy.mjs";
 import { evolveEstimatedLiveClock, goalMinuteDiagnostics } from "../../js/live-match-minute.js";
 
 
@@ -333,7 +333,7 @@ export async function syncGames(options = {}) {
   const ids = valid.map((game) => game.id_jogo);
   const { data: existing, error: existingError } = await supabase
     .from("jogos")
-    .select("id_jogo,status,gols_casa,gols_fora,minuto_estimado,periodo_estimado,relogio_referencia_em")
+    .select("id_jogo,status,inicio,gols_casa,gols_fora,minuto_estimado,periodo_estimado,relogio_referencia_em,situacao_agendamento,fonte_agendamento,agendamento_confirmado_em,data_base")
     .in("id_jogo", ids);
   if (existingError) throw new Error(`Supabase: ${existingError.message}`);
   const existingById = new Map((existing || []).map((game) => [Number(game.id_jogo), game]));
@@ -341,7 +341,8 @@ export async function syncGames(options = {}) {
   const rawById=new Map(normalizedMatches.map(({raw,game})=>[Number(game.id_jogo),raw]));
   const merged = valid.map((game) => {
     const previous = existingById.get(Number(game.id_jogo));
-    const sanitized=sanitizeGameForStatus(game, previous, repairs);
+    const scheduled=sanitizeGameSchedule(game, previous, repairs);
+    const sanitized=sanitizeGameForStatus(scheduled, previous, repairs);
     return evolveEstimatedLiveClock(sanitized,previous,rawById.get(Number(game.id_jogo)),new Date());
   });
 
