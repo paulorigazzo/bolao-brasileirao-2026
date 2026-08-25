@@ -77,6 +77,19 @@ anterior.
 - Nenhuma chave ou credencial pode ser registrada neste documento, no código,
   em logs versionados ou em respostas.
 
+### Prova Externa Instrumentada concluída
+
+- A fixture 1492340, Botafogo 2 × 3 Athletico-PR, foi observada durante uma
+  partida completa entre 2026-08-24 e 2026-08-25 UTC.
+- A API informou de forma coerente `1H`, `HT`, `2H`, `FT`, minuto decorrido,
+  acréscimos e placar corrente e final.
+- Foram observados `45+3` no intervalo e `90+6` no encerramento.
+- A lista de eventos veio temporariamente vazia ou incompleta e depois foi
+  recomposta, enquanto estado e placar permaneceram coerentes.
+- A prova recomenda avançar para adaptador puro e testes, sem persistência.
+- A linha do tempo, os limites da evidência e o contrato resultante estão em
+  [`CONTRATO_FONTE_ESPORTIVA.md`](CONTRATO_FONTE_ESPORTIVA.md).
+
 ## Objetivos
 
 1. Validar a qualidade da API-Football para agenda, estado ao vivo, minutagem,
@@ -159,6 +172,10 @@ O contrato deve preservar os conceitos já consumidos pela aplicação e separar
 - minuto oficial do relógio estimado existente;
 - instante informado pelo fornecedor do instante em que o Bolão observou o dado;
 - payload competitivo do diagnóstico operacional.
+
+A versão 1.0 está fechada em
+[`CONTRATO_FONTE_ESPORTIVA.md`](CONTRATO_FONTE_ESPORTIVA.md). Alterações
+incompatíveis exigem nova versão, decisão e aprovação.
 
 ## Modelo de dados proposto
 
@@ -328,24 +345,25 @@ uma observação completa com frequência de um minuto.
 
 ## Fases e portões
 
-| Fase | Estado em 2026-08-24 | Resultado necessário para avançar |
+| Fase | Estado em 2026-08-25 | Resultado necessário para avançar |
 | --- | --- | --- |
 | 0. Planejamento | concluída | plano aprovado e registrado |
-| 1. Validação externa | iniciada | respostas reais e limites compreendidos |
-| 2. Fundação no banco | não iniciada | migração aditiva revisada e aplicada |
-| 3. Adaptador e sombra | não iniciada | coleta isolada e observável |
-| 4. Sombra pré-corte | não iniciada | 1–2 rodadas e critérios atendidos |
-| 5. Corte controlado | não iniciada | aprovação explícita e rollback pronto |
-| 6. Sombra pós-corte | não iniciada | 1–2 rodadas sem regressão material |
-| 7. Encerramento | não iniciada | decisão sobre retirada do legado e dados sombra |
+| 1. Validação externa | concluída para contrato v1 | prova de uma partida registrada |
+| 2. Adaptador puro e testes | não iniciada | contrato v1 executável, sem persistência |
+| 3. Fundação no banco | não iniciada | migração aditiva revisada e aplicada |
+| 4. Coleta em sombra | não iniciada | coleta isolada e observável |
+| 5. Sombra pré-corte | não iniciada | 1–2 rodadas e critérios atendidos |
+| 6. Corte controlado | não iniciada | aprovação explícita e rollback pronto |
+| 7. Sombra pós-corte | não iniciada | 1–2 rodadas sem regressão material |
+| 8. Encerramento | não iniciada | decisão sobre retirada do legado e dados sombra |
 
 Cada fase deve ser uma tarefa separada quando envolver riscos, permissões ou
 artefatos diferentes. O estado desta tabela só deve mudar com evidência datada.
 
-## Próximo portão — Prova Externa Instrumentada
+## Portão concluído — Prova Externa Instrumentada
 
-O próximo passo prático é observar uma partida real da API-Football sem escrever
-no Supabase, sem alterar o app e sem mudar a fonte oficial.
+A partida real foi observada sem escrever no Supabase, sem alterar o app e sem
+mudar a fonte oficial. A evidência completa está no contrato normalizado.
 
 ### Escopo mínimo
 
@@ -368,11 +386,23 @@ no Supabase, sem alterar o app e sem mudar a fonte oficial.
 - o coletor e sua frequência exigem plano de implementação próprio;
 - a criação de tabelas de sombra permanece bloqueada até a revisão do relatório.
 
-### Critério de saída
+### Critério de saída atendido
 
-A prova termina com uma recomendação explícita: avançar, repetir com ajustes ou
-interromper a avaliação. Somente a opção “avançar”, aprovada pelo responsável,
-libera o desenho final da fundação no Supabase.
+A recomendação foi “avançar” para o adaptador puro e seus testes. A fundação no
+Supabase continua bloqueada até esse adaptador comprovar o contrato v1.
+
+## Próximo portão — Adaptador puro e testes
+
+A próxima entrega deve implementar, sem Supabase e sem integração com produção:
+
+- validação do envelope da API-Football;
+- normalização de jogos e classificação;
+- mapa completo de estados conhecidos e falha segura para desconhecidos;
+- precedência de placar, relógio e eventos;
+- fixtures sanitizadas e testes das políticas contra regressão.
+
+O contrato e os critérios estão em
+[`CONTRATO_FONTE_ESPORTIVA.md`](CONTRATO_FONTE_ESPORTIVA.md).
 
 ## Estratégia de rollback
 
@@ -412,9 +442,8 @@ não deve produzir operação híbrida.
 - tratamento futuro dos IDs legados de times e partidas;
 - momento de cancelar a assinatura antiga;
 - destino das tabelas de transição após estabilização.
-- forma exata do contrato interno normalizado;
 - estratégia de namespace do cache por fornecedor durante a sombra;
-- ferramenta, duração e frequência da Prova Externa Instrumentada.
+- ferramenta e frequência da futura sombra de uma a duas rodadas.
 
 ## Protocolo de atualização para agentes
 
@@ -439,10 +468,12 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | --- | --- | --- |
 | 2026-08-24 | 0.1 | Plano inicial da avaliação e migração controlada |
 | 2026-08-24 | 0.2 | Contrato normalizado, segurança, prova externa e critérios refinados |
+| 2026-08-25 | 0.3 | Evidência ao vivo, contrato v1 e adaptador puro como próximo portão |
 
 ## Referências internas
 
 - [Visão geral da arquitetura](./OVERVIEW.md)
+- [Contrato normalizado da fonte esportiva](./CONTRATO_FONTE_ESPORTIVA.md)
 - [Fluxo de trabalho do Codex](../ai/CODEX_WORKFLOW.md)
 - [Registro de decisões](../ai/DECISION_LOG.md)
 - [Recuperação competitiva](./RECUPERACAO_COMPETITIVA.md)

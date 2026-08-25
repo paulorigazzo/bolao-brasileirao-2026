@@ -539,3 +539,39 @@ validada sem comprometer jogos, palpites, pontuação ou histórico.
 - a manutenção temporária de duas assinaturas é aceitável, sem tornar a solução
   permanentemente híbrida;
 - este registro não autoriza contratação, implementação, deploy ou corte.
+
+## DEC-2026-017 — Contrato normalizado antes da fundação no banco
+
+- Data: 2026-08-25
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: alto
+
+### Contexto
+
+A observação integral de uma partida real da API-Football confirmou estado,
+minutagem, acréscimos e placar, mas revelou que eventos embutidos podem ficar
+temporariamente vazios ou incompletos. Além disso, a integração atual usa o ID
+do fornecedor como `id_jogo`, acoplamento que não pode ser repetido na migração.
+
+### Decisão
+
+- adotar o contrato v1 definido em
+  [`docs/architecture/CONTRATO_FONTE_ESPORTIVA.md`](../architecture/CONTRATO_FONTE_ESPORTIVA.md);
+- tratar estado, relógio e placar como dados competitivos normalizados e eventos
+  como informação auxiliar não destrutiva;
+- bloquear escrita para envelopes inválidos, estados desconhecidos,
+  identificações ambíguas e resultados finais incoerentes;
+- implementar primeiro um adaptador puro com fixtures sanitizadas e testes;
+- manter Supabase, Functions e fonte oficial inalterados até a validação desse
+  adaptador.
+
+### Consequências
+
+- a fundação no banco passa a ocorrer depois do adaptador puro, não antes;
+- fornecedores ficam isolados atrás do mesmo contrato interno;
+- eventos ausentes não apagam informação previamente observada e nunca
+  reconstruem o placar oficial;
+- mudanças incompatíveis no contrato exigem nova versão e aprovação;
+- esta decisão não autoriza implementação, migração, deploy ou corte.
