@@ -182,10 +182,10 @@ incompatíveis exigem nova versão, decisão e aprovação.
 Tudo nesta seção é **PROPOSTO** e requer tarefa específica de Supabase, revisão
 de segurança, migração aditiva e plano de rollback.
 
-O desenho físico abaixo permanece candidato até a conclusão da Prova Externa
-Instrumentada. A prova pode demonstrar que há campos desnecessários, ausentes ou
-que duas tabelas atendem melhor do que três. Nenhuma tabela ou coluna deve ser
-criada apenas porque aparece neste plano.
+O desenho físico foi refinado após a Prova Externa Instrumentada e a auditoria
+somente leitura do Supabase. A migração local da fundação está em
+`supabase/migrations/20260825021432_fundacao_sombra_api_football.sql` e foi
+aplicada no Supabase após revisão e aprovação específicas.
 
 ### Campos aditivos em `public.jogos`
 
@@ -254,9 +254,12 @@ em `jsonb`, hash, validade e erro sanitizado. Recomenda-se unicidade por
   necessidade demonstrada.
 - Preferir dados normalizados e hashes para reduzir retenção e exposição.
 
-As tabelas são propostas no schema `public` porque o backend atual acessa o
-Supabase pela API. Usar schema privado exigiria uma mudança arquitetural
-adicional. Essa escolha deve ser confirmada na revisão de implementação.
+As tabelas ficam no schema `public` porque o backend atual acessa o Supabase
+pela Data API. A auditoria confirmou que o schema `private` existente não
+concede `USAGE` ao `service_role`; usá-lo exigiria RPC privilegiada ou outra
+mudança arquitetural. Em `public`, as tabelas permanecem isoladas por RLS sem
+políticas, revogações explícitas para `PUBLIC`, `anon` e `authenticated`, e
+privilégios mínimos explícitos para `service_role`.
 
 Não criar inicialmente uma quarta tabela de divergências: as divergências devem
 ser derivadas das fotografias. Persisti-las só se houver necessidade operacional
@@ -280,9 +283,9 @@ pelo diagnóstico. Esses consumidores não podem interpretar diretamente o
 payload de um fornecedor.
 
 O mapa completo de estados, incluindo intervalo, adiamento, suspensão,
-cancelamento, prorrogação e encerramento, permanece **PENDENTE** até ser
-documentado e testado contra respostas reais. Estados desconhecidos devem gerar
-telemetria e falha segura, nunca inferência silenciosa.
+cancelamento, prorrogação e encerramento, está implementado e testado no
+contrato v1. Estados desconhecidos geram diagnóstico e falha segura, nunca
+inferência silenciosa.
 
 ## Reconciliação de identidades
 
@@ -350,7 +353,7 @@ uma observação completa com frequência de um minuto.
 | 0. Planejamento | concluída | plano aprovado e registrado |
 | 1. Validação externa | concluída para contrato v1 | prova de uma partida registrada |
 | 2. Adaptador puro e testes | concluída | contrato v1 executável, sem persistência |
-| 3. Fundação no banco | não iniciada | migração aditiva revisada e aplicada |
+| 3. Fundação no banco | concluída | migração aditiva revisada e aplicada |
 | 4. Coleta em sombra | não iniciada | coleta isolada e observável |
 | 5. Sombra pré-corte | não iniciada | 1–2 rodadas e critérios atendidos |
 | 6. Corte controlado | não iniciada | aprovação explícita e rollback pronto |
@@ -404,12 +407,19 @@ A entrega implementou, sem Supabase e sem integração com produção:
 O contrato e os critérios estão em
 [`CONTRATO_FONTE_ESPORTIVA.md`](CONTRATO_FONTE_ESPORTIVA.md).
 
-## Próximo portão — Fundação no banco
+## Portão concluído — Fundação no banco
 
-A próxima tarefa poderá propor a migração aditiva descrita neste plano. Ela deve
-ter revisão específica de Supabase, rollback documentado e aprovação humana
-própria. O adaptador puro não autoriza criar tabelas, alterar RLS, configurar
-credenciais, coletar em sombra ou trocar a fonte oficial.
+A migração aditiva foi aplicada com rollback documentado e testes estáticos.
+As quatro colunas permanecem nulas, as três tabelas permanecem vazias e o
+acesso direto está limitado ao `service_role`. A fundação não autoriza
+configurar credenciais, coletar em sombra ou trocar a fonte oficial.
+
+## Próximo portão — Coleta em sombra
+
+A próxima tarefa deve implementar a coleta isolada e observável, sem escrever
+estado competitivo e sem alterar a fonte oficial. Function, configuração,
+frequência, orçamento de chamadas e mecanismo de reconciliação exigem plano e
+aprovação próprios.
 
 ## Estratégia de rollback
 
@@ -477,6 +487,8 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | 2026-08-24 | 0.2 | Contrato normalizado, segurança, prova externa e critérios refinados |
 | 2026-08-25 | 0.3 | Evidência ao vivo, contrato v1 e adaptador puro como próximo portão |
 | 2026-08-25 | 0.4 | Adaptador puro validado e fundação no banco definida como próximo portão |
+| 2026-08-25 | 0.5 | Fundação modelada em migração local, ainda não aplicada no Supabase |
+| 2026-08-25 | 0.6 | Fundação aplicada e validada; coleta em sombra definida como próximo portão |
 
 ## Referências internas
 

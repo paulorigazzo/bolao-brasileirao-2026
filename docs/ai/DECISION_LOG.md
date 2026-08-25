@@ -575,3 +575,39 @@ do fornecedor como `id_jogo`, acoplamento que não pode ser repetido na migraç�
   reconstruem o placar oficial;
 - mudanças incompatíveis no contrato exigem nova versão e aprovação;
 - esta decisão não autoriza implementação, migração, deploy ou corte.
+
+## DEC-2026-018 — Tabelas de sombra em `public` com exposição controlada
+
+- Data: 2026-08-25
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: proposta ainda não confirmada em DEC-2026-016
+- Impacto: alto
+
+### Contexto
+
+A auditoria da fundação confirmou que o backend atual usa a Data API com
+`service_role`, enquanto o schema `private` existente não concede `USAGE`
+nem a esse papel. Colocar as fotografias de transição em `private` exigiria uma
+RPC privilegiada ou mudança arquitetural adicional antes da coleta em sombra.
+
+### Decisão
+
+- manter em `public` as três tabelas de transição;
+- habilitar RLS sem políticas para `anon` ou `authenticated`;
+- revogar privilégios automáticos de `PUBLIC`, `anon`, `authenticated` e
+  `service_role`;
+- conceder novamente ao `service_role` somente `SELECT`, `INSERT` e
+  `UPDATE`, além do uso estritamente necessário das sequências;
+- não criar funções privilegiadas, políticas públicas ou uma tabela separada de
+  divergências nesta fase.
+
+### Consequências
+
+- a futura Function de sombra poderá persistir fotografias normalizadas pela
+  mesma fronteira server-side já usada pelo projeto;
+- navegador e usuários autenticados não terão acesso direto às tabelas;
+- exclusão e retenção continuam bloqueadas até uma decisão própria;
+- qualquer ampliação de privilégios exige nova revisão de segurança;
+- a aplicação da migração foi autorizada e concluída em 2026-08-25;
+- a fundação aplicada não autoriza o início da coleta em sombra.
