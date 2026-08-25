@@ -1,0 +1,1 @@
+drop index public.jogos_agendamento_observacoes_id_jogo_idx;

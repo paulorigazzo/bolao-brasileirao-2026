@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-const migration=readFileSync(new URL("../supabase/migrations/20260825190000_classifica_agendamentos_divergentes.sql",import.meta.url),"utf8");
+const migration=readFileSync(new URL("../supabase/migrations/20260825202000_classifica_agendamentos_divergentes.sql",import.meta.url),"utf8");
+const indexMigration=readFileSync(new URL("../supabase/migrations/20260825202718_add_schedule_observations_index.sql",import.meta.url),"utf8");
 const rollback=readFileSync(new URL("../supabase/rollback/rollback_classifica_agendamentos_divergentes.sql",import.meta.url),"utf8");
 
 assert.match(migration,/pg_advisory_xact_lock/);
@@ -24,5 +25,7 @@ assert.match(migration,/agendamento_observacoes_pos_condicao_divergente/);
 assert.match(migration,/agendamento_estado_competitivo_nao_autorizado_alterado/);
 assert.match(rollback,/agendamento_rollback_auditoria_ausente/);
 assert.match(rollback,/2026-05-10 20:40:00\+00/);
+assert.match(indexMigration,/create index jogos_agendamento_observacoes_id_jogo_idx/);
+assert.match(indexMigration,/public\.jogos_agendamento_observacoes \(id_jogo\)/);
 
 console.log("Migration corretiva de agendamentos verificada com sucesso.");
