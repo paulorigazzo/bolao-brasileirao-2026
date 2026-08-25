@@ -354,7 +354,7 @@ uma observação completa com frequência de um minuto.
 | 1. Validação externa | concluída para contrato v1 | prova de uma partida registrada |
 | 2. Adaptador puro e testes | concluída | contrato v1 executável, sem persistência |
 | 3. Fundação no banco | concluída | migração aditiva revisada e aplicada |
-| 4. Coleta em sombra | não iniciada | coleta isolada e observável |
+| 4. Coleta em sombra | concluída | duas provas reais isoladas, válidas e revisadas |
 | 5. Sombra pré-corte | não iniciada | 1–2 rodadas e critérios atendidos |
 | 6. Corte controlado | não iniciada | aprovação explícita e rollback pronto |
 | 7. Sombra pós-corte | não iniciada | 1–2 rodadas sem regressão material |
@@ -410,16 +410,16 @@ O contrato e os critérios estão em
 ## Portão concluído — Fundação no banco
 
 A migração aditiva foi aplicada com rollback documentado e testes estáticos.
-As quatro colunas permanecem nulas, as três tabelas permanecem vazias e o
-acesso direto está limitado ao `service_role`. A fundação não autoriza
-configurar credenciais, coletar em sombra ou trocar a fonte oficial.
+As quatro colunas auxiliares de `public.jogos` permanecem nulas, a tabela de
+classificações de transição permanece vazia e o acesso direto continua limitado
+ao `service_role`. As tabelas de execuções e jogos agora contêm somente as
+evidências isoladas descritas abaixo. A fundação não autoriza trocar a fonte
+oficial.
 
-## Próximo portão — Coleta em sombra
+## Portão concluído — Coleta em sombra
 
-A próxima tarefa deve implementar a coleta isolada e observável, sem escrever
-estado competitivo e sem alterar a fonte oficial. Function, configuração,
-frequência, orçamento de chamadas e mecanismo de reconciliação exigem plano e
-aprovação próprios.
+O primeiro recorte de coleta isolada e observável foi implantado e validado sem
+escrever estado competitivo e sem alterar a fonte oficial.
 
 ### Primeiro recorte implementado
 
@@ -438,6 +438,42 @@ O acionamento do ensaio fica disponível somente no Diagnóstico do Sistema para
 administradores. O controle exige confirmação, encaminha a sessão vigente à
 Function e apresenta apenas o resumo sanitizado; não expõe chave, token ou
 payload do fornecedor.
+
+### Evidências reais revisadas em 2026-08-25
+
+Foram executados dois ensaios administrativos, cada um com exatamente uma
+chamada de coleta à API-Football e duas fotografias normalizadas, uma por
+fornecedor:
+
+| Execução | Jogo interno | Fixture | Comparação revisada | Resultado |
+| --- | ---: | ---: | --- | --- |
+| 1 | 554970 | 1492340 | Botafogo 2 × 3 Athletico-PR; `finished` nas duas fontes; API-Football em `FT`, `90+6`, intervalo 0 × 2 | duas fotografias válidas, sem campos ausentes ou erros |
+| 2 | 554969 | 1492339 | Vitória 1 × 0 Botafogo; `finished` nas duas fontes; API-Football em `FT`, `90+4`, intervalo 1 × 0 | duas fotografias válidas, sem campos ausentes ou erros |
+
+As duas execuções registraram sucesso oficial e sombra, um jogo por fonte e
+nenhum erro de normalização. Diferenças apenas nominais, como `Vitória` versus
+`Vitoria` e `Paranaense` versus `Atletico Paranaense`, não afetaram o pareamento
+confirmado por identidade, rodada, horário e placar. Nenhuma execução escreveu
+em `public.jogos`, palpites, pontuação, classificação oficial ou interface do
+participante.
+
+A cota observada passou de 88 para 81 chamadas restantes entre as duas provas.
+Essa diferença inclui consultas auxiliares no tester para localizar e confirmar
+fixtures; cada registro de coleta em sombra contabilizou somente uma chamada.
+
+### Limitação confirmada do ensaio gratuito
+
+O plano gratuito permitiu consultar fixtures conhecidas por ID, mas bloqueou a
+listagem livre da temporada 2026 e restringiu consultas por data a uma janela
+curta. Portanto, ele é suficiente para provas pontuais com IDs previamente
+confirmados, mas não deve ser tratado como base operacional da sombra pré-corte.
+
+## Próximo portão — Sombra pré-corte
+
+A Fase 5 deve observar 1–2 rodadas com pareamentos previamente confirmados,
+orçamento de chamadas, frequência, reconciliação e critérios de divergência
+aprovados. Ela permanece não iniciada e exige plano próprio antes de qualquer
+agendamento ou ampliação da coleta.
 
 ## Estratégia de rollback
 
@@ -509,6 +545,7 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | 2026-08-25 | 0.6 | Fundação aplicada e validada; coleta em sombra definida como próximo portão |
 | 2026-08-25 | 0.7 | Coletor manual unitário implementado; prova real permanece como portão da Fase 4 |
 | 2026-08-25 | 0.8 | Acionador administrativo definido para viabilizar a primeira prova real autenticada |
+| 2026-08-25 | 0.9 | Duas coletas reais revisadas; Fase 4 concluída e sombra pré-corte definida como próximo portão |
 
 ## Referências internas
 
