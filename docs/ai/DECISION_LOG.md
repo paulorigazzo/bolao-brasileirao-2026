@@ -949,3 +949,6 @@ modelo tratava instantes provisórios como se fossem horários confirmados.
   competitivo vigente imediatamente antes e depois da própria transação;
 - uma nova data de provedor para jogo adiado volta como provisória até confirmação;
 - aplicação remota, deploy e preenchimento dos 125 IDs continuam não autorizados.
+- a aplicação remota foi registrada como `20260825202000`; o arquivo local deve
+  usar a mesma versão, e o índice recomendado para a chave estrangeira das
+  observações permanece em migration própria e reversível.
