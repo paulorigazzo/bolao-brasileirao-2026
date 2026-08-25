@@ -3942,6 +3942,44 @@ async function fetchAdminDiagnostic(){
   if(!response.ok) throw new Error(result.error||"Não foi possível obter o diagnóstico.");
   return result;
 }
+async function runAdminShadowCollection(event){
+  event?.preventDefault();
+  if(!isAdminUser()) return;
+  const gameId=Number($("adminShadowGameId")?.value);
+  const fixtureId=Number($("adminShadowFixtureId")?.value);
+  const feedback=$("adminShadowFeedback");
+  const button=$("adminShadowSubmit");
+  if(!Number.isInteger(gameId)||gameId<=0||!Number.isInteger(fixtureId)||fixtureId<=0){
+    if(feedback) feedback.textContent="Informe IDs positivos e válidos.";
+    return;
+  }
+  if(!window.confirm(`Executar uma coleta em sombra para o jogo ${gameId} e a fixture ${fixtureId}? Isso consumirá uma chamada da API-Football e gravará apenas nas tabelas de transição.`)) return;
+  const originalText=button?.textContent||"Executar ensaio";
+  try{
+    if(button){button.disabled=true;button.textContent="Coletando…";}
+    if(feedback){feedback.textContent="Executando uma chamada controlada…";feedback.className="admin-shadow-feedback";}
+    const {data:{session}}=await sb.auth.getSession();
+    if(!session?.access_token) throw new Error("Sessão administrativa expirada.");
+    const response=await fetch("/.netlify/functions/coletar-sombra-api-football",{
+      method:"POST",
+      headers:{Authorization:`Bearer ${session.access_token}`,"Content-Type":"application/json",Accept:"application/json"},
+      body:JSON.stringify({id_jogo:gameId,fixture_id:fixtureId})
+    });
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok||!result.ok) throw new Error(result.error||(result.errors||[]).join(", ")||"A coleta em sombra não foi concluída.");
+    const clock=result.clock?.elapsed==null?"sem relógio":`${result.clock.elapsed}${result.clock.extra?`+${result.clock.extra}`:""}'`;
+    const score=result.score?.home==null||result.score?.away==null?"placar indisponível":`${result.score.home} × ${result.score.away}`;
+    const quota=result.quota?.dailyRemaining==null?"cota não informada":`${result.quota.dailyRemaining} chamadas restantes`;
+    if(feedback){
+      feedback.textContent=`Execução ${result.executionId} concluída • ${result.normalizedStatus} • ${score} • ${clock} • ${quota}.`;
+      feedback.className="admin-shadow-feedback is-success";
+    }
+  }catch(error){
+    if(feedback){feedback.textContent=error.message||"A coleta em sombra não pôde ser concluída.";feedback.className="admin-shadow-feedback is-error";}
+  }finally{
+    if(button){button.disabled=false;button.textContent=originalText;}
+  }
+}
 async function renderAdminDiagnostic(){
   if(!isAdminUser()) return;
   const content=$("adminDiagnosticContent"), badge=$("adminDiagnosticBadge");
@@ -3970,6 +4008,7 @@ async function renderAdminDiagnostic(){
       </div>${d.cache.lookup==="latest-fallback"?'<small class="diagnostic-cache-warning">⚠ Cache localizado pelo registro mais recente; verifique se o identificador oficial é BSA-2026.</small>':''}</div>
       <div class="diagnostic-section"><div class="diagnostic-autotest-head"><h3>Autoteste detalhado</h3><strong>${d.autotest.score}/100</strong></div><div class="diagnostic-checks">${d.autotest.checks.map(c=>`<div class="${c.ok?"ok":"fail"}"><span>${c.ok?"✔":"✕"}</span><span>${escapeHtml(c.label)}${diagnosticCheckDetail(c)}</span></div>`).join("")}</div></div>
       <div class="diagnostic-section"><h3>Logs recentes</h3><div class="diagnostic-log-list">${d.logs.slice(0,8).map(log=>`<div><span>${diagnosticDate(log.criado_em)}</span><strong>${log.sucesso?"🟢":"🔴"} ${escapeHtml(log.origem||"sincronização")}</strong><small>${log.sucesso?`${log.jogos_atualizados??0} jogos • ${diagnosticDuration(log.duracao_ms)}`:escapeHtml(log.erro||"Falha sem detalhes")}</small></div>`).join("")||'<p class="muted-note">Nenhum log disponível.</p>'}</div></div>
+      <div class="diagnostic-section admin-shadow-section"><div class="admin-shadow-heading"><div><span>API-FOOTBALL</span><h3>Coleta em sombra — ensaio</h3></div><strong>Sem efeito competitivo</strong></div><p>Executa uma única observação e grava somente fotografias nas tabelas de transição.</p><form id="adminShadowForm" class="admin-shadow-form"><label>ID do jogo no Bolão<input id="adminShadowGameId" name="id_jogo" type="number" min="1" step="1" value="554970" required></label><label>Fixture da API-Football<input id="adminShadowFixtureId" name="fixture_id" type="number" min="1" step="1" value="1492340" required></label><button id="adminShadowSubmit" class="secondary" type="submit">Executar ensaio</button></form><p id="adminShadowFeedback" class="admin-shadow-feedback" role="status" aria-live="polite"></p></div>
       <div class="diagnostic-actions"><button id="diagnosticRefreshBtn" class="secondary" type="button">🔄 Atualizar diagnóstico</button><button id="diagnosticSyncBtn" class="primary" type="button">⚽ Sincronizar agora</button><button id="diagnosticExportBtn" class="secondary" type="button">📥 Exportar logs</button></div>
       <small class="diagnostic-note">A disponibilidade da Football Data API é inferida pelos logs para não consumir cota; a atualidade do conteúdo é verificada separadamente nos jogos armazenados.</small>`;
     const sportsDelayed=d.sportsData?.status==="delayed";
@@ -3978,6 +4017,7 @@ async function renderAdminDiagnostic(){
     if(badge){ badge.textContent=sportsDelayed?"Dados esportivos atrasados":d.autotest.score>=90?"Sistema saudável":d.autotest.score>=70?"Atenção":"Problemas"; badge.className=`admin-diagnostic-badge ${sportsDelayed||d.autotest.score>=70&&d.autotest.score<90?"is-warning":d.autotest.score>=90?"is-ok":"is-error"}`; }
     $("diagnosticRefreshBtn")?.addEventListener("click",renderAdminDiagnostic);
     $("diagnosticSyncBtn")?.addEventListener("click",async e=>{await syncGames(e.currentTarget); await renderAdminDiagnostic();});
+    $("adminShadowForm")?.addEventListener("submit",runAdminShadowCollection);
     $("diagnosticExportBtn")?.addEventListener("click",()=>{
       const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),diagnostic:d},null,2)],{type:"application/json"});
       const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`bolao-diagnostico-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
