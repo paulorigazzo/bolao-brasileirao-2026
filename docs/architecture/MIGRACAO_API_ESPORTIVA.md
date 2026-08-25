@@ -349,7 +349,7 @@ uma observação completa com frequência de um minuto.
 | --- | --- | --- |
 | 0. Planejamento | concluída | plano aprovado e registrado |
 | 1. Validação externa | concluída para contrato v1 | prova de uma partida registrada |
-| 2. Adaptador puro e testes | não iniciada | contrato v1 executável, sem persistência |
+| 2. Adaptador puro e testes | concluída | contrato v1 executável, sem persistência |
 | 3. Fundação no banco | não iniciada | migração aditiva revisada e aplicada |
 | 4. Coleta em sombra | não iniciada | coleta isolada e observável |
 | 5. Sombra pré-corte | não iniciada | 1–2 rodadas e critérios atendidos |
@@ -388,12 +388,12 @@ mudar a fonte oficial. A evidência completa está no contrato normalizado.
 
 ### Critério de saída atendido
 
-A recomendação foi “avançar” para o adaptador puro e seus testes. A fundação no
-Supabase continua bloqueada até esse adaptador comprovar o contrato v1.
+A recomendação foi “avançar” para o adaptador puro e seus testes. Esse adaptador
+comprovou o contrato v1 localmente, sem rede, credenciais ou persistência.
 
-## Próximo portão — Adaptador puro e testes
+## Portão concluído — Adaptador puro e testes
 
-A próxima entrega deve implementar, sem Supabase e sem integração com produção:
+A entrega implementou, sem Supabase e sem integração com produção:
 
 - validação do envelope da API-Football;
 - normalização de jogos e classificação;
@@ -403,6 +403,13 @@ A próxima entrega deve implementar, sem Supabase e sem integração com produç
 
 O contrato e os critérios estão em
 [`CONTRATO_FONTE_ESPORTIVA.md`](CONTRATO_FONTE_ESPORTIVA.md).
+
+## Próximo portão — Fundação no banco
+
+A próxima tarefa poderá propor a migração aditiva descrita neste plano. Ela deve
+ter revisão específica de Supabase, rollback documentado e aprovação humana
+própria. O adaptador puro não autoriza criar tabelas, alterar RLS, configurar
+credenciais, coletar em sombra ou trocar a fonte oficial.
 
 ## Estratégia de rollback
 
@@ -469,6 +476,7 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | 2026-08-24 | 0.1 | Plano inicial da avaliação e migração controlada |
 | 2026-08-24 | 0.2 | Contrato normalizado, segurança, prova externa e critérios refinados |
 | 2026-08-25 | 0.3 | Evidência ao vivo, contrato v1 e adaptador puro como próximo portão |
+| 2026-08-25 | 0.4 | Adaptador puro validado e fundação no banco definida como próximo portão |
 
 ## Referências internas
 
