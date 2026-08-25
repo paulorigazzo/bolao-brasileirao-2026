@@ -4,20 +4,28 @@
 select pg_advisory_xact_lock(hashtext('bolao_2026_agendamentos_divergentes'));
 
 create temporary table agendamento_preflight on commit drop as
-select encode(sha256(convert_to(coalesce(string_agg(
-  (to_jsonb(j) - array['api_football_id','api_football_time_casa_id','api_football_time_fora_id','api_football_mapeado_em']::text[])::text,
-  ',' order by j.id_jogo), ''), 'UTF8')), 'hex') as competitive_hash_before,
-  encode(sha256(convert_to(coalesce(string_agg(
-  (to_jsonb(j) - array['inicio','api_football_id','api_football_time_casa_id','api_football_time_fora_id','api_football_mapeado_em']::text[])::text,
-  ',' order by j.id_jogo), ''), 'UTF8')), 'hex') as protected_hash_before
-from public.jogos j;
+select
+  (select encode(sha256(convert_to(
+    '[' || string_agg(
+      format('{"canonicalGameId":%s,"providerFixtureId":%s,"providerHomeTeamId":%s,"providerAwayTeamId":%s}',
+        j.id_jogo, j.api_football_id, j.api_football_time_casa_id, j.api_football_time_fora_id),
+      ',' order by j.id_jogo
+    ) || ']', 'UTF8')), 'hex')
+   from public.jogos j
+   where j.api_football_id is not null
+     and j.api_football_time_casa_id is not null
+     and j.api_football_time_fora_id is not null) as mapping_hash_current,
+  (select encode(sha256(convert_to(coalesce(string_agg(
+    (to_jsonb(j) - array['inicio','api_football_id','api_football_time_casa_id','api_football_time_fora_id','api_football_mapeado_em']::text[])::text,
+    ',' order by j.id_jogo), ''), 'UTF8')), 'hex')
+   from public.jogos j) as protected_hash_before;
 
 do $preflight$
 declare
   registered_hash text;
   current_hash text;
 begin
-  select detalhes ->> 'estado_competitivo_hash_depois'
+  select detalhes ->> 'hash_reconciliacao'
     into registered_hash
   from public.transicao_api_execucoes
   where detalhes ->> 'tipo' = 'reconciliacao_mapeamentos'
@@ -25,12 +33,29 @@ begin
   order by id desc
   limit 1;
 
-  select competitive_hash_before into current_hash from agendamento_preflight;
+  select mapping_hash_current into current_hash from agendamento_preflight;
   if registered_hash is null or registered_hash <> current_hash then
-    raise exception 'agendamento_hash_5b2_divergente: registrado %, atual %', registered_hash, current_hash;
+    raise exception 'agendamento_hash_mapeamentos_5b2_divergente: registrado %, atual %', registered_hash, current_hash;
   end if;
   if (select count(*) from public.jogos) <> 380 then
     raise exception 'agendamento_contagem_canonica_divergente';
+  end if;
+  if (select count(*) from public.jogos where api_football_id is not null
+      and api_football_time_casa_id is not null and api_football_time_fora_id is not null
+      and api_football_mapeado_em is not null) <> 255 then
+    raise exception 'agendamento_mapeamentos_completos_divergentes';
+  end if;
+  if (select count(*) from public.jogos where api_football_id is null
+      and api_football_time_casa_id is null and api_football_time_fora_id is null
+      and api_football_mapeado_em is null) <> 125 then
+    raise exception 'agendamento_mapeamentos_nulos_divergentes';
+  end if;
+  if exists (select 1 from public.jogos where
+      (api_football_id is null)::integer
+      + (api_football_time_casa_id is null)::integer
+      + (api_football_time_fora_id is null)::integer
+      + (api_football_mapeado_em is null)::integer not in (0,4)) then
+    raise exception 'agendamento_mapeamentos_parciais_detectados';
   end if;
   if not exists (
     select 1 from public.jogos
@@ -194,7 +219,7 @@ begin
     jsonb_build_object(
       'tipo', 'correcao_agendamentos_divergentes',
       'fase_migracao', '5B.3-corretiva',
-      'hash_5b2_validado', (select competitive_hash_before from agendamento_preflight),
+      'hash_reconciliacao_5b2_validado', (select mapping_hash_current from agendamento_preflight),
       'hash_protegido_antes', (select protected_hash_before from agendamento_preflight),
       'hash_protegido_depois', protected_hash_after,
       'inicio_corrigido', jsonb_build_object('id_jogo',554887,'antes','2026-05-10T20:40:00Z','depois','2026-05-10T19:00:00Z'),

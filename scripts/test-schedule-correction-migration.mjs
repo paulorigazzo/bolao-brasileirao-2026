@@ -5,7 +5,12 @@ const migration=readFileSync(new URL("../supabase/migrations/20260825190000_clas
 const rollback=readFileSync(new URL("../supabase/rollback/rollback_classifica_agendamentos_divergentes.sql",import.meta.url),"utf8");
 
 assert.match(migration,/pg_advisory_xact_lock/);
-assert.match(migration,/estado_competitivo_hash_depois/);
+assert.match(migration,/detalhes ->> 'hash_reconciliacao'/);
+assert.match(migration,/mapping_hash_current/);
+assert.match(migration,/agendamento_mapeamentos_completos_divergentes/);
+assert.match(migration,/agendamento_mapeamentos_nulos_divergentes/);
+assert.match(migration,/agendamento_mapeamentos_parciais_detectados/);
+assert.doesNotMatch(migration,/detalhes ->> 'estado_competitivo_hash_depois'/);
 assert.match(migration,/id_jogo = 554887[\s\S]*2026-05-10 20:40:00\+00/);
 assert.match(migration,/inicio = timestamptz '2026-05-10 19:00:00\+00'/);
 assert.match(migration,/id_jogo in \(554940,554941,554942,554948\)/);
