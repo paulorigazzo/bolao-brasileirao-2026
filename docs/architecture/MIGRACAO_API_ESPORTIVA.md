@@ -647,6 +647,27 @@ completos e 125 integralmente nulos. A Function e o cron foram integrados, mas
 as variáveis permanecem ausentes e a coleta continua desativada. Deploy
 operacional e início da 5B.3B.2 ainda exigem autorização própria.
 
+### Metadados opcionais preparados na Fase 5B.3B.2A
+
+Antes da ativação da rodada 25, a coleta foi ampliada localmente para preservar
+também nome e cidade do local, URLs de escudo e códigos de time observados na
+mesma resposta de fixtures. Esses valores são opcionais, não geram chamadas
+adicionais, não participam da autoridade competitiva e nunca são promovidos
+automaticamente para `public.jogos`.
+
+A migração aditiva preparada acrescenta seis colunas anuláveis somente a
+`transicao_api_jogos`. A fotografia da fonte oficial reutiliza exclusivamente
+local e escudos já disponíveis em `public.jogos`; cidade e códigos permanecem
+nulos quando não estão persistidos, sem inferência por aliases. Apelidos, nomes
+de exibição e siglas canônicas ficam reservados a um futuro catálogo de clubes,
+que não integra esta fase.
+
+A aplicação remota da migração, publicação da Function, simulação operacional
+e ativação da campanha continuam submetidas a portões independentes. O rollback
+por remoção das colunas é seguro antes da primeira evidência real; depois dela,
+a campanha deve ser desativada e a auditoria preservada antes de qualquer
+remoção.
+
 Uma segunda rodada será exigida somente se a primeira tiver cobertura
 incompleta, divergência material sem explicação ou deixar sem observação algum
 marco relevante de primeiro tempo, intervalo, segundo tempo, acréscimos ou
@@ -727,6 +748,7 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | 2026-08-25 | 1.2 | Ponto de retomada da 5B.2 documentado com escopo mínimo, recomendação e portões de segurança |
 | 2026-08-25 | 1.3 | Núcleo inativo da 5B.3A implementado; ativação da rodada permanece bloqueada |
 | 2026-08-25 | 1.4 | Ativação fail-closed da 5B.3B.1 preparada para a rodada 25, ainda sem deploy ou coleta |
+| 2026-08-25 | 1.5 | Metadados opcionais de local, escudos e códigos preparados na 5B.3B.2A, ainda sem aplicação remota |
 
 ## Referências internas
 

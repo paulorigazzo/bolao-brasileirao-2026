@@ -852,3 +852,43 @@ com chave nula; as contagens de sombra continuaram em três execuções, quatro
 fotografias de jogos e nenhuma classificação. Os 255 mapeamentos completos e os
 125 integralmente nulos foram preservados. A aplicação não configurou a Netlify
 nem iniciou coleta.
+
+## DEC-2026-025 — Metadados opcionais na fotografia de jogos em sombra
+
+- Data: 2026-08-25
+- Status: aceita; implementação local em revisão
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: alto
+
+### Contexto
+
+As fotografias de transição já cobriam identidade, agenda, estado, relógio e
+placares, mas não preservavam local, cidade, escudos ou códigos de três letras
+disponíveis na resposta de fixtures. Ativar a rodada sem esses campos perderia
+a oportunidade de avaliar metadados usados na apresentação, embora eles não
+tenham autoridade competitiva.
+
+### Decisão
+
+- acrescentar seis colunas opcionais somente a `transicao_api_jogos`;
+- observar nome e cidade do local, escudos e códigos dos dois times sem chamadas
+  adicionais;
+- incluir esses valores no hash auditável de cada fotografia;
+- não invalidar a fotografia competitiva quando estiverem ausentes ou
+  divergentes;
+- não promover valores para `public.jogos` nem inferir cidade ou código ausente;
+- manter apelidos, nomes de exibição e siglas canônicas sob autoridade do Bolão;
+- avaliar um catálogo canônico de clubes apenas em tarefa futura, antes do
+  corte, se sua necessidade for confirmada.
+
+### Consequências
+
+- a rodada 25 poderá produzir evidência de identidade visual e local sem elevar
+  o consumo da API-Football;
+- linhas antigas permanecem válidas com as novas colunas nulas;
+- `id_jogo`, horários, resultados, palpites, pontuação, classificação oficial e
+  demais dados competitivos permanecem inalterados;
+- RLS e privilégios existentes não são ampliados;
+- aplicação remota, publicação, simulação e ativação continuam sujeitas a
+  autorizações independentes.

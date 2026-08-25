@@ -8,10 +8,14 @@ import {
 const fixtureEnvelope = JSON.parse(await readFile(new URL("../fixtures/api-football/fixture-1492340.sanitized.json", import.meta.url)));
 const standingsEnvelope = JSON.parse(await readFile(new URL("../fixtures/api-football/standings-brasileirao.synthetic.json", import.meta.url)));
 const rawFixture = fixtureEnvelope.response[0];
+rawFixture.teams.home.code = "BOT";
+rawFixture.teams.away.code = "CAP";
 const canonical = {
   id_jogo: 999, rodada: 24, time_casa: rawFixture.teams.home.name, time_fora: rawFixture.teams.away.name,
   inicio: rawFixture.fixture.date, status: "encerrado", minuto: 90, acrescimos: 6,
   gols_casa: 2, gols_fora: 3, time_casa_id: 1770, time_fora_id: 1766,
+  local_partida: "Estádio Nilton Santos", time_casa_logo: "https://example.test/official-botafogo.png",
+  time_fora_logo: "https://example.test/official-athletico.png",
   atualizado_em: rawFixture.fixture.date, sincronizado_em: rawFixture.fixture.date,
   api_football_id: rawFixture.fixture.id, api_football_time_casa_id: rawFixture.teams.home.id,
   api_football_time_fora_id: rawFixture.teams.away.id,
@@ -78,6 +82,9 @@ const result = await collectApiFootballRoundCycle({
 assert.deepEqual(result, { ok: true, executionId: 88, games: 1, calls: 2, standings: true });
 assert.match(urls[0], /fixtures\?league=71&season=2026&date=2026-08-24&timezone=America%2FSao_Paulo$/);
 assert.equal(supabase.writes.find((write) => write.table === "transicao_api_jogos").value.length, 2);
+const roundSnapshots = supabase.writes.find((write) => write.table === "transicao_api_jogos").value;
+assert.deepEqual(roundSnapshots.map((row) => row.time_casa_codigo), [null, "BOT"]);
+assert.deepEqual(roundSnapshots.map((row) => row.local_cidade), [null, "Rio de Janeiro"]);
 assert.equal(supabase.writes.find((write) => write.table === "transicao_api_classificacoes").value.length, 2);
 assert.equal(supabase.writes.some((write) => write.table === "jogos"), false);
 assert.equal(supabase.writes.some((write) => write.table === "classificacao_cache"), false);

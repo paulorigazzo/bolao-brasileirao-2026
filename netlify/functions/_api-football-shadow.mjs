@@ -29,6 +29,9 @@ export function officialSnapshot(game, executionId, observedAt) {
   const relevant = {
     id: Number(game.id_jogo), home: game.time_casa, away: game.time_fora, kickoff: game.inicio,
     status, minute: game.minuto, extra: game.acrescimos, homeScore: game.gols_casa, awayScore: game.gols_fora,
+    venueName: game.local_partida || null, venueCity: null,
+    homeCrestUrl: game.time_casa_logo || null, awayCrestUrl: game.time_fora_logo || null,
+    homeCode: null, awayCode: null,
   };
   return {
     execucao_id: executionId, fornecedor: OFFICIAL_PROVIDER, id_jogo: Number(game.id_jogo),
@@ -36,6 +39,9 @@ export function officialSnapshot(game, executionId, observedAt) {
     time_casa_id_externo: game.time_casa_id == null ? null : Number(game.time_casa_id),
     time_fora_id_externo: game.time_fora_id == null ? null : Number(game.time_fora_id),
     time_casa_nome: game.time_casa, time_fora_nome: game.time_fora,
+    local_nome: game.local_partida || null, local_cidade: null,
+    time_casa_logo: game.time_casa_logo || null, time_fora_logo: game.time_fora_logo || null,
+    time_casa_codigo: null, time_fora_codigo: null,
     competicao_nome: "Campeonato Brasileiro Série A", temporada: 2026,
     rodada: game.rodada == null ? null : Number(game.rodada), inicio_previsto: game.inicio,
     status_original: game.status || "desconhecido", status_normalizado: status,
@@ -53,12 +59,18 @@ export function shadowSnapshot(game, executionId, canonicalGameId, observedAt) {
     id: game.providerFixtureId, home: game.home.providerTeamId, away: game.away.providerTeamId,
     kickoff: game.kickoffAt, status: game.status.normalized, minute: game.clock.elapsed,
     extra: game.clock.extra, score: game.score,
+    venueName: game.venueName, venueCity: game.venueCity,
+    homeCrestUrl: game.home.crestUrl, awayCrestUrl: game.away.crestUrl,
+    homeCode: game.home.code, awayCode: game.away.code,
   };
   return {
     execucao_id: executionId, fornecedor: SHADOW_PROVIDER, id_jogo: canonicalGameId,
     id_externo: game.providerFixtureId, time_casa_id_externo: game.home.providerTeamId,
     time_fora_id_externo: game.away.providerTeamId, time_casa_nome: game.home.name,
     time_fora_nome: game.away.name, competicao_id_externo: game.competitionProviderId,
+    local_nome: game.venueName, local_cidade: game.venueCity,
+    time_casa_logo: game.home.crestUrl, time_fora_logo: game.away.crestUrl,
+    time_casa_codigo: game.home.code, time_fora_codigo: game.away.code,
     competicao_nome: "Campeonato Brasileiro Série A", temporada: game.season,
     rodada: game.roundNumber, rodada_original: game.roundRaw, inicio_previsto: game.kickoffAt,
     status_original: game.status.rawCode || "desconhecido", status_normalizado: game.status.normalized,
@@ -86,7 +98,7 @@ export async function collectApiFootballShadowMatch({
   const observedAt = now().toISOString();
   const totalStartedAt = Date.now();
   const { data: officialGame, error: officialError } = await supabase.from("jogos")
-    .select("id_jogo,rodada,time_casa,time_fora,inicio,status,minuto,acrescimos,gols_casa,gols_fora,time_casa_id,time_fora_id,atualizado_em,sincronizado_em")
+    .select("id_jogo,rodada,time_casa,time_fora,inicio,status,minuto,acrescimos,gols_casa,gols_fora,time_casa_id,time_fora_id,time_casa_logo,time_fora_logo,local_partida,atualizado_em,sincronizado_em")
     .eq("id_jogo", gameId).maybeSingle();
   if (officialError) throw new Error(`official_snapshot_read_failed:${officialError.message}`);
   if (!officialGame) throw new Error("canonical_game_not_found");
