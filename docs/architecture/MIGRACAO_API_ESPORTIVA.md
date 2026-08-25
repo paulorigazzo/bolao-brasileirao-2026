@@ -605,6 +605,25 @@ Depois dos mapeamentos aprovados, a Fase 5B.3 deve observar uma rodada completa
 com jogos e classificação conforme o orçamento e as regras operacionais
 aprovados.
 
+### Núcleo inativo da Fase 5B.3A
+
+O núcleo técnico da observação de rodada foi implementado sem Function pública,
+cron, deploy, chamada real ao fornecedor ou escrita no Supabase remoto. O módulo
+prepara uma consulta de fixtures por data e ciclo, reconcilia exclusivamente IDs
+auxiliares já aprovados, normaliza jogos e classificação e limita a persistência
+às três tabelas de transição.
+
+As políticas executáveis cobrem a janela de quinze minutos antes do primeiro
+jogo até trinta minutos após o último horário, a extensão de cinco em cinco
+minutos por até noventa minutos, as reservas de 20% da cota diária e 10% da cota
+por minuto e a interrupção diante de identidade divergente, estado desconhecido,
+resposta inválida ou persistência malsucedida. O fuso da data esportiva é
+explicitamente `America/Sao_Paulo`.
+
+Este núcleo não ativa a Fase 5B.3B. A seleção da rodada, a Function agendada, a
+configuração do cron, o deploy e o início das chamadas continuam bloqueados até
+preflight e autorização operacional próprios.
+
 Uma segunda rodada será exigida somente se a primeira tiver cobertura
 incompleta, divergência material sem explicação ou deixar sem observação algum
 marco relevante de primeiro tempo, intervalo, segundo tempo, acréscimos ou
@@ -683,6 +702,7 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | 2026-08-25 | 1.0 | Plano Pro confirmado; Fases 5A e 5B separadas; acesso, cobertura e orçamento da 5A validados |
 | 2026-08-25 | 1.1 | Reconciliação seca da 5B.1 concluída; 255 jogos aceitos e 125 horários mantidos bloqueados |
 | 2026-08-25 | 1.2 | Ponto de retomada da 5B.2 documentado com escopo mínimo, recomendação e portões de segurança |
+| 2026-08-25 | 1.3 | Núcleo inativo da 5B.3A implementado; ativação da rodada permanece bloqueada |
 
 ## Referências internas
 

@@ -15,7 +15,7 @@ function positiveInteger(value, name) {
   return number;
 }
 
-function sha256(value) {
+export function sha256(value) {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
 }
 
@@ -23,7 +23,7 @@ function absent(values) {
   return Object.entries(values).filter(([, value]) => value == null || value === "").map(([key]) => key);
 }
 
-function officialSnapshot(game, executionId, observedAt) {
+export function officialSnapshot(game, executionId, observedAt) {
   const status = officialStatuses.get(String(game.status || "").toLowerCase()) || "unknown";
   const missing = absent({ home: game.time_casa, away: game.time_fora, kickoff: game.inicio });
   const relevant = {
@@ -47,7 +47,7 @@ function officialSnapshot(game, executionId, observedAt) {
   };
 }
 
-function shadowSnapshot(game, executionId, canonicalGameId, observedAt) {
+export function shadowSnapshot(game, executionId, canonicalGameId, observedAt) {
   const missing = absent({ fixture: game.providerFixtureId, home: game.home.name, away: game.away.name, kickoff: game.kickoffAt });
   const relevant = {
     id: game.providerFixtureId, home: game.home.providerTeamId, away: game.away.providerTeamId,

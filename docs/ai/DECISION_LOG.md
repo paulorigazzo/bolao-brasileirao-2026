@@ -774,3 +774,35 @@ Supabase e registrada como `20260825050228`. A verificação posterior confirmou
 parciais, hash idêntico ao aprovado e igualdade entre os hashes competitivos
 anterior e posterior. A aplicação não autorizou coleta, corte, deploy ou
 publicação Git.
+
+## DEC-2026-023 — Núcleo de rodada inativo antes da ativação operacional
+
+- Data: 2026-08-25
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: alto
+
+### Contexto
+
+A Fase 5B.2 deixou uma base integralmente mapeada para observar uma rodada, mas
+adicionar imediatamente um cron ao deploy poderia iniciar chamadas e escritas de
+transição sem que a rodada e sua janela fossem confirmadas em preflight.
+
+### Decisão
+
+- separar a Fase 5B.3 em núcleo técnico 5B.3A e ativação operacional 5B.3B;
+- implementar e testar na 5B.3A janela, cadência, orçamento, normalização em
+  lote, reconciliação exata, classificação e persistência isolada;
+- usar `America/Sao_Paulo` como fuso explícito da consulta por data;
+- não criar Function pública, cron ou configuração capaz de iniciar a coleta;
+- manter qualquer seleção de rodada, deploy e chamada real sujeitos a preflight
+  e autorização próprios.
+
+### Consequências
+
+- o código pode ser revisado sem consumo de cota ou mutação remota;
+- as tabelas competitivas e o cache oficial permanecem somente leitura;
+- a 5B.3B deverá escolher uma rodada futura integralmente mapeada e acrescentar
+  o acionamento protegido sem alterar o núcleo aprovado;
+- a fonte oficial continua sendo exclusivamente a football-data.org.

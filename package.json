@@ -12,6 +12,7 @@
     "test:api-football-mapping-migration": "node scripts/test-api-football-mapping-migration.mjs",
     "test:api-football-foundation": "node scripts/test-api-football-foundation.mjs",
     "test:api-football-shadow": "node scripts/test-api-football-shadow.mjs",
+    "test:api-football-round-shadow": "node scripts/test-api-football-round-shadow.mjs",
     "test:api-football-shadow-admin": "node scripts/test-api-football-shadow-admin.mjs",
     "test:sports-data-health": "node scripts/test-sports-data-health.mjs",
     "test:snapshot-exporter": "node scripts/test-snapshot-exporter.mjs",
