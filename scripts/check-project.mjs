@@ -10,6 +10,7 @@ const required = [
   "scripts/test-round-highlights-engine.mjs", "scripts/test-participant-duel-engine.mjs", "scripts/test-friendly-rankings-engine.mjs", "scripts/test-admin-round-share.mjs", "scripts/test-match-calendar-engine.mjs", "scripts/test-games-calendar-entry.mjs",
   "src/sports-data/contract.mjs", "src/sports-data/api-football-adapter.mjs",
   "scripts/test-api-football-adapter.mjs", "fixtures/api-football/fixture-1492340.sanitized.json", "fixtures/api-football/standings-brasileirao.synthetic.json",
+  "scripts/test-api-football-foundation.mjs", "supabase/migrations/20260825021432_fundacao_sombra_api_football.sql",
   "netlify.toml", "netlify/functions/classificacao-brasileirao.mjs",
   "netlify/functions/sincronizar-jogos.mjs", "netlify/functions/sincronizar-jogos-agendado.mjs",
   "netlify/functions/diagnostico-sistema.mjs",
