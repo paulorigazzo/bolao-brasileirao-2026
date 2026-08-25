@@ -909,3 +909,39 @@ foi preenchido e nenhuma coleta foi iniciada.
 Esta foi a segunda ocorrência em que o conector gerou uma versão remota distinta
 do timestamp do arquivo já publicado. O workflow foi reforçado para impedir
 novo encerramento com histórico divergente.
+
+## DEC-2026-026 — Agenda canônica distingue horário confirmado de data provisória
+
+- Data: 2026-08-25
+- Status: aceita; implementação local em revisão
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: alto
+
+### Contexto
+
+A consulta autenticada à football-data.org confirmou que os 125 horários
+divergentes da reconciliação eram idênticos aos armazenados no Supabase. A
+comparação com API-Football, CBF e ge separou um erro histórico de horário,
+quatro adiamentos sem nova data e 120 datas-base futuras sem detalhamento
+oficial. Portanto, a ingestão não apresentou conversão incorreta de fuso; o
+modelo tratava instantes provisórios como se fossem horários confirmados.
+
+### Decisão
+
+- preservar `id_jogo`, resultados, palpites, pontuação e demais dados competitivos;
+- corrigir somente o início de Remo x Palmeiras (`554887`) para 10/05 às 16h de Brasília;
+- classificar os quatro jogos adiados da rodada 21 como `adiado_sem_data`;
+- classificar os 120 jogos das rodadas 27 a 38 como `provisorio`;
+- manter uma trilha append-only e sem payload bruto das evidências de agenda;
+- impedir que a football-data.org sobrescreva um horário confirmado pela CBF;
+- manter os 125 mapeamentos da API-Football fora desta gravação, sujeitos a
+  reconciliação e aprovação próprias.
+
+### Consequências
+
+- `inicio` continua existindo para compatibilidade, mas passa a ter qualificação semântica;
+- a migration valida o hash competitivo registrado na Fase 5B.2, usa bloqueio
+  transacional, pós-condições e rollback condicionado;
+- uma nova data de provedor para jogo adiado volta como provisória até confirmação;
+- aplicação remota, deploy e preenchimento dos 125 IDs continuam não autorizados.

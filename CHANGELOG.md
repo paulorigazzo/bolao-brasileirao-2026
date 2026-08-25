@@ -1,3 +1,9 @@
+# v6.23.2 — Agendamentos divergentes
+
+- Distingue horários confirmados, datas provisórias e adiamentos sem nova data.
+- Prepara correção atômica e auditável do horário de Remo x Palmeiras sem alterar resultados ou IDs.
+- Impede que a sincronização sobrescreva um horário confirmado pela CBF.
+
 # v6.23.1 — Frases individuais nas disputas paralelas
 
 - Acrescenta uma frase de efeito própria a cada participante nos dois rankings recreativos.

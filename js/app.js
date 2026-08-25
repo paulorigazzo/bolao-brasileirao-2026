@@ -18,7 +18,7 @@ import { liveMatchMinute } from "./live-match-minute.js";
 import { isScheduledLiveEstimate, scheduledLiveLabel } from "./scheduled-live-estimate.js";
 import { buildFriendlyRankingsModel } from "./friendly-rankings-engine.js";
 
-const APP_VERSION = "6.23.1";
+const APP_VERSION = "6.23.2";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
