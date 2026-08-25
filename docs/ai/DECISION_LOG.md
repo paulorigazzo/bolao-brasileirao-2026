@@ -688,3 +688,40 @@ comportava uma observação recorrente sem chamadas por jogo.
   preenchimento de IDs auxiliares, escrita competitiva ou troca de fornecedor;
 - uma segunda rodada deixa de ser automática, mas continua obrigatória quando a
   primeira não produzir evidência suficiente para o portão de corte.
+
+## DEC-2026-021 — Reconciliação determinística com tolerância de trinta minutos
+
+- Data: 2026-08-25
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: tolerância pendente em DEC-2026-016
+- Impacto: alto na futura gravação; somente leitura nesta execução
+
+### Contexto
+
+A Fase 5B exige relacionar os IDs da API-Football aos 380 jogos canônicos sem
+transformar o fornecedor em identidade interna. Diferenças nominais conhecidas
+e agendas futuras provisórias não podem provocar aproximação vaga, remapeamento
+silencioso ou escrita parcial não revisada.
+
+### Decisão
+
+- exigir temporada, rodada, mandante e visitante na direção correta;
+- normalizar acentos e usar somente aliases de clubes explícitos e testados;
+- aceitar horário com diferença máxima de trinta minutos;
+- exigir exatamente um candidato e bloquear duplicidade, ambiguidade, inversão,
+  conflito existente ou horário fora da tolerância;
+- executar primeiro uma reconciliação seca, sem `INSERT`, `UPDATE`, `UPSERT`,
+  RPC, DDL ou persistência do payload bruto;
+- vincular a evidência aceita a um hash determinístico dos mapeamentos.
+
+### Consequências
+
+- a execução real normalizou 380 fixtures e aceitou 255 correspondências, todas
+  com horário idêntico ao canônico;
+- 125 jogos permaneceram bloqueados somente por divergência de agenda, sem
+  alterar seus campos auxiliares;
+- a rodada 24 ficou integralmente reconciliada e apta ao próximo portão;
+- gravar os 255 mapeamentos ou aguardar convergência dos 125 exige decisão e
+  tarefa de dados próprias;
+- nenhuma escrita ocorreu em jogos, tabelas de transição ou estado competitivo.

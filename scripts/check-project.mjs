@@ -8,8 +8,8 @@ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "
 const required = [
   "index.html", "css/design-system.css", "css/components.css", "css/styles.css", "js/app.js", "js/config.js", "js/motion.js", "js/statistics-engine.js", "js/round-highlights-engine.js", "js/participant-duel-engine.js", "js/friendly-rankings-engine.js", "js/admin-round-share.js", "js/match-calendar-engine.js",
   "scripts/test-round-highlights-engine.mjs", "scripts/test-participant-duel-engine.mjs", "scripts/test-friendly-rankings-engine.mjs", "scripts/test-admin-round-share.mjs", "scripts/test-match-calendar-engine.mjs", "scripts/test-games-calendar-entry.mjs",
-  "src/sports-data/contract.mjs", "src/sports-data/api-football-adapter.mjs",
-  "scripts/test-api-football-adapter.mjs", "fixtures/api-football/fixture-1492340.sanitized.json", "fixtures/api-football/standings-brasileirao.synthetic.json",
+  "src/sports-data/contract.mjs", "src/sports-data/api-football-adapter.mjs", "src/sports-data/api-football-reconciliation.mjs",
+  "scripts/test-api-football-adapter.mjs", "scripts/test-api-football-reconciliation.mjs", "scripts/reconcile-api-football-season.mjs", "fixtures/api-football/fixture-1492340.sanitized.json", "fixtures/api-football/standings-brasileirao.synthetic.json",
   "scripts/test-api-football-foundation.mjs", "supabase/migrations/20260825021432_fundacao_sombra_api_football.sql",
   "netlify/functions/_api-football-shadow.mjs", "netlify/functions/coletar-sombra-api-football.mjs", "scripts/test-api-football-shadow.mjs", "scripts/test-api-football-shadow-admin.mjs",
   "netlify.toml", "netlify/functions/classificacao-brasileirao.mjs",
