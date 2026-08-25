@@ -421,6 +421,19 @@ estado competitivo e sem alterar a fonte oficial. Function, configuração,
 frequência, orçamento de chamadas e mecanismo de reconciliação exigem plano e
 aprovação próprios.
 
+### Primeiro recorte implementado
+
+O coletor manual de uma partida foi implementado em
+`netlify/functions/coletar-sombra-api-football.mjs`. Cada acionamento
+administrativo faz no máximo uma chamada à API-Football, normaliza a resposta
+pelo contrato v1 e grava somente uma execução e as fotografias comparativas em
+`transicao_api_execucoes` e `transicao_api_jogos`.
+
+Este recorte não agenda chamadas, não coleta classificação, não preenche os
+campos auxiliares de `public.jogos` e não altera a fonte oficial. A Fase 4 só
+será considerada concluída depois da configuração protegida da credencial, do
+deploy aprovado e de uma prova real com evidências revisadas.
+
 ## Estratégia de rollback
 
 Antes do corte, devem existir:
@@ -489,6 +502,7 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | 2026-08-25 | 0.4 | Adaptador puro validado e fundação no banco definida como próximo portão |
 | 2026-08-25 | 0.5 | Fundação modelada em migração local, ainda não aplicada no Supabase |
 | 2026-08-25 | 0.6 | Fundação aplicada e validada; coleta em sombra definida como próximo portão |
+| 2026-08-25 | 0.7 | Coletor manual unitário implementado; prova real permanece como portão da Fase 4 |
 
 ## Referências internas
 

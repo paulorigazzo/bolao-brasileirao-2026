@@ -611,3 +611,36 @@ RPC privilegiada ou mudança arquitetural adicional antes da coleta em sombra.
 - qualquer ampliação de privilégios exige nova revisão de segurança;
 - a aplicação da migração foi autorizada e concluída em 2026-08-25;
 - a fundação aplicada não autoriza o início da coleta em sombra.
+
+## DEC-2026-019 — Primeiro recorte de sombra manual e unitário
+
+- Data: 2026-08-25
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: alto
+
+### Contexto
+
+A fundação no banco está aplicada, mas iniciar uma rodada automatizada antes de
+validar credencial, Function, normalização e persistência aumentaria o risco
+operacional. O primeiro ensaio precisa produzir evidência real com consumo de
+cota previsível e sem qualquer autoridade competitiva.
+
+### Decisão
+
+- implementar uma Function acionada somente por administrador;
+- receber um jogo interno e uma fixture da API-Football por execução;
+- limitar o recorte a uma chamada externa e duas fotografias normalizadas;
+- usar `public.jogos` apenas como referência de leitura da fonte oficial;
+- gravar somente nas tabelas de transição, sem payload bruto;
+- manter agenda automática, classificação e mapeamentos auxiliares fora deste
+  primeiro recorte.
+
+### Consequências
+
+- a chave da API-Football será necessária apenas no ambiente protegido da
+  Function e sua configuração continua sujeita a portão operacional;
+- a Fase 4 permanece aberta até uma prova real publicada e revisada;
+- a coleta de uma ou duas rodadas só poderá ser planejada depois desse ensaio;
+- nenhuma tela, palpite, pontuação, relógio ou fonte oficial é alterada.
