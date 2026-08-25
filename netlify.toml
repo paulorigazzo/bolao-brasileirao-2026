@@ -6,3 +6,8 @@
 # (4h anteriores até 90 min futuros) ou na manutenção periódica de 6 horas.
 [functions."sincronizar-jogos-agendado"]
   schedule = "* * * * *"
+
+# A Function 5B.3B permanece inerte enquanto API_FOOTBALL_SHADOW_ENABLED não
+# for exatamente "true" e a campanha, rodada e datas não forem válidas.
+[functions."coletar-sombra-rodada-api-football-agendado"]
+  schedule = "* * * * *"

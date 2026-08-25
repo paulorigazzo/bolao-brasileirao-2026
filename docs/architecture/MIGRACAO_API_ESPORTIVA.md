@@ -624,6 +624,26 @@ Este núcleo não ativa a Fase 5B.3B. A seleção da rodada, a Function agendada
 configuração do cron, o deploy e o início das chamadas continuam bloqueados até
 preflight e autorização operacional próprios.
 
+### Ativação preparada da Fase 5B.3B.1
+
+O preflight somente leitura de 2026-08-25 selecionou a rodada 25: dez jogos
+futuros, dez mapeamentos completos e três datas esportivas, de 29 a 31 de
+agosto. A implementação prepara uma Function agendada a cada minuto, mas exige
+simultaneamente ativação explícita, campanha, rodada e datas válidas; na ausência
+de qualquer requisito, encerra sem chamada ao fornecedor e sem escrita.
+
+O acionador aplica a janela e a cadência aprovadas, impede repetição pelo minuto
+da campanha, observa no máximo duas tentativas adicionais, interrompe após três
+falhas consecutivas e coleta classificação somente nos marcos de início e fim de
+cada data. Identidade, competição, temporada, rodada e diferença de agenda de no
+máximo trinta minutos são revalidadas em cada ciclo. O cache oficial da
+classificação precisa conter vinte clubes e ter no máximo uma hora.
+
+Uma migração aditiva acrescenta apenas a chave opcional de idempotência a
+`transicao_api_execucoes`, com índice único parcial e sem ampliar permissões. A
+Function, a migração, o cron e as variáveis permanecem locais e não autorizam
+aplicação no Supabase, deploy ou início da 5B.3B.2.
+
 Uma segunda rodada será exigida somente se a primeira tiver cobertura
 incompleta, divergência material sem explicação ou deixar sem observação algum
 marco relevante de primeiro tempo, intervalo, segundo tempo, acréscimos ou
@@ -703,6 +723,7 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | 2026-08-25 | 1.1 | Reconciliação seca da 5B.1 concluída; 255 jogos aceitos e 125 horários mantidos bloqueados |
 | 2026-08-25 | 1.2 | Ponto de retomada da 5B.2 documentado com escopo mínimo, recomendação e portões de segurança |
 | 2026-08-25 | 1.3 | Núcleo inativo da 5B.3A implementado; ativação da rodada permanece bloqueada |
+| 2026-08-25 | 1.4 | Ativação fail-closed da 5B.3B.1 preparada para a rodada 25, ainda sem deploy ou coleta |
 
 ## Referências internas
 
