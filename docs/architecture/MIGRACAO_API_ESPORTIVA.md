@@ -434,6 +434,11 @@ campos auxiliares de `public.jogos` e não altera a fonte oficial. A Fase 4 só
 será considerada concluída depois da configuração protegida da credencial, do
 deploy aprovado e de uma prova real com evidências revisadas.
 
+O acionamento do ensaio fica disponível somente no Diagnóstico do Sistema para
+administradores. O controle exige confirmação, encaminha a sessão vigente à
+Function e apresenta apenas o resumo sanitizado; não expõe chave, token ou
+payload do fornecedor.
+
 ## Estratégia de rollback
 
 Antes do corte, devem existir:
@@ -503,6 +508,7 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | 2026-08-25 | 0.5 | Fundação modelada em migração local, ainda não aplicada no Supabase |
 | 2026-08-25 | 0.6 | Fundação aplicada e validada; coleta em sombra definida como próximo portão |
 | 2026-08-25 | 0.7 | Coletor manual unitário implementado; prova real permanece como portão da Fase 4 |
+| 2026-08-25 | 0.8 | Acionador administrativo definido para viabilizar a primeira prova real autenticada |
 
 ## Referências internas
 
