@@ -856,7 +856,7 @@ nem iniciou coleta.
 ## DEC-2026-025 — Metadados opcionais na fotografia de jogos em sombra
 
 - Data: 2026-08-25
-- Status: aceita; implementação local em revisão
+- Status: aceita e aplicada
 - Responsáveis: manutenção do projeto
 - Substitui: não se aplica
 - Impacto: alto
@@ -892,3 +892,20 @@ tenham autoridade competitiva.
 - RLS e privilégios existentes não são ampliados;
 - aplicação remota, publicação, simulação e ativação continuam sujeitas a
   autorizações independentes.
+
+### Evidência de aplicação
+
+Em 2026-08-25, a migração foi aplicada pelo conector oficial do Supabase e
+registrada remotamente como `20260825151356`. A validação confirmou seis colunas
+anuláveis e comentadas, RLS ativa, nenhum privilégio para `PUBLIC`, `anon` ou
+`authenticated` e somente `SELECT`, `INSERT` e `UPDATE` para `service_role`.
+
+O hash integral de `public.jogos` permaneceu
+`f781125f96ae8c79bc5adf6e4621d88b`; os 380 jogos, 255 mapeamentos completos,
+125 jogos integralmente nulos e as contagens de três execuções, quatro
+fotografias e nenhuma classificação foram preservados. Nenhum dos novos campos
+foi preenchido e nenhuma coleta foi iniciada.
+
+Esta foi a segunda ocorrência em que o conector gerou uma versão remota distinta
+do timestamp do arquivo já publicado. O workflow foi reforçado para impedir
+novo encerramento com histórico divergente.

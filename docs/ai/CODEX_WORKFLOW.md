@@ -247,6 +247,29 @@ Somente executar cada ação quando houver autorização explícita:
 
 Arquivos temporários não devem entrar no commit.
 
+### Migrações remotas do Supabase
+
+Antes de publicar uma entrega com migração, definir e registrar no plano qual
+mecanismo aplicará o arquivo versionado:
+
+1. preferir a CLI autenticada com `db push`, porque ela aplica o timestamp já
+   versionado no repositório;
+2. quando a CLI não estiver autenticada e o conector oficial for necessário,
+   aplicar a migração antes do PR final ou do merge, consultar imediatamente a
+   versão gerada remotamente e reconciliar nome do arquivo, testes e documentos
+   dentro da mesma entrega;
+3. nunca presumir que o conector preservará o timestamp do arquivo local;
+4. depois da aplicação, comparar explicitamente versão e nome em
+   `supabase_migrations.schema_migrations` com `supabase/migrations/`;
+5. se uma divergência for descoberta depois do merge, interromper o
+   Encerramento e abrir um corretivo mínimo antes de remover branches;
+6. não reparar a divergência alterando diretamente a tabela de histórico de
+   migrações.
+
+O contrato de saída da aplicação remota deve informar a versão registrada e a
+igualdade entre histórico remoto e arquivo local. O Encerramento só pode
+prosseguir quando essa igualdade estiver comprovada.
+
 ## Fase 8 — Merge
 
 - Nunca fazer merge automaticamente.
