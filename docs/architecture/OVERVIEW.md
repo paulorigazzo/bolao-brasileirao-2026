@@ -32,6 +32,9 @@ Resultados encerrados, palpites relacionados e checkpoints de Ranking possuem um
   sombra, critérios de avanço, preservação de identidades e rollback;
 - o plano é referência arquitetural e não autoriza alterações de banco, código,
   configuração, contratação, deploy ou troca de fornecedor.
+- o contrato independente de fornecedor para jogos, classificação e proteção
+  contra regressões está em
+  [`CONTRATO_FONTE_ESPORTIVA.md`](CONTRATO_FONTE_ESPORTIVA.md).
 
 ## Regras protegidas
 
