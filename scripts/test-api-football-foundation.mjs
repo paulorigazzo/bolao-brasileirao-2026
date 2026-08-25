@@ -8,7 +8,7 @@ const migrationUrl = new URL(
 const sql = await readFile(migrationUrl, "utf8");
 const normalized = sql.toLowerCase().replace(/\s+/g, " ");
 const metadataMigration = await readFile(new URL(
-  "../supabase/migrations/20260825141629_add_shadow_match_metadata_5b3b2a.sql",
+  "../supabase/migrations/20260825151356_add_shadow_match_metadata_5b3b2a.sql",
   import.meta.url,
 ), "utf8");
 const normalizedMetadata = metadataMigration.toLowerCase().replace(/\s+/g, " ");

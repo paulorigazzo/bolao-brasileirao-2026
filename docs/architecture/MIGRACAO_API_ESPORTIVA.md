@@ -655,18 +655,23 @@ mesma resposta de fixtures. Esses valores são opcionais, não geram chamadas
 adicionais, não participam da autoridade competitiva e nunca são promovidos
 automaticamente para `public.jogos`.
 
-A migração aditiva preparada acrescenta seis colunas anuláveis somente a
+A migração aditiva acrescenta seis colunas anuláveis somente a
 `transicao_api_jogos`. A fotografia da fonte oficial reutiliza exclusivamente
 local e escudos já disponíveis em `public.jogos`; cidade e códigos permanecem
 nulos quando não estão persistidos, sem inferência por aliases. Apelidos, nomes
 de exibição e siglas canônicas ficam reservados a um futuro catálogo de clubes,
 que não integra esta fase.
 
-A aplicação remota da migração, publicação da Function, simulação operacional
-e ativação da campanha continuam submetidas a portões independentes. O rollback
-por remoção das colunas é seguro antes da primeira evidência real; depois dela,
-a campanha deve ser desativada e a auditoria preservada antes de qualquer
-remoção.
+A aplicação remota foi autorizada e registrada como `20260825151356`. A
+validação confirmou as seis colunas anuláveis e comentadas, RLS preservada,
+ausência de privilégios públicos, privilégios mínimos do `service_role`, hash
+competitivo inalterado, 255 mapeamentos completos, 125 integralmente nulos e as
+contagens anteriores das tabelas sombra. Nenhuma coleta foi iniciada.
+
+A simulação operacional e a ativação da campanha continuam submetidas a portões
+independentes. O rollback por remoção das colunas é seguro antes da primeira
+evidência real; depois dela, a campanha deve ser desativada e a auditoria
+preservada antes de qualquer remoção.
 
 Uma segunda rodada será exigida somente se a primeira tiver cobertura
 incompleta, divergência material sem explicação ou deixar sem observação algum
@@ -749,6 +754,7 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | 2026-08-25 | 1.3 | Núcleo inativo da 5B.3A implementado; ativação da rodada permanece bloqueada |
 | 2026-08-25 | 1.4 | Ativação fail-closed da 5B.3B.1 preparada para a rodada 25, ainda sem deploy ou coleta |
 | 2026-08-25 | 1.5 | Metadados opcionais de local, escudos e códigos preparados na 5B.3B.2A, ainda sem aplicação remota |
+| 2026-08-25 | 1.6 | Migração de metadados aplicada e reconciliada com a versão remota `20260825151356` |
 
 ## Referências internas
 
