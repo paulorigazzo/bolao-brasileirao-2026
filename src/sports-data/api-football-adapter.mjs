@@ -164,6 +164,7 @@ function normalizeTeam(rawTeam, side, errors, warnings) {
     providerTeamId,
     name,
     shortName: null,
+    code: nonEmpty(rawTeam?.code),
     crestUrl: httpsUrl(rawTeam?.logo, warnings, `${side}_crest_invalid`),
   };
 }
@@ -305,6 +306,7 @@ function normalizeFixture(raw, options, metadata) {
     ...round,
     kickoffAt,
     venueName: nonEmpty(raw?.fixture?.venue?.name),
+    venueCity: nonEmpty(raw?.fixture?.venue?.city),
     timezoneRaw: nonEmpty(raw?.fixture?.timezone),
     home,
     away,

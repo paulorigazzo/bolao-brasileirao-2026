@@ -158,7 +158,7 @@ export async function collectApiFootballRoundCycle({
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date))) throw new Error("date_invalid");
   const observedAt = now().toISOString();
   const { data: games, error: gamesError } = await supabase.from("jogos")
-    .select("id_jogo,rodada,time_casa,time_fora,inicio,status,minuto,acrescimos,gols_casa,gols_fora,time_casa_id,time_fora_id,atualizado_em,sincronizado_em,api_football_id,api_football_time_casa_id,api_football_time_fora_id")
+    .select("id_jogo,rodada,time_casa,time_fora,inicio,status,minuto,acrescimos,gols_casa,gols_fora,time_casa_id,time_fora_id,time_casa_logo,time_fora_logo,local_partida,atualizado_em,sincronizado_em,api_football_id,api_football_time_casa_id,api_football_time_fora_id")
     .eq("rodada", round);
   if (gamesError) throw new Error(`round_games_read_failed:${gamesError.message}`);
   const dateGames = (games || []).filter((game) => dateInSaoPaulo(game.inicio) === date);

@@ -120,6 +120,7 @@ não pode apagar nem substituir um valor competitivo anterior.
 | `roundRaw` | string ou null | sim | texto original para diagnóstico |
 | `kickoffAt` | ISO 8601 com fuso | sim | convertido e validado |
 | `venueName` | string ou null | sim | ausência não invalida o jogo |
+| `venueCity` | string ou null | sim | ausência não invalida o jogo |
 | `timezoneRaw` | string ou null | sim | valor informado pela fonte |
 
 `roundNumber` pode ser extraído de `Regular Season - N` somente para a
@@ -135,11 +136,17 @@ Cada lado usa a mesma estrutura:
 | `providerTeamId` | integer positivo | sim | ID do fornecedor |
 | `name` | string não vazia | sim | nome observado |
 | `shortName` | string ou null | sim | não inventar abreviação |
+| `code` | string ou null | sim | código observado; nunca sigla canônica automática |
 | `crestUrl` | URL HTTPS ou null | sim | URL inválida vira null + warning |
 
 A posição de mandante e visitante faz parte da identidade observada. Troca de
 lado, ID ou nome após mapeamento exige divergência e revisão; não autoriza
 remapeamento automático.
+
+Local, cidade, escudos e códigos são metadados opcionais de auditoria. Sua
+ausência ou divergência não invalida identidade, agenda, estado, relógio ou
+placar. Apelidos, nomes de exibição e siglas canônicas pertencem ao Bolão e não
+devem ser promovidos automaticamente a partir de um fornecedor.
 
 ### Estado
 

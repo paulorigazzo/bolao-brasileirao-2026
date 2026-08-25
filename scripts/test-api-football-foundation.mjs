@@ -7,6 +7,11 @@ const migrationUrl = new URL(
 );
 const sql = await readFile(migrationUrl, "utf8");
 const normalized = sql.toLowerCase().replace(/\s+/g, " ");
+const metadataMigration = await readFile(new URL(
+  "../supabase/migrations/20260825141629_add_shadow_match_metadata_5b3b2a.sql",
+  import.meta.url,
+), "utf8");
+const normalizedMetadata = metadataMigration.toLowerCase().replace(/\s+/g, " ");
 
 const requiredGameColumns = [
   "api_football_id bigint",
@@ -68,6 +73,16 @@ for (const rollbackTarget of [
 ]) {
   assert.ok(normalized.includes(rollbackTarget), `rollback não documentado: ${rollbackTarget}`);
 }
+
+for (const column of [
+  "local_nome text", "local_cidade text", "time_casa_logo text", "time_fora_logo text",
+  "time_casa_codigo text", "time_fora_codigo text",
+]) {
+  assert.ok(normalizedMetadata.includes(`add column ${column}`), `metadado sombra ausente: ${column}`);
+}
+assert.ok(normalizedMetadata.includes("pg_advisory_xact_lock"));
+assert.doesNotMatch(normalizedMetadata, /\b(?:insert\s+into|update|delete\s+from|create\s+policy|grant|revoke)\b/);
+assert.doesNotMatch(normalizedMetadata, /alter\s+table\s+public\.jogos\b/);
 
 console.log(
   "Fundação de sombra verificada: 4 colunas, 3 tabelas, isolamento, constraints, índices e rollback.",

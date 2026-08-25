@@ -32,6 +32,11 @@ assert.deepEqual(
 );
 assert.deepEqual(normalized.game.clock, { elapsed: 90, extra: 6, period: "secondHalf", isOfficial: true, displayBase: 90 });
 assert.deepEqual([normalized.game.score.home, normalized.game.score.away], [2, 3]);
+assert.deepEqual(
+  [normalized.game.venueName, normalized.game.venueCity, normalized.game.home.crestUrl, normalized.game.away.crestUrl],
+  ["Nilton Santos", "Rio de Janeiro", "https://example.test/botafogo.png", "https://example.test/athletico.png"],
+);
+assert.deepEqual([normalized.game.home.code, normalized.game.away.code], [null, null]);
 assert.equal(normalized.game.events.length, 5);
 assert.deepEqual(
   [normalized.observation.dailyLimit, normalized.observation.dailyRemaining, normalized.observation.minuteLimit, normalized.observation.minuteRemaining],
@@ -90,6 +95,20 @@ noEvents.response[0].events = [];
 const noEventsResult = normalizeApiFootballFixtureEnvelope(noEvents, options);
 assert.equal(noEventsResult.observation.responseValid, true);
 assert.ok(noEventsResult.observation.warnings.includes("events_missing"));
+
+const optionalMetadata = clone(fixture);
+optionalMetadata.response[0].teams.home.code = "BOT";
+optionalMetadata.response[0].teams.away.code = "CAP";
+optionalMetadata.response[0].fixture.venue.city = "";
+optionalMetadata.response[0].teams.home.logo = "http://insecure.example.test/botafogo.png";
+const optionalMetadataResult = normalizeApiFootballFixtureEnvelope(optionalMetadata, options);
+assert.equal(optionalMetadataResult.observation.responseValid, true);
+assert.deepEqual(
+  [optionalMetadataResult.game.home.code, optionalMetadataResult.game.away.code, optionalMetadataResult.game.venueCity],
+  ["BOT", "CAP", null],
+);
+assert.equal(optionalMetadataResult.game.home.crestUrl, null);
+assert.ok(optionalMetadataResult.observation.warnings.includes("home_crest_invalid"));
 
 const previous = normalized.game;
 for (const [mutation, expected] of [
