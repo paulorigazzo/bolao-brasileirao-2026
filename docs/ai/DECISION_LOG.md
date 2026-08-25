@@ -806,3 +806,37 @@ transição sem que a rodada e sua janela fossem confirmadas em preflight.
 - a 5B.3B deverá escolher uma rodada futura integralmente mapeada e acrescentar
   o acionamento protegido sem alterar o núcleo aprovado;
 - a fonte oficial continua sendo exclusivamente a football-data.org.
+
+## DEC-2026-024 — Ativação fail-closed da sombra da rodada 25
+
+- Data: 2026-08-25
+- Status: aceita para implementação local
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: alto
+
+### Contexto
+
+O preflight somente leitura identificou a rodada 25, entre 29 e 31 de agosto,
+como a próxima rodada futura com dez jogos e dez mapeamentos completos. Publicar
+um cron sem bloqueio operacional poderia iniciar consumo e persistência no mesmo
+deploy do código.
+
+### Decisão
+
+- preparar o cron de um minuto com bloqueio por ativação, campanha, rodada e
+  lista explícita de datas;
+- manter a configuração ausente ou diferente de `true` como estado inerte;
+- criar chave opcional e única de idempotência por campanha, data e minuto;
+- revalidar identidade, competição, temporada, rodada e agenda antes de gravar;
+- exigir classificação oficial de vinte clubes atualizada há no máximo uma hora;
+- manter aplicação da migração, deploy, variáveis e início da coleta sujeitos a
+  autorizações próprias.
+
+### Consequências
+
+- Deploy Preview não inicia coleta automaticamente;
+- ciclos duplicados são bloqueados antes de chamar a API-Football;
+- nenhuma permissão é concedida a `anon` ou `authenticated`;
+- os 125 mapeamentos bloqueados e todo o estado competitivo permanecem intactos;
+- a 5B.3B.2 só começa depois de preflight final e ativação humana explícita.

@@ -8,6 +8,8 @@ import { CLASSIFICATION_SNAPSHOT_ID } from "./_constants.mjs";
 const API_FOOTBALL_BASE = "https://v3.football.api-sports.io";
 const DAILY_RESERVE_RATIO = 0.2;
 const MINUTE_RESERVE_RATIO = 0.1;
+const MAX_SCHEDULE_DIFFERENCE_MS = 30 * 60_000;
+const OFFICIAL_STANDINGS_MAX_AGE_MS = 60 * 60_000;
 const TERMINAL = new Set(["encerrado", "adiado", "cancelado", "finished", "postponed", "cancelled"]);
 
 function integer(value) {
@@ -81,7 +83,15 @@ export function reconcileRoundFixtures(canonicalGames, providerGames) {
       throw new Error("mapped_identity_conflict");
     }
     if (!provider.status.isKnown) throw new Error("provider_status_unknown");
-    return { canonical, provider };
+    if (Number(provider.competitionProviderId) !== 71 || Number(provider.season) !== 2026
+      || Number(provider.roundNumber) !== Number(canonical.rodada)) {
+      throw new Error("mapped_competition_conflict");
+    }
+    const scheduleDifferenceMs = Math.abs(new Date(provider.kickoffAt).getTime() - new Date(canonical.inicio).getTime());
+    if (!Number.isFinite(scheduleDifferenceMs) || scheduleDifferenceMs > MAX_SCHEDULE_DIFFERENCE_MS) {
+      throw new Error("mapped_schedule_conflict");
+    }
+    return { canonical, provider, scheduleDifferenceMinutes: scheduleDifferenceMs / 60_000 };
   });
   if (pairs.length !== providerGames.length) throw new Error("provider_fixture_set_unexpected");
   return pairs;
@@ -94,12 +104,14 @@ function officialStandingsSnapshot(cache, executionId, observedAt, round) {
     won: row.won, draw: row.draw, lost: row.lost, points: row.points,
     goalsFor: row.goalsFor, goalsAgainst: row.goalsAgainst, goalDifference: row.goalDifference,
   })) };
-  const valid = table.length === 20 && new Set(table.map((row) => row.position)).size === 20;
+  const ageMs = new Date(observedAt).getTime() - new Date(cache?.atualizado_em).getTime();
+  const valid = table.length === 20 && new Set(table.map((row) => row.position)).size === 20
+    && Number.isFinite(ageMs) && ageMs >= 0 && ageMs <= OFFICIAL_STANDINGS_MAX_AGE_MS;
   return {
     execucao_id: executionId, fornecedor: "football-data.org", competicao_nome: "Campeonato Brasileiro Série A",
     temporada: 2026, rodada: round, observado_em: observedAt, quantidade_times: table.length,
     conteudo_normalizado: normalized, hash_relevante: sha256(normalized), valido: valid,
-    erro_normalizacao: valid ? null : "official_standings_invalid",
+    erro_normalizacao: valid ? null : "official_standings_invalid_or_stale",
   };
 }
 
@@ -127,6 +139,7 @@ async function requestJson(fetchImpl, url, apiKey, attempts = 3) {
       await new Promise((resolve) => setTimeout(resolve, attempt * 100));
     }
   }
+  lastError.attempts = attempts;
   throw lastError;
 }
 
@@ -137,6 +150,7 @@ async function updateExecution(supabase, id, values) {
 
 export async function collectApiFootballRoundCycle({
   supabase, fetchImpl = fetch, apiKey, round, date, includeStandings = false,
+  classificationMarker = null, idempotencyKey = null, campaign = null,
   trigger = "5b3a:test", now = () => new Date(), leagueId = 71, season = 2026,
 }) {
   if (!apiKey) throw new Error("api_football_key_missing");
@@ -150,10 +164,16 @@ export async function collectApiFootballRoundCycle({
   const dateGames = (games || []).filter((game) => dateInSaoPaulo(game.inicio) === date);
   if (!dateGames.length) throw new Error("round_date_games_empty");
 
-  const details = { modo: "rodada", gatilho: trigger, rodada: round, data: date, classificacao: includeStandings };
+  if (idempotencyKey != null && !/^[a-z0-9:_-]{10,160}$/i.test(idempotencyKey)) throw new Error("idempotency_key_invalid");
+  const details = {
+    modo: "rodada", gatilho: trigger, campanha: campaign, rodada: round, data: date,
+    classificacao: includeStandings, classificacao_marco: classificationMarker,
+  };
   const { data: execution, error: executionError } = await supabase.from("transicao_api_execucoes").insert({
-    fase: "sombra_pre_corte", fonte_oficial: "football-data.org", fonte_sombra: "api-football", detalhes: details,
+    fase: "sombra_pre_corte", fonte_oficial: "football-data.org", fonte_sombra: "api-football",
+    chave_idempotencia: idempotencyKey, detalhes: details,
   }).select("id").single();
+  if (executionError?.code === "23505") throw new Error("round_execution_duplicate");
   if (executionError) throw new Error(`round_execution_insert_failed:${executionError.message}`);
 
   let calls = 0;
@@ -215,10 +235,14 @@ export async function collectApiFootballRoundCycle({
       jogos_oficial: pairs.length, jogos_sombra: pairs.length,
       classificacoes_oficial: classificationRows.length ? 1 : 0,
       classificacoes_sombra: classificationRows.length ? 1 : 0,
-      detalhes: { ...details, fixtures: pairs.length, tentativas: calls },
+      detalhes: {
+        ...details, fixtures: pairs.length, tentativas: calls,
+        maior_diferenca_agenda_minutos: Math.max(...pairs.map((pair) => pair.scheduleDifferenceMinutes)),
+      },
     });
     return { ok: true, executionId: execution.id, games: pairs.length, calls, standings: classificationRows.length === 2 };
   } catch (error) {
+    calls += Number(error?.attempts || 0);
     await updateExecution(supabase, execution.id, {
       concluida_em: now().toISOString(), sucesso_oficial: false, sucesso_sombra: false,
       chamadas_sombra: calls, erros_sombra: [errorCode(error)], detalhes: { ...details, interrompida: errorCode(error) },

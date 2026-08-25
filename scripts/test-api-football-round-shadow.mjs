@@ -31,6 +31,7 @@ const normalizedProvider = {
   providerFixtureId: canonical.api_football_id,
   home: { providerTeamId: canonical.api_football_time_casa_id },
   away: { providerTeamId: canonical.api_football_time_fora_id }, status: { isKnown: true },
+  competitionProviderId: 71, season: 2026, roundNumber: 24, kickoffAt: canonical.inicio,
 };
 assert.equal(reconcileRoundFixtures([canonical], [normalizedProvider]).length, 1);
 assert.throws(() => reconcileRoundFixtures([{ ...canonical, api_football_id: null }], [normalizedProvider]), /canonical_mapping_incomplete/);
@@ -47,7 +48,7 @@ function fakeSupabase() {
     writes,
     from(table) {
       if (table === "jogos") return { select: () => ({ eq: async () => ({ data: [canonical], error: null }) }) };
-      if (table === "classificacao_cache") return { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { payload: { table: cacheTable } }, error: null }) }) }) };
+      if (table === "classificacao_cache") return { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { payload: { table: cacheTable }, atualizado_em: "2026-08-25T01:30:00Z" }, error: null }) }) }) };
       return {
         insert(value) {
           writes.push({ table, value });
