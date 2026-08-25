@@ -1,5 +1,6 @@
 -- Idempotência aditiva para os ciclos agendados da sombra 5B.3B.
 -- Não ativa coleta, não altera tabelas competitivas e não amplia permissões.
+-- Versão registrada remotamente pelo Supabase: 20260825060519.
 
 alter table public.transicao_api_execucoes
   add column chave_idempotencia text,

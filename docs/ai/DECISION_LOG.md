@@ -810,7 +810,7 @@ transição sem que a rodada e sua janela fossem confirmadas em preflight.
 ## DEC-2026-024 — Ativação fail-closed da sombra da rodada 25
 
 - Data: 2026-08-25
-- Status: aceita para implementação local
+- Status: aceita e aplicada
 - Responsáveis: manutenção do projeto
 - Substitui: não se aplica
 - Impacto: alto
@@ -840,3 +840,15 @@ deploy do código.
 - nenhuma permissão é concedida a `anon` ou `authenticated`;
 - os 125 mapeamentos bloqueados e todo o estado competitivo permanecem intactos;
 - a 5B.3B.2 só começa depois de preflight final e ativação humana explícita.
+
+### Evidência de aplicação
+
+Em 2026-08-25, após autorização humana específica, a migração de idempotência
+foi aplicada no Supabase e registrada como `20260825060519`. A validação
+posterior confirmou coluna opcional, restrição de formato, índice único parcial
+válido, RLS preservada, ausência de privilégios públicos e manutenção dos
+privilégios mínimos do `service_role`. As três execuções anteriores permaneceram
+com chave nula; as contagens de sombra continuaram em três execuções, quatro
+fotografias de jogos e nenhuma classificação. Os 255 mapeamentos completos e os
+125 integralmente nulos foram preservados. A aplicação não configurou a Netlify
+nem iniciou coleta.

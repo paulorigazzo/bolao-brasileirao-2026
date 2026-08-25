@@ -11,7 +11,7 @@ const required = [
   "src/sports-data/contract.mjs", "src/sports-data/api-football-adapter.mjs", "src/sports-data/api-football-reconciliation.mjs", "src/sports-data/api-football-mapping-migration.mjs",
   "scripts/test-api-football-adapter.mjs", "scripts/test-api-football-reconciliation.mjs", "scripts/test-api-football-mapping-migration.mjs", "scripts/reconcile-api-football-season.mjs", "scripts/generate-api-football-mapping-migration.mjs", "fixtures/api-football/fixture-1492340.sanitized.json", "fixtures/api-football/standings-brasileirao.synthetic.json",
   "scripts/test-api-football-foundation.mjs", "supabase/migrations/20260825021432_fundacao_sombra_api_football.sql", "supabase/migrations/20260825050228_gravacao_mapeamentos_api_football_5b2.sql", "supabase/rollback/rollback_gravacao_mapeamentos_api_football_5b2.sql",
-  "supabase/migrations/20260825054458_add_idempotency_round_shadow_5b3b.sql", "supabase/rollback/rollback_add_idempotency_round_shadow_5b3b.sql",
+  "supabase/migrations/20260825060519_add_idempotency_round_shadow_5b3b.sql", "supabase/rollback/rollback_add_idempotency_round_shadow_5b3b.sql",
   "netlify/functions/_api-football-shadow.mjs", "netlify/functions/_api-football-round-shadow.mjs", "netlify/functions/coletar-sombra-api-football.mjs", "netlify/functions/coletar-sombra-rodada-api-football-agendado.mjs", "scripts/test-api-football-shadow.mjs", "scripts/test-api-football-round-shadow.mjs", "scripts/test-api-football-round-shadow-schedule.mjs", "scripts/test-api-football-round-shadow-idempotency.mjs", "scripts/test-api-football-shadow-admin.mjs",
   "netlify.toml", "netlify/functions/classificacao-brasileirao.mjs",
   "netlify/functions/sincronizar-jogos.mjs", "netlify/functions/sincronizar-jogos-agendado.mjs",

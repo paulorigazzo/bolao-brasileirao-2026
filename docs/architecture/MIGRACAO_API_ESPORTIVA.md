@@ -641,8 +641,11 @@ classificação precisa conter vinte clubes e ter no máximo uma hora.
 
 Uma migração aditiva acrescenta apenas a chave opcional de idempotência a
 `transicao_api_execucoes`, com índice único parcial e sem ampliar permissões. A
-Function, a migração, o cron e as variáveis permanecem locais e não autorizam
-aplicação no Supabase, deploy ou início da 5B.3B.2.
+aplicação foi autorizada e registrada no Supabase como `20260825060519`; as
+validações preservaram RLS, privilégios, contagens de sombra, 255 mapeamentos
+completos e 125 integralmente nulos. A Function e o cron foram integrados, mas
+as variáveis permanecem ausentes e a coleta continua desativada. Deploy
+operacional e início da 5B.3B.2 ainda exigem autorização própria.
 
 Uma segunda rodada será exigida somente se a primeira tiver cobertura
 incompleta, divergência material sem explicação ou deixar sem observação algum
