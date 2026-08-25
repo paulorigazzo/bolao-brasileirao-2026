@@ -725,3 +725,52 @@ silencioso ou escrita parcial não revisada.
 - gravar os 255 mapeamentos ou aguardar convergência dos 125 exige decisão e
   tarefa de dados próprias;
 - nenhuma escrita ocorreu em jogos, tabelas de transição ou estado competitivo.
+
+## DEC-2026-022 — Gravação parcial, atômica e auditável dos mapeamentos aceitos
+
+- Data: 2026-08-25
+- Status: aceita e aplicada
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: alto
+
+### Contexto
+
+A reconciliação seca da Fase 5B.1 aceitou 255 correspondências inequívocas com
+horário idêntico e bloqueou 125 jogos por divergência de agenda. A observação da
+rodada reconciliada depende dos identificadores auxiliares, mas aceitar os jogos
+bloqueados ou executar atualizações parciais sem precondições comprometeria a
+rastreabilidade da transição.
+
+### Decisão
+
+- materializar somente os 255 mapeamentos vinculados ao hash aprovado;
+- exigir os quatro campos auxiliares nulos nos 380 jogos antes da gravação;
+- executar validação, bloqueio, atualização, pós-condições e auditoria na mesma
+  transação;
+- preservar nulos os 125 casos bloqueados;
+- comparar o estado competitivo completo de `public.jogos`, excluídos somente
+  os quatro campos autorizados, antes e depois da atualização;
+- preparar rollback operacional separado, condicionado à auditoria original e
+  à ausência de divergência posterior;
+- manter a aplicação remota sujeita a autorização humana específica.
+
+### Consequências
+
+- `id_jogo`, horários, resultados, estados e demais dados competitivos não são
+  alterados pela migração preparada;
+- a auditoria usa `public.transicao_api_execucoes` com tipo explícito em
+  `detalhes`, sem criar nova tabela ou ampliar exposição;
+- qualquer campo auxiliar previamente preenchido, hash diferente, ID ausente,
+  duplicidade ou contagem divergente aborta a transação inteira;
+- os artefatos locais não autorizam `db push`, escrita remota, coleta de rodada,
+  corte, deploy ou publicação Git.
+
+### Evidência de aplicação
+
+Em 2026-08-25, após autorização humana específica, a migração foi aplicada no
+Supabase e registrada como `20260825050228`. A verificação posterior confirmou
+255 jogos completamente mapeados, 125 completamente nulos, zero linhas
+parciais, hash idêntico ao aprovado e igualdade entre os hashes competitivos
+anterior e posterior. A aplicação não autorizou coleta, corte, deploy ou
+publicação Git.

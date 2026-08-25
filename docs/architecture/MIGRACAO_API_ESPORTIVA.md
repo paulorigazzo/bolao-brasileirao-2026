@@ -3,8 +3,8 @@
 ## Estado do documento
 
 - **Natureza:** plano arquitetural e operacional interno.
-- **Estado:** migração em andamento; reconciliação seca da Fase 5B concluída;
-  gravação de mapeamentos e corte ainda não autorizados.
+- **Estado:** migração em andamento; gravação controlada da Fase 5B.2 aplicada
+  e validada; corte não autorizado.
 - **Candidato em avaliação:** API-Football.
 - **Fonte oficial atual:** football-data.org.
 - **Última atualização:** 2026-08-25.
@@ -549,7 +549,7 @@ os 125 casos não foram aceitos automaticamente. Após a execução, os quatro
 campos auxiliares continuaram nulos nos 380 jogos e nenhuma tabela de transição
 ou competitiva foi escrita.
 
-## Próximo portão — Gravação controlada da Fase 5B.2
+## Portão concluído — Gravação controlada da Fase 5B.2
 
 A retomada deve começar por uma tarefa nova e exclusiva para a Fase 5B.2. A
 recomendação técnica registrada é gravar somente as 255 correspondências
@@ -570,9 +570,36 @@ O plano da 5B.2 deve, no mínimo:
 - confirmar ao final 255 jogos mapeados, 125 ainda nulos e nenhuma alteração
   fora dos campos auxiliares autorizados.
 
-Ponto de retomada confirmado em 2026-08-25: a 5B.1 está concluída; não houve
-escrita de mapeamentos, DDL, deploy ou troca da fonte oficial. A 5B.2 ainda não
-foi iniciada nem aprovada para execução.
+Em 2026-08-25, a reprodução protegida da reconciliação confirmou novamente 255
+mapeamentos aceitos, 125 bloqueados e o hash
+`eba86a38c9514427d04d2d23547ce25c5366547d5051c014bbb35dbc0c0bbe1f`.
+Foram preparados localmente:
+
+- a migração transacional
+  `supabase/migrations/20260825050228_gravacao_mapeamentos_api_football_5b2.sql`;
+- o rollback operacional não automático
+  `supabase/rollback/rollback_gravacao_mapeamentos_api_football_5b2.sql`;
+- o gerador determinístico e o teste que recalcula o hash diretamente das 255
+  linhas materializadas.
+
+A migração bloqueia execução diante de estado inicial divergente, grava somente
+os quatro campos auxiliares autorizados, exige 255 linhas atualizadas, preserva
+125 linhas nulas, compara hashes dos campos competitivos antes e depois e inclui
+auditoria na mesma transação. O rollback exige a auditoria original e os valores
+posteriores intactos antes de restaurar os quatro campos para nulo.
+
+Em 2026-08-25, após autorização humana específica, a migração foi aplicada pelo
+conector oficial do Supabase e registrada remotamente como `20260825050228`.
+As validações posteriores confirmaram 255 mapeamentos completos, 125 jogos com
+os quatro campos auxiliares nulos, zero preenchimentos parciais, 255 fixtures
+distintas, um único instante de mapeamento e o mesmo hash aprovado. A auditoria
+contém 255 linhas mapeadas e 125 IDs bloqueados; os hashes do estado competitivo
+antes e depois são iguais.
+
+Ponto de retomada confirmado em 2026-08-25: a Fase 5B.2 está concluída. Não
+houve deploy, troca da fonte oficial, alteração de palpites, resultados,
+horários ou demais dados competitivos. A Fase 5B.3 continua sujeita a tarefa,
+plano e autorização próprios.
 
 Depois dos mapeamentos aprovados, a Fase 5B.3 deve observar uma rodada completa
 com jogos e classificação conforme o orçamento e as regras operacionais
