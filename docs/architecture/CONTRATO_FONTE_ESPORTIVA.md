@@ -611,9 +611,15 @@ persistência.
 }
 ```
 
-## Critérios para implementar o adaptador
+## Implementação de referência do adaptador
 
-A próxima entrega deve:
+A implementação pura do contrato v1 está em
+`src/sports-data/api-football-adapter.mjs`, com a política transversal contra
+regressões em `src/sports-data/contract.mjs`. As fixtures sanitizadas ficam em
+`fixtures/api-football/` e a prova executável em
+`scripts/test-api-football-adapter.mjs`.
+
+Essa implementação:
 
 1. implementar somente funções puras de validação e normalização;
 2. usar fixtures sanitizadas e testes locais;
@@ -623,6 +629,10 @@ A próxima entrega deve:
 6. provar as políticas contra regressão em unidade separada;
 7. não consultar nem escrever no Supabase;
 8. não alterar a fonte oficial ou Functions em produção.
+
+O comando `npm run test:api-football-adapter` valida esses critérios. Essa
+referência não consulta rede, não lê credenciais, não persiste dados e não
+autoriza a integração com produção.
 
 ## Evolução do contrato
 
