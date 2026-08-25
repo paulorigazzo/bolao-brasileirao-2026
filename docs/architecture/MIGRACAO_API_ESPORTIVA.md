@@ -3,10 +3,10 @@
 ## Estado do documento
 
 - **Natureza:** plano arquitetural e operacional interno.
-- **Estado:** planejamento aprovado; migração ainda não autorizada.
+- **Estado:** migração em andamento; Fase 5A concluída; corte ainda não autorizado.
 - **Candidato em avaliação:** API-Football.
 - **Fonte oficial atual:** football-data.org.
-- **Última atualização:** 2026-08-24.
+- **Última atualização:** 2026-08-25.
 
 Este documento é a referência canônica para retomar, executar e atualizar a
 migração da fonte de dados esportivos. Ele foi escrito para reduzir dependência
@@ -105,8 +105,9 @@ anterior.
 - redesenhar a Tela de Jogos ou o relógio apresentado ao participante;
 - corrigir automaticamente dados históricos;
 - substituir `public.jogos.id_jogo` por identificadores da nova API;
-- definir ou executar agora a contratação comercial;
-- implantar DDL, funções, variáveis ou rotinas de produção.
+- expor detalhes comerciais, credenciais ou dados da conta do fornecedor;
+- autorizar novas alterações de DDL, funções, variáveis ou rotinas de produção
+  sem tarefa e aprovação específicas.
 
 ## Princípios aceitos
 
@@ -177,10 +178,11 @@ A versão 1.0 está fechada em
 [`CONTRATO_FONTE_ESPORTIVA.md`](CONTRATO_FONTE_ESPORTIVA.md). Alterações
 incompatíveis exigem nova versão, decisão e aprovação.
 
-## Modelo de dados proposto
+## Modelo de dados da transição
 
-Tudo nesta seção é **PROPOSTO** e requer tarefa específica de Supabase, revisão
-de segurança, migração aditiva e plano de rollback.
+A fundação descrita nesta seção foi implementada e aplicada mediante tarefas,
+revisões e aprovações específicas. Qualquer ampliação continua exigindo tarefa
+própria de Supabase, revisão de segurança, migração aditiva e plano de rollback.
 
 O desenho físico foi refinado após a Prova Externa Instrumentada e a auditoria
 somente leitura do Supabase. A migração local da fundação está em
@@ -309,10 +311,10 @@ Regras adicionais:
   automaticamente um jogo já confirmado;
 - todo remapeamento exige evidência, revisão humana e registro auditável.
 
-## Critérios propostos de avanço
+## Critérios de avanço da Fase 5
 
-Os números abaixo são **PROPOSTOS** e precisam ser confirmados antes da fase de
-sombra. Eles não autorizam corte automático.
+Os critérios abaixo foram confirmados para a sombra pré-corte. Eles não
+autorizam corte automático.
 
 - cobertura de todos os jogos da rodada observada;
 - mapeamento de 100% dos jogos, salvo exceção aprovada e documentada;
@@ -340,11 +342,36 @@ A validação deve estimar e medir separadamente chamadas de agenda, jogos ao vi
 classificação, repetição por falha e margem operacional. Também deve registrar
 os cabeçalhos de cota diária e limite por minuto retornados pelo fornecedor.
 
-Na verificação de 2026-08-24, a API-Football informava 100 chamadas diárias no
-plano gratuito e 7.500 no primeiro plano pago. Esses valores são temporais e
-devem ser reconfirmados antes de contratação ou teste prolongado. O plano
-gratuito pode servir a ensaio curto, mas não deve ser presumido suficiente para
-uma observação completa com frequência de um minuto.
+Em 2026-08-25 foi confirmada no painel uma assinatura Pro ativa por três meses.
+O endpoint de status confirmou 7.500 chamadas diárias, e a documentação oficial
+vigente informa limite de 300 chamadas por minuto, ou cinco por segundo. Esses
+limites devem ser lidos dos cabeçalhos em produção e tratados como informação
+temporal, não como constante permanente do código.
+
+Para a primeira rodada, o desenho aprovado usa uma consulta de fixtures por
+data e competição a cada minuto durante a janela ativa, em vez de uma chamada
+por jogo. Em cenário conservador de cinco datas com quatro horas totais de
+janela ativa por data, são 1.200 chamadas de jogos. Agenda, classificação,
+verificações finais e
+até 10% de repetição mantêm a estimativa abaixo de 1.350 chamadas por rodada.
+
+Regras operacionais para a implementação da Fase 5B:
+
+- atualizar agenda uma vez ao dia e antes da abertura de cada janela ativa;
+- consultar jogos do dia a cada minuto, quinze minutos antes do primeiro jogo até
+  trinta minutos após o último horário previsto;
+- se ainda houver jogo não terminal, consultar a cada cinco minutos por no
+  máximo noventa minutos adicionais;
+- coletar classificação no início e no fim de cada data com jogos, respeitando
+  a recomendação do fornecedor de atualização horária;
+- permitir no máximo duas repetições com espera progressiva, sem acumular
+  chamadas entre ciclos;
+- reservar 20% da cota diária e 10% do limite por minuto; ao atingir uma dessas
+  reservas, interromper a sombra e registrar a execução incompleta;
+- interromper também após três falhas consecutivas, resposta inválida, estado
+  desconhecido, conflito de identidade ou falha de persistência;
+- nunca compensar uma interrupção escrevendo em tabelas competitivas ou
+  recorrendo a uma composição híbrida de fornecedores.
 
 ## Fases e portões
 
@@ -355,7 +382,8 @@ uma observação completa com frequência de um minuto.
 | 2. Adaptador puro e testes | concluída | contrato v1 executável, sem persistência |
 | 3. Fundação no banco | concluída | migração aditiva revisada e aplicada |
 | 4. Coleta em sombra | concluída | duas provas reais isoladas, válidas e revisadas |
-| 5. Sombra pré-corte | não iniciada | 1–2 rodadas e critérios atendidos |
+| 5A. Acesso e desenho operacional | concluída | cobertura, limites e orçamento confirmados |
+| 5B. Sombra de rodada completa | não iniciada | 1 rodada completa e critérios atendidos; segunda se necessária |
 | 6. Corte controlado | não iniciada | aprovação explícita e rollback pronto |
 | 7. Sombra pós-corte | não iniciada | 1–2 rodadas sem regressão material |
 | 8. Encerramento | não iniciada | decisão sobre retirada do legado e dados sombra |
@@ -468,12 +496,37 @@ listagem livre da temporada 2026 e restringiu consultas por data a uma janela
 curta. Portanto, ele é suficiente para provas pontuais com IDs previamente
 confirmados, mas não deve ser tratado como base operacional da sombra pré-corte.
 
-## Próximo portão — Sombra pré-corte
+## Portão concluído — Acesso e desenho operacional da Fase 5A
 
-A Fase 5 deve observar 1–2 rodadas com pareamentos previamente confirmados,
-orçamento de chamadas, frequência, reconciliação e critérios de divergência
-aprovados. Ela permanece não iniciada e exige plano próprio antes de qualquer
-agendamento ou ampliação da coleta.
+Em 2026-08-25, o tester autenticado confirmou, com respostas sem erro:
+
+- plano Pro ativo e limite diário de 7.500 chamadas;
+- competição 71, Serie A do Brasil, com temporada 2026 ativa e cobertura de
+  fixtures, eventos, escalações, estatísticas, jogadores e classificação;
+- 38 rodadas disponíveis em uma página;
+- 380 fixtures da temporada disponíveis em uma única consulta e uma página;
+- dez fixtures na rodada consultada, também em uma página;
+- consulta por data sem a restrição temporal observada no plano gratuito;
+- consulta unitária por fixture preservando estado, minuto e acréscimos;
+- classificação válida com vinte posições distintas em uma página.
+
+A evidência remove o bloqueio comercial e técnico para descobrir fixtures e
+comprova que uma chamada por ciclo pode cobrir todos os jogos de uma data. A
+Fase 5A não alterou aplicação, Supabase, Netlify, agendamento, mapeamentos ou
+fonte oficial e não persistiu payload bruto nem credencial.
+
+## Próximo portão — Sombra pré-corte da Fase 5B
+
+A Fase 5B deve primeiro reconciliar os 380 jogos sem escrita competitiva,
+apresentar ambiguidades para revisão e gravar os IDs auxiliares somente após
+aprovação específica. Depois, deve observar uma rodada completa com jogos e
+classificação conforme o orçamento e as regras operacionais aprovados.
+
+Uma segunda rodada será exigida somente se a primeira tiver cobertura
+incompleta, divergência material sem explicação ou deixar sem observação algum
+marco relevante de primeiro tempo, intervalo, segundo tempo, acréscimos ou
+encerramento. A implementação, o agendamento e qualquer preenchimento de IDs
+exigem plano técnico e aprovação próprios.
 
 ## Estratégia de rollback
 
@@ -504,9 +557,7 @@ não deve produzir operação híbrida.
 
 ## Decisões pendentes
 
-- confirmação comercial e técnica do fornecedor definitivo;
-- limites finais dos critérios de aceite;
-- frequência de consulta ao vivo e orçamento de chamadas;
+- limites finais do portão de corte após as evidências da Fase 5B;
 - localização e mecanismo da configuração da fonte oficial;
 - tolerância de horário no mapeamento;
 - retenção e limpeza das tabelas de sombra;
@@ -514,7 +565,8 @@ não deve produzir operação híbrida.
 - momento de cancelar a assinatura antiga;
 - destino das tabelas de transição após estabilização.
 - estratégia de namespace do cache por fornecedor durante a sombra;
-- ferramenta e frequência da futura sombra de uma a duas rodadas.
+- resultado da reconciliação inicial dos 380 jogos;
+- necessidade de uma segunda rodada de sombra após a primeira evidência completa.
 
 ## Protocolo de atualização para agentes
 
@@ -546,6 +598,7 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | 2026-08-25 | 0.7 | Coletor manual unitário implementado; prova real permanece como portão da Fase 4 |
 | 2026-08-25 | 0.8 | Acionador administrativo definido para viabilizar a primeira prova real autenticada |
 | 2026-08-25 | 0.9 | Duas coletas reais revisadas; Fase 4 concluída e sombra pré-corte definida como próximo portão |
+| 2026-08-25 | 1.0 | Plano Pro confirmado; Fases 5A e 5B separadas; acesso, cobertura e orçamento da 5A validados |
 
 ## Referências internas
 

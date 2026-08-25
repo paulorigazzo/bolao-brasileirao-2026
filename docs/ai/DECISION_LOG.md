@@ -644,3 +644,47 @@ cota previsível e sem qualquer autoridade competitiva.
 - a Fase 4 permanece aberta até uma prova real publicada e revisada;
 - a coleta de uma ou duas rodadas só poderá ser planejada depois desse ensaio;
 - nenhuma tela, palpite, pontuação, relógio ou fonte oficial é alterada.
+
+## DEC-2026-020 — Fase 5 dividida entre validação operacional e sombra de rodada
+
+- Data: 2026-08-25
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: detalhamento pendente da Fase 5 em DEC-2026-016
+- Impacto: alto na futura implementação; documental nesta decisão
+
+### Contexto
+
+As provas unitárias da Fase 4 foram concluídas e uma assinatura Pro da
+API-Football foi contratada por três meses. Antes de automatizar uma rodada, era
+necessário confirmar que o acesso pago removia as restrições do plano gratuito,
+que a temporada completa e a classificação podiam ser consultadas e que a cota
+comportava uma observação recorrente sem chamadas por jogo.
+
+### Decisão
+
+- dividir a sombra pré-corte em Fase 5A, de validação do acesso e desenho
+  operacional, e Fase 5B, de reconciliação e observação de rodada completa;
+- considerar a Fase 5A concluída após confirmar temporada, 38 rodadas, 380
+  fixtures, rodada com dez jogos, consulta por data, fixture unitária,
+  classificação com vinte posições e os limites do plano Pro;
+- na futura Fase 5B, consultar todos os jogos da data em uma única chamada por
+  ciclo, com frequência de um minuto apenas durante a janela ativa;
+- reservar 20% da cota diária e 10% do limite por minuto, interrompendo a sombra
+  com diagnóstico se essas reservas ou as demais condições de segurança forem
+  atingidas;
+- executar uma rodada obrigatória e exigir a segunda somente se a primeira
+  deixar cobertura incompleta, divergência material ou marco relevante sem
+  observação;
+- manter classificação dentro da sombra e preservar integralmente a autoridade
+  exclusiva da football-data.org antes do corte.
+
+### Consequências
+
+- o bloqueio comercial para enumerar a temporada foi removido;
+- a próxima tarefa deve reconciliar identidades e implementar a coleta de rodada
+  conforme plano técnico próprio;
+- assinatura, credencial e evidências desta fase não autorizam agendamento,
+  preenchimento de IDs auxiliares, escrita competitiva ou troca de fornecedor;
+- uma segunda rodada deixa de ser automática, mas continua obrigatória quando a
+  primeira não produzir evidência suficiente para o portão de corte.
