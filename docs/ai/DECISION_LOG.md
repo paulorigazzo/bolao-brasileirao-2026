@@ -943,5 +943,9 @@ modelo tratava instantes provisórios como se fossem horários confirmados.
 - `inicio` continua existindo para compatibilidade, mas passa a ter qualificação semântica;
 - a migration valida o hash competitivo registrado na Fase 5B.2, usa bloqueio
   transacional, pós-condições e rollback condicionado;
+- após o primeiro ensaio seguro bloquear uma fotografia competitiva histórica
+  que havia evoluído por sincronizações normais, a pré-condição foi corrigida
+  para validar o hash imutável dos 255 mapeamentos e comparar o estado
+  competitivo vigente imediatamente antes e depois da própria transação;
 - uma nova data de provedor para jogo adiado volta como provisória até confirmação;
 - aplicação remota, deploy e preenchimento dos 125 IDs continuam não autorizados.
