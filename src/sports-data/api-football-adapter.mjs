@@ -338,6 +338,18 @@ export function normalizeApiFootballFixtureEnvelope(payload, options = {}) {
   return { observation: metadata, game: metadata.responseValid ? game : null };
 }
 
+export function normalizeApiFootballFixturesEnvelope(payload, options = {}) {
+  const metadata = observation(options, "fixtures");
+  const response = validateEnvelope(payload, metadata);
+  const games = response.map((raw) => normalizeFixture(raw, options, metadata));
+  const fixtureIds = new Set(games.map((game) => game.providerFixtureId));
+  if (fixtureIds.size !== games.length) metadata.errors.push("fixture_ids_duplicated");
+  const expectedCount = nullableInteger(options.expectedCount, 1, Number.MAX_SAFE_INTEGER);
+  if (expectedCount != null && games.length !== expectedCount) metadata.errors.push("fixture_count_unexpected");
+  metadata.responseValid = metadata.errors.length === 0;
+  return { observation: metadata, games: metadata.responseValid ? games : [] };
+}
+
 function normalizeStandingRow(raw, warnings, errors) {
   const position = integer(raw?.rank, 1, 999);
   const providerTeamId = integer(raw?.team?.id, 1, Number.MAX_SAFE_INTEGER);

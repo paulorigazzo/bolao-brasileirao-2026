@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import {
   normalizeApiFootballFixtureEnvelope,
+  normalizeApiFootballFixturesEnvelope,
   normalizeApiFootballStandingsEnvelope,
   normalizeApiFootballStatus,
 } from "../src/sports-data/api-football-adapter.mjs";
@@ -36,6 +37,18 @@ assert.deepEqual(
   [normalized.observation.dailyLimit, normalized.observation.dailyRemaining, normalized.observation.minuteLimit, normalized.observation.minuteRemaining],
   [100, 91, 10, 9],
 );
+
+const batchFixture = clone(fixture);
+batchFixture.response.push(clone(fixture.response[0]));
+batchFixture.response[1].fixture.id = 1492341;
+batchFixture.results = 2;
+const batch = normalizeApiFootballFixturesEnvelope(batchFixture, { ...options, requestedFixtureId: undefined, expectedCount: 2 });
+assert.equal(batch.observation.responseValid, true);
+assert.deepEqual(batch.games.map((game) => game.providerFixtureId), [1492340, 1492341]);
+assert.ok(normalizeApiFootballFixturesEnvelope(batchFixture, { ...options, expectedCount: 380 }).observation.errors.includes("fixture_count_unexpected"));
+const duplicatedBatch = clone(batchFixture);
+duplicatedBatch.response[1].fixture.id = 1492340;
+assert.ok(normalizeApiFootballFixturesEnvelope(duplicatedBatch, options).observation.errors.includes("fixture_ids_duplicated"));
 
 const statusCases = {
   TBD: "scheduled", NS: "scheduled", "1H": "live", "2H": "live", ET: "live",

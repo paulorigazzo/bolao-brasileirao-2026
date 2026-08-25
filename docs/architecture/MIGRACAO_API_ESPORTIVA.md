@@ -3,7 +3,8 @@
 ## Estado do documento
 
 - **Natureza:** plano arquitetural e operacional interno.
-- **Estado:** migração em andamento; Fase 5A concluída; corte ainda não autorizado.
+- **Estado:** migração em andamento; reconciliação seca da Fase 5B concluída;
+  gravação de mapeamentos e corte ainda não autorizados.
 - **Candidato em avaliação:** API-Football.
 - **Fonte oficial atual:** football-data.org.
 - **Última atualização:** 2026-08-25.
@@ -383,7 +384,7 @@ Regras operacionais para a implementação da Fase 5B:
 | 3. Fundação no banco | concluída | migração aditiva revisada e aplicada |
 | 4. Coleta em sombra | concluída | duas provas reais isoladas, válidas e revisadas |
 | 5A. Acesso e desenho operacional | concluída | cobertura, limites e orçamento confirmados |
-| 5B. Sombra de rodada completa | não iniciada | 1 rodada completa e critérios atendidos; segunda se necessária |
+| 5B. Sombra de rodada completa | em andamento | reconciliação seca concluída; gravação e coleta ainda pendentes |
 | 6. Corte controlado | não iniciada | aprovação explícita e rollback pronto |
 | 7. Sombra pós-corte | não iniciada | 1–2 rodadas sem regressão material |
 | 8. Encerramento | não iniciada | decisão sobre retirada do legado e dados sombra |
@@ -515,12 +516,67 @@ comprova que uma chamada por ciclo pode cobrir todos os jogos de uma data. A
 Fase 5A não alterou aplicação, Supabase, Netlify, agendamento, mapeamentos ou
 fonte oficial e não persistiu payload bruto nem credencial.
 
-## Próximo portão — Sombra pré-corte da Fase 5B
+## Portão concluído — Reconciliação seca da Fase 5B.1
 
-A Fase 5B deve primeiro reconciliar os 380 jogos sem escrita competitiva,
-apresentar ambiguidades para revisão e gravar os IDs auxiliares somente após
-aprovação específica. Depois, deve observar uma rodada completa com jogos e
-classificação conforme o orçamento e as regras operacionais aprovados.
+Em 2026-08-25, uma única consulta autenticada retornou as 380 fixtures da
+temporada, com paginação completa, IDs únicos e rodadas de 1 a 38. O payload
+bruto permaneceu somente na memória do tester. Foram extraídos para o motor
+local apenas fixture, rodada, horário, mandante, visitante e IDs dos times.
+
+O motor comparou esses dados com os 380 jogos canônicos do Supabase usando
+temporada, rodada, mando, aliases explícitos e tolerância máxima aprovada de
+trinta minutos. O resultado foi:
+
+- 255 correspondências inequívocas;
+- 125 jogos bloqueados somente por diferença de horário superior à tolerância;
+- nenhuma ambiguidade, duplicidade, inversão de mando, conflito de ID ou falha
+  estrutural;
+- todos os 255 jogos aceitos com diferença de horário igual a zero;
+- rodada 24 integralmente reconciliada;
+- bloqueios concentrados em um jogo da rodada 15, quatro da rodada 21 e todos
+  os jogos das rodadas 27 a 38;
+- 55 diferenças entre uma e 23 horas e 70 entre um e seis dias;
+- hash da reconciliação aceita
+  `eba86a38c9514427d04d2d23547ce25c5366547d5051c014bbb35dbc0c0bbe1f`.
+
+Foram confirmados aliases explícitos para Atlético-MG, Athletico-PR,
+RB Bragantino, Remo, Chapecoense, Grêmio, São Paulo, Vasco da Gama e Vitória.
+Não foi usada correspondência aproximada por texto.
+
+A distribuição mostra que a identidade esportiva coincide, mas parte da agenda
+futura ainda diverge entre as fontes. A política de falha segura foi mantida:
+os 125 casos não foram aceitos automaticamente. Após a execução, os quatro
+campos auxiliares continuaram nulos nos 380 jogos e nenhuma tabela de transição
+ou competitiva foi escrita.
+
+## Próximo portão — Gravação controlada da Fase 5B.2
+
+A retomada deve começar por uma tarefa nova e exclusiva para a Fase 5B.2. A
+recomendação técnica registrada é gravar somente as 255 correspondências
+inequívocas, preservando os campos dos outros 125 jogos nulos até a convergência
+da agenda. Nenhum ID pode ser gravado antes da aprovação explícita desse plano
+de dados e de sua execução atômica, auditável e reversível.
+
+O plano da 5B.2 deve, no mínimo:
+
+- reproduzir ou validar o conjunto aceito pelo hash registrado na 5B.1;
+- bloquear qualquer correspondência nova, alterada ou fora da tolerância sem
+  revisão humana;
+- gravar somente `api_football_id`, `api_football_time_casa_id`,
+  `api_football_time_fora_id` e a origem auxiliar prevista no modelo;
+- preservar `id_jogo`, horários canônicos, resultados e demais dados
+  competitivos;
+- registrar estado anterior e posterior suficiente para auditoria e rollback;
+- confirmar ao final 255 jogos mapeados, 125 ainda nulos e nenhuma alteração
+  fora dos campos auxiliares autorizados.
+
+Ponto de retomada confirmado em 2026-08-25: a 5B.1 está concluída; não houve
+escrita de mapeamentos, DDL, deploy ou troca da fonte oficial. A 5B.2 ainda não
+foi iniciada nem aprovada para execução.
+
+Depois dos mapeamentos aprovados, a Fase 5B.3 deve observar uma rodada completa
+com jogos e classificação conforme o orçamento e as regras operacionais
+aprovados.
 
 Uma segunda rodada será exigida somente se a primeira tiver cobertura
 incompleta, divergência material sem explicação ou deixar sem observação algum
@@ -559,13 +615,12 @@ não deve produzir operação híbrida.
 
 - limites finais do portão de corte após as evidências da Fase 5B;
 - localização e mecanismo da configuração da fonte oficial;
-- tolerância de horário no mapeamento;
 - retenção e limpeza das tabelas de sombra;
 - tratamento futuro dos IDs legados de times e partidas;
 - momento de cancelar a assinatura antiga;
 - destino das tabelas de transição após estabilização.
 - estratégia de namespace do cache por fornecedor durante a sombra;
-- resultado da reconciliação inicial dos 380 jogos;
+- estratégia para os 255 mapeamentos aceitos e os 125 horários divergentes;
 - necessidade de uma segunda rodada de sombra após a primeira evidência completa.
 
 ## Protocolo de atualização para agentes
@@ -599,6 +654,8 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | 2026-08-25 | 0.8 | Acionador administrativo definido para viabilizar a primeira prova real autenticada |
 | 2026-08-25 | 0.9 | Duas coletas reais revisadas; Fase 4 concluída e sombra pré-corte definida como próximo portão |
 | 2026-08-25 | 1.0 | Plano Pro confirmado; Fases 5A e 5B separadas; acesso, cobertura e orçamento da 5A validados |
+| 2026-08-25 | 1.1 | Reconciliação seca da 5B.1 concluída; 255 jogos aceitos e 125 horários mantidos bloqueados |
+| 2026-08-25 | 1.2 | Ponto de retomada da 5B.2 documentado com escopo mínimo, recomendação e portões de segurança |
 
 ## Referências internas
 
