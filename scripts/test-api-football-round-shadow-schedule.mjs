@@ -52,6 +52,34 @@ function gamesOnly(games) {
     },
   };
 }
+
+function gamesAndHistory(games, expectedDetails) {
+  return {
+    from(table) {
+      if (table === "jogos") {
+        return { select: () => ({ eq: async () => ({ data: games, error: null }) }) };
+      }
+      assert.equal(table, "transicao_api_execucoes");
+      return {
+        select: () => ({
+          eq: (column, value) => {
+            assert.equal(column, "fase");
+            assert.equal(value, "sombra_pre_corte");
+            return {
+              contains: (detailsColumn, details) => {
+                assert.equal(detailsColumn, "detalhes");
+                assert.deepEqual(details, expectedDetails);
+                return {
+                  order: () => ({ limit: async () => ({ data: [], error: null }) }),
+                };
+              },
+            };
+          },
+        }),
+      };
+    },
+  };
+}
 const game = { id_jogo: 1, inicio: "2026-08-29T21:30:00Z", status: "agendado" };
 assert.equal(allowTerminalFinalCycle(
   [{ ...game, status: "encerrado" }], new Date("2026-08-29T23:20:00Z"), { reason: "round_terminal" },
@@ -63,5 +91,12 @@ assert.deepEqual(await runScheduledRoundShadow({
   supabase: gamesOnly([game]), apiKey: "test-only", config,
   now: () => new Date("2026-08-29T21:00:00Z"),
 }), { ok: true, skipped: "before_active_window" });
+
+assert.deepEqual(await runScheduledRoundShadow({
+  supabase: gamesAndHistory([game], { campanha: "5b3-round-25", data: "2026-08-29" }),
+  apiKey: "test-only", config,
+  now: () => new Date("2026-08-29T21:20:00Z"),
+  collectRoundCycle: async () => ({ ok: true }),
+}), { ok: true });
 
 console.log("Agendamento 5B.3B verificado: bloqueio padrão, configuração, datas e janela.");
