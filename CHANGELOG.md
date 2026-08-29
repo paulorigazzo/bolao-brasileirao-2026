@@ -1,3 +1,11 @@
+# v6.23.3 — Momentos e marcos ativos de Meu Time
+
+- Mantém o título “Momentos com o seu time” e substitui a lista de partidas por um comentário curto, contextual e bem-humorado.
+- Deriva o comentário deterministicamente de palpites, acertos, confiança, sequência e fase recente do clube, sem IA ou chamada externa.
+- Exibe desde o início os cinco marcos pessoais, distinguindo conquistas desbloqueadas e progresso pendente.
+- Acrescenta o marco de participação “Primeiro capítulo” e preserva os critérios competitivos existentes.
+- Mantém Supabase, sincronização esportiva, palpites, resultados e pontuação inalterados.
+
 # v6.23.2 — Agendamentos divergentes
 
 - Distingue horários confirmados, datas provisórias e adiamentos sem nova data.

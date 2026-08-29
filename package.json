@@ -1,6 +1,6 @@
 {
   "name": "bolao-br-2026",
-  "version": "6.23.2",
+  "version": "6.23.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -34,7 +34,8 @@
     "test:live-sync-window": "node scripts/test-live-sync-window.mjs",
     "test:participant-team": "node scripts/test-participant-team.mjs",
     "test:participant-profile-access": "node scripts/test-participant-profile-access.mjs",
-    "test:my-team-hero": "node scripts/test-my-team-hero.mjs",
+    "test:my-team-hero": "node scripts/test-my-team-hero.mjs && node scripts/test-my-team-moments.mjs",
+    "test:my-team-moments": "node scripts/test-my-team-moments.mjs",
     "test:games-progress": "node scripts/test-games-progress.mjs",
     "test:games-score-input": "node scripts/test-games-score-input.mjs",
     "test:home-live-card": "node scripts/test-home-live-card.mjs",
