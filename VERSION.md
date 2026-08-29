@@ -1,6 +1,6 @@
-6.23.2
+6.23.3
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.23.2-agendamentos-divergentes.md`](docs/releases/v6.23.2-agendamentos-divergentes.md)
+- Nota da versão atual: [`docs/releases/v6.23.3-momentos-marcos-meu-time.md`](docs/releases/v6.23.3-momentos-marcos-meu-time.md)

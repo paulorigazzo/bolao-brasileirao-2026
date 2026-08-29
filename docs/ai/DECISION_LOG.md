@@ -1016,3 +1016,35 @@ registros mais recentes podiam ficar fora do recorte recebido.
 - a consulta transfere apenas os registros necessários à tela atual;
 - nenhuma escrita, migration ou correção de dados é necessária;
 - publicação e deploy permanecem sujeitos a autorizações próprias.
+
+## DEC-2026-029 — Meu Time combina comentário editorial e progresso explícito
+
+- Data: 2026-08-29
+- Status: aceita; implementação local em revisão
+- Responsáveis: manutenção do projeto
+- Substitui: timeline restrita a vitórias e placares exatos
+- Impacto: médio
+
+### Contexto
+
+Os cards **Momentos com o seu time** e **Marcos do Meu Time** podiam permanecer
+vazios mesmo quando o participante acompanhava e palpitava nos jogos do clube.
+A timeline também repetia resultados já disponíveis na Tela de Jogos.
+
+### Decisão
+
+- preservar o título **Momentos com o seu time**;
+- apresentar um único comentário curto, positivo e bem-humorado, escolhido por
+  regras determinísticas e sem IA ou chamada externa;
+- alternar frases equivalentes pela rodada para reduzir repetição;
+- mostrar todos os marcos desde o início, com estado e progresso explícitos;
+- acrescentar o marco de participação **Primeiro capítulo**;
+- recalcular a experiência pelo time favorito atual e pelos dados históricos já
+  carregados, sem persistir novos eventos.
+
+### Consequências
+
+- participantes sem acertos passam a receber conteúdo útil e não depreciativo;
+- conquistas mantêm seus critérios, mas deixam de parecer inativas;
+- nenhuma tabela, API, pontuação, palpite ou resultado é alterado;
+- a mudança permanece inteiramente reversível no código da interface.
