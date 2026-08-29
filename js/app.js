@@ -17,6 +17,7 @@ import { buildGamesProgressModel } from "./games-progress.js";
 import { liveMatchMinute } from "./live-match-minute.js";
 import { isScheduledLiveEstimate, scheduledLiveLabel } from "./scheduled-live-estimate.js";
 import { buildFriendlyRankingsModel } from "./friendly-rankings-engine.js";
+import { adminRoundGameIds, loadAdminPickProgress } from "./admin-pick-progress.js";
 
 const APP_VERSION = "6.23.2";
 installMotionTokens();
@@ -362,17 +363,17 @@ async function saveFavoriteTeam(){
   }finally{button.disabled=false;button.textContent="Salvar escolha";}
 }
 
-function currentRoundNumber(){
-  const rounds=[...new Set(state.games.map(game=>Number(game.rodada)).filter(Number.isFinite))].sort((a,b)=>a-b);
+function currentRoundNumber(games=state.games){
+  const rounds=[...new Set(games.map(game=>Number(game.rodada)).filter(Number.isFinite))].sort((a,b)=>a-b);
   if(!rounds.length) return 1;
 
   const now=Date.now();
-  const liveGame=state.games
+  const liveGame=games
     .filter(game=>gameStatusDisplay(game).key==="live")
     .sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
   if(liveGame) return Number(liveGame.rodada);
 
-  const nextGame=state.games
+  const nextGame=games
     .filter(game=>!isFinished(game) && new Date(game.inicio).getTime()>now)
     .sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
   if(nextGame) return Number(nextGame.rodada);
@@ -786,17 +787,19 @@ function applyCanonicalParticipantNames(){
 }
 
 async function loadData(){
-  const [{data:games,error:gErr},{data:picks,error:pErr},{data:pub,error:pubErr},{data:counts,error:countsErr},{data:participants,error:participantsErr},{data:adminProgress,error:adminProgressErr},{data:authorized,error:authorizedErr},{data:participantLimit,error:participantLimitErr}] = await Promise.all([
-    sb.from("jogos").select("*").order("rodada").order("inicio"),
+  const {data:games,error:gErr}=await sb.from("jogos").select("*").order("rodada").order("inicio");
+  if(gErr) throw gErr;
+  const adminGameIds=adminRoundGameIds(games,currentRoundNumber(games));
+  const [{data:picks,error:pErr},{data:pub,error:pubErr},{data:counts,error:countsErr},{data:participants,error:participantsErr},{data:adminProgress,error:adminProgressErr},{data:authorized,error:authorizedErr},{data:participantLimit,error:participantLimitErr}] = await Promise.all([
     sb.from("palpites").select("*").eq("user_id",state.user.id),
     sb.from("palpites_encerrados_publicos").select("*"),
     sb.from("contagem_palpites_participantes").select("*"),
     sb.from("participantes").select("user_id,nome,email,time_favorito,ativo"),
-    isAdminUser() ? sb.from("progresso_palpites_adm").select("user_id,usuario,id_jogo,atualizado_em") : Promise.resolve({data:[],error:null}),
+    loadAdminPickProgress({supabase:sb,isAdmin:isAdminUser(),gameIds:adminGameIds}),
     sb.from("participantes_autorizados").select("id,nome,email,celular,time_favorito,ativo,administrador,status,solicitado_em,aprovado_em,criado_em,atualizado_em").order("nome"),
     isAdminUser() ? sb.rpc("obter_limite_participantes_ativos") : Promise.resolve({data:10,error:null})
   ]);
-  if(gErr) throw gErr; if(pErr) throw pErr; if(pubErr) console.warn(pubErr);
+  if(pErr) throw pErr; if(pubErr) console.warn(pubErr);
   if(countsErr) console.warn("Não foi possível carregar a contagem geral de palpites. Verifique a view correspondente e as migrações versionadas do Supabase.", countsErr);
   if(participantsErr) console.warn("Os times dos demais participantes não puderam ser carregados.", participantsErr);
   if(adminProgressErr) console.warn("O progresso administrativo não pôde ser carregado. Verifique a view correspondente e as migrações versionadas do Supabase.", adminProgressErr);

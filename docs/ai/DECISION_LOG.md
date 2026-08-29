@@ -985,3 +985,34 @@ escudos atuais e usa contêineres proporcionais com fallback.
 - catálogo canônico, armazenamento próprio e troca da origem visual permanecem
   sujeitos a tarefas e aprovações separadas;
 - dados competitivos, nomes, apelidos e siglas continuam preservados.
+
+## DEC-2026-028 — Progresso administrativo limitado à rodada atual
+
+- Data: 2026-08-29
+- Status: aceita; implementação local em revisão
+- Responsáveis: manutenção do projeto
+- Substitui: consulta histórica irrestrita de `progresso_palpites_adm`
+- Impacto: alto
+
+### Contexto
+
+O painel administrativo exibiu Ana Flávia como `0/10` na rodada 25 apesar de
+os dez palpites estarem gravados e visíveis na view administrativa. A view
+alcançou 1.051 linhas, ultrapassando o limite de 1.000 registros de uma resposta
+da Data API. Como o navegador carregava todo o histórico sem filtro, os
+registros mais recentes podiam ficar fora do recorte recebido.
+
+### Decisão
+
+- consultar primeiro os jogos e determinar a rodada corrente;
+- enviar à view administrativa somente os dez `id_jogo` dessa rodada;
+- não aumentar o limite global nem paginar histórico desnecessário;
+- preservar a view, RLS, palpites, placares e regras de fechamento;
+- cobrir por teste um histórico superior a mil linhas.
+
+### Consequências
+
+- o indicador administrativo deixa de depender do tamanho do histórico;
+- a consulta transfere apenas os registros necessários à tela atual;
+- nenhuma escrita, migration ou correção de dados é necessária;
+- publicação e deploy permanecem sujeitos a autorizações próprias.
