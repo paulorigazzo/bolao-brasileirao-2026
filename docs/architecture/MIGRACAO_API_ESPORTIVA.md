@@ -679,6 +679,21 @@ marco relevante de primeiro tempo, intervalo, segundo tempo, acréscimos ou
 encerramento. A implementação, o agendamento e qualquer preenchimento de IDs
 exigem plano técnico e aprovação próprios.
 
+### Portão visual da Fase 5B.3C
+
+As URLs de escudo observadas na rodada são evidência, não autoridade visual. A
+Fase 5B.3C introduz uma auditoria local e somente leitura que consolida cada
+clube pelo ID da API-Football, compara a URL observada com o escudo canônico e
+verifica HTTPS, disponibilidade, tipo de conteúdo, tamanho do arquivo,
+dimensões, proporção e consistência entre observações.
+
+Arquivos tecnicamente idênticos ao canônico podem ser aprovados de forma
+determinística. Arquivos diferentes permanecem pendentes de comparação visual;
+ausências, inconsistências e falhas técnicas são rejeitadas. Nenhum resultado
+da auditoria promove URLs para `public.jogos`, altera a interface ou cria nova
+tabela. Um catálogo canônico e a eventual cópia para armazenamento controlado
+dependem de tarefa e aprovação próprias.
+
 ## Estratégia de rollback
 
 Antes do corte, devem existir:
@@ -755,6 +770,7 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | 2026-08-25 | 1.4 | Ativação fail-closed da 5B.3B.1 preparada para a rodada 25, ainda sem deploy ou coleta |
 | 2026-08-25 | 1.5 | Metadados opcionais de local, escudos e códigos preparados na 5B.3B.2A, ainda sem aplicação remota |
 | 2026-08-25 | 1.6 | Migração de metadados aplicada e reconciliada com a versão remota `20260825151356` |
+| 2026-08-29 | 1.7 | Portão visual 5B.3C definido com auditoria técnica e revisão humana dos escudos |
 
 ## Referências internas
 
