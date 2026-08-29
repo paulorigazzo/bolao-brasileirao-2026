@@ -41,6 +41,7 @@ export function allowTerminalFinalCycle(games, instant, window) {
 
 export async function runScheduledRoundShadow({
   supabase, fetchImpl = fetch, apiKey, config, now = () => new Date(),
+  collectRoundCycle = collectApiFootballRoundCycle,
 }) {
   if (!config.enabled) return { ok: true, skipped: "shadow_disabled" };
   if (!config.valid) return { ok: false, skipped: "shadow_config_invalid" };
@@ -62,7 +63,7 @@ export async function runScheduledRoundShadow({
 
   const { data: history, error: historyError } = await supabase.from("transicao_api_execucoes")
     .select("sucesso_sombra,classificacoes_sombra,detalhes,iniciada_em")
-    .eq("fase", "sombra_pre_corte").contains("detalhes", { campanha: config.campaign, data })
+    .eq("fase", "sombra_pre_corte").contains("detalhes", { campanha: config.campaign, data: date })
     .order("iniciada_em", { ascending: false }).limit(20);
   if (historyError) throw new Error(`scheduled_round_history_read_failed:${historyError.message}`);
   if (consecutiveFailures(history || []) >= 3) return { ok: false, skipped: "three_consecutive_failures" };
@@ -78,7 +79,7 @@ export async function runScheduledRoundShadow({
   }
   const minuteKey = instant.toISOString().slice(0, 16).replace("T", "-").replace(":", "");
   try {
-    return await collectApiFootballRoundCycle({
+    return await collectRoundCycle({
       supabase, fetchImpl, apiKey, round: config.round, date,
       includeStandings: classificationMarker != null, classificationMarker,
       idempotencyKey: `${config.campaign}:${date}:${minuteKey}`,
