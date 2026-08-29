@@ -952,3 +952,36 @@ modelo tratava instantes provisórios como se fossem horários confirmados.
 - a aplicação remota foi registrada como `20260825202000`; o arquivo local deve
   usar a mesma versão, e o índice recomendado para a chave estrangeira das
   observações permanece em migration própria e reversível.
+
+## DEC-2026-027 — Escudos novos exigem auditoria antes da promoção visual
+
+- Data: 2026-08-29
+- Status: aceita; implementação local em revisão
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: médio
+
+### Contexto
+
+A API-Football fornece URLs de escudos com possíveis diferenças de arquivo,
+dimensão, proporção, transparência e margem interna. A coleta da rodada 25 já
+preserva essas URLs em `transicao_api_jogos`, enquanto o aplicativo mantém os
+escudos atuais e usa contêineres proporcionais com fallback.
+
+### Decisão
+
+- reutilizar as fotografias existentes, sem criar outra tabela sombra;
+- consolidar a evidência por ID do clube na API-Football;
+- rejeitar URLs inseguras, ausentes, inconsistentes ou tecnicamente inválidas;
+- aprovar automaticamente somente conteúdo binariamente idêntico ao canônico;
+- exigir revisão visual humana para qualquer arquivo diferente;
+- impedir promoção automática para `public.jogos` ou para a interface.
+
+### Consequências
+
+- a campanha corrente não muda de comportamento e não faz chamadas extras;
+- a auditoria pode ser repetida sobre exportações controladas e gera relatório
+  JSON e Markdown;
+- catálogo canônico, armazenamento próprio e troca da origem visual permanecem
+  sujeitos a tarefas e aprovações separadas;
+- dados competitivos, nomes, apelidos e siglas continuam preservados.
