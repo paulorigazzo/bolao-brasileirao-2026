@@ -1048,3 +1048,78 @@ A timeline também repetia resultados já disponíveis na Tela de Jogos.
 - conquistas mantêm seus critérios, mas deixam de parecer inativas;
 - nenhuma tabela, API, pontuação, palpite ou resultado é alterado;
 - a mudança permanece inteiramente reversível no código da interface.
+
+## DEC-2026-030 — Fechamento da sombra usa marcos permanentes e recuperação terminal
+
+- Data: 2026-08-30
+- Status: aceita e aplicada
+- Responsáveis: manutenção do projeto
+- Substitui: limite terminal rígido e inferência de marcos pelas vinte execuções mais recentes
+- Impacto: alto
+
+### Contexto
+
+Na primeira data real da rodada 25, a coleta terminou com Vasco x Cruzeiro ainda
+ao vivo. A última fotografia registrou API-Football 3 x 0 em 90+2 e fonte
+oficial 2 x 0; o resultado posterior foi 3 x 1. O limite de 120 minutos após o
+último início impediu o ciclo terminal. A janela de vinte execuções usada para
+falhas também esquecia o marco `inicio`, provocando novas coletas de
+classificação aproximadamente a cada 21 minutos.
+
+### Decisão
+
+- consultar a existência de `inicio` e `fim` diretamente no histórico da
+  campanha e da data;
+- manter as vinte execuções recentes somente para contar falhas consecutivas;
+- permitir um ciclo terminal sem prazo rígido quando todos os jogos canônicos
+  da data estiverem encerrados e o marco `fim` ainda não existir;
+- recuperar a data autorizada anterior que esteja terminal e sem marco `fim`;
+- retomar a data corrente no ciclo seguinte;
+- preservar idempotência por campanha, data e minuto e todas as barreiras de
+  cota, identidade, agenda e persistência isolada.
+
+### Consequências e evidência
+
+- o PR #170 implementou e testou os cenários de prazo excedido, memória do
+  marco e recuperação posterior;
+- a execução 289 recuperou 29 de agosto com três resultados finais concordantes
+  e registrou exatamente um marco `fim`;
+- a execução seguinte voltou aos seis jogos de 30 de agosto;
+- nenhuma tabela competitiva, variável ou estrutura do Supabase foi alterada.
+
+## DEC-2026-031 — Eventos da API-Football terão sombra abrangente e extensível
+
+- Data: 2026-08-30
+- Status: aceita para planejamento; implementação pendente
+- Responsáveis: manutenção do projeto
+- Substitui: não se aplica
+- Impacto: alto
+
+### Contexto
+
+A coleta atual registra o minuto observado da partida, mas não persiste o minuto
+do gol nem os demais eventos normalizados pelo adaptador. Restringir a futura
+tabela apenas a gols exigiria novas migrações para cartões, substituições, VAR
+ou tipos acrescentados pelo fornecedor.
+
+### Decisão
+
+- planejar `transicao_api_eventos` para todos os tipos de evento retornados;
+- vincular cada linha à execução, ao jogo canônico e aos identificadores do
+  fornecedor;
+- preservar minuto, acréscimos, equipe, jogador, participante relacionado,
+  tipo, detalhe, comentário e payload original sanitizado e limitado;
+- manter campos originais mesmo para tipos desconhecidos e normalização
+  opcional para categorias conhecidas;
+- usar chave estável, hash e estado observacional para idempotência, correções e
+  desaparecimentos sem apagar histórico;
+- validar retenção e condições de uso antes de persistir payload original;
+- reprocessar controladamente a rodada 25 somente após o relatório consolidado.
+
+### Consequências
+
+- a campanha atual não muda durante a rodada 25;
+- nenhuma interface ou tabela competitiva passa a consumir eventos nesta fase;
+- migração, código, aplicação remota e reprocessamento exigem plano e
+  autorizações separados;
+- tipos futuros podem ser preservados sem bloquear a coleta.

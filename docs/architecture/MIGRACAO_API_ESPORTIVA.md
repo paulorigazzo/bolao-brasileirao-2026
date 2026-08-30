@@ -694,6 +694,52 @@ da auditoria promove URLs para `public.jogos`, altera a interface ou cria nova
 tabela. Um catálogo canônico e a eventual cópia para armazenamento controlado
 dependem de tarefa e aprovação próprias.
 
+### Execução operacional da Fase 5B.3B.2
+
+A campanha `5b3-round-25` foi ativada para observar os dez jogos da rodada 25,
+distribuídos entre 29 e 31 de agosto de 2026. O estado de identidade permaneceu
+em dez mapeamentos completos na rodada, 255 completos na temporada, 125
+integralmente nulos e nenhum preenchimento parcial. A coleta grava somente nas
+tabelas de transição e mantém a football-data.org como fonte oficial.
+
+Em 29 de agosto, a primeira janela real revelou dois defeitos antes do corte. A
+Function inicialmente falhou com `ReferenceError: data is not defined` ao
+consultar o histórico da campanha. O hotfix do PR #169 corrigiu a referência,
+acrescentou cobertura da janela ativa e restabeleceu a coleta. Depois, o jogo
+Vasco 3 x 1 Cruzeiro terminou após a última fotografia elegível: às 23h15, a
+API-Football mostrava 3 x 0 em 90+2 e a fonte oficial ainda mostrava 2 x 0. A
+janela rígida de 120 minutos impediu uma fotografia terminal. A mesma análise
+mostrou que o marco `inicio` era repetido quando saía das vinte execuções mais
+recentes.
+
+O hotfix do PR #170 separou a detecção permanente dos marcos da janela usada
+para falhas consecutivas, removeu o prazo rígido do ciclo terminal e acrescentou
+recuperação de data autorizada anterior sem marco `fim`. Após o deploy, a
+execução 289 recuperou 29 de agosto com as duas fontes encerradas e concordantes
+em 2 x 1, 2 x 1 e 3 x 1, registrou o marco `fim` uma única vez e, no minuto
+seguinte, a campanha retomou os seis jogos de 30 de agosto. Durante
+Athletico-PR 1 x 1 Fluminense, as duas fontes concordaram no intervalo e a
+API-Football preservou 45+8; as seis primeiras execuções posteriores ao fix
+tiveram sucesso, sem falha, duplicação ou nova repetição de classificação.
+
+O relatório incremental e as evidências reproduzíveis estão em
+[Evidências operacionais da rodada 25](./EVIDENCIAS_API_FOOTBALL_RODADA_25.md).
+O veredicto de corte permanece bloqueado até o encerramento de 31 de agosto e o
+relatório consolidado.
+
+### Extensão planejada para eventos
+
+A fotografia atual preserva placar e relógio observado, mas não persiste o
+minuto específico de gols ou os demais eventos retornados pela API-Football. A
+extensão aprovada para planejamento deverá criar uma tabela sombra própria e
+capturar todos os tipos de evento disponíveis, mantendo campos originais e uma
+normalização opcional. Gols, cartões, substituições, VAR, tipos desconhecidos e
+correções posteriores deverão ser auditáveis e idempotentes.
+
+A migração, a implementação e o reprocessamento da rodada 25 ocorrerão somente
+depois do relatório consolidado, mediante plano e autorizações próprios. Até lá,
+a campanha corrente permanece estável e sem persistência de eventos.
+
 ## Estratégia de rollback
 
 Antes do corte, devem existir:
@@ -771,6 +817,7 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | 2026-08-25 | 1.5 | Metadados opcionais de local, escudos e códigos preparados na 5B.3B.2A, ainda sem aplicação remota |
 | 2026-08-25 | 1.6 | Migração de metadados aplicada e reconciliada com a versão remota `20260825151356` |
 | 2026-08-29 | 1.7 | Portão visual 5B.3C definido com auditoria técnica e revisão humana dos escudos |
+| 2026-08-30 | 1.8 | Execução real da rodada 25, hotfixes #169 e #170, recuperação terminal e extensão de eventos registradas |
 
 ## Referências internas
 
