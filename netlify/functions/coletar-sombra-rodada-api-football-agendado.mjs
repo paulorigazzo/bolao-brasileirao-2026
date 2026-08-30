@@ -33,10 +33,34 @@ function consecutiveFailures(history) {
   return count;
 }
 
+function allGamesTerminal(games) {
+  return games.length > 0
+    && games.every((game) => TERMINAL.has(String(game.status || "").toLowerCase()));
+}
+
 export function allowTerminalFinalCycle(games, instant, window) {
   if (window.reason !== "round_terminal" || !games.length) return false;
-  const lastKickoff = Math.max(...games.map((game) => new Date(game.inicio).getTime()));
-  return Number.isFinite(lastKickoff) && instant.getTime() <= lastKickoff + 120 * 60_000;
+  return allGamesTerminal(games);
+}
+
+async function markerExists(supabase, campaign, date, marker) {
+  const { data: rows, error } = await supabase.from("transicao_api_execucoes")
+    .select("id")
+    .eq("fase", "sombra_pre_corte")
+    .contains("detalhes", { campanha: campaign, data: date, classificacao_marco: marker })
+    .limit(1);
+  if (error) throw new Error(`scheduled_round_marker_read_failed:${error.message}`);
+  return (rows || []).length > 0;
+}
+
+async function pendingRecoveryDate(supabase, games, config, currentDate) {
+  const previousDates = config.dates.filter((date) => date < currentDate).sort().reverse();
+  for (const date of previousDates) {
+    const dateGames = games.filter((game) => localDate(new Date(game.inicio)) === date);
+    if (!allGamesTerminal(dateGames)) continue;
+    if (!await markerExists(supabase, config.campaign, date, "fim")) return date;
+  }
+  return null;
 }
 
 export async function runScheduledRoundShadow({
@@ -46,13 +70,15 @@ export async function runScheduledRoundShadow({
   if (!config.enabled) return { ok: true, skipped: "shadow_disabled" };
   if (!config.valid) return { ok: false, skipped: "shadow_config_invalid" };
   const instant = now();
-  const date = localDate(instant);
-  if (!config.dates.includes(date)) return { ok: true, skipped: "date_not_authorized" };
+  const currentDate = localDate(instant);
+  if (!config.dates.includes(currentDate)) return { ok: true, skipped: "date_not_authorized" };
   if (!apiKey) return { ok: false, skipped: "api_key_missing" };
 
   const { data: games, error: gamesError } = await supabase.from("jogos")
     .select("id_jogo,inicio,status").eq("rodada", config.round);
   if (gamesError) throw new Error(`scheduled_round_games_read_failed:${gamesError.message}`);
+  const recoveryDate = await pendingRecoveryDate(supabase, games || [], config, currentDate);
+  const date = recoveryDate || currentDate;
   const dateGames = (games || []).filter((game) => localDate(new Date(game.inicio)) === date);
   const window = evaluateRoundShadowWindow(dateGames, instant);
   const terminalFinalCandidate = allowTerminalFinalCycle(dateGames, instant, window);
@@ -68,12 +94,12 @@ export async function runScheduledRoundShadow({
   if (historyError) throw new Error(`scheduled_round_history_read_failed:${historyError.message}`);
   if (consecutiveFailures(history || []) >= 3) return { ok: false, skipped: "three_consecutive_failures" };
 
-  const markers = new Set((history || []).filter((item) => item.classificacoes_sombra === 1)
-    .map((item) => item.detalhes?.classificacao_marco).filter(Boolean));
-  const allTerminal = dateGames.length > 0
-    && dateGames.every((game) => TERMINAL.has(String(game.status || "").toLowerCase()));
-  const classificationMarker = !markers.has("inicio") ? "inicio"
-    : allTerminal && !markers.has("fim") ? "fim" : null;
+  const allTerminal = allGamesTerminal(dateGames);
+  const hasStartMarker = await markerExists(supabase, config.campaign, date, "inicio");
+  const hasFinishMarker = allTerminal
+    ? await markerExists(supabase, config.campaign, date, "fim") : false;
+  const classificationMarker = !hasStartMarker ? "inicio"
+    : allTerminal && !hasFinishMarker ? "fim" : null;
   if (terminalFinalCandidate && classificationMarker == null) {
     return { ok: true, skipped: "round_terminal" };
   }

@@ -53,7 +53,8 @@ function gamesOnly(games) {
   };
 }
 
-function gamesAndHistory(games, expectedDetails) {
+function gamesAndHistory(games, expectedDetails, existingMarkers = []) {
+  const markers = new Set(existingMarkers);
   return {
     from(table) {
       if (table === "jogos") {
@@ -68,6 +69,10 @@ function gamesAndHistory(games, expectedDetails) {
             return {
               contains: (detailsColumn, details) => {
                 assert.equal(detailsColumn, "detalhes");
+                if (details.classificacao_marco) {
+                  const key = `${details.data}:${details.classificacao_marco}`;
+                  return { limit: async () => ({ data: markers.has(key) ? [{ id: 1 }] : [], error: null }) };
+                }
                 assert.deepEqual(details, expectedDetails);
                 return {
                   order: () => ({ limit: async () => ({ data: [], error: null }) }),
@@ -86,7 +91,7 @@ assert.equal(allowTerminalFinalCycle(
 ), true);
 assert.equal(allowTerminalFinalCycle(
   [{ ...game, status: "encerrado" }], new Date("2026-08-29T23:31:00Z"), { reason: "round_terminal" },
-), false);
+), true);
 assert.deepEqual(await runScheduledRoundShadow({
   supabase: gamesOnly([game]), apiKey: "test-only", config,
   now: () => new Date("2026-08-29T21:00:00Z"),
@@ -98,5 +103,34 @@ assert.deepEqual(await runScheduledRoundShadow({
   now: () => new Date("2026-08-29T21:20:00Z"),
   collectRoundCycle: async () => ({ ok: true }),
 }), { ok: true });
+
+let rememberedMarkerCall;
+assert.deepEqual(await runScheduledRoundShadow({
+  supabase: gamesAndHistory(
+    [game], { campanha: "5b3-round-25", data: "2026-08-29" }, ["2026-08-29:inicio"],
+  ),
+  apiKey: "test-only", config,
+  now: () => new Date("2026-08-29T21:21:00Z"),
+  collectRoundCycle: async (options) => { rememberedMarkerCall = options; return { ok: true }; },
+}), { ok: true });
+assert.equal(rememberedMarkerCall.includeStandings, false);
+assert.equal(rememberedMarkerCall.classificationMarker, null);
+
+const previousGame = { ...game, status: "encerrado" };
+const currentGame = { id_jogo: 2, inicio: "2026-08-30T16:00:00Z", status: "agendado" };
+let recoveryCall;
+assert.deepEqual(await runScheduledRoundShadow({
+  supabase: gamesAndHistory(
+    [previousGame, currentGame],
+    { campanha: "5b3-round-25", data: "2026-08-29" },
+    ["2026-08-29:inicio"],
+  ),
+  apiKey: "test-only", config,
+  now: () => new Date("2026-08-30T12:00:00Z"),
+  collectRoundCycle: async (options) => { recoveryCall = options; return { ok: true }; },
+}), { ok: true });
+assert.equal(recoveryCall.date, "2026-08-29");
+assert.equal(recoveryCall.includeStandings, true);
+assert.equal(recoveryCall.classificationMarker, "fim");
 
 console.log("Agendamento 5B.3B verificado: bloqueio padrão, configuração, datas e janela.");
