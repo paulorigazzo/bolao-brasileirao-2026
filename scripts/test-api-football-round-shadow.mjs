@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import {
-  collectApiFootballRoundCycle, evaluateApiFootballQuota, evaluateRoundShadowWindow,
+  buildEventPersistence, collectApiFootballRoundCycle, evaluateApiFootballQuota, evaluateRoundShadowWindow,
   reconcileRoundFixtures, shouldInterruptRoundShadow,
 } from "../netlify/functions/_api-football-round-shadow.mjs";
 
@@ -41,7 +41,7 @@ assert.equal(reconcileRoundFixtures([canonical], [normalizedProvider]).length, 1
 assert.throws(() => reconcileRoundFixtures([{ ...canonical, api_football_id: null }], [normalizedProvider]), /canonical_mapping_incomplete/);
 assert.throws(() => reconcileRoundFixtures([canonical], [{ ...normalizedProvider, home: { providerTeamId: 1 } }]), /mapped_identity_conflict/);
 
-function fakeSupabase() {
+function fakeSupabase({ rpcError = null } = {}) {
   const writes = [];
   const cacheTable = standingsEnvelope.response[0].league.standings[0].map((row) => ({
     position: row.rank, teamId: row.team.id, team: row.team.name, playedGames: row.all.played,
@@ -50,6 +50,10 @@ function fakeSupabase() {
   }));
   return {
     writes,
+    rpc(name, args) {
+      writes.push({ rpc: name, args });
+      return Promise.resolve({ data: rpcError ? null : 1, error: rpcError });
+    },
     from(table) {
       if (table === "jogos") return { select: () => ({ eq: async () => ({ data: [canonical], error: null }) }) };
       if (table === "classificacao_cache") return { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { payload: { table: cacheTable }, atualizado_em: "2026-08-25T01:30:00Z" }, error: null }) }) }) };
@@ -79,13 +83,21 @@ const result = await collectApiFootballRoundCycle({
     return new Response(JSON.stringify(url.includes("/standings?") ? standingsEnvelope : fixtureEnvelope), { status: 200, headers });
   },
 });
-assert.deepEqual(result, { ok: true, executionId: 88, games: 1, calls: 2, standings: true });
+assert.deepEqual(result, {
+  ok: true, executionId: 88, games: 1, calls: 2, standings: true, eventLots: 1, events: 5,
+});
 assert.match(urls[0], /fixtures\?league=71&season=2026&date=2026-08-24&timezone=America%2FSao_Paulo$/);
+assert.equal(urls.length, 2);
 assert.equal(supabase.writes.find((write) => write.table === "transicao_api_jogos").value.length, 2);
 const roundSnapshots = supabase.writes.find((write) => write.table === "transicao_api_jogos").value;
 assert.deepEqual(roundSnapshots.map((row) => row.time_casa_codigo), [null, "BOT"]);
 assert.deepEqual(roundSnapshots.map((row) => row.local_cidade), [null, "Rio de Janeiro"]);
 assert.equal(supabase.writes.find((write) => write.table === "transicao_api_classificacoes").value.length, 2);
+const eventRpc = supabase.writes.find((write) => write.rpc === "registrar_lote_eventos_sombra");
+assert.equal(eventRpc.args.p_lote.quantidade_eventos, 5);
+assert.equal(eventRpc.args.p_lote.lista_disponivel, true);
+assert.equal(eventRpc.args.p_eventos.length, 5);
+assert.equal(supabase.writes.some((write) => write.table === "transicao_api_eventos"), false);
 assert.equal(supabase.writes.some((write) => write.table === "jogos"), false);
 assert.equal(supabase.writes.some((write) => write.table === "classificacao_cache"), false);
 assert.equal(JSON.stringify(supabase.writes).includes("test-only"), false);
@@ -98,4 +110,53 @@ await assert.rejects(collectApiFootballRoundCycle({
 }), /daily_reserve_reached/);
 assert.equal(blocked.writes.some((write) => write.table === "transicao_api_jogos"), false);
 
-console.log("Núcleo 5B.3A verificado: janela, cota, identidade, lote, classificação e isolamento.");
+function event(index, typeRaw, elapsed = 10) {
+  return {
+    providerEventKey: `fixture:${index}:${elapsed}`,
+    elapsed, extra: null, teamProviderId: 1, teamName: "Time",
+    playerProviderId: index, playerName: `Jogador ${index}`,
+    relatedPlayerProviderId: null, relatedPlayerName: null,
+    typeRaw, detailRaw: "detalhe", comments: null,
+  };
+}
+const allTypes = ["Goal", "Card", "subst", "VAR", "Something New"].map((type, index) => event(index + 1, type));
+const eventProvider = {
+  providerFixtureId: 123,
+  events: allTypes,
+  eventObservation: { available: true, count: allTypes.length, valid: true, warnings: [] },
+};
+const persisted = buildEventPersistence(eventProvider, 999, 88, "2026-08-25T02:00:00.000Z");
+assert.deepEqual(persisted.events.map((row) => row.categoria_normalizada), [
+  "gol", "cartao", "substituicao", "var", "desconhecido",
+]);
+assert.deepEqual(persisted.events.map((row) => row.tipo_original), ["Goal", "Card", "subst", "VAR", "Something New"]);
+const reordered = buildEventPersistence({ ...eventProvider, events: [...allTypes].reverse() }, 999, 88, "2026-08-25T02:00:00.000Z");
+assert.equal(reordered.lot.hash_lista, persisted.lot.hash_lista);
+const corrected = buildEventPersistence({
+  ...eventProvider,
+  events: [{ ...allTypes[0], elapsed: 11, providerEventKey: "fixture:1:11" }],
+  eventObservation: { available: true, count: 1, valid: true, warnings: [] },
+}, 999, 89, "2026-08-25T02:01:00.000Z");
+assert.equal(corrected.events[0].chave_logica, persisted.events[0].chave_logica);
+assert.notEqual(corrected.events[0].hash_conteudo, persisted.events[0].hash_conteudo);
+const unavailable = buildEventPersistence({ providerFixtureId: 123, events: [] }, 999, 88, "2026-08-25T02:00:00.000Z");
+assert.equal(unavailable.lot.lista_disponivel, false);
+assert.equal(unavailable.lot.hash_lista, null);
+assert.equal(unavailable.lot.valido, false);
+assert.throws(() => buildEventPersistence({
+  ...eventProvider, events: [allTypes[0], { ...allTypes[1], providerEventKey: allTypes[0].providerEventKey }],
+  eventObservation: { available: true, count: 2, valid: true, warnings: [] },
+}, 999, 88, "2026-08-25T02:00:00.000Z"), /event_keys_duplicated/);
+
+const failedEvents = fakeSupabase({ rpcError: { message: "denied" } });
+await assert.rejects(collectApiFootballRoundCycle({
+  supabase: failedEvents, apiKey: "test-only", round: 24, date: "2026-08-24",
+  now: () => new Date("2026-08-25T02:00:00Z"),
+  fetchImpl: async () => new Response(JSON.stringify(fixtureEnvelope), { status: 200, headers }),
+}), /round_events_insert_failed/);
+assert.equal(failedEvents.writes.some((write) => write.table === "jogos"), false);
+const failedExecution = failedEvents.writes.find((write) =>
+  write.table === "transicao_api_execucoes" && write.value?.erros_sombra?.length);
+assert.deepEqual(failedExecution.value.erros_sombra, ["round_events_insert_failed"]);
+
+console.log("Núcleo 5B.4B verificado: eventos auxiliares, auditoria, falha segura e isolamento competitivo.");

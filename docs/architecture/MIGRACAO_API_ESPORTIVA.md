@@ -770,6 +770,20 @@ e o reprocessamento não foram iniciados. O histórico local foi reconciliado co
 a versão remota e passou a ser protegido pelo registro e check obrigatórios de
 migrations do Supabase.
 
+#### Integração inativa 5B.4B
+
+O coletor de rodada passa a preparar um lote auxiliar por jogo e gravá-lo pela
+RPC `registrar_lote_eventos_sombra`. A resposta de fixtures já contém os eventos,
+portanto a integração não acrescenta chamadas à API-Football. Cada execução
+registra quantidades de lotes, eventos, listas disponíveis, vazias,
+indisponíveis, inválidas e tipos desconhecidos.
+
+Lista ausente, lista vazia potencialmente incompleta e falha de persistência são
+auditadas sem alterar a validade de status ou placar. Falha da RPC encerra a
+execução como malsucedida; observações append-only eventualmente gravadas
+permanecem como evidência. A campanha continua desabilitada, e reprocessamento
+da rodada 25 ou nova coleta ao vivo exigem portões próprios.
+
 ### Encerramento operacional da campanha
 
 A campanha concluída deve ser desativada antes de preparar outro acionamento.

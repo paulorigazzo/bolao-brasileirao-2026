@@ -250,6 +250,10 @@ Eventos não fazem parte do estado competitivo mínimo. Quando coletados:
 | `type` | string |
 | `detail` | string ou null |
 
+Cada jogo também expõe `eventObservation` com `available`, `count`, `valid` e
+`warnings`. Esse bloco distingue uma lista presente e vazia de um campo ausente
+ou inválido sem alterar a validade competitiva do jogo.
+
 Regras obrigatórias:
 
 - lista vazia não apaga eventos anteriormente observados;
@@ -257,6 +261,12 @@ Regras obrigatórias:
 - evento de gol não altera placar por conta própria;
 - deduplicação usa chave derivada de fixture, tempo, time, jogador, tipo e detalhe;
 - ausência de eventos gera warning, não falha, quando estado e placar são válidos;
+- lista presente e vazia é válida antes de eventos esperados; com placar positivo
+  em jogo ao vivo ou encerrado, permanece registrada, mas é marcada incompleta;
+- o hash da lista usa hashes de conteúdo ordenados, de modo que mera reordenação
+  do fornecedor não produza uma divergência falsa;
+- tipos conhecidos normalizam para `gol`, `cartao`, `substituicao` ou `var`;
+  qualquer outro tipo permanece integralmente preservado como `desconhecido`;
 - payload completo de escalações, atletas ou estatísticas não integra este
   contrato e não deve ser persistido sem novo escopo.
 
