@@ -1164,6 +1164,22 @@ ou tipos acrescentados pelo fornecedor.
 - falha da RPC marca a execução como malsucedida, sem escrita competitiva;
 - campanha, reprocessamento e consumo pelo aplicativo permanecem desabilitados.
 
+### Preparação do reprocessamento aprovada em 2026-09-01
+
+- a simulação histórica deverá abranger os 255 jogos inequivocamente mapeados;
+- a resposta de temporada será usada apenas como índice; como a prova real
+  confirmou ausência de eventos nesse envelope, o detalhe será consultado por
+  fixture aceita e produzirá manifesto sanitizado, local e não versionado;
+- os dez jogos da rodada 25 permanecem como único piloto de persistência;
+- os outros 245 jogos poderão formar um backfill 5B.4D separado depois da
+  validação do piloto;
+- os 125 jogos sem mapeamento permanecem excluídos e integralmente nulos;
+- o modo de escrita do utilitário fica indisponível até simulação real, revisão
+  do hash e nova autorização humana.
+- após a simulação aceita, o caminho de escrita foi preparado com confirmação
+  textual, hash obrigatório, bloqueio de lote preexistente, execução por data e
+  RPC atômica por jogo; nenhuma aplicação real foi realizada.
+
 ## DEC-2026-032 — Rodada 25 conclui a sombra pré-corte sem autorizar o corte
 
 - Data: 2026-08-31
