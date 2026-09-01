@@ -1124,6 +1124,19 @@ ou tipos acrescentados pelo fornecedor.
   autorizações separados;
 - tipos futuros podem ser preservados sem bloquear a coleta.
 
+### Implementação fundacional aprovada em 2026-09-01
+
+- separar a observação em `transicao_api_eventos_lotes` e
+  `transicao_api_eventos`, preservando explicitamente listas vazias e ausentes;
+- usar persistência append-only e uma RPC transacional `security invoker`,
+  executável apenas pelo `service_role`;
+- manter tipo, detalhe e comentário originais e classificar opcionalmente gol,
+  cartão, substituição, VAR ou desconhecido;
+- não persistir o payload integral do fornecedor até validação específica de
+  retenção e direitos;
+- manter aplicação no Supabase, integração do coletor e reprocessamento da
+  rodada 25 sujeitos a autorizações humanas separadas.
+
 ## DEC-2026-032 — Rodada 25 conclui a sombra pré-corte sem autorizar o corte
 
 - Data: 2026-08-31

@@ -748,6 +748,21 @@ A migração, a implementação e o reprocessamento da rodada 25 permanecem
 sujeitos a plano e autorizações próprios. O relatório consolidado removeu apenas
 essa dependência temporal; não iniciou persistência de eventos.
 
+#### Fundação 5B.4A aprovada
+
+A persistência auxiliar será separada em `transicao_api_eventos_lotes` e
+`transicao_api_eventos`. O lote registra inclusive a diferença entre uma lista
+disponível e vazia e uma lista temporariamente ausente. Os eventos preservam os
+campos originais e uma categoria normalizada extensível, sem autoridade sobre
+placar, status ou qualquer outro dado competitivo.
+
+A gravação será append-only e atômica por meio de uma função `security invoker`
+restrita ao `service_role`. Correções, desaparecimentos e reaparecimentos serão
+novas observações; nenhum deles apagará o histórico. O payload integral do
+fornecedor fica fora desta fundação até existir validação específica de retenção
+e direitos. Aplicação remota, integração do coletor e reprocessamento controlado
+da rodada 25 continuam sendo portões independentes com aprovação humana.
+
 ### Encerramento operacional da campanha
 
 A campanha concluída deve ser desativada antes de preparar outro acionamento.
