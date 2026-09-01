@@ -910,6 +910,22 @@ Esta foi a segunda ocorrência em que o conector gerou uma versão remota distin
 do timestamp do arquivo já publicado. O workflow foi reforçado para impedir
 novo encerramento com histórico divergente.
 
+### Bloqueio mecânico após a terceira ocorrência
+
+Em 2026-09-01, a fundação de eventos foi registrada remotamente como
+`20260901161645`, embora o arquivo integrado ainda usasse `20260901120000`. A
+causa foi novamente aplicar pelo conector depois do merge: o conector gera uma
+nova versão e não preserva o timestamp local.
+
+Além de renomear o artefato para
+`20260901161645_add_api_football_shadow_events.sql`, o projeto passa a manter
+`supabase/migration-history.json` e a executar
+`check:supabase-migration-history` na suíte obrigatória. O check exige
+correspondência exata entre arquivos e registro e rejeita migrations ainda não
+reconciliadas como aplicadas. Aplicações pelo conector devem ocorrer enquanto o
+PR estiver em Draft; indisponibilidade da CLI ou da consulta remota passa a ser
+um bloqueio, não uma justificativa para aplicar depois do merge.
+
 ## DEC-2026-026 — Agenda canônica distingue horário confirmado de data provisória
 
 - Data: 2026-08-25

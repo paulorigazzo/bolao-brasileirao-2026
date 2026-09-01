@@ -266,9 +266,25 @@ mecanismo aplicará o arquivo versionado:
 6. não reparar a divergência alterando diretamente a tabela de histórico de
    migrações.
 
-O contrato de saída da aplicação remota deve informar a versão registrada e a
-igualdade entre histórico remoto e arquivo local. O Encerramento só pode
-prosseguir quando essa igualdade estiver comprovada.
+Controles obrigatórios adicionais:
+
+7. toda migration a partir de `20260825000000` deve constar em
+   `supabase/migration-history.json` com a versão e o nome observados no projeto
+   remoto canônico;
+8. `npm run check:supabase-migration-history` deve bloquear migration ausente,
+   renomeada incorretamente ou ainda marcada como não aplicada;
+9. quando o conector oficial for usado, a aplicação e a reconciliação devem
+   ocorrer com o PR ainda em Draft; o PR só pode ficar pronto para merge depois
+   de o arquivo, o registro e o histórico remoto coincidirem;
+10. se a CLI autenticada ou a consulta remota não estiverem disponíveis, parar
+    no portão. Falha de ferramenta não autoriza usar o conector depois do merge;
+11. nunca excluir a branch de uma entrega com migration antes de registrar no
+    relatório a versão remota e o resultado positivo do verificador.
+
+O contrato de saída da aplicação remota deve informar a versão registrada, a
+igualdade entre histórico remoto, registro canônico e arquivo local, e o check
+automatizado aprovado. O Encerramento só pode prosseguir quando essa igualdade
+estiver comprovada.
 
 ## Fase 8 — Merge
 

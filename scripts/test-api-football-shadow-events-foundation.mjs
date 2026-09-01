@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const sql = await readFile(new URL(
-  "../supabase/migrations/20260901120000_add_api_football_shadow_events.sql",
+  "../supabase/migrations/20260901161645_add_api_football_shadow_events.sql",
   import.meta.url,
 ), "utf8");
 const executableSql = sql.replace(/^\s*--.*$/gm, "");
@@ -18,6 +18,7 @@ assert.match(sql, /unique \(lote_id, chave_fornecedor\)/);
 assert.match(sql, /foreign key \(lote_id, execucao_id, fornecedor, id_jogo\)/);
 assert.match(sql, /categoria_normalizada in \('gol', 'cartao', 'substituicao', 'var', 'desconhecido'\)/);
 assert.match(sql, /security invoker/);
+assert.match(sql, /Versão registrada remotamente pelo Supabase: 20260901161645/);
 assert.match(sql, /set search_path = public, pg_temp/);
 assert.match(sql, /revoke all on function public\.registrar_lote_eventos_sombra\(jsonb, jsonb\)/);
 assert.match(sql, /grant execute on function public\.registrar_lote_eventos_sombra\(jsonb, jsonb\)[\s\S]*to service_role/);
