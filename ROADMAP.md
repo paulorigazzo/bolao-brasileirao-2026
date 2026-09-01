@@ -4,7 +4,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.24.1`.
+- Versão funcional: `v6.24.2`.
 - Prioridade: **manter o Bolão 2026 estável e independente e simplificar o Rigazzo como evolução caseira com Temporadas e Ligas**.
 - Próxima etapa coordenada: executar, em autorização operacional própria, o ensaio somente leitura da Fase 6B e preparar o preflight da Fase 6C; a football-data.org permanece oficial. A evolução independente do Rigazzo continua congelada nos termos já documentados.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.

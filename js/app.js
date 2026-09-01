@@ -20,7 +20,7 @@ import { buildFriendlyRankingsModel } from "./friendly-rankings-engine.js";
 import { adminRoundGameIds, loadAdminPickProgress } from "./admin-pick-progress.js";
 import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js";
 
-const APP_VERSION = "6.24.1";
+const APP_VERSION = "6.24.2";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -3977,6 +3977,50 @@ async function runAdminShadowCollection(event){
     if(button){button.disabled=false;button.textContent=originalText;}
   }
 }
+function apiFootballCutoverVerdict(result){
+  const hashes=result?.hashes||{};
+  return result?.ok===true
+    && Number(result?.canonicalGames)===10
+    && Number(result?.mappedGames)===10
+    && Number(result?.unmappedGames)===0
+    && Number(result?.apiFootballGames)===10
+    && Number(result?.footballDataGames)===10
+    && Number(result?.apiFootballStandings)===20
+    && Number(result?.footballDataStandings)===20
+    && Number(result?.writes)===0
+    && hashes.gamesBefore===hashes.gamesAfter
+    && hashes.picksBefore===hashes.picksAfter
+    && result?.rollback?.restored===true;
+}
+function renderApiFootballCutoverReport(result){
+  const approved=apiFootballCutoverVerdict(result),hashes=result?.hashes||{},quota=result?.quota||{};
+  return `<div class="admin-cutover-verdict ${approved?"is-success":"is-error"}"><strong>${approved?"✅ Ensaio aprovado":"⛔ Ensaio reprovado"}</strong><span>Rodada ${Number(result?.round)||"—"} • ${Number(result?.writes)||0} escrita(s)</span></div>
+    <div class="diagnostic-metrics admin-cutover-metrics"><div><span>Jogos canônicos</span><strong>${Number(result?.canonicalGames)||0}/10</strong></div><div><span>Mapeamentos</span><strong>${Number(result?.mappedGames)||0}/10</strong></div><div><span>API-Football</span><strong>${Number(result?.apiFootballGames)||0} jogos • ${Number(result?.apiFootballStandings)||0} clubes</strong></div><div><span>football-data.org</span><strong>${Number(result?.footballDataGames)||0} jogos • ${Number(result?.footballDataStandings)||0} clubes</strong></div><div><span>Mudanças propostas</span><strong>${Number(result?.proposedChanges)||0}</strong></div><div><span>Reparos propostos</span><strong>${Number(result?.proposedRepairs)||0}</strong></div><div><span>Cota diária</span><strong>${quota.dailyRemaining??"—"} / ${quota.dailyLimit??"—"}</strong></div><div><span>Cota por minuto</span><strong>${quota.minuteRemaining??"—"} / ${quota.minuteLimit??"—"}</strong></div></div>
+    <ul class="admin-cutover-checks"><li>${hashes.gamesBefore===hashes.gamesAfter?"✅":"⛔"} Hash de jogos preservado</li><li>${hashes.picksBefore===hashes.picksAfter?"✅":"⛔"} Hash de palpites preservado</li><li>${result?.rollback?.restored?"✅":"⛔"} Rollback integral simulado</li></ul>
+    <small>Hash do relatório</small><code class="admin-cutover-hash">${escapeHtml(result?.reportHash||"indisponível")}</code>`;
+}
+async function runAdminApiFootballCutoverRehearsal(event){
+  event?.preventDefault();
+  if(!isAdminUser()) return;
+  const round=Number($("adminCutoverRound")?.value),feedback=$("adminCutoverFeedback"),report=$("adminCutoverReport"),button=$("adminCutoverSubmit");
+  if(!Number.isInteger(round)||round<1||round>38){if(feedback) feedback.textContent="Informe uma rodada entre 1 e 38.";return;}
+  if(!window.confirm(`Executar o ensaio somente leitura da Fase 6B para a rodada ${round}? Serão consultadas as duas APIs e nenhum dado competitivo será gravado.`)) return;
+  const originalText=button?.textContent||"Executar ensaio 6B";
+  try{
+    if(button){button.disabled=true;button.textContent="Executando…";}
+    if(feedback){feedback.textContent="Comparando as duas fontes e validando os hashes…";feedback.className="admin-shadow-feedback";}
+    if(report) report.innerHTML="";
+    const {data:{session}}=await sb.auth.getSession();
+    if(!session?.access_token) throw new Error("Sessão administrativa expirada.");
+    const response=await fetch("/.netlify/functions/ensaiar-corte-api-football",{method:"POST",headers:{Authorization:`Bearer ${session.access_token}`,"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({rodada:round,confirmacao:"REHEARSE_API_FOOTBALL_CUTOVER"})});
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok||!result.ok) throw new Error(result.error||"O ensaio 6B não foi concluído.");
+    if(report) report.innerHTML=renderApiFootballCutoverReport(result);
+    if(feedback){feedback.textContent=apiFootballCutoverVerdict(result)?"Ensaio concluído sem mutação competitiva.":"Ensaio concluído com portão reprovado; não avance para o corte.";feedback.className=`admin-shadow-feedback ${apiFootballCutoverVerdict(result)?"is-success":"is-error"}`;}
+  }catch(error){
+    if(feedback){feedback.textContent=error.message||"O ensaio 6B não pôde ser concluído.";feedback.className="admin-shadow-feedback is-error";}
+  }finally{if(button){button.disabled=false;button.textContent=originalText;}}
+}
 async function renderAdminDiagnostic(){
   if(!isAdminUser()) return;
   const content=$("adminDiagnosticContent"), badge=$("adminDiagnosticBadge");
@@ -4006,6 +4050,7 @@ async function renderAdminDiagnostic(){
       <div class="diagnostic-section"><div class="diagnostic-autotest-head"><h3>Autoteste detalhado</h3><strong>${d.autotest.score}/100</strong></div><div class="diagnostic-checks">${d.autotest.checks.map(c=>`<div class="${c.ok?"ok":"fail"}"><span>${c.ok?"✔":"✕"}</span><span>${escapeHtml(c.label)}${diagnosticCheckDetail(c)}</span></div>`).join("")}</div></div>
       <div class="diagnostic-section"><h3>Logs recentes</h3><div class="diagnostic-log-list">${d.logs.slice(0,8).map(log=>`<div><span>${diagnosticDate(log.criado_em)}</span><strong>${log.sucesso?"🟢":"🔴"} ${escapeHtml(log.origem||"sincronização")}</strong><small>${log.sucesso?`${log.jogos_atualizados??0} jogos • ${diagnosticDuration(log.duracao_ms)}`:escapeHtml(log.erro||"Falha sem detalhes")}</small></div>`).join("")||'<p class="muted-note">Nenhum log disponível.</p>'}</div></div>
       <div class="diagnostic-section admin-shadow-section"><div class="admin-shadow-heading"><div><span>API-FOOTBALL</span><h3>Coleta em sombra — ensaio</h3></div><strong>Sem efeito competitivo</strong></div><p>Executa uma única observação e grava somente fotografias nas tabelas de transição.</p><form id="adminShadowForm" class="admin-shadow-form"><label>ID do jogo no Bolão<input id="adminShadowGameId" name="id_jogo" type="number" min="1" step="1" value="554970" required></label><label>Fixture da API-Football<input id="adminShadowFixtureId" name="fixture_id" type="number" min="1" step="1" value="1492340" required></label><button id="adminShadowSubmit" class="secondary" type="submit">Executar ensaio</button></form><p id="adminShadowFeedback" class="admin-shadow-feedback" role="status" aria-live="polite"></p></div>
+      <div class="diagnostic-section admin-shadow-section admin-cutover-section"><div class="admin-shadow-heading"><div><span>FASE 6B</span><h3>Ensaio do corte e rollback</h3></div><strong>Somente leitura</strong></div><p>Compara rodada e classificação nas duas fontes, valida cota e prova por hashes que jogos e palpites permanecem intactos.</p><form id="adminCutoverForm" class="admin-shadow-form admin-cutover-form"><label>Rodada do ensaio<input id="adminCutoverRound" name="rodada" type="number" min="1" max="38" step="1" value="25" required></label><button id="adminCutoverSubmit" class="secondary" type="submit">Executar ensaio 6B</button></form><p id="adminCutoverFeedback" class="admin-shadow-feedback" role="status" aria-live="polite"></p><div id="adminCutoverReport" class="admin-cutover-report" aria-live="polite"></div></div>
       <div class="diagnostic-actions"><button id="diagnosticRefreshBtn" class="secondary" type="button">🔄 Atualizar diagnóstico</button><button id="diagnosticSyncBtn" class="primary" type="button">⚽ Sincronizar agora</button><button id="diagnosticExportBtn" class="secondary" type="button">📥 Exportar logs</button></div>
       <small class="diagnostic-note">A disponibilidade da Football Data API é inferida pelos logs para não consumir cota; a atualidade do conteúdo é verificada separadamente nos jogos armazenados.</small>`;
     const sportsDelayed=d.sportsData?.status==="delayed";
@@ -4015,6 +4060,7 @@ async function renderAdminDiagnostic(){
     $("diagnosticRefreshBtn")?.addEventListener("click",renderAdminDiagnostic);
     $("diagnosticSyncBtn")?.addEventListener("click",async e=>{await syncGames(e.currentTarget); await renderAdminDiagnostic();});
     $("adminShadowForm")?.addEventListener("submit",runAdminShadowCollection);
+    $("adminCutoverForm")?.addEventListener("submit",runAdminApiFootballCutoverRehearsal);
     $("diagnosticExportBtn")?.addEventListener("click",()=>{
       const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),diagnostic:d},null,2)],{type:"application/json"});
       const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`bolao-diagnostico-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);

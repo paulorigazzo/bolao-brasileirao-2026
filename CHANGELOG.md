@@ -1,3 +1,10 @@
+# v6.24.2 — Acionador administrativo do ensaio 6B
+
+- Adiciona à Central de Diagnóstico um acionador autenticado para o ensaio somente leitura da Fase 6B.
+- Mantém o JWT encapsulado no cliente, exige confirmação humana e não o exibe nem registra.
+- Apresenta cobertura das duas fontes, cota, hashes competitivos, zero escrita, rollback e hash do relatório.
+- Mantém a football-data.org oficial e não executa automaticamente o ensaio, deploy ou corte.
+
 # v6.24.1 — Ensaio protegido do corte para API-Football
 
 - Adiciona um ensaio administrativo, explicitamente confirmado e somente leitura para comparar rodada e classificação nas duas fontes.

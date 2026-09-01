@@ -1295,3 +1295,32 @@ O ensaio não possui operações de escrita no Supabase e não altera configura�
 cache, fonte oficial ou Netlify. A football-data.org permanece oficial. A
 implementação local não substitui a execução real do ensaio, que exige
 autorização operacional separada, assim como preflight, deploy e corte.
+
+## DEC-2026-035 — Ensaio 6B deve ser acionado pela sessão encapsulada da Área ADM
+
+- Data: 2026-09-01
+- Status: aceita e implementada localmente
+- Responsáveis: manutenção do projeto
+- Impacto: médio; não autoriza execução nem corte
+
+### Contexto
+
+O endpoint 6B foi publicado com autenticação obrigatória, mas não havia um fluxo
+de operador no app. Executá-lo externamente exigiria extrair o JWT do navegador,
+contrariando a proteção de credenciais adotada pelo projeto.
+
+### Decisão
+
+- adicionar o acionador à Central de Diagnóstico da Área ADM;
+- obter a sessão pelo cliente Supabase já ativo e transmitir o JWT apenas ao
+  endpoint do próprio app;
+- exigir rodada válida e confirmação humana;
+- apresentar somente o relatório sanitizado, sem token ou payload bruto;
+- reprovar visualmente o portão se cobertura, hashes, zero escrita ou rollback
+  não atenderem ao contrato.
+
+### Consequências
+
+O ensaio passa a ser operacionalizável sem exposição de credenciais. A entrega
+do acionador não executa o ensaio, não altera o Supabase ou o Netlify e não muda
+a football-data.org como fonte oficial.
