@@ -1123,3 +1123,52 @@ ou tipos acrescentados pelo fornecedor.
 - migração, código, aplicação remota e reprocessamento exigem plano e
   autorizações separados;
 - tipos futuros podem ser preservados sem bloquear a coleta.
+
+## DEC-2026-032 — Rodada 25 conclui a sombra pré-corte sem autorizar o corte
+
+- Data: 2026-08-31
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Substitui: veredicto pendente da Fase 5B.3B.2
+- Impacto: alto na decisão futura; somente documental nesta aplicação
+
+### Contexto
+
+A campanha `5b3-round-25` observou os dez jogos entre 29 e 31 de agosto. Dois
+defeitos operacionais foram encontrados antes do corte e corrigidos pelos PRs
+#169 e #170. A recuperação terminal recompôs a fotografia final de 29 de agosto
+e os dias seguintes exercitaram os marcos permanentes até Remo 2 x 3 Coritiba.
+
+### Decisão
+
+- considerar a Fase 5B concluída com uma rodada completa de evidência;
+- não exigir segunda rodada com o mesmo contrato, pois os dez jogos terminaram
+  válidos e concordantes e as lacunas encontradas foram corrigidas;
+- preservar 255 mapeamentos completos, 125 jogos integralmente nulos e nenhum
+  mapeamento parcial;
+- preservar toda a auditoria e desativar a campanha somente em portão
+  operacional autorizado;
+- manter o corte, a configuração da fonte e o deploy bloqueados até plano da
+  Fase 6 com rollback testado;
+- tratar eventos e auditoria visual dos escudos em tarefas separadas.
+
+### Evidência
+
+- 846 execuções, sem falhas, execuções abertas ou chaves duplicadas;
+- 8.258 fotografias de jogos, dez jogos, dois fornecedores, zero linha inválida
+  e zero erro de normalização;
+- dez estados finais e dez placares finais concordantes;
+- diferença de agenda máxima igual a zero minuto;
+- marco `fim` único para cada data depois da correção;
+- cota final em 7.486 de 7.500 chamadas;
+- escudos e locais presentes nas dez observações finais; códigos de três
+  letras ausentes, mas opcionais e sem autoridade sobre a sigla canônica.
+
+### Consequências
+
+- há evidência suficiente para planejar o próximo portão;
+- nenhuma fonte foi trocada e a football-data.org permanece oficial;
+- nenhuma variável do Netlify, tabela, dado competitivo ou versão foi alterado
+  por esta decisão documental;
+- uma nova sombra somente será necessária se o contrato mudar ou a extensão de
+  eventos exigir evidência operacional própria.

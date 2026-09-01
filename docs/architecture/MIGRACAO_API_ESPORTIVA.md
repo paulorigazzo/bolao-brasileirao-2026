@@ -384,7 +384,7 @@ Regras operacionais para a implementação da Fase 5B:
 | 3. Fundação no banco | concluída | migração aditiva revisada e aplicada |
 | 4. Coleta em sombra | concluída | duas provas reais isoladas, válidas e revisadas |
 | 5A. Acesso e desenho operacional | concluída | cobertura, limites e orçamento confirmados |
-| 5B. Sombra de rodada completa | em andamento | reconciliação seca concluída; gravação e coleta ainda pendentes |
+| 5B. Sombra de rodada completa | concluída | rodada 25 integralmente observada, reconciliada e auditada |
 | 6. Corte controlado | não iniciada | aprovação explícita e rollback pronto |
 | 7. Sombra pós-corte | não iniciada | 1–2 rodadas sem regressão material |
 | 8. Encerramento | não iniciada | decisão sobre retirada do legado e dados sombra |
@@ -722,10 +722,18 @@ Athletico-PR 1 x 1 Fluminense, as duas fontes concordaram no intervalo e a
 API-Football preservou 45+8; as seis primeiras execuções posteriores ao fix
 tiveram sucesso, sem falha, duplicação ou nova repetição de classificação.
 
-O relatório incremental e as evidências reproduzíveis estão em
+O relatório consolidado e as evidências reproduzíveis estão em
 [Evidências operacionais da rodada 25](./EVIDENCIAS_API_FOOTBALL_RODADA_25.md).
-O veredicto de corte permanece bloqueado até o encerramento de 31 de agosto e o
-relatório consolidado.
+Ao final de 31 de agosto, a campanha somou 846 execuções sem falhas, execuções
+abertas ou chaves duplicadas e 8.258 fotografias válidas. Os dez jogos
+terminaram com estados e placares concordantes nas duas fontes, diferença de
+agenda zero e um marco `fim` por data depois da correção. Remo 2 x 3 Coritiba
+encerrou a observação na execução 857.
+
+O veredicto é favorável ao planejamento do próximo portão, sem exigir uma
+segunda rodada com o mesmo contrato. Isso conclui a Fase 5B, mas não autoriza a
+Fase 6: desativação da campanha, configuração da fonte, deploy, corte e rollback
+continuam sujeitos a tarefas e autorizações independentes.
 
 ### Extensão planejada para eventos
 
@@ -736,9 +744,21 @@ capturar todos os tipos de evento disponíveis, mantendo campos originais e uma
 normalização opcional. Gols, cartões, substituições, VAR, tipos desconhecidos e
 correções posteriores deverão ser auditáveis e idempotentes.
 
-A migração, a implementação e o reprocessamento da rodada 25 ocorrerão somente
-depois do relatório consolidado, mediante plano e autorizações próprios. Até lá,
-a campanha corrente permanece estável e sem persistência de eventos.
+A migração, a implementação e o reprocessamento da rodada 25 permanecem
+sujeitos a plano e autorizações próprios. O relatório consolidado removeu apenas
+essa dependência temporal; não iniciou persistência de eventos.
+
+### Encerramento operacional da campanha
+
+A campanha concluída deve ser desativada antes de preparar outro acionamento.
+O procedimento deverá tornar `API_FOOTBALL_SHADOW_ENABLED` inativo, preservar
+campanha, rodada e datas para rastreabilidade, manter toda a auditoria e
+confirmar que nenhum novo registro foi criado depois da mudança. Reativar a
+mesma chave de controle é o rollback operacional, mas somente dentro de nova
+janela e autorização explícitas.
+
+Esta documentação não executa a desativação. A mudança de variável no Netlify,
+sua verificação e qualquer deploy formam um portão de produção separado.
 
 ## Estratégia de rollback
 
@@ -777,7 +797,8 @@ não deve produzir operação híbrida.
 - destino das tabelas de transição após estabilização.
 - estratégia de namespace do cache por fornecedor durante a sombra;
 - estratégia para os 255 mapeamentos aceitos e os 125 horários divergentes;
-- necessidade de uma segunda rodada de sombra após a primeira evidência completa.
+- necessidade de nova sombra somente se o contrato mudar ou a futura extensão
+  de eventos exigir evidência operacional própria.
 
 ## Protocolo de atualização para agentes
 
@@ -818,6 +839,7 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | 2026-08-25 | 1.6 | Migração de metadados aplicada e reconciliada com a versão remota `20260825151356` |
 | 2026-08-29 | 1.7 | Portão visual 5B.3C definido com auditoria técnica e revisão humana dos escudos |
 | 2026-08-30 | 1.8 | Execução real da rodada 25, hotfixes #169 e #170, recuperação terminal e extensão de eventos registradas |
+| 2026-08-31 | 1.9 | Rodada 25 consolidada com dez jogos concordantes; Fase 5B concluída e corte ainda bloqueado |
 
 ## Referências internas
 

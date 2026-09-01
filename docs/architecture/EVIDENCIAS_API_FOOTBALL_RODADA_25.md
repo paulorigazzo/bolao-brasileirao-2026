@@ -5,8 +5,9 @@
 - Período observado: 29 a 31 de agosto de 2026.
 - Campanha: `5b3-round-25`.
 - Fuso de apresentação: `America/Sao_Paulo`.
-- Estado: relatório incremental até 30 de agosto de 2026, 12h06.
-- Veredicto final: pendente do encerramento da rodada.
+- Estado: relatório consolidado em 31 de agosto de 2026, 22h02.
+- Veredicto final: favorável ao planejamento do próximo portão, sem autorizar
+  corte, configuração ou deploy.
 
 Este relatório registra evidências operacionais da Fase 5B.3B.2. Ele não
 autoriza corte, promoção de dados, alteração da fonte oficial ou desativação da
@@ -36,6 +37,9 @@ football-data.org.
 | 30/08, 12h00 | execução 289 | recuperação de 29/08 com três jogos finais concordantes e marco `fim` único |
 | 30/08, 12h01 | execução 290 | retorno automático à coleta dos seis jogos da data corrente |
 | 30/08, 12h06 | execução 295 | Athletico-PR 1 x 1 Fluminense no intervalo; API-Football em 45+8 e fontes concordantes |
+| 30/08, 21h28 | execução 792 | seis jogos da data encerrados e concordantes; marco `fim` único |
+| 31/08, 19h45 | abertura da última janela | Remo x Coritiba integralmente mapeado; marco `inicio` único |
+| 31/08, 22h01 | execução 857 | Remo 2 x 3 Coritiba encerrado nas duas fontes; marco `fim` único |
 
 ## Incidentes e correções
 
@@ -58,42 +62,56 @@ anterior e manteve o orçamento protegido.
 Os marcos eram inferidos das vinte execuções recentes. Em cadência de um minuto,
 o marco `inicio` desaparecia da consulta e a classificação era coletada de novo.
 Em 29 de agosto houve dez registros de `inicio`; antes do segundo hotfix, em 30
-de agosto houve três. O PR #170 passou a consultar cada marco diretamente e
-preservou a janela curta apenas para falhas consecutivas. Não houve nova
-repetição nas seis primeiras execuções posteriores ao deploy.
+de agosto houve quatro. O PR #170 passou a consultar cada marco diretamente e
+preservou a janela curta apenas para falhas consecutivas. Depois do deploy, os
+marcos `fim` de 29 e 30 de agosto foram registrados uma única vez; em 31 de
+agosto, `inicio` e `fim` também foram registrados uma única vez cada.
 
-## Evidências positivas até 30 de agosto
+## Consolidação final
 
+- dez jogos com fotografias finais válidas nas duas fontes;
+- dez jogos encerrados e dez placares finais concordantes;
+- 846 execuções da campanha, sem falhas, execuções abertas ou chaves de
+  idempotência duplicadas;
+- 8.258 fotografias de jogos, cobrindo dez jogos e dois fornecedores, sem linha
+  inválida ou erro de normalização;
+- 36 fotografias de classificação em dezoito execuções e dois fornecedores;
 - identidade, mando e agenda reconciliados em todos os jogos observados;
 - diferença máxima de agenda igual a zero minuto;
-- placares e estados concordantes entre as duas fontes nas verificações
-  realizadas;
 - relógio e acréscimos disponíveis pela API-Football, inclusive 90+5, 90+6 e
   45+8 em evidências reais;
-- execuções posteriores aos hotfixes sem falhas ou duplicações;
-- cota diária com ampla margem em todos os pontos verificados;
-- fotografias válidas e sem erro de normalização;
+- cota final em 7.486 de 7.500 chamadas, com ampla margem em todos os portões;
+- dez observações finais com os dois escudos, nome e cidade do local;
+- códigos de três letras ausentes nas dez observações finais, campo opcional
+  que não invalida a fotografia nem substitui a sigla canônica do Bolão;
 - recuperação terminal concluída sem interromper a coleta corrente;
-- ausência de promoção automática de dados de sombra.
+- 255 mapeamentos completos na temporada, 125 jogos integralmente nulos, nenhum
+  preenchimento parcial e dez mapeamentos completos na rodada;
+- persistência restrita às tabelas de transição, sem promoção automática de
+  dados de sombra ou mudança da fonte oficial.
 
-## Lacunas e decisões pendentes
+## Veredicto
 
-- concluir os jogos de 30 e 31 de agosto;
-- comprovar marcos `fim` únicos para as duas datas restantes;
-- consolidar consumo de cota, falhas, idempotência e metadados opcionais;
+A rodada completa forneceu evidência suficiente para avançar ao planejamento do
+próximo portão. Não é necessário repetir outra rodada com o mesmo contrato:
+as lacunas operacionais observadas foram explicadas, corrigidas e exercitadas
+até o fechamento terminal. Este veredicto não autoriza corte, deploy, mudança
+de variáveis ou retirada da football-data.org.
+
+## Próximos portões separados
+
+- desativar controladamente a campanha e comprovar ausência de novas execuções,
+  sem remover sua auditoria;
 - concluir a auditoria visual dos escudos antes de qualquer promoção;
-- planejar e implementar `transicao_api_eventos` após a rodada;
-- verificar as condições de retenção antes de armazenar payload original de
-  eventos;
-- decidir, no relatório final, entre avançar, repetir a sombra ou investigar.
+- planejar e implementar `transicao_api_eventos`, validar retenção e somente
+  então autorizar eventual reprocessamento controlado da rodada 25;
+- planejar a Fase 6 com seleção explícita da fonte, rollback testado e
+  autorizações independentes para configuração, deploy e corte.
 
-## Critério para o veredicto de 31 de agosto
-
-O resultado será favorável ao próximo portão somente se os dez jogos tiverem
-fotografias suficientes e terminais, os marcos não se repetirem, as divergências
-forem explicadas, a cota permanecer segura e não houver mutação competitiva. A
-eventual aprovação autorizará apenas o planejamento do estágio seguinte; corte,
-configuração e deploy continuarão sujeitos a autorizações próprias.
+O procedimento de desativação deve definir `API_FOOTBALL_SHADOW_ENABLED` como
+inativo, preservar as demais configurações para rastreabilidade, verificar que
+nenhuma nova execução foi criada e manter todas as tabelas de transição. Sua
+execução é uma mudança operacional separada e depende de autorização humana.
 
 ## Referências
 
