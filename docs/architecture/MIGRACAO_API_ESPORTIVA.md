@@ -817,13 +817,25 @@ desconhecidos. Seu hash aprovado para revisão é
 `3c4d84ba2d988880af5bcc6395e581dda0dd77276a3b45d164b8a1f68879189e`.
 Essa evidência não gravou lotes, eventos ou execuções no Supabase.
 
-O caminho de persistência do piloto foi preparado, mas não executado. Ele exige
-simultaneamente `--apply`, escopo `round25`, a confirmação
-`REPROCESS_EVENTS_ROUND_25` e o hash exato do manifesto aprovado. Antes da
-primeira escrita, bloqueia qualquer lote anterior nos dez jogos. A operação cria
-uma execução por data, usa a RPC atômica por jogo, interrompe na primeira falha
-e não contém escrita para `jogos`, fotografias ou classificações. A aplicação
-real e as validações posteriores permanecem sujeitas a autorização separada.
+O caminho de persistência do piloto exige simultaneamente `--apply`, escopo
+`round25`, a confirmação `REPROCESS_EVENTS_ROUND_25` e o hash exato do
+manifesto aprovado. Antes da primeira escrita, bloqueia qualquer lote anterior
+nos dez jogos. A operação cria uma execução por data, usa a RPC atômica por
+jogo, interrompe na primeira falha e não contém escrita para `jogos`,
+fotografias ou classificações.
+
+Após o merge do PR #176 e um novo preflight somente leitura, a aplicação foi
+autorizada e concluída no Supabase em 2026-09-01. A transação criou três
+execuções bem-sucedidas, dez lotes válidos e 177 eventos: 54 em 29 de agosto,
+104 em 30 de agosto e 19 em 31 de agosto. Os hashes de todos os lotes
+coincidiram com o manifesto aprovado; não houve duplicidade, tipo desconhecido,
+execução aberta, fotografia de jogo ou classificação criada.
+
+Os hashes competitivos permaneceram idênticos ao preflight: `public.jogos`
+continuou em `05aeccf93d78b3165a91cf269862f16e` e `public.palpites` em
+`11c78e365989bab5dd2841e96f7bba8e`. Permaneceram também 255 mapeamentos
+completos e 125 integralmente nulos. RLS e privilégios foram preservados, e os
+artefatos temporários usados na operação foram removidos após a auditoria.
 
 ### Encerramento operacional da campanha
 
