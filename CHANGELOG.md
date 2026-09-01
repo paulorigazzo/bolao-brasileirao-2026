@@ -1,3 +1,11 @@
+# v6.24.0 — Fundação do corte controlado para API-Football
+
+- Adiciona seleção protegida e fail-closed da fonte esportiva oficial, mantendo a football-data.org como padrão.
+- Prepara a API-Football para sincronizar jogos e classificação por meio dos IDs canônicos já mapeados.
+- Separa o cache de classificação por fornecedor e identifica a fonte oficial em logs e diagnóstico.
+- Bloqueia mapeamentos incompletos, conflitos de identidade, estados desconhecidos e consumo da reserva de cota.
+- Mantém a ativação, o deploy de corte, o ensaio operacional e qualquer escrita real pela API-Football fora desta entrega.
+
 # v6.23.3 — Momentos e marcos ativos de Meu Time
 
 - Mantém o título “Momentos com o seu time” e substitui a lista de partidas por um comentário curto, contextual e bem-humorado.

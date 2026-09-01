@@ -385,7 +385,7 @@ Regras operacionais para a implementação da Fase 5B:
 | 4. Coleta em sombra | concluída | duas provas reais isoladas, válidas e revisadas |
 | 5A. Acesso e desenho operacional | concluída | cobertura, limites e orçamento confirmados |
 | 5B. Sombra de rodada completa | concluída | rodada 25 integralmente observada, reconciliada e auditada |
-| 6. Corte controlado | não iniciada | aprovação explícita e rollback pronto |
+| 6. Corte controlado | em andamento | fundação inativa concluída; ensaio, preflight e ativação pendentes |
 | 7. Sombra pós-corte | não iniciada | 1–2 rodadas sem regressão material |
 | 8. Encerramento | não iniciada | decisão sobre retirada do legado e dados sombra |
 
@@ -848,6 +848,26 @@ janela e autorização explícitas.
 
 Esta documentação não executa a desativação. A mudança de variável no Netlify,
 sua verificação e qualquer deploy formam um portão de produção separado.
+
+### Fundação inativa da Fase 6A
+
+A versão 6.24.0 introduz o seletor server-side
+`SPORTS_DATA_OFFICIAL_PROVIDER` com valores restritos a
+`football-data.org` e `api-football`. Ausência da variável preserva a fonte
+anterior; valor desconhecido interrompe a operação. Jogos e classificação
+consultam a mesma seleção, e o diagnóstico identifica a fonte oficial. O cache
+legado `BSA-2026` permanece exclusivo da football-data.org; a API-Football usa
+`BSA-2026:api-football`.
+
+O caminho novo grava jogos somente pelo `id_jogo` canônico depois de validar
+os três IDs de mapeamento. Jogos solicitados sem mapeamento, fixtures ausentes,
+conflitos de equipe, estados desconhecidos ou consumo das reservas de cota
+interrompem a execução. IDs genéricos de equipe permanecem preservados para não
+converter referências legadas em IDs de outro fornecedor.
+
+Esta fundação não altera variável, Supabase ou fonte oficial em produção. A
+football-data.org continua selecionada. Ensaio de rollback, preflight, deploy e
+corte permanecem como portões independentes das Fases 6B a 6D.
 
 ## Estratégia de rollback
 

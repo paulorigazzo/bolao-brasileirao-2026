@@ -2,6 +2,7 @@ import { serviceClient, isMissingTableError, requireEnv } from "./_api-helpers.m
 import { FOOTBALL_API_BASE, COMPETITION_CODE, SEASON_YEAR, MAX_API_CALLS_PER_SYNC } from "./_constants.mjs";
 import { sanitizeGameForStatus, sanitizeGameSchedule } from "./_sync-policy.mjs";
 import { evolveEstimatedLiveClock, goalMinuteDiagnostics } from "../../js/live-match-minute.js";
+import { officialSportsDataProvider, SPORTS_DATA_PROVIDERS } from "./_sports-data-provider.mjs";
 
 
 const HOME_STADIUMS = [
@@ -159,6 +160,11 @@ export function selectLiveMatchDetails(matches = [], maxApiCalls = MAX_API_CALLS
 
 
 export async function syncGames(options = {}) {
+  const provider = officialSportsDataProvider();
+  if (provider === SPORTS_DATA_PROVIDERS.API_FOOTBALL) {
+    const { syncApiFootballGames } = await import("./_api-football-official.mjs");
+    return syncApiFootballGames(options);
+  }
   const startedAt = Date.now();
   const trigger = options.trigger || "manual";
   const maxApiCalls = Math.max(1, Math.min(Number(options.maxApiCalls) || MAX_API_CALLS_PER_SYNC, MAX_API_CALLS_PER_SYNC));
@@ -357,6 +363,7 @@ export async function syncGames(options = {}) {
 
   const report = {
     ok: true,
+    provider: SPORTS_DATA_PROVIDERS.FOOTBALL_DATA,
     imported: merged.length,
     live: merged.filter((g) => ["em_andamento", "intervalo"].includes(g.status)).length,
     liveWithScore: merged.filter((g) => ["em_andamento", "intervalo"].includes(g.status) && g.gols_casa != null && g.gols_fora != null).length,

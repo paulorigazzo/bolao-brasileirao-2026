@@ -651,6 +651,16 @@ O comando `npm run test:api-football-adapter` valida esses critérios. Essa
 referência não consulta rede, não lê credenciais, não persiste dados e não
 autoriza a integração com produção.
 
+### Integração oficial inativa
+
+A Fase 6A reutiliza este contrato em
+`netlify/functions/_api-football-official.mjs`. A seleção única de jogos e
+classificação ocorre por `SPORTS_DATA_OFFICIAL_PROVIDER`; ausência da variável
+mantém `football-data.org`, e qualquer valor fora da lista permitida falha sem
+consultar ou gravar. A API-Football somente produz atualizações competitivas
+depois de reconciliar fixture e equipes com os campos `api_football_*` do jogo
+canônico. O teste continua local e não autoriza ativação em produção.
+
 ## Evolução do contrato
 
 Mudanças compatíveis incrementam a versão secundária. Renomear, remover ou mudar

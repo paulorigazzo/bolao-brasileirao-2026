@@ -1,6 +1,7 @@
 import { jsonResponse, requireAdmin, methodNotAllowed, errorResponse } from "./_api-helpers.mjs";
 import { APP_VERSION, CLASSIFICATION_SNAPSHOT_ID, CACHE_FRESH_MS, CACHE_STALE_MS, MAX_API_CALLS_PER_SYNC, SCHEDULE_CHECK_MINUTES, MAINTENANCE_INTERVAL_MS } from "./_constants.mjs";
 import { assessSportsDataFreshness, SPORTS_DATA_LOOKBACK_HOURS } from "./_sports-data-health.mjs";
+import { officialSportsDataProvider, providerClassificationSnapshotId, SPORTS_DATA_PROVIDERS } from "./_sports-data-provider.mjs";
 
 const countTable = async (supabase, table) => {
   const { count, error } = await supabase.from(table).select("*", { count: "exact", head: true });
@@ -15,10 +16,12 @@ export default async (request) => {
   const startedAt = Date.now();
   const { supabase } = admin;
   try {
+    const provider = officialSportsDataProvider();
+    const snapshotId = providerClassificationSnapshotId(CLASSIFICATION_SNAPSHOT_ID, provider);
     const recentGamesAfter = new Date(Date.now() - SPORTS_DATA_LOOKBACK_HOURS * 3_600_000).toISOString();
     const [logsResult, cacheResult, jogos, palpites, participantes, recentGamesResult] = await Promise.all([
       supabase.from("api_sync_log").select("id,criado_em,origem,sucesso,duracao_ms,chamadas_api,jogos_atualizados,erro,detalhes").order("criado_em", { ascending: false }).limit(20),
-      supabase.from("classificacao_cache").select("id,atualizado_em,payload").eq("id", CLASSIFICATION_SNAPSHOT_ID).maybeSingle(),
+      supabase.from("classificacao_cache").select("id,atualizado_em,payload").eq("id", snapshotId).maybeSingle(),
       countTable(supabase, "jogos"),
       countTable(supabase, "palpites"),
       countTable(supabase, "participantes_autorizados"),
@@ -54,7 +57,7 @@ export default async (request) => {
     const cacheTable = Array.isArray(cache?.payload?.table) ? cache.payload.table : [];
     const cacheAvailable = Boolean(cache?.payload) && cacheTable.length > 0;
     const cacheStatus = !cacheAvailable ? "missing" : cacheAgeMs <= CACHE_FRESH_MS ? "fresh" : cacheAgeMs <= CACHE_STALE_MS ? "stale" : "expired";
-    const cacheSource = cache?.payload?.source || "football-data.org";
+    const cacheSource = cache?.payload?.provider || cache?.payload?.source || "football-data.org";
     const lastSuccessAgeMs = lastSuccess?.criado_em ? Date.now() - new Date(lastSuccess.criado_em).getTime() : null;
     const apiStatus = !lastSuccess ? "unknown" : (last?.sucesso === false && lastSuccessAgeMs > MAINTENANCE_INTERVAL_MS ? "degraded" : "online");
     const sportsData = recentGamesResult.error
@@ -80,8 +83,10 @@ export default async (request) => {
       services: {
         supabase: { status: jogos.ok && palpites.ok && participantes.ok ? "online" : "degraded" },
         netlifyFunctions: { status: "online" },
-        footballData: { status: apiStatus, availabilityStatus: apiStatus, dataStatus: sportsData.status, inferred: true, note: "Disponibilidade inferida pelas sincronizações; atualidade conferida nos jogos armazenados." },
+        footballData: { status: provider === SPORTS_DATA_PROVIDERS.FOOTBALL_DATA ? apiStatus : "standby", availabilityStatus: provider === SPORTS_DATA_PROVIDERS.FOOTBALL_DATA ? apiStatus : "unknown", dataStatus: sportsData.status, inferred: true, note: "Disponibilidade inferida pelas sincronizações; atualidade conferida nos jogos armazenados." },
+        apiFootball: { status: provider === SPORTS_DATA_PROVIDERS.API_FOOTBALL ? apiStatus : "standby", availabilityStatus: provider === SPORTS_DATA_PROVIDERS.API_FOOTBALL ? apiStatus : "unknown", dataStatus: sportsData.status, inferred: true },
       },
+      officialSportsDataProvider: provider,
       sportsData,
       sync: {
         last,
