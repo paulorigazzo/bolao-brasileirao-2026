@@ -4,9 +4,9 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.24.2`.
+- Versão funcional: `v6.24.3`.
 - Prioridade: **manter o Bolão 2026 estável e independente e simplificar o Rigazzo como evolução caseira com Temporadas e Ligas**.
-- Próxima etapa coordenada: executar, em autorização operacional própria, o ensaio somente leitura da Fase 6B e preparar o preflight da Fase 6C; a football-data.org permanece oficial. A evolução independente do Rigazzo continua congelada nos termos já documentados.
+- Próxima etapa coordenada: executar, em autorização operacional própria, o preflight somente leitura da Fase 6C para a rodada 26; a football-data.org permanece oficial. A evolução independente do Rigazzo continua congelada nos termos já documentados.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -45,7 +45,7 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - ✅ Consulta permanente do Ranking provisório da rodada atual pela Área ADM.
 - ✅ Sincronização de jogos, datas, locais, placares e classificação.
 - ✅ Sincronização ao vivo por minuto, restrita às partidas próximas e preservando a manutenção completa.
-- 🟡 Migração API-Football: fundação inativa do corte controlado concluída; ensaio de rollback, preflight, ativação e estabilização permanecem pendentes.
+- 🟡 Migração API-Football: ensaio de rollback aprovado e manutenção protegida contra regravação de jogos terminais; preflight da rodada 26, ativação e estabilização permanecem pendentes.
 - ✅ Centro de Controle, diagnóstico, auditoria e acompanhamento da proteção de recuperação.
 - ✅ Detalhamento determinístico das ocorrências de recuperação, com classificação informativa, conferência administrativa auditável e verificação de checkpoint.
 - ✅ Ritmo visual uniforme entre os cards operacionais da Área ADM.

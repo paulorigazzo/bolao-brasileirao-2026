@@ -1,3 +1,10 @@
+# v6.24.3 — Preflight enxuto do corte para API-Football
+
+- Restringe a manutenção periódica da API-Football aos jogos não terminais, evitando regravação ampla do histórico encerrado.
+- Preserva a verificação explícita por IDs usada nas janelas ao vivo e em operações administrativas controladas.
+- Mantém os jogos sem mapeamento fora da escrita e informa quantos jogos terminais foram preservados.
+- Prepara o preflight somente leitura da rodada 26 sem alterar variável, fonte oficial, Supabase ou produção.
+
 # v6.24.2 — Acionador administrativo do ensaio 6B
 
 - Adiciona à Central de Diagnóstico um acionador autenticado para o ensaio somente leitura da Fase 6B.

@@ -8,6 +8,7 @@ import { providerClassificationSnapshotId, SPORTS_DATA_PROVIDERS } from "./_spor
 const API_BASE = "https://v3.football.api-sports.io";
 const DAILY_RESERVE_RATIO = 0.2;
 const MINUTE_RESERVE_RATIO = 0.1;
+const TERMINAL_STATUSES = new Set(["encerrado", "adiado", "cancelado"]);
 
 export function assertApiFootballQuota(observation) {
   const pairs = [
@@ -85,6 +86,12 @@ export function buildApiFootballSyncPlan({ canonicalGames = [], providerGames = 
     unmappedCount: scoped.length - mapped.length, updates, changedCount: changed.length, repairs };
 }
 
+export function scopeApiFootballSyncGames(canonicalGames = [], requestedMatchIds = []) {
+  const requested = new Set(requestedMatchIds.map(Number).filter(Number.isInteger));
+  if (requested.size) return canonicalGames.filter((game) => requested.has(Number(game.id_jogo)));
+  return canonicalGames.filter((game) => !TERMINAL_STATUSES.has(String(game?.status || "").toLowerCase()));
+}
+
 export async function syncApiFootballGames(options = {}) {
   const startedAt = Date.now();
   const trigger = options.trigger || "manual";
@@ -99,7 +106,8 @@ export async function syncApiFootballGames(options = {}) {
   const normalized = normalizeApiFootballFixturesEnvelope(payload, { observedAt, httpStatus: response.status, headers: response.headers });
   if (!normalized.observation.responseValid) throw new Error(normalized.observation.errors[0] || "fixtures_response_invalid");
   assertApiFootballQuota(normalized.observation);
-  const plan = buildApiFootballSyncPlan({ canonicalGames: canonical || [], providerGames: normalized.games,
+  const scopedCanonical = scopeApiFootballSyncGames(canonical || [], [...requested]);
+  const plan = buildApiFootballSyncPlan({ canonicalGames: scopedCanonical, providerGames: normalized.games,
     requestedMatchIds: [...requested], observedAt });
   const merged = plan.updates;
   const { error: writeError } = await supabase.from("jogos").upsert(merged, { onConflict: "id_jogo" });
@@ -107,6 +115,7 @@ export async function syncApiFootballGames(options = {}) {
   const report = {
     ok: true, provider: SPORTS_DATA_PROVIDERS.API_FOOTBALL, imported: merged.length,
     unmappedSkipped: plan.unmappedCount, repairedCount: plan.repairs.length,
+    terminalSkipped: requested.size ? 0 : (canonical || []).length - scopedCanonical.length,
     repairs: plan.repairs.slice(0, 50), apiCalls: 1, syncMode: requested.size ? "live" : "full",
     requestedMatches: requested.size, atomicUpdate: true, trigger, durationMs: Date.now() - startedAt, synchronizedAt: observedAt,
     quota: { dailyLimit: normalized.observation.dailyLimit, dailyRemaining: normalized.observation.dailyRemaining,
