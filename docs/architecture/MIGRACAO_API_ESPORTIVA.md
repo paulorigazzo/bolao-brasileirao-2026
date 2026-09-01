@@ -895,6 +895,29 @@ O operador escolhe a rodada e confirma a chamada; o resultado expõe cobertura,
 cota, hashes, zero escrita, rollback e hash auditável. A presença do acionador
 não executa o ensaio automaticamente nem altera a fonte oficial.
 
+#### Evidência real do ensaio 6B
+
+Em 2026-09-01, o ensaio protegido foi executado pela Área ADM para a rodada 25.
+O relatório aprovou os dez jogos canônicos e os dez mapeamentos, encontrou dez
+jogos na API-Football e dez na football-data.org, validou vinte clubes em cada
+classificação, propôs dez atualizações e nenhum reparo. A execução registrou
+zero escrita, preservou os hashes de jogos e palpites e aprovou a simulação do
+rollback integral.
+
+A inspeção somente leitura das fotografias mais recentes da rodada explica as
+dez atualizações propostas. Data e horário, status e placares coincidem nos dez
+jogos. As diferenças estão restritas a minuto final e acréscimos nos dez jogos,
+escudos dos dois times nos dez jogos e nome ou preenchimento do local em seis
+jogos. Como o planejador conta jogos com ao menos um campo diferente, e não o
+número total de campos divergentes, todos os dez jogos aparecem uma única vez
+em `proposedChanges`.
+
+Essas diferenças são operacionais, visuais ou de metadados. Elas não indicam
+correção de identidade, agenda ou resultado e não afetam palpites, pontuação ou
+qualquer outro estado competitivo. A evidência aprova tecnicamente a Fase 6B,
+mas não autoriza escrita, configuração, deploy ou corte. A decisão sobre quais
+metadados serão promovidos deve permanecer explícita no preflight da Fase 6C.
+
 ## Estratégia de rollback
 
 Antes do corte, devem existir:
@@ -975,6 +998,7 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | 2026-08-29 | 1.7 | Portão visual 5B.3C definido com auditoria técnica e revisão humana dos escudos |
 | 2026-08-30 | 1.8 | Execução real da rodada 25, hotfixes #169 e #170, recuperação terminal e extensão de eventos registradas |
 | 2026-08-31 | 1.9 | Rodada 25 consolidada com dez jogos concordantes; Fase 5B concluída e corte ainda bloqueado |
+| 2026-09-01 | 2.0 | Ensaio real 6B aprovado; dez atualizações explicadas por relógio final, locais e escudos, sem divergência competitiva |
 
 ## Referências internas
 

@@ -1324,3 +1324,42 @@ contrariando a proteção de credenciais adotada pelo projeto.
 O ensaio passa a ser operacionalizável sem exposição de credenciais. A entrega
 do acionador não executa o ensaio, não altera o Supabase ou o Netlify e não muda
 a football-data.org como fonte oficial.
+
+## DEC-2026-036 — Ensaio real 6B aprova equivalência competitiva da rodada 25
+
+- Data: 2026-09-01
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Impacto: alto na decisão futura; somente documental nesta aplicação
+
+### Contexto
+
+O ensaio protegido da Fase 6B foi executado pela Área ADM para a rodada 25. O
+relatório apresentou dez jogos canônicos, dez mapeamentos, dez partidas em cada
+fornecedor, vinte clubes em cada classificação, dez mudanças propostas, nenhum
+reparo e zero escrita. Os hashes competitivos permaneceram preservados e o
+rollback integral foi aprovado.
+
+Uma consulta posterior, estritamente somente leitura, comparou os jogos
+canônicos com as fotografias mais recentes da API-Football. Horários, status e
+placares coincidiram nos dez jogos. Houve diferença em minuto final e
+acréscimos nos dez jogos, em ambos os escudos dos dez jogos e no nome ou
+preenchimento do local em seis jogos.
+
+### Decisão
+
+- considerar a execução real da Fase 6B tecnicamente aprovada;
+- interpretar `proposedChanges = 10` como dez jogos com ao menos uma diferença,
+  e não como dez correções competitivas;
+- reconhecer equivalência integral de identidade, agenda, status e resultado
+  na rodada ensaiada;
+- classificar relógio final, acréscimos, locais e escudos como diferenças
+  operacionais, visuais ou de metadados a serem tratadas explicitamente;
+- avançar para o planejamento e preflight da Fase 6C sem autorizar o corte.
+
+### Consequências e limites
+
+A decisão não promove nenhum campo, não altera código, versão, Supabase,
+Netlify, fonte oficial, palpites ou pontuação. A football-data.org permanece
+oficial. Configuração, deploy, escrita, corte e estabilização continuam sujeitos
+a portões e autorizações humanas próprios.
