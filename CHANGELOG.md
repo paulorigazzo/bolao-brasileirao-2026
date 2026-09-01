@@ -1,3 +1,11 @@
+# v6.24.1 — Ensaio protegido do corte para API-Football
+
+- Adiciona um ensaio administrativo, explicitamente confirmado e somente leitura para comparar rodada e classificação nas duas fontes.
+- Reutiliza o plano oficial da API-Football sem persistência e valida os dez mapeamentos, identidades, estados e reservas de cota.
+- Comprova por hashes antes/depois que jogos e palpites competitivos permanecem intactos.
+- Simula em memória a sequência de corte e rollback integral, mantendo a football-data.org oficial.
+- Não realiza chamadas reais, escritas no Supabase, alteração de variável, deploy ou corte nesta entrega.
+
 # v6.24.0 — Fundação do corte controlado para API-Football
 
 - Adiciona seleção protegida e fail-closed da fonte esportiva oficial, mantendo a football-data.org como padrão.

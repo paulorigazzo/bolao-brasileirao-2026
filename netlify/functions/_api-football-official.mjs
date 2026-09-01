@@ -9,7 +9,7 @@ const API_BASE = "https://v3.football.api-sports.io";
 const DAILY_RESERVE_RATIO = 0.2;
 const MINUTE_RESERVE_RATIO = 0.1;
 
-function assertQuota(observation) {
+export function assertApiFootballQuota(observation) {
   const pairs = [
     [observation.dailyLimit, observation.dailyRemaining, DAILY_RESERVE_RATIO, "api_football_daily_reserve_reached"],
     [observation.minuteLimit, observation.minuteRemaining, MINUTE_RESERVE_RATIO, "api_football_minute_reserve_reached"],
@@ -59,6 +59,32 @@ export function apiFootballGameForCanonical(provider, canonical, observedAt = ne
   };
 }
 
+export function buildApiFootballSyncPlan({ canonicalGames = [], providerGames = [], requestedMatchIds = [], observedAt = new Date().toISOString() }) {
+  const requested = new Set(requestedMatchIds.map(Number).filter(Number.isInteger));
+  const scoped = requested.size ? canonicalGames.filter((game) => requested.has(Number(game.id_jogo))) : canonicalGames;
+  const mapped = scoped.filter((game) => game.api_football_id && game.api_football_time_casa_id && game.api_football_time_fora_id);
+  if (requested.size && mapped.length !== requested.size) throw new Error("api_football_mapping_incomplete");
+  if (!mapped.length) throw new Error("api_football_mapping_empty");
+  const byFixture = new Map(providerGames.map((game) => [Number(game.providerFixtureId), game]));
+  const missing = mapped.filter((game) => !byFixture.has(Number(game.api_football_id)));
+  if (missing.length) throw new Error(`api_football_fixture_missing:${missing.map((game) => game.id_jogo).join(",")}`);
+  const repairs = [];
+  const updates = mapped.map((canonicalGame) => {
+    const provider = byFixture.get(Number(canonicalGame.api_football_id));
+    const candidate = apiFootballGameForCanonical(provider, canonicalGame, observedAt);
+    const scheduled = sanitizeGameSchedule(candidate, canonicalGame, repairs);
+    const sanitized = sanitizeGameForStatus(scheduled, canonicalGame, repairs);
+    return evolveEstimatedLiveClock(sanitized, canonicalGame, {}, observedAt);
+  });
+  const changed = updates.filter((update, index) => {
+    const current = mapped[index];
+    return ["inicio", "status", "gols_casa", "gols_fora", "minuto", "acrescimos", "local_partida", "time_casa_logo", "time_fora_logo"]
+      .some((field) => (update[field] ?? null) !== (current[field] ?? null));
+  });
+  return { provider: SPORTS_DATA_PROVIDERS.API_FOOTBALL, scopedCount: scoped.length, mappedCount: mapped.length,
+    unmappedCount: scoped.length - mapped.length, updates, changedCount: changed.length, repairs };
+}
+
 export async function syncApiFootballGames(options = {}) {
   const startedAt = Date.now();
   const trigger = options.trigger || "manual";
@@ -68,33 +94,20 @@ export async function syncApiFootballGames(options = {}) {
   if (requested.size) query = query.in("id_jogo", [...requested]);
   const { data: canonical, error: canonicalError } = await query;
   if (canonicalError) throw new Error(`Supabase: ${canonicalError.message}`);
-  const mapped = (canonical || []).filter((game) => game.api_football_id && game.api_football_time_casa_id && game.api_football_time_fora_id);
-  if (requested.size && mapped.length !== requested.size) throw new Error("api_football_mapping_incomplete");
-  if (!mapped.length) throw new Error("api_football_mapping_empty");
-
   const observedAt = new Date().toISOString();
   const { response, payload } = await request(`/fixtures?league=${API_FOOTBALL_LEAGUE_ID}&season=${SEASON_YEAR}`);
   const normalized = normalizeApiFootballFixturesEnvelope(payload, { observedAt, httpStatus: response.status, headers: response.headers });
   if (!normalized.observation.responseValid) throw new Error(normalized.observation.errors[0] || "fixtures_response_invalid");
-  assertQuota(normalized.observation);
-  const byFixture = new Map(normalized.games.map((game) => [Number(game.providerFixtureId), game]));
-  const missing = mapped.filter((game) => !byFixture.has(Number(game.api_football_id)));
-  if (missing.length) throw new Error(`api_football_fixture_missing:${missing.map((game) => game.id_jogo).join(",")}`);
-
-  const repairs = [];
-  const merged = mapped.map((canonicalGame) => {
-    const provider = byFixture.get(Number(canonicalGame.api_football_id));
-    const candidate = apiFootballGameForCanonical(provider, canonicalGame, observedAt);
-    const scheduled = sanitizeGameSchedule(candidate, canonicalGame, repairs);
-    const sanitized = sanitizeGameForStatus(scheduled, canonicalGame, repairs);
-    return evolveEstimatedLiveClock(sanitized, canonicalGame, {}, observedAt);
-  });
+  assertApiFootballQuota(normalized.observation);
+  const plan = buildApiFootballSyncPlan({ canonicalGames: canonical || [], providerGames: normalized.games,
+    requestedMatchIds: [...requested], observedAt });
+  const merged = plan.updates;
   const { error: writeError } = await supabase.from("jogos").upsert(merged, { onConflict: "id_jogo" });
   if (writeError) throw new Error(`Supabase: ${writeError.message}`);
   const report = {
     ok: true, provider: SPORTS_DATA_PROVIDERS.API_FOOTBALL, imported: merged.length,
-    unmappedSkipped: Math.max(0, (canonical || []).length - mapped.length), repairedCount: repairs.length,
-    repairs: repairs.slice(0, 50), apiCalls: 1, syncMode: requested.size ? "live" : "full",
+    unmappedSkipped: plan.unmappedCount, repairedCount: plan.repairs.length,
+    repairs: plan.repairs.slice(0, 50), apiCalls: 1, syncMode: requested.size ? "live" : "full",
     requestedMatches: requested.size, atomicUpdate: true, trigger, durationMs: Date.now() - startedAt, synchronizedAt: observedAt,
     quota: { dailyLimit: normalized.observation.dailyLimit, dailyRemaining: normalized.observation.dailyRemaining,
       minuteLimit: normalized.observation.minuteLimit, minuteRemaining: normalized.observation.minuteRemaining },
@@ -110,7 +123,7 @@ export async function apiFootballClassification(fetchImpl = fetch) {
   const { response, payload } = await request(`/standings?league=${API_FOOTBALL_LEAGUE_ID}&season=${SEASON_YEAR}`, fetchImpl);
   const normalized = normalizeApiFootballStandingsEnvelope(payload, { observedAt, httpStatus: response.status, headers: response.headers });
   if (!normalized.observation.responseValid || !normalized.standings) throw new Error(normalized.observation.errors[0] || "standings_response_invalid");
-  assertQuota(normalized.observation);
+  assertApiFootballQuota(normalized.observation);
   const standing = normalized.standings;
   return {
     id: providerClassificationSnapshotId(CLASSIFICATION_SNAPSHOT_ID, SPORTS_DATA_PROVIDERS.API_FOOTBALL),

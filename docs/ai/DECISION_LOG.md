@@ -1266,3 +1266,32 @@ ausente, estado desconhecido ou reserva de cota atingida interrompem a
 operação. A integração antiga permanece disponível para rollback integral.
 Nenhuma variável, deploy, fonte oficial ou dado remoto foi alterado. Ensaio,
 preflight, corte e estabilização exigem portões e autorizações próprios.
+
+## DEC-2026-034 — Ensaio de corte deve ser somente leitura e provar rollback integral
+
+- Data: 2026-09-01
+- Status: aceita e implementada localmente
+- Responsáveis: manutenção do projeto
+- Impacto: alto; execução remota e corte permanecem bloqueados
+
+### Contexto
+
+A fundação 6A criou a seleção reversível, mas faltava exercitar as duas fontes
+pelo mesmo contrato e provar que o retorno à fonte anterior não produz estado
+híbrido nem mutação competitiva.
+
+### Decisão
+
+- separar o planejamento de atualizações da persistência da API-Football;
+- expor endpoint administrativo com método e confirmação fortes;
+- consultar rodada e classificação nas duas fontes;
+- validar dez jogos, dez mapeamentos, vinte equipes e reservas de cota;
+- comparar hashes competitivos antes e depois;
+- simular em memória a sequência integral de ativação e rollback.
+
+### Consequências e limites
+
+O ensaio não possui operações de escrita no Supabase e não altera configuração,
+cache, fonte oficial ou Netlify. A football-data.org permanece oficial. A
+implementação local não substitui a execução real do ensaio, que exige
+autorização operacional separada, assim como preflight, deploy e corte.
