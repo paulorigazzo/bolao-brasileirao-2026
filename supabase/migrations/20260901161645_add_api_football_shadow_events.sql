@@ -1,4 +1,5 @@
 -- Fundação append-only para eventos auxiliares observados na transição da API esportiva.
+-- Versão registrada remotamente pelo Supabase: 20260901161645.
 -- Não altera jogos, resultados, palpites, pontuação nem a fonte oficial.
 -- O payload integral do fornecedor não é persistido nesta fase.
 

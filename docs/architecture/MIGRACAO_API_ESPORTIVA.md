@@ -763,6 +763,13 @@ fornecedor fica fora desta fundação até existir validação específica de re
 e direitos. Aplicação remota, integração do coletor e reprocessamento controlado
 da rodada 25 continuam sendo portões independentes com aprovação humana.
 
+Em 2026-09-01, a fundação foi aplicada no projeto canônico e registrada como
+`20260901161645_add_api_football_shadow_events`. As tabelas permaneceram vazias,
+com RLS ativa e privilégios restritos ao `service_role`; a integração do coletor
+e o reprocessamento não foram iniciados. O histórico local foi reconciliado com
+a versão remota e passou a ser protegido pelo registro e check obrigatórios de
+migrations do Supabase.
+
 ### Encerramento operacional da campanha
 
 A campanha concluída deve ser desativada antes de preparar outro acionamento.

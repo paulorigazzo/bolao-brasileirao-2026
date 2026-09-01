@@ -1,0 +1,13 @@
+{
+  "projectRef": "hfrygykchiqhxcgabedm",
+  "managedFrom": "20260825000000",
+  "migrations": [
+    { "version": "20260825021432", "name": "fundacao_sombra_api_football", "status": "applied" },
+    { "version": "20260825050228", "name": "gravacao_mapeamentos_api_football_5b2", "status": "applied" },
+    { "version": "20260825060519", "name": "add_idempotency_round_shadow_5b3b", "status": "applied" },
+    { "version": "20260825151356", "name": "add_shadow_match_metadata_5b3b2a", "status": "applied" },
+    { "version": "20260825202000", "name": "classifica_agendamentos_divergentes", "status": "applied" },
+    { "version": "20260825202718", "name": "add_schedule_observations_index", "status": "applied" },
+    { "version": "20260901161645", "name": "add_api_football_shadow_events", "status": "applied" }
+  ]
+}
