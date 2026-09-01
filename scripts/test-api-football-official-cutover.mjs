@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import fixture from "../fixtures/api-football/fixture-1492340.sanitized.json" with { type: "json" };
 import { normalizeApiFootballFixtureEnvelope } from "../src/sports-data/api-football-adapter.mjs";
-import { apiFootballGameForCanonical } from "../netlify/functions/_api-football-official.mjs";
+import { apiFootballGameForCanonical, scopeApiFootballSyncGames } from "../netlify/functions/_api-football-official.mjs";
 import { officialSportsDataProvider, providerClassificationSnapshotId, SPORTS_DATA_PROVIDERS } from "../netlify/functions/_sports-data-provider.mjs";
 
 assert.equal(officialSportsDataProvider({}), SPORTS_DATA_PROVIDERS.FOOTBALL_DATA);
@@ -31,6 +31,16 @@ assert.equal(game.status, "encerrado");
 assert.throws(() => apiFootballGameForCanonical(normalized.game, { ...canonical, api_football_id: 1 }), /mapped_fixture_identity_conflict/);
 assert.throws(() => apiFootballGameForCanonical(normalized.game, { ...canonical, api_football_time_casa_id: 1 }), /mapped_home_identity_conflict/);
 assert.throws(() => apiFootballGameForCanonical(normalized.game, { ...canonical, api_football_time_fora_id: 1 }), /mapped_away_identity_conflict/);
+
+const maintenanceScope = scopeApiFootballSyncGames([
+  { id_jogo: 1, status: "encerrado" }, { id_jogo: 2, status: "agendado" },
+  { id_jogo: 3, status: "em_andamento" }, { id_jogo: 4, status: "intervalo" },
+  { id_jogo: 5, status: "adiado" }, { id_jogo: 6, status: "cancelado" },
+]);
+assert.deepEqual(maintenanceScope.map((game) => game.id_jogo), [2, 3, 4]);
+assert.deepEqual(scopeApiFootballSyncGames([
+  { id_jogo: 1, status: "encerrado" }, { id_jogo: 2, status: "agendado" },
+], [1]).map((game) => game.id_jogo), [1]);
 
 const syncSource = readFileSync(new URL("../netlify/functions/_sync-shared.mjs", import.meta.url), "utf8");
 const classificationSource = readFileSync(new URL("../netlify/functions/classificacao-brasileirao.mjs", import.meta.url), "utf8");

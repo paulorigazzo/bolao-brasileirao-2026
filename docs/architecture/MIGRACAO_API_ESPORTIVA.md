@@ -918,6 +918,26 @@ qualquer outro estado competitivo. A evidência aprova tecnicamente a Fase 6B,
 mas não autoriza escrita, configuração, deploy ou corte. A decisão sobre quais
 metadados serão promovidos deve permanecer explícita no preflight da Fase 6C.
 
+### Preparação enxuta da Fase 6C
+
+A versão 6.24.3 restringe a manutenção periódica da API-Football aos jogos não
+terminais. Sem IDs solicitados, jogos encerrados, adiados ou cancelados são
+preservados e contabilizados no relatório; com IDs explícitos, o recorte
+controlado continua disponível para a janela ao vivo e para verificação
+administrativa. Mapeamentos incompletos permanecem fora da escrita.
+
+Essa proteção evita que a primeira manutenção após o corte proponha regravar os
+255 jogos mapeados apenas por diferenças de relógio final, local ou escudos. O
+preflight operacional da rodada 26 pode, assim, reutilizar o ensaio existente e
+deve confirmar dez jogos, dez mapeamentos, horários, identidades, classificação,
+cota, hashes preservados, zero escrita e rollback integral.
+
+Em 2026-09-01, a auditoria somente leitura confirmou que a rodada 26 possui dez
+mapeamentos completos. Os 125 jogos nulos permanecem preservados; 120 deles
+estão nas rodadas 27 a 38 e exigirão reconciliação progressiva antes de suas
+respectivas janelas. Esta preparação não executa o preflight, não altera a fonte
+oficial e não autoriza deploy ou corte.
+
 ## Estratégia de rollback
 
 Antes do corte, devem existir:
@@ -999,6 +1019,7 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | 2026-08-30 | 1.8 | Execução real da rodada 25, hotfixes #169 e #170, recuperação terminal e extensão de eventos registradas |
 | 2026-08-31 | 1.9 | Rodada 25 consolidada com dez jogos concordantes; Fase 5B concluída e corte ainda bloqueado |
 | 2026-09-01 | 2.0 | Ensaio real 6B aprovado; dez atualizações explicadas por relógio final, locais e escudos, sem divergência competitiva |
+| 2026-09-01 | 2.1 | Fase 6C simplificada; manutenção preparada para preservar jogos terminais e preflight da rodada 26 mantido como portão |
 
 ## Referências internas
 

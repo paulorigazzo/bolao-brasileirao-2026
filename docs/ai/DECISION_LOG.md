@@ -1363,3 +1363,41 @@ A decisão não promove nenhum campo, não altera código, versão, Supabase,
 Netlify, fonte oficial, palpites ou pontuação. A football-data.org permanece
 oficial. Configuração, deploy, escrita, corte e estabilização continuam sujeitos
 a portões e autorizações humanas próprios.
+
+## DEC-2026-037 — Fase 6C restringe a manutenção e reutiliza o ensaio existente
+
+- Data: 2026-09-01
+- Status: aceita e implementada localmente
+- Responsáveis: manutenção do projeto
+- Impacto: alto; preflight remoto e corte permanecem bloqueados
+
+### Contexto
+
+A primeira proposta da Fase 6C acrescentava novos mecanismos de preflight e
+auditoria. A Fase 6B já comprovou cobertura, equivalência competitiva, cota,
+hashes e rollback. A lacuna nova relevante era o modo de manutenção sem IDs,
+que poderia preparar atualizações para todos os 255 jogos mapeados, incluindo
+histórico encerrado.
+
+A auditoria somente leitura confirmou dez mapeamentos completos na rodada 26.
+Os 125 jogos nulos permanecem íntegros; 120 deles pertencem às rodadas 27 a 38
+e não impedem o piloto da rodada 26, mas exigem reconciliação antes das janelas
+futuras correspondentes.
+
+### Decisão
+
+- restringir a manutenção da API-Football aos jogos não terminais;
+- preservar o recorte explícito por IDs para janela ao vivo e operação
+  administrativa controlada;
+- reutilizar o ensaio administrativo existente como preflight da rodada 26;
+- não criar nova tabela, painel ou estrutura paralela de auditoria;
+- manter os 125 jogos nulos fora da escrita;
+- manter ativação, variável, deploy e corte em portões separados.
+
+### Consequências e limites
+
+O caminho amplo deixa de regravar automaticamente jogos encerrados, adiados e
+cancelados e passa a informar quantos foram preservados. As validações de
+mapeamento, identidade, estado, cota e reparos continuam ativas. A entrega não
+executa chamadas reais, não escreve no Supabase, não altera o Netlify e não
+muda a football-data.org como fonte oficial.
