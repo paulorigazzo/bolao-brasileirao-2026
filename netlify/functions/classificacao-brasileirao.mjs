@@ -5,12 +5,14 @@ import {
   SEASON_YEAR,
   CLASSIFICATION_SNAPSHOT_ID,
 } from "./_constants.mjs";
+import { officialSportsDataProvider, providerClassificationSnapshotId, SPORTS_DATA_PROVIDERS } from "./_sports-data-provider.mjs";
+import { apiFootballClassification } from "./_api-football-official.mjs";
 
-async function readSnapshot(supabase) {
+async function readSnapshot(supabase, snapshotId) {
   const { data, error } = await supabase
     .from("classificacao_cache")
     .select("payload,atualizado_em")
-    .eq("id", CLASSIFICATION_SNAPSHOT_ID)
+    .eq("id", snapshotId)
     .maybeSingle();
   if (error) {
     if (isMissingTableError(error)) return null;
@@ -22,8 +24,20 @@ async function readSnapshot(supabase) {
 export default async (request) => {
   if (request.method !== "GET") return methodNotAllowed("GET");
   const supabase = serviceClient();
+  const provider = officialSportsDataProvider();
+  const snapshotId = providerClassificationSnapshotId(CLASSIFICATION_SNAPSHOT_ID, provider);
 
   try {
+    if (provider === SPORTS_DATA_PROVIDERS.API_FOOTBALL) {
+      const classification = await apiFootballClassification();
+      const { error: cacheError } = await supabase.from("classificacao_cache").upsert({
+        id: classification.id,
+        payload: classification.result,
+        atualizado_em: classification.result.updatedAt,
+      }, { onConflict: "id" });
+      if (cacheError && !isMissingTableError(cacheError)) console.warn("Falha ao salvar cache da classificação:", cacheError.message);
+      return jsonResponse(classification.result, 200, { "cache-control": "public, max-age=300, s-maxage=300" });
+    }
     const token = requireEnv("FOOTBALL_DATA_TOKEN");
     const response = await fetch(`${FOOTBALL_API_BASE}/competitions/${COMPETITION_CODE}/standings?season=${SEASON_YEAR}`, {
       headers: { "X-Auth-Token": token, Accept: "application/json" },
@@ -41,6 +55,7 @@ export default async (request) => {
       currentMatchday: payload.season?.currentMatchday ?? null,
       updatedAt: new Date().toISOString(),
       source: "api",
+      provider: SPORTS_DATA_PROVIDERS.FOOTBALL_DATA,
       table: table.map((row) => ({
         position: row.position, teamId: row.team?.id ?? null,
         team: row.team?.shortName || row.team?.name || "Clube", crest: row.team?.crest ?? null,
@@ -51,7 +66,7 @@ export default async (request) => {
     };
 
     const { error: cacheError } = await supabase.from("classificacao_cache").upsert({
-      id: CLASSIFICATION_SNAPSHOT_ID,
+      id: snapshotId,
       payload: result,
       atualizado_em: result.updatedAt,
     }, { onConflict: "id" });
@@ -60,7 +75,7 @@ export default async (request) => {
     return jsonResponse(result, 200, { "cache-control": "public, max-age=300, s-maxage=300" });
   } catch (error) {
     try {
-      const snapshot = await readSnapshot(supabase);
+      const snapshot = await readSnapshot(supabase, snapshotId);
       if (snapshot) {
         return jsonResponse({ ...snapshot, ok: true, warning: "API indisponível; exibindo a última classificação salva." }, 200, {
           "cache-control": "public, max-age=60, s-maxage=60",

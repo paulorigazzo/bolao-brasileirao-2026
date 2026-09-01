@@ -1237,3 +1237,32 @@ e os dias seguintes exercitaram os marcos permanentes até Remo 2 x 3 Coritiba.
   por esta decisão documental;
 - uma nova sombra somente será necessária se o contrato mudar ou a extensão de
   eventos exigir evidência operacional própria.
+
+## DEC-2026-033 — Corte adota seleção única, explícita e reversível por fornecedor
+
+- Data: 2026-09-01
+- Status: aceita e implementada como fundação inativa
+- Responsáveis: manutenção do projeto
+- Impacto: alto; ativação permanece bloqueada
+
+### Contexto
+
+A sombra pré-corte foi concluída, mas as Functions oficiais ainda estavam
+diretamente acopladas à football-data.org.
+
+### Decisão
+
+- selecionar jogos e classificação pela variável server-side
+  `SPORTS_DATA_OFFICIAL_PROVIDER`;
+- manter `football-data.org` como padrão seguro;
+- usar namespace de cache por fornecedor;
+- gravar a API-Football somente pelo `id_jogo` canônico após validação
+  integral dos mapeamentos.
+
+### Proteções e limite
+
+Valor desconhecido, mapeamento incompleto, conflito de identidade, fixture
+ausente, estado desconhecido ou reserva de cota atingida interrompem a
+operação. A integração antiga permanece disponível para rollback integral.
+Nenhuma variável, deploy, fonte oficial ou dado remoto foi alterado. Ensaio,
+preflight, corte e estabilização exigem portões e autorizações próprios.
