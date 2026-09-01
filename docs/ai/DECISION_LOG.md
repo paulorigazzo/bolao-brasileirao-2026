@@ -1178,7 +1178,16 @@ ou tipos acrescentados pelo fornecedor.
   do hash e nova autorização humana.
 - após a simulação aceita, o caminho de escrita foi preparado com confirmação
   textual, hash obrigatório, bloqueio de lote preexistente, execução por data e
-  RPC atômica por jogo; nenhuma aplicação real foi realizada.
+  RPC atômica por jogo;
+- após o merge do PR #176, a aplicação autorizada criou três execuções, dez
+  lotes e 177 eventos com o hash aprovado; todos os lotes ficaram válidos e não
+  houve duplicidade, fotografia ou classificação adicional;
+- os hashes de `public.jogos` e `public.palpites` permaneceram respectivamente
+  `05aeccf93d78b3165a91cf269862f16e` e
+  `11c78e365989bab5dd2841e96f7bba8e`; 255 mapeamentos completos e 125 nulos,
+  RLS e privilégios restritos foram preservados;
+- os artefatos temporários foram removidos depois da auditoria; o backfill dos
+  outros 245 jogos permanece como Fase 5B.4D independente e não autorizada.
 
 ## DEC-2026-032 — Rodada 25 conclui a sombra pré-corte sem autorizar o corte
 
