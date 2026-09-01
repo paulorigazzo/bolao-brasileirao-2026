@@ -888,6 +888,13 @@ namespaces correspondentes do cache. Esta entrega não executa o ensaio remoto,
 não altera variáveis, não escreve no Supabase, não faz deploy e não autoriza o
 corte. A execução real da 6B e o preflight 6C são portões separados.
 
+A versão 6.24.2 acrescenta o acionador operacional na Central de Diagnóstico.
+Ele obtém a sessão pelo cliente Supabase já inicializado, envia o JWT somente ao
+endpoint do próprio app e nunca o apresenta no DOM, nos logs ou no relatório.
+O operador escolhe a rodada e confirma a chamada; o resultado expõe cobertura,
+cota, hashes, zero escrita, rollback e hash auditável. A presença do acionador
+não executa o ensaio automaticamente nem altera a fonte oficial.
+
 ## Estratégia de rollback
 
 Antes do corte, devem existir:
