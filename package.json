@@ -15,7 +15,7 @@
     "test:api-football-foundation": "node scripts/test-api-football-foundation.mjs",
     "test:api-football-shadow-events-foundation": "node scripts/test-api-football-shadow-events-foundation.mjs",
     "test:schedule-correction-migration": "node scripts/test-schedule-correction-migration.mjs",
-    "test:api-football-shadow": "node scripts/test-api-football-shadow.mjs && npm run test:api-football-round-shadow",
+    "test:api-football-shadow": "node scripts/test-api-football-shadow.mjs && npm run test:api-football-round-shadow && npm run test:api-football-event-reprocessing",
     "test:api-football-round-shadow": "node scripts/test-api-football-round-shadow.mjs && npm run test:api-football-round-shadow-schedule && npm run test:api-football-round-shadow-idempotency",
     "test:api-football-round-shadow-schedule": "node scripts/test-api-football-round-shadow-schedule.mjs",
     "test:api-football-round-shadow-idempotency": "node scripts/test-api-football-round-shadow-idempotency.mjs",
@@ -50,7 +50,9 @@
     "test:competitive-snapshots": "node scripts/test-competitive-snapshots.mjs",
     "test:recovery-protection": "node scripts/test-recovery-protection.mjs",
     "test:admin-attention-whatsapp": "node scripts/test-admin-attention-whatsapp.mjs",
-    "test:admin-pick-progress": "node scripts/test-admin-pick-progress.mjs"
+    "test:admin-pick-progress": "node scripts/test-admin-pick-progress.mjs",
+    "test:api-football-event-reprocessing": "node scripts/test-api-football-event-reprocessing.mjs",
+    "events:dry-run": "node scripts/reprocess-api-football-events.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.110.9"

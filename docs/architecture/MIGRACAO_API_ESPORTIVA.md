@@ -784,6 +784,47 @@ execução como malsucedida; observações append-only eventualmente gravadas
 permanecem como evidência. A campanha continua desabilitada, e reprocessamento
 da rodada 25 ou nova coleta ao vivo exigem portões próprios.
 
+#### Reprocessamento controlado 5B.4C
+
+O utilitário administrativo de reprocessamento opera em modo seco por padrão.
+A consulta da temporada de 2026 fornece o índice dos jogos, mas a prova real
+confirmou que essa resposta não inclui os eventos históricos. Por isso, a
+simulação detalhada consulta também cada fixture aceita. A descoberta histórica
+abrange somente os 255 jogos com mapeamento completo; os 125 casos bloqueados
+permanecem fora do conjunto e integralmente nulos.
+
+A simulação gera em `.artifacts/` um manifesto local e não versionado contendo
+identificadores, contagens, avisos e hashes, sem preservar o payload integral do
+fornecedor. Ela valida identidade, competição, rodada, agenda com tolerância de
+30 minutos, cota e listas de eventos, além de catalogar tipos desconhecidos.
+
+O modo de escrita permanece mecanicamente indisponível até o manifesto real ser
+revisado e aprovado. A primeira persistência continuará restrita aos dez jogos
+da rodada 25. O backfill dos outros 245 jogos será uma Fase 5B.4D independente,
+com autorização, lotes e validações próprios.
+
+Em 2026-09-01, a simulação real detalhada reconciliou os 255 jogos com diferença
+de agenda zero e encontrou 4.277 eventos: 655 gols, 1.186 cartões, 2.340
+substituições e 96 intervenções de VAR, sem tipo desconhecido, aviso ou lista
+inválida. As onze listas vazias pertencem a jogos ainda futuros: dez da rodada
+26 e uma partida da rodada 4 reagendada para 2 de setembro. O manifesto
+histórico recebeu o hash
+`9369f77d5f549aec2a3110e0a56102e0eae648a82a0ab666005191979c245851`.
+
+O recorte da rodada 25 contém dez listas válidas, 177 eventos, 38 gols, 45
+cartões, 89 substituições e cinco intervenções de VAR, também sem tipos
+desconhecidos. Seu hash aprovado para revisão é
+`3c4d84ba2d988880af5bcc6395e581dda0dd77276a3b45d164b8a1f68879189e`.
+Essa evidência não gravou lotes, eventos ou execuções no Supabase.
+
+O caminho de persistência do piloto foi preparado, mas não executado. Ele exige
+simultaneamente `--apply`, escopo `round25`, a confirmação
+`REPROCESS_EVENTS_ROUND_25` e o hash exato do manifesto aprovado. Antes da
+primeira escrita, bloqueia qualquer lote anterior nos dez jogos. A operação cria
+uma execução por data, usa a RPC atômica por jogo, interrompe na primeira falha
+e não contém escrita para `jogos`, fotografias ou classificações. A aplicação
+real e as validações posteriores permanecem sujeitas a autorização separada.
+
 ### Encerramento operacional da campanha
 
 A campanha concluída deve ser desativada antes de preparar outro acionamento.
