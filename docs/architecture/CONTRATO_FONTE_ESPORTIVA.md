@@ -661,6 +661,20 @@ consultar ou gravar. A API-Football somente produz atualizações competitivas
 depois de reconciliar fixture e equipes com os campos `api_football_*` do jogo
 canônico. O teste continua local e não autoriza ativação em produção.
 
+### Ensaio somente leitura do corte
+
+A Fase 6B separa cálculo e persistência por meio de
+`buildApiFootballSyncPlan`. O endpoint `ensaiar-corte-api-football` usa esse
+planejador nos dez jogos canônicos da rodada, compara a football-data.org e a
+API-Football e valida ambas as classificações. O contrato exige cobertura
+integral, identidade reconciliada, estados conhecidos e reservas de cota.
+
+O ensaio lê antes e depois somente os campos competitivos necessários de
+`public.jogos` e `public.palpites`; seus hashes devem permanecer idênticos. O
+código não contém mutações ou RPC no Supabase. A resposta omite payloads e
+segredos e apresenta apenas evidências agregadas e hashes auditáveis.
+Implementar o endpoint não equivale a executá-lo nem autoriza a troca da fonte.
+
 ## Evolução do contrato
 
 Mudanças compatíveis incrementam a versão secundária. Renomear, remover ou mudar

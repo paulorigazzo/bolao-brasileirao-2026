@@ -869,6 +869,25 @@ Esta fundação não altera variável, Supabase ou fonte oficial em produção. 
 football-data.org continua selecionada. Ensaio de rollback, preflight, deploy e
 corte permanecem como portões independentes das Fases 6B a 6D.
 
+### Ensaio protegido da Fase 6B
+
+A versão 6.24.1 implementa `ensaiar-corte-api-football` como endpoint
+administrativo, acionado por `POST` e confirmação explícita. O ensaio lê jogos
+e palpites, consulta rodada e classificação nas duas fontes e reutiliza o mesmo
+planejador puro do caminho oficial da API-Football. O plano não é persistido.
+
+O portão falha fechado se a rodada não tiver dez jogos, se algum mapeamento ou
+identidade estiver incompleto, se uma fonte não entregar dez jogos, se uma
+classificação não tiver vinte equipes, se aparecer estado desconhecido ou se a
+reserva de cota diária ou por minuto for atingida. Hashes do estado competitivo
+antes e depois comprovam a ausência de mutação em jogos e palpites.
+
+O rollback é ensaiado em memória como
+`football-data.org -> api-football -> football-data.org`, inclusive com os
+namespaces correspondentes do cache. Esta entrega não executa o ensaio remoto,
+não altera variáveis, não escreve no Supabase, não faz deploy e não autoriza o
+corte. A execução real da 6B e o preflight 6C são portões separados.
+
 ## Estratégia de rollback
 
 Antes do corte, devem existir:
