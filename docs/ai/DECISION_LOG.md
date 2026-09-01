@@ -1153,6 +1153,17 @@ ou tipos acrescentados pelo fornecedor.
 - manter aplicação no Supabase, integração do coletor e reprocessamento da
   rodada 25 sujeitos a autorizações humanas separadas.
 
+### Integração inativa aprovada em 2026-09-01
+
+- o adaptador distingue eventos disponíveis, vazios e indisponíveis por jogo;
+- o coletor persiste um lote por jogo pela RPC transacional já protegida;
+- os eventos embutidos em `/fixtures` não consomem chamadas adicionais;
+- hashes de conteúdo ordenados tornam o hash da lista independente da ordem;
+- a chave lógica diagnóstica não depende do minuto ou detalhe mutáveis e nunca
+  promove correções automaticamente;
+- falha da RPC marca a execução como malsucedida, sem escrita competitiva;
+- campanha, reprocessamento e consumo pelo aplicativo permanecem desabilitados.
+
 ## DEC-2026-032 — Rodada 25 conclui a sombra pré-corte sem autorizar o corte
 
 - Data: 2026-08-31

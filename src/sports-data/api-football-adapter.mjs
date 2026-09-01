@@ -243,9 +243,14 @@ function eventKey(fixtureId, event) {
 }
 
 function normalizeEvents(rawEvents, fixtureId, score, status, warnings) {
+  const eventWarnings = [];
   if (!Array.isArray(rawEvents)) {
     warnings.push("events_missing");
-    return [];
+    eventWarnings.push("events_missing");
+    return {
+      events: [],
+      observation: { available: false, count: 0, valid: false, warnings: eventWarnings },
+    };
   }
   const events = rawEvents.map((raw) => {
     const event = {
@@ -267,8 +272,17 @@ function normalizeEvents(rawEvents, fixtureId, score, status, warnings) {
   });
   if (!events.length && (status.isLive || status.isFinal) && ((score.home || 0) + (score.away || 0) > 0)) {
     warnings.push("events_missing");
+    eventWarnings.push("events_missing");
   }
-  return events;
+  return {
+    events,
+    observation: {
+      available: true,
+      count: events.length,
+      valid: eventWarnings.length === 0,
+      warnings: eventWarnings,
+    },
+  };
 }
 
 function normalizeFixture(raw, options, metadata) {
@@ -294,7 +308,7 @@ function normalizeFixture(raw, options, metadata) {
   const away = normalizeTeam(raw?.teams?.away, "away", errors, warnings);
   const clock = normalizeClock(raw?.fixture?.status, status, errors);
   const score = normalizeScore(raw, status, errors);
-  const events = normalizeEvents(raw?.events, providerFixtureId, score, status, warnings);
+  const eventCollection = normalizeEvents(raw?.events, providerFixtureId, score, status, warnings);
 
   return {
     contractVersion: SPORTS_DATA_CONTRACT_VERSION,
@@ -320,7 +334,8 @@ function normalizeFixture(raw, options, metadata) {
     },
     clock,
     score,
-    events,
+    events: eventCollection.events,
+    eventObservation: eventCollection.observation,
   };
 }
 

@@ -21,6 +21,75 @@ function errorCode(error) {
   return String(error?.message || "round_shadow_failed").split(":")[0];
 }
 
+function normalizeEventCategory(typeRaw) {
+  const type = String(typeRaw || "").trim().toLowerCase();
+  if (type === "goal") return "gol";
+  if (type === "card") return "cartao";
+  if (type === "subst") return "substituicao";
+  if (type === "var") return "var";
+  return "desconhecido";
+}
+
+export function buildEventPersistence(provider, canonicalGameId, executionId, observedAt) {
+  const observation = provider?.eventObservation || {
+    available: false, count: 0, valid: false, warnings: ["events_missing"],
+  };
+  const events = Array.isArray(provider?.events) ? provider.events : [];
+  const occurrences = new Map();
+  const rows = events.map((event) => {
+    const signature = [
+      provider.providerFixtureId,
+      event.teamProviderId ?? "",
+      event.playerProviderId ?? "",
+      event.relatedPlayerProviderId ?? "",
+      String(event.typeRaw || "unknown").trim().toLowerCase(),
+    ].join(":");
+    const occurrence = (occurrences.get(signature) || 0) + 1;
+    occurrences.set(signature, occurrence);
+    const content = {
+      minuto: event.elapsed,
+      acrescimos: event.extra,
+      time_id_externo: event.teamProviderId,
+      time_nome: event.teamName,
+      jogador_id_externo: event.playerProviderId,
+      jogador_nome: event.playerName,
+      relacionado_id_externo: event.relatedPlayerProviderId,
+      relacionado_nome: event.relatedPlayerName,
+      tipo_original: event.typeRaw,
+      detalhe_original: event.detailRaw,
+      comentario: event.comments,
+      categoria_normalizada: normalizeEventCategory(event.typeRaw),
+    };
+    return {
+      chave_fornecedor: event.providerEventKey,
+      chave_logica: `${signature}:${occurrence}`,
+      hash_conteudo: sha256(content),
+      ...content,
+    };
+  });
+  if (new Set(rows.map((row) => row.chave_fornecedor)).size !== rows.length) {
+    throw new Error("event_keys_duplicated");
+  }
+  const available = observation.available === true;
+  const valid = available && observation.valid === true && observation.count === rows.length;
+  return {
+    lot: {
+      execucao_id: executionId,
+      fornecedor: "api-football",
+      id_jogo: canonicalGameId,
+      id_externo: provider.providerFixtureId,
+      observado_em: observedAt,
+      lista_disponivel: available,
+      quantidade_eventos: rows.length,
+      hash_lista: available ? sha256(rows.map((row) => row.hash_conteudo).sort()) : null,
+      avisos: Array.isArray(observation.warnings) ? observation.warnings : [],
+      valido: valid,
+      erro_normalizacao: available ? (valid ? null : "events_incomplete") : "events_unavailable",
+    },
+    events: rows,
+  };
+}
+
 function dateInSaoPaulo(value) {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit",
@@ -227,6 +296,25 @@ export async function collectApiFootballRoundCycle({
       const { error: classificationError } = await supabase.from("transicao_api_classificacoes").insert(classificationRows);
       if (classificationError) throw new Error(`round_standings_insert_failed:${classificationError.message}`);
     }
+    const eventPayloads = pairs.map(({ canonical, provider }) =>
+      buildEventPersistence(provider, canonical.id_jogo, execution.id, observedAt));
+    for (const payload of eventPayloads) {
+      const { error: eventError } = await supabase.rpc("registrar_lote_eventos_sombra", {
+        p_lote: payload.lot,
+        p_eventos: payload.events,
+      });
+      if (eventError) throw new Error(`round_events_insert_failed:${eventError.message}`);
+    }
+    const eventSummary = {
+      lotes: eventPayloads.length,
+      eventos: eventPayloads.reduce((total, payload) => total + payload.events.length, 0),
+      listas_disponiveis: eventPayloads.filter((payload) => payload.lot.lista_disponivel).length,
+      listas_vazias: eventPayloads.filter((payload) => payload.lot.lista_disponivel && payload.events.length === 0).length,
+      listas_indisponiveis: eventPayloads.filter((payload) => !payload.lot.lista_disponivel).length,
+      lotes_invalidos: eventPayloads.filter((payload) => !payload.lot.valido).length,
+      eventos_desconhecidos: eventPayloads.flatMap((payload) => payload.events)
+        .filter((event) => event.categoria_normalizada === "desconhecido").length,
+    };
     const finalObservation = standingsObservation || normalized.observation;
     await updateExecution(supabase, execution.id, {
       concluida_em: now().toISOString(), sucesso_oficial: true, sucesso_sombra: true,
@@ -238,9 +326,13 @@ export async function collectApiFootballRoundCycle({
       detalhes: {
         ...details, fixtures: pairs.length, tentativas: calls,
         maior_diferenca_agenda_minutos: Math.max(...pairs.map((pair) => pair.scheduleDifferenceMinutes)),
+        eventos: eventSummary,
       },
     });
-    return { ok: true, executionId: execution.id, games: pairs.length, calls, standings: classificationRows.length === 2 };
+    return {
+      ok: true, executionId: execution.id, games: pairs.length, calls,
+      standings: classificationRows.length === 2, eventLots: eventSummary.lotes, events: eventSummary.eventos,
+    };
   } catch (error) {
     calls += Number(error?.attempts || 0);
     await updateExecution(supabase, execution.id, {

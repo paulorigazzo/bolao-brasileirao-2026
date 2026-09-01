@@ -38,6 +38,7 @@ assert.deepEqual(
 );
 assert.deepEqual([normalized.game.home.code, normalized.game.away.code], [null, null]);
 assert.equal(normalized.game.events.length, 5);
+assert.deepEqual(normalized.game.eventObservation, { available: true, count: 5, valid: true, warnings: [] });
 assert.deepEqual(
   [normalized.observation.dailyLimit, normalized.observation.dailyRemaining, normalized.observation.minuteLimit, normalized.observation.minuteRemaining],
   [100, 91, 10, 9],
@@ -95,6 +96,16 @@ noEvents.response[0].events = [];
 const noEventsResult = normalizeApiFootballFixtureEnvelope(noEvents, options);
 assert.equal(noEventsResult.observation.responseValid, true);
 assert.ok(noEventsResult.observation.warnings.includes("events_missing"));
+assert.deepEqual(noEventsResult.game.eventObservation, {
+  available: true, count: 0, valid: false, warnings: ["events_missing"],
+});
+const unavailableEvents = clone(fixture);
+delete unavailableEvents.response[0].events;
+const unavailableEventsResult = normalizeApiFootballFixtureEnvelope(unavailableEvents, options);
+assert.equal(unavailableEventsResult.observation.responseValid, true);
+assert.deepEqual(unavailableEventsResult.game.eventObservation, {
+  available: false, count: 0, valid: false, warnings: ["events_missing"],
+});
 
 const optionalMetadata = clone(fixture);
 optionalMetadata.response[0].teams.home.code = "BOT";
