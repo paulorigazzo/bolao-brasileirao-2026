@@ -6,7 +6,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 - Versão funcional: `v6.24.3`.
 - Prioridade: **manter o Bolão 2026 estável e independente e simplificar o Rigazzo como evolução caseira com Temporadas e Ligas**.
-- Próxima etapa coordenada: planejar em portão próprio a ativação controlada da Fase 6D, após o preflight somente leitura da rodada 26 aprovado; a football-data.org permanece oficial. A evolução independente do Rigazzo continua congelada nos termos já documentados.
+- Próxima etapa coordenada: estabilizar por uma ou duas rodadas o corte controlado da Fase 6D, ativado em 2026-09-03 com a API-Football oficial e a football-data.org preservada para rollback. A evolução independente do Rigazzo continua congelada nos termos já documentados.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda

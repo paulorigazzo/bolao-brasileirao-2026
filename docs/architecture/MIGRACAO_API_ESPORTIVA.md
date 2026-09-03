@@ -954,6 +954,28 @@ Essa evidência aprova o portão operacional da Fase 6C, mas não promove campos
 não altera configuração ou fonte oficial e não autoriza deploy, corte ou
 estabilização. A `football-data.org` permanece oficial.
 
+### Roteiro operacional da Fase 6D
+
+O corte, seus portões de integridade e o rollback estão detalhados em
+[`docs/process/API_FOOTBALL_CUTOVER_6D.md`](../process/API_FOOTBALL_CUTOVER_6D.md).
+O roteiro mantém a mudança da configuração de produção e o novo deploy sujeitos
+a autorização humana explícita após a renovação do preflight sem escrita.
+
+#### Evidência real da ativação 6D
+
+Em 2026-09-03, após autorização dos portões de produção, a variável oficial foi
+configurada exclusivamente para o contexto de produção e a API-Football passou
+a ser a fonte oficial no deploy `6a99ce62eddc57abc4c5c7ea`. O cache específico
+`BSA-2026:api-football` foi criado com 20 clubes e o diagnóstico permaneceu em
+100/100.
+
+A primeira sincronização oficial importou os 10 jogos elegíveis da rodada 26
+com uma chamada à API, preservou 250 jogos terminais, ignorou 120 jogos futuros
+sem mapeamento, não propôs reparos e manteve intactos os 50 palpites vinculados
+à rodada. Os 10 jogos permaneceram com ambos os escudos. A football-data.org
+continua disponível para rollback durante a estabilização de uma ou duas
+rodadas.
+
 ## Estratégia de rollback
 
 Antes do corte, devem existir:
