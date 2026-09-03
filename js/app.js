@@ -20,7 +20,7 @@ import { buildFriendlyRankingsModel } from "./friendly-rankings-engine.js";
 import { adminRoundGameIds, loadAdminPickProgress } from "./admin-pick-progress.js";
 import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js";
 
-const APP_VERSION = "6.24.5";
+const APP_VERSION = "6.24.6";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2928,6 +2928,7 @@ function standingsFavoriteData(teamName){
 
 
 function standingsTeamExpandedContent(row){
+  const displayName=teamDisplayName(row.team);
   const team=findTeam(row.team) || {name:row.team,key:normalizeTeamKey(row.team),logo:row.crest||""};
   const games=favoriteTeamGames(team);
   const recent=games.filter(isScorableGame).sort((a,b)=>Number(b.rodada)-Number(a.rodada)||new Date(b.inicio)-new Date(a.inicio)).slice(0,5).sort((a,b)=>Number(a.rodada)-Number(b.rodada)||new Date(a.inicio)-new Date(b.inicio));
@@ -2949,7 +2950,7 @@ function standingsTeamExpandedContent(row){
       <span><small>Gols pró</small><strong>${row.goalsFor}</strong></span><span><small>Gols contra</small><strong>${row.goalsAgainst}</strong></span><span><small>Aproveitamento</small><strong>${row.playedGames?Math.round((Number(row.points)/(Number(row.playedGames)*3))*100):0}%</strong></span>
     </div>
     ${history}
-    <button class="standings-team-games-action" type="button" data-standings-team-games="${escapeHtml(row.team)}">Ver jogos do ${escapeHtml(row.team)} <b aria-hidden="true">›</b></button>
+    <button class="standings-team-games-action" type="button" data-standings-team-games="${escapeHtml(row.team)}">Ver jogos do ${escapeHtml(displayName)} <b aria-hidden="true">›</b></button>
   </div>`;
 }
 
@@ -2958,17 +2959,18 @@ function renderStandings(){
   const totalTeams = table.length;
   const mobileCards=[];
   $("standingsBody").innerHTML = table.map(row => {
+    const displayName=teamDisplayName(row.team);
     const zone = standingsZone(Number(row.position), totalTeams);
     const crest = row.crest
       ? `<img src="${escapeHtml(row.crest)}" alt="" loading="lazy" referrerpolicy="no-referrer">`
-      : `<span>${initials(row.team).slice(0,2)}</span>`;
+      : `<span>${initials(displayName).slice(0,2)}</span>`;
     const goalDiff = Number(row.goalDifference || 0);
     const favorite=standingsFavoriteData(row.team);
     const favoriteStyle=favorite.isFavorite?` style="--favorite-primary:${favorite.colors[0]};--favorite-secondary:${favorite.colors[1]};--favorite-text:${favorite.colors[2]}"`:"";
     mobileCards.push(`<article class="standings-mobile-card zone-${zone} ${favorite.isFavorite?"is-favorite-standing":""}" data-team-key="${escapeHtml(favorite.rowKey)}"${favoriteStyle}>
       <button class="standings-card-summary" type="button" aria-expanded="false">
         <span class="standings-mobile-position">${row.position}º</span>
-        <span class="standings-mobile-team"><span class="standings-crest">${crest}</span><span><strong>${escapeHtml(row.team)}${favorite.isFavorite?'<span class="favorite-mini-heart" aria-label="Time favorito">♥</span>':''}</strong><small>${standingsZoneLabel(zone)}</small></span></span>
+        <span class="standings-mobile-team"><span class="standings-crest">${crest}</span><span><strong>${escapeHtml(displayName)}${favorite.isFavorite?'<span class="favorite-mini-heart" aria-label="Time favorito">♥</span>':''}</strong><small>${standingsZoneLabel(zone)}</small></span></span>
         <span class="standings-mobile-points"><strong>${row.points}</strong><small>pts</small></span>
         <span class="standings-card-chevron" aria-hidden="true">⌄</span>
       </button>
@@ -2976,7 +2978,7 @@ function renderStandings(){
     </article>`);
     return `<tr class="standings-row zone-${zone} ${favorite.isFavorite?"is-favorite-standing":""}" data-team-key="${escapeHtml(favorite.rowKey)}">
       <td><strong>${row.position}º</strong></td>
-      <td><div class="standings-team"><span class="standings-crest">${crest}</span><strong>${escapeHtml(row.team)}</strong></div></td>
+      <td><div class="standings-team"><span class="standings-crest">${crest}</span><strong>${escapeHtml(displayName)}</strong></div></td>
       <td class="standings-points"><strong>${row.points}</strong></td><td>${row.playedGames}</td><td>${row.won}</td><td>${row.draw}</td><td>${row.lost}</td><td>${row.goalsFor}</td><td>${row.goalsAgainst}</td>
       <td class="${goalDiff > 0 ? "positive" : goalDiff < 0 ? "negative" : ""}">${goalDiff > 0 ? "+" : ""}${goalDiff}</td>
     </tr>`;
