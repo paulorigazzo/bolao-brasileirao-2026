@@ -1509,3 +1509,36 @@ Não há nova tabela, migração, serviço de armazenamento ou alteração
 competitiva. A atualização dos arquivos é controlada, versionada e submetida à
 suíte completa e à revisão visual. Marcas e escudos são usados somente para
 identificação dos clubes e permanecem sujeitos aos direitos de seus titulares.
+
+## DEC-2026-041 — A identidade nominal permanece canônica no Bolão
+
+- Data: 2026-09-03
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Impacto: alto, integração esportiva e identidade dos clubes
+
+### Contexto
+
+Após a reativação da API-Football, a classificação passou a expor diretamente
+variações nominais do fornecedor, como `Atletico Paranaense`, `Sao Paulo`,
+`RB Bragantino` e `Remo`. Os jogos já preservavam os nomes canônicos gravados
+no Bolão, de modo que a divergência alcançava classificação, cadastro de novos
+participantes e correspondências usadas por Home, Meu Time e Ranking.
+
+### Decisão
+
+- manter posições, estatísticas e IDs da classificação vindos da API-Football;
+- resolver o nome pelo relacionamento entre ID da API-Football e nome canônico
+  existente nos jogos, sem manter uma lista manual paralela;
+- exigir cobertura exata dos clubes presentes na classificação;
+- interromper a atualização diante de ID ausente, inesperado ou nome
+  conflitante;
+- preservar os nomes armazenados nos jogos e a apresentação já existente para
+  `Mineiro` e `Paranaense`.
+
+### Consequências e limites
+
+A correção não altera esquema, RLS, autenticação, dados competitivos, regras de
+pontuação ou o fornecedor oficial. O cache anterior só é substituído depois de
+uma resposta integralmente validada; a football-data.org permanece disponível
+para rollback operacional.

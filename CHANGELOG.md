@@ -1,3 +1,10 @@
+# v6.24.5 — Nomes canônicos na classificação da API-Football
+
+- Mantém posições, estatísticas e IDs da classificação vindos da API-Football, mas apresenta os nomes canônicos já usados pelo Bolão.
+- Deriva o catálogo dos mapeamentos dos 380 jogos, sem criar uma segunda lista manual de clubes.
+- Impede a publicação de classificação com clube ausente, inesperado ou associado a nomes conflitantes.
+- Uniformiza classificação, cadastro, Home, Meu Time e Ranking sem alterar os nomes armazenados nos jogos.
+
 # v6.24.4 — Escudos locais da API-Football
 
 - Armazena os 20 escudos do Brasileirão recebidos da API-Football como ativos estáticos do próprio Bolão.

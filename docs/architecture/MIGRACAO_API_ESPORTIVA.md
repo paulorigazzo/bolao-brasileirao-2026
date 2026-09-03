@@ -3,11 +3,10 @@
 ## Estado do documento
 
 - **Natureza:** plano arquitetural e operacional interno.
-- **Estado:** migração em andamento; gravação controlada da Fase 5B.2 aplicada
-  e validada; corte não autorizado.
+- **Estado:** migração em estabilização; Fase 6D ativada com rollback preservado.
 - **Candidato em avaliação:** API-Football.
-- **Fonte oficial atual:** football-data.org.
-- **Última atualização:** 2026-08-25.
+- **Fonte oficial atual:** API-Football.
+- **Última atualização:** 2026-09-03.
 
 Este documento é a referência canônica para retomar, executar e atualizar a
 migração da fonte de dados esportivos. Ele foi escrito para reduzir dependência
@@ -1078,6 +1077,7 @@ somente à identificação dos clubes e sujeitos aos direitos de seus titulares.
 | 2026-09-01 | 2.0 | Ensaio real 6B aprovado; dez atualizações explicadas por relógio final, locais e escudos, sem divergência competitiva |
 | 2026-09-01 | 2.1 | Fase 6C simplificada; manutenção preparada para preservar jogos terminais e preflight da rodada 26 mantido como portão |
 | 2026-09-03 | 2.2 | Rollback da Fase 6D e escudos locais da API-Football registrados como novo portão de corte |
+| 2026-09-03 | 2.3 | Recorte reativado com escudos locais e nomes da classificação reconciliados pelo catálogo canônico dos jogos |
 
 ## Referências internas
 

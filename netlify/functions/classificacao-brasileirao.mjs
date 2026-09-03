@@ -7,6 +7,7 @@ import {
 } from "./_constants.mjs";
 import { officialSportsDataProvider, providerClassificationSnapshotId, SPORTS_DATA_PROVIDERS } from "./_sports-data-provider.mjs";
 import { apiFootballClassification } from "./_api-football-official.mjs";
+import { canonicalizeApiFootballClassificationResult } from "../../src/sports-data/api-football-team-catalog.mjs";
 
 async function readSnapshot(supabase, snapshotId) {
   const { data, error } = await supabase
@@ -26,10 +27,15 @@ export default async (request) => {
   const supabase = serviceClient();
   const provider = officialSportsDataProvider();
   const snapshotId = providerClassificationSnapshotId(CLASSIFICATION_SNAPSHOT_ID, provider);
+  let canonicalGames = null;
 
   try {
     if (provider === SPORTS_DATA_PROVIDERS.API_FOOTBALL) {
-      const classification = await apiFootballClassification();
+      const { data, error: canonicalError } = await supabase.from("jogos")
+        .select("time_casa,time_fora,api_football_time_casa_id,api_football_time_fora_id");
+      if (canonicalError) throw canonicalError;
+      canonicalGames = data || [];
+      const classification = await apiFootballClassification(canonicalGames);
       const { error: cacheError } = await supabase.from("classificacao_cache").upsert({
         id: classification.id,
         payload: classification.result,
@@ -77,7 +83,10 @@ export default async (request) => {
     try {
       const snapshot = await readSnapshot(supabase, snapshotId);
       if (snapshot) {
-        return jsonResponse({ ...snapshot, ok: true, warning: "API indisponível; exibindo a última classificação salva." }, 200, {
+        const safeSnapshot = provider === SPORTS_DATA_PROVIDERS.API_FOOTBALL
+          ? canonicalizeApiFootballClassificationResult(snapshot, canonicalGames || [])
+          : snapshot;
+        return jsonResponse({ ...safeSnapshot, ok: true, warning: "API indisponível; exibindo a última classificação salva." }, 200, {
           "cache-control": "public, max-age=60, s-maxage=60",
           "x-bolao-fallback": "classification-cache",
         });

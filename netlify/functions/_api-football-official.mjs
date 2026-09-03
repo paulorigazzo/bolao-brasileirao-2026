@@ -5,6 +5,7 @@ import { isMissingTableError, requireEnv, serviceClient } from "./_api-helpers.m
 import { API_FOOTBALL_LEAGUE_ID, CLASSIFICATION_SNAPSHOT_ID, SEASON_YEAR } from "./_constants.mjs";
 import { providerClassificationSnapshotId, SPORTS_DATA_PROVIDERS } from "./_sports-data-provider.mjs";
 import { apiFootballLocalCrestUrl } from "../../src/sports-data/api-football-local-crests.mjs";
+import { canonicalizeApiFootballStandings } from "../../src/sports-data/api-football-team-catalog.mjs";
 
 const API_BASE = "https://v3.football.api-sports.io";
 const DAILY_RESERVE_RATIO = 0.2;
@@ -128,21 +129,22 @@ export async function syncApiFootballGames(options = {}) {
   return report;
 }
 
-export async function apiFootballClassification(fetchImpl = fetch) {
+export async function apiFootballClassification(canonicalGames, fetchImpl = fetch) {
   const observedAt = new Date().toISOString();
   const { response, payload } = await request(`/standings?league=${API_FOOTBALL_LEAGUE_ID}&season=${SEASON_YEAR}`, fetchImpl);
   const normalized = normalizeApiFootballStandingsEnvelope(payload, { observedAt, httpStatus: response.status, headers: response.headers });
   if (!normalized.observation.responseValid || !normalized.standings) throw new Error(normalized.observation.errors[0] || "standings_response_invalid");
   assertApiFootballQuota(normalized.observation);
-  return apiFootballClassificationResult(normalized.standings, observedAt);
+  return apiFootballClassificationResult(normalized.standings, canonicalGames, observedAt);
 }
 
-export function apiFootballClassificationResult(standing, observedAt = new Date().toISOString()) {
+export function apiFootballClassificationResult(standing, canonicalGames, observedAt = new Date().toISOString()) {
+  const canonicalStanding = canonicalizeApiFootballStandings(standing, canonicalGames);
   return {
     id: providerClassificationSnapshotId(CLASSIFICATION_SNAPSHOT_ID, SPORTS_DATA_PROVIDERS.API_FOOTBALL),
     result: { ok: true, competition: standing.competitionName, season: String(standing.season), currentMatchday: standing.currentRound,
       updatedAt: observedAt, source: "api", provider: SPORTS_DATA_PROVIDERS.API_FOOTBALL,
-      table: standing.table.map((row) => ({ position: row.position, teamId: row.providerTeamId, team: row.teamName,
+      table: canonicalStanding.table.map((row) => ({ position: row.position, teamId: row.providerTeamId, team: row.teamName,
         crest: apiFootballLocalCrestUrl(row.providerTeamId), playedGames: row.played, won: row.won, draw: row.drawn, lost: row.lost,
         points: row.points, goalsFor: row.goalsFor, goalsAgainst: row.goalsAgainst, goalDifference: row.goalDifference })) },
   };
