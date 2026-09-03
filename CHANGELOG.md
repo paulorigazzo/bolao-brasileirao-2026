@@ -1,3 +1,10 @@
+# v6.24.6 — Identidade visual uniforme dos clubes
+
+- Exibe `Atlético-MG` e `Athletico-PR` também na Classificação, preservando os nomes internos `Mineiro` e `Paranaense` para associações.
+- Uniformiza os nomes no cartão móvel, tabela desktop e ação expandida de consulta aos jogos do clube.
+- Registra os 20 pares reais entre IDs, nomes, siglas e escudos da API-Football em uma fixture de regressão.
+- Valida a assinatura dos vinte PNGs para detectar automaticamente arquivos trocados.
+
 # v6.24.5 — Nomes canônicos na classificação da API-Football
 
 - Mantém posições, estatísticas e IDs da classificação vindos da API-Football, mas apresenta os nomes canônicos já usados pelo Bolão.

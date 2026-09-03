@@ -1,0 +1,22 @@
+[
+  { "id": 118, "providerName": "Bahia", "canonicalName": "Bahia", "displayName": "Bahia", "abbreviation": "BAH", "crestSha256": "c846ae3d72aed4db81fd6edccb75f030338775917f08d8e243ff8f7d34fde993" },
+  { "id": 119, "providerName": "Internacional", "canonicalName": "Internacional", "displayName": "Internacional", "abbreviation": "INT", "crestSha256": "ec3a86e650496d19770d4d98a6aa0da27bf9330e3003e5cea43bbf7bcffa6622" },
+  { "id": 120, "providerName": "Botafogo", "canonicalName": "Botafogo", "displayName": "Botafogo", "abbreviation": "BOT", "crestSha256": "77dbb0098360a25aee1ac3ec2b61c90b16f54516b1d1de7b6a80050cf39d1bd8" },
+  { "id": 121, "providerName": "Palmeiras", "canonicalName": "Palmeiras", "displayName": "Palmeiras", "abbreviation": "PAL", "crestSha256": "9879fc79989245870237232f145825d73a392437a28938c45e496346cd55a581" },
+  { "id": 124, "providerName": "Fluminense", "canonicalName": "Fluminense", "displayName": "Fluminense", "abbreviation": "FLU", "crestSha256": "3079f020cec272c9944911bb3a9b8708342a5f851eac199b50c6c80340c3a577" },
+  { "id": 126, "providerName": "Sao Paulo", "canonicalName": "São Paulo", "displayName": "São Paulo", "abbreviation": "SAO", "crestSha256": "698c7d2606aad33b3ea06da30b1dc99ca73c0ca9c7748a0da9fc20a2f5a8c544" },
+  { "id": 127, "providerName": "Flamengo", "canonicalName": "Flamengo", "displayName": "Flamengo", "abbreviation": "FLA", "crestSha256": "af573eed42b77ba6801a00b43bd0bfd318f2f609d225521fd94e3a57c24b4f09" },
+  { "id": 128, "providerName": "Santos", "canonicalName": "Santos", "displayName": "Santos", "abbreviation": "SAN", "crestSha256": "aea834017ce654920f08bde58030fdeb03763db2eff976ea20c09886990fff46" },
+  { "id": 130, "providerName": "Gremio", "canonicalName": "Grêmio", "displayName": "Grêmio", "abbreviation": "GRE", "crestSha256": "d4d521693bc37fa2c7d85d51ab30fe6c3c49bb4a56c2bd9327f74616ff8facad" },
+  { "id": 131, "providerName": "Corinthians", "canonicalName": "Corinthians", "displayName": "Corinthians", "abbreviation": "COR", "crestSha256": "cd0ff28fd7c9d3397df596560732cc020e2df68c9b12c64049130da12ae509af" },
+  { "id": 132, "providerName": "Chapecoense-sc", "canonicalName": "Chapecoense", "displayName": "Chapecoense", "abbreviation": "CHA", "crestSha256": "31650f96022e4717e69c837c4d188c34966ffb848432eeecf7b74037efb3e14d" },
+  { "id": 133, "providerName": "Vasco DA Gama", "canonicalName": "Vasco da Gama", "displayName": "Vasco da Gama", "abbreviation": "VAS", "crestSha256": "8ea02fa177c5a0362bb7b253add694629369aeee94b4ae7e4f1424dc13644ab7" },
+  { "id": 134, "providerName": "Atletico Paranaense", "canonicalName": "Paranaense", "displayName": "Athletico-PR", "abbreviation": "CAP", "crestSha256": "01850be776d8a164cd24e03a7140cc64ba8236010046750ed23040dd5851e6a2" },
+  { "id": 135, "providerName": "Cruzeiro", "canonicalName": "Cruzeiro", "displayName": "Cruzeiro", "abbreviation": "CRU", "crestSha256": "21b1f9724cd2572ba72d4a37e0103d196589b6ec32e7a877fac290e7feb88c29" },
+  { "id": 136, "providerName": "Vitoria", "canonicalName": "Vitória", "displayName": "Vitória", "abbreviation": "VIT", "crestSha256": "69da02c855d435d6582836759fca6cdd5a0bd2ad48b6f18ccffd177918b074a7" },
+  { "id": 147, "providerName": "Coritiba", "canonicalName": "Coritiba", "displayName": "Coritiba", "abbreviation": "CFC", "crestSha256": "3188ce00f2f75f28500a9c57a79169a954feee37da637ab50019e3ce81abb73b" },
+  { "id": 794, "providerName": "RB Bragantino", "canonicalName": "Bragantino", "displayName": "Bragantino", "abbreviation": "RBB", "crestSha256": "3d20e7dab6d693528503af8b7295d92070195eed584ee42fa495cd32c3881eb5" },
+  { "id": 1062, "providerName": "Atletico-MG", "canonicalName": "Mineiro", "displayName": "Atlético-MG", "abbreviation": "CAM", "crestSha256": "d8ff9d6373abc3b84fb1d2512c24767baa4f373b4ce1e13d729fc80a61983e26" },
+  { "id": 1198, "providerName": "Remo", "canonicalName": "Clube do Remo", "displayName": "Clube do Remo", "abbreviation": "REM", "crestSha256": "67aafe70695b9866d61a8cc5ecee04c2f7c413425dd1737c5a00c8925f56b5e4" },
+  { "id": 7848, "providerName": "Mirassol", "canonicalName": "Mirassol", "displayName": "Mirassol", "abbreviation": "MIR", "crestSha256": "da876ca45c245f0f56488807623d57c321d7031c18157fc02e1fe3468d8b6b19" }
+]

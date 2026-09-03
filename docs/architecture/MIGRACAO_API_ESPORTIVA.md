@@ -1078,6 +1078,7 @@ somente à identificação dos clubes e sujeitos aos direitos de seus titulares.
 | 2026-09-01 | 2.1 | Fase 6C simplificada; manutenção preparada para preservar jogos terminais e preflight da rodada 26 mantido como portão |
 | 2026-09-03 | 2.2 | Rollback da Fase 6D e escudos locais da API-Football registrados como novo portão de corte |
 | 2026-09-03 | 2.3 | Recorte reativado com escudos locais e nomes da classificação reconciliados pelo catálogo canônico dos jogos |
+| 2026-09-03 | 2.4 | Apresentação da classificação uniformizada e matriz dos vinte clubes protegida por regressão nominal e visual |
 
 ## Referências internas
 

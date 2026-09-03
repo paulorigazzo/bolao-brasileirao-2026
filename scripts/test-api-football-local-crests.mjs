@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
+import teams from "../fixtures/api-football/teams-brasileirao-2026.json" with { type: "json" };
 import {
   API_FOOTBALL_BRASILEIRAO_TEAM_IDS,
   apiFootballLocalCrestUrl,
@@ -10,6 +12,9 @@ import { probeApiFootballLocalCrests } from "../netlify/functions/_api-football-
 
 assert.equal(API_FOOTBALL_BRASILEIRAO_TEAM_IDS.length, 20);
 assert.equal(new Set(API_FOOTBALL_BRASILEIRAO_TEAM_IDS).size, 20);
+assert.deepEqual(teams.map((team) => team.id).sort((a, b) => a - b), [...API_FOOTBALL_BRASILEIRAO_TEAM_IDS].sort((a, b) => a - b));
+assert.equal(new Set(teams.map((team) => team.canonicalName)).size, 20);
+assert.equal(new Set(teams.map((team) => team.abbreviation)).size, 20);
 assert.equal(apiFootballLocalCrestUrl(794), "/assets/clubs/api-football/794.png");
 assert.throws(() => apiFootballLocalCrestUrl("invalid"), /api_football_team_id_invalid/);
 assert.equal(assessApiFootballCrestCoverage(API_FOOTBALL_BRASILEIRAO_TEAM_IDS).ok, true);
@@ -36,9 +41,11 @@ const unavailable = await probeApiFootballLocalCrests("https://bolao.example",
 assert.equal(unavailable.ok, false);
 assert.equal(unavailable.failures.length, 20);
 
-for (const teamId of API_FOOTBALL_BRASILEIRAO_TEAM_IDS) {
-  const bytes = await readFile(new URL(`../assets/clubs/api-football/${teamId}.png`, import.meta.url));
-  assert.equal(inspectApiFootballCrest(bytes).ok, true, `Escudo local inválido: ${teamId}`);
+for (const team of teams) {
+  const bytes = await readFile(new URL(`../assets/clubs/api-football/${team.id}.png`, import.meta.url));
+  assert.equal(inspectApiFootballCrest(bytes).ok, true, `Escudo local inválido: ${team.id} (${team.displayName})`);
+  assert.equal(createHash("sha256").update(bytes).digest("hex"), team.crestSha256,
+    `Escudo local trocado: ${team.id} deveria representar ${team.displayName}`);
 }
 
 console.log("Escudos locais da API-Football verificados: cobertura, formato, resolução e falhas negativas.");

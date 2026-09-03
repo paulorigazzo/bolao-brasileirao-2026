@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import fixture from "../fixtures/api-football/fixture-1492340.sanitized.json" with { type: "json" };
 import standings from "../fixtures/api-football/standings-brasileirao.synthetic.json" with { type: "json" };
+import teams from "../fixtures/api-football/teams-brasileirao-2026.json" with { type: "json" };
 import { normalizeApiFootballFixtureEnvelope, normalizeApiFootballStandingsEnvelope } from "../src/sports-data/api-football-adapter.mjs";
 import { apiFootballClassificationResult, apiFootballGameForCanonical, scopeApiFootballSyncGames } from "../netlify/functions/_api-football-official.mjs";
 import { buildApiFootballCanonicalTeamCatalog, canonicalizeApiFootballClassificationResult, canonicalizeApiFootballStandings } from "../src/sports-data/api-football-team-catalog.mjs";
@@ -63,19 +64,7 @@ assert.throws(() => canonicalizeApiFootballStandings(normalizedStandings.standin
   { time_casa: "Clube inesperado", api_football_time_casa_id: 999999 },
 ]), /api_football_canonical_team_unexpected/);
 
-const observedDivergences = [
-  [121, "Palmeiras", "Palmeiras"],
-  [127, "Flamengo", "Flamengo"],
-  [134, "Atletico Paranaense", "Paranaense"],
-  [1062, "Atletico-MG", "Mineiro"],
-  [119, "RB Bragantino", "Bragantino"],
-  [126, "Sao Paulo", "São Paulo"],
-  [120, "Vitoria", "Vitória"],
-  [130, "Gremio", "Grêmio"],
-  [133, "Vasco DA Gama", "Vasco da Gama"],
-  [794, "Remo", "Clube do Remo"],
-  [1198, "Chapecoense-sc", "Chapecoense"],
-];
+const observedDivergences = teams.map((team) => [team.id, team.providerName, team.canonicalName]);
 const divergenceStanding = {
   ...normalizedStandings.standings,
   table: observedDivergences.map(([providerTeamId, teamName], index) => ({
@@ -120,10 +109,13 @@ assert.deepEqual(scopeApiFootballSyncGames([
 const syncSource = readFileSync(new URL("../netlify/functions/_sync-shared.mjs", import.meta.url), "utf8");
 const classificationSource = readFileSync(new URL("../netlify/functions/classificacao-brasileirao.mjs", import.meta.url), "utf8");
 const diagnosticSource = readFileSync(new URL("../netlify/functions/diagnostico-sistema.mjs", import.meta.url), "utf8");
+const appSource = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
 assert.match(syncSource, /officialSportsDataProvider\(\)[\s\S]*syncApiFootballGames/);
 assert.match(classificationSource, /officialSportsDataProvider\(\)[\s\S]*apiFootballClassification/);
 assert.match(classificationSource, /api_football_time_casa_id,api_football_time_fora_id/);
 assert.match(classificationSource, /providerClassificationSnapshotId/);
 assert.match(diagnosticSource, /officialSportsDataProvider: provider/);
+assert.match(appSource, /function standingsTeamExpandedContent\(row\)\{[\s\S]*const displayName=teamDisplayName\(row\.team\)[\s\S]*Ver jogos do \$\{escapeHtml\(displayName\)\}/);
+assert.match(appSource, /function renderStandings\(\)\{[\s\S]*const displayName=teamDisplayName\(row\.team\)[\s\S]*standings-mobile-team[\s\S]*escapeHtml\(displayName\)[\s\S]*standings-team[\s\S]*escapeHtml\(displayName\)/);
 
 console.log("Fundação de corte controlado da API-Football verificada com sucesso.");
