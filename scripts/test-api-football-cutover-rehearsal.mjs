@@ -54,7 +54,8 @@ const fetchImpl = async (url) => {
 
 const report = await runApiFootballCutoverRehearsal({ supabase: supabaseReadOnly(), fetchImpl,
   apiFootballKey: "test-key", footballDataToken: "test-token", round: 26,
-  confirmation: "REHEARSE_API_FOOTBALL_CUTOVER", now: () => new Date("2026-09-01T21:00:00Z") });
+  confirmation: "REHEARSE_API_FOOTBALL_CUTOVER", crestProbe: async () => ({ ok: true, clubs: 20 }),
+  now: () => new Date("2026-09-01T21:00:00Z") });
 assert.equal(report.ok, true);
 assert.equal(report.canonicalGames, 10);
 assert.equal(report.mappedGames, 10);
@@ -62,13 +63,15 @@ assert.equal(report.apiFootballGames, 10);
 assert.equal(report.footballDataGames, 10);
 assert.equal(report.apiFootballStandings, 20);
 assert.equal(report.footballDataStandings, 20);
+assert.deepEqual(report.localCrests, { ok: true, clubs: 20 });
 assert.equal(report.writes, 0);
 assert.equal(report.hashes.gamesBefore, report.hashes.gamesAfter);
 assert.equal(report.hashes.picksBefore, report.hashes.picksAfter);
 assert.match(report.reportHash, /^[0-9a-f]{64}$/);
 assert.deepEqual(simulateProviderRollback().sequence, ["football-data.org", "api-football", "football-data.org"]);
 await assert.rejects(() => runApiFootballCutoverRehearsal({ supabase: supabaseReadOnly(), fetchImpl,
-  apiFootballKey: "test-key", footballDataToken: "test-token", round: 26, confirmation: "wrong" }), /rehearsal_confirmation_invalid/);
+  apiFootballKey: "test-key", footballDataToken: "test-token", round: 26, confirmation: "wrong",
+  crestProbe: async () => ({ ok: true, clubs: 20 }) }), /rehearsal_confirmation_invalid/);
 const lowQuotaFetch = async (url, options) => {
   const response = await fetchImpl(url, options);
   return { ...response, headers: new Headers({ "x-ratelimit-requests-limit": "7500",
@@ -76,7 +79,11 @@ const lowQuotaFetch = async (url, options) => {
 };
 await assert.rejects(() => runApiFootballCutoverRehearsal({ supabase: supabaseReadOnly(), fetchImpl: lowQuotaFetch,
   apiFootballKey: "test-key", footballDataToken: "test-token", round: 26,
-  confirmation: "REHEARSE_API_FOOTBALL_CUTOVER" }), /api_football_daily_reserve_reached/);
+  confirmation: "REHEARSE_API_FOOTBALL_CUTOVER", crestProbe: async () => ({ ok: true, clubs: 20 }) }), /api_football_daily_reserve_reached/);
+await assert.rejects(() => runApiFootballCutoverRehearsal({ supabase: supabaseReadOnly(), fetchImpl,
+  apiFootballKey: "test-key", footballDataToken: "test-token", round: 26,
+  confirmation: "REHEARSE_API_FOOTBALL_CUTOVER", crestProbe: async () => ({ ok: false, clubs: 19 }) }),
+  /api_football_local_crests_invalid/);
 
 const rehearsalSource = readFileSync(new URL("../netlify/functions/_api-football-cutover-rehearsal.mjs", import.meta.url), "utf8");
 const endpointSource = readFileSync(new URL("../netlify/functions/ensaiar-corte-api-football.mjs", import.meta.url), "utf8");

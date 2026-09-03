@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import fixture from "../fixtures/api-football/fixture-1492340.sanitized.json" with { type: "json" };
-import { normalizeApiFootballFixtureEnvelope } from "../src/sports-data/api-football-adapter.mjs";
-import { apiFootballGameForCanonical, scopeApiFootballSyncGames } from "../netlify/functions/_api-football-official.mjs";
+import standings from "../fixtures/api-football/standings-brasileirao.synthetic.json" with { type: "json" };
+import { normalizeApiFootballFixtureEnvelope, normalizeApiFootballStandingsEnvelope } from "../src/sports-data/api-football-adapter.mjs";
+import { apiFootballClassificationResult, apiFootballGameForCanonical, scopeApiFootballSyncGames } from "../netlify/functions/_api-football-official.mjs";
 import { officialSportsDataProvider, providerClassificationSnapshotId, SPORTS_DATA_PROVIDERS } from "../netlify/functions/_sports-data-provider.mjs";
 
 assert.equal(officialSportsDataProvider({}), SPORTS_DATA_PROVIDERS.FOOTBALL_DATA);
@@ -28,6 +29,15 @@ assert.equal(game.time_fora, canonical.time_fora);
 assert.equal(game.time_casa_id, canonical.time_casa_id);
 assert.equal(game.time_fora_id, canonical.time_fora_id);
 assert.equal(game.status, "encerrado");
+assert.equal(game.time_casa_logo, `/assets/clubs/api-football/${normalized.game.home.providerTeamId}.png`);
+assert.equal(game.time_fora_logo, `/assets/clubs/api-football/${normalized.game.away.providerTeamId}.png`);
+
+const normalizedStandings = normalizeApiFootballStandingsEnvelope(standings, { observedAt: "2026-08-25T00:01:00Z" });
+const classification = apiFootballClassificationResult(normalizedStandings.standings, "2026-08-25T00:01:00Z");
+assert.equal(classification.result.table.length, 20);
+assert.equal(classification.result.table[0].crest,
+  `/assets/clubs/api-football/${normalizedStandings.standings.table[0].providerTeamId}.png`);
+assert.equal(classification.result.table.some((row) => row.crest.includes("media.api-sports.io")), false);
 assert.throws(() => apiFootballGameForCanonical(normalized.game, { ...canonical, api_football_id: 1 }), /mapped_fixture_identity_conflict/);
 assert.throws(() => apiFootballGameForCanonical(normalized.game, { ...canonical, api_football_time_casa_id: 1 }), /mapped_home_identity_conflict/);
 assert.throws(() => apiFootballGameForCanonical(normalized.game, { ...canonical, api_football_time_fora_id: 1 }), /mapped_away_identity_conflict/);

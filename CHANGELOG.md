@@ -1,3 +1,11 @@
+# v6.24.4 — Escudos locais da API-Football
+
+- Armazena os 20 escudos do Brasileirão recebidos da API-Football como ativos estáticos do próprio Bolão.
+- Faz jogos e classificação da API-Football usarem URLs locais, sem dependência do DNS de `media.api-sports.io` no navegador dos participantes.
+- Impede o preflight de aprovar o corte quando a cobertura ou a disponibilidade dos 20 escudos locais estiver incompleta.
+- Acrescenta ao diagnóstico a verificação real de formato, resolução e resposta HTTP dos ativos publicados.
+- Registra o rollback de 2026-09-03 e mantém a football-data.org como fonte oficial até novo corte autorizado.
+
 # v6.24.3 — Preflight enxuto do corte para API-Football
 
 - Restringe a manutenção periódica da API-Football aos jogos não terminais, evitando regravação ampla do histórico encerrado.

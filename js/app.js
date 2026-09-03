@@ -20,7 +20,7 @@ import { buildFriendlyRankingsModel } from "./friendly-rankings-engine.js";
 import { adminRoundGameIds, loadAdminPickProgress } from "./admin-pick-progress.js";
 import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js";
 
-const APP_VERSION = "6.24.3";
+const APP_VERSION = "6.24.4";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -3987,6 +3987,8 @@ function apiFootballCutoverVerdict(result){
     && Number(result?.footballDataGames)===10
     && Number(result?.apiFootballStandings)===20
     && Number(result?.footballDataStandings)===20
+    && result?.localCrests?.ok===true
+    && Number(result?.localCrests?.clubs)===20
     && Number(result?.writes)===0
     && hashes.gamesBefore===hashes.gamesAfter
     && hashes.picksBefore===hashes.picksAfter
@@ -3996,7 +3998,7 @@ function renderApiFootballCutoverReport(result){
   const approved=apiFootballCutoverVerdict(result),hashes=result?.hashes||{},quota=result?.quota||{};
   return `<div class="admin-cutover-verdict ${approved?"is-success":"is-error"}"><strong>${approved?"✅ Ensaio aprovado":"⛔ Ensaio reprovado"}</strong><span>Rodada ${Number(result?.round)||"—"} • ${Number(result?.writes)||0} escrita(s)</span></div>
     <div class="diagnostic-metrics admin-cutover-metrics"><div><span>Jogos canônicos</span><strong>${Number(result?.canonicalGames)||0}/10</strong></div><div><span>Mapeamentos</span><strong>${Number(result?.mappedGames)||0}/10</strong></div><div><span>API-Football</span><strong>${Number(result?.apiFootballGames)||0} jogos • ${Number(result?.apiFootballStandings)||0} clubes</strong></div><div><span>football-data.org</span><strong>${Number(result?.footballDataGames)||0} jogos • ${Number(result?.footballDataStandings)||0} clubes</strong></div><div><span>Mudanças propostas</span><strong>${Number(result?.proposedChanges)||0}</strong></div><div><span>Reparos propostos</span><strong>${Number(result?.proposedRepairs)||0}</strong></div><div><span>Cota diária</span><strong>${quota.dailyRemaining??"—"} / ${quota.dailyLimit??"—"}</strong></div><div><span>Cota por minuto</span><strong>${quota.minuteRemaining??"—"} / ${quota.minuteLimit??"—"}</strong></div></div>
-    <ul class="admin-cutover-checks"><li>${hashes.gamesBefore===hashes.gamesAfter?"✅":"⛔"} Hash de jogos preservado</li><li>${hashes.picksBefore===hashes.picksAfter?"✅":"⛔"} Hash de palpites preservado</li><li>${result?.rollback?.restored?"✅":"⛔"} Rollback integral simulado</li></ul>
+    <ul class="admin-cutover-checks"><li>${hashes.gamesBefore===hashes.gamesAfter?"✅":"⛔"} Hash de jogos preservado</li><li>${hashes.picksBefore===hashes.picksAfter?"✅":"⛔"} Hash de palpites preservado</li><li>${result?.localCrests?.ok&&Number(result?.localCrests?.clubs)===20?"✅":"⛔"} 20 escudos locais disponíveis</li><li>${result?.rollback?.restored?"✅":"⛔"} Rollback integral simulado</li></ul>
     <small>Hash do relatório</small><code class="admin-cutover-hash">${escapeHtml(result?.reportHash||"indisponível")}</code>`;
 }
 async function runAdminApiFootballCutoverRehearsal(event){

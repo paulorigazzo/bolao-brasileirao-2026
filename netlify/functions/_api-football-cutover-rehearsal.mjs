@@ -59,12 +59,13 @@ export function simulateProviderRollback() {
 }
 
 export async function runApiFootballCutoverRehearsal({ supabase, fetchImpl = fetch, apiFootballKey,
-  footballDataToken, round, confirmation, now = () => new Date() }) {
+  footballDataToken, round, confirmation, crestProbe, now = () => new Date() }) {
   const roundNumber = Number(round);
   if (!Number.isInteger(roundNumber) || roundNumber < 1 || roundNumber > 38) throw new Error("rehearsal_round_invalid");
   if (confirmation !== CONFIRMATION) throw new Error("rehearsal_confirmation_invalid");
   if (!apiFootballKey) throw new Error("api_football_key_missing");
   if (!footballDataToken) throw new Error("football_data_token_missing");
+  if (typeof crestProbe !== "function") throw new Error("api_football_local_crest_probe_missing");
   const observedAt = now().toISOString();
   const gameColumns = "id_jogo,rodada,time_casa,time_fora,inicio,status,gols_casa,gols_fora,minuto,acrescimos,minuto_estimado,periodo_estimado,relogio_referencia_em,situacao_agendamento,fonte_agendamento,agendamento_confirmado_em,data_base,local_partida,time_casa_id,time_fora_id,time_casa_logo,time_fora_logo,api_football_id,api_football_time_casa_id,api_football_time_fora_id";
   const pickColumns = "id_jogo,user_id,gols_casa,gols_fora";
@@ -93,6 +94,8 @@ export async function runApiFootballCutoverRehearsal({ supabase, fetchImpl = fet
     httpStatus: apiStandings.response.status, headers: apiStandings.response.headers });
   if (!normalizedStandings.observation.responseValid || !normalizedStandings.standings) throw new Error(normalizedStandings.observation.errors[0] || "api_football_standings_invalid");
   assertApiFootballQuota(normalizedStandings.observation);
+  const localCrests = await crestProbe(normalizedStandings.standings.table.map((row) => row.providerTeamId));
+  if (!localCrests?.ok || localCrests.clubs !== 20) throw new Error("api_football_local_crests_invalid");
   if (!officialStandings.response.ok) throw new Error(`football_data_standings_http_${officialStandings.response.status}`);
   const oldStandings = footballDataStandings(officialStandings.payload);
 
@@ -109,6 +112,6 @@ export async function runApiFootballCutoverRehearsal({ supabase, fetchImpl = fet
     apiFootballStandings: normalizedStandings.standings.teamCount, footballDataStandings: oldStandings.length,
     quota: { dailyLimit: normalizedApi.observation.dailyLimit, dailyRemaining: normalizedApi.observation.dailyRemaining,
       minuteLimit: normalizedApi.observation.minuteLimit, minuteRemaining: normalizedApi.observation.minuteRemaining },
-    rollback, hashes, writes: 0 };
+    localCrests: { ok: localCrests.ok, clubs: localCrests.clubs }, rollback, hashes, writes: 0 };
   return { ok: true, ...reportCore, reportHash: sha256(reportCore) };
 }

@@ -1033,6 +1033,25 @@ Ao retomar este tema, o agente deve:
 Se houver conflito entre o estado real e este documento, parar a implementação,
 registrar a divergência e pedir decisão humana antes de prosseguir.
 
+### Escudos locais após o rollback da Fase 6D
+
+O corte de 2026-09-03 revelou que URLs válidas e presentes no payload não
+comprovam disponibilidade para o participante. O domínio
+`media.api-sports.io` retornou `NXDOMAIN` em dispositivo real, no Wi-Fi e na
+rede móvel, enquanto os dados esportivos permaneceram saudáveis. O rollback
+para a football-data.org foi concluído no mesmo dia.
+
+A versão 6.24.4 mantém a API-Football como origem dos escudos, mas publica os
+vinte PNGs da Série A em `/assets/clubs/api-football/<team-id>.png`. O ID do
+clube na API-Football é a chave estável. Jogos e classificação não expõem o
+domínio de mídia ao navegador. O diagnóstico verifica os arquivos pela mesma
+origem do Bolão e o preflight falha quando a cobertura, resposta HTTP, tipo,
+assinatura ou resolução não atendem ao contrato.
+
+Os termos e o guia da fornecedora recomendam o armazenamento próprio das
+imagens para evitar latência e limites do CDN. Os ativos continuam destinados
+somente à identificação dos clubes e sujeitos aos direitos de seus titulares.
+
 ## Histórico do documento
 
 | Data | Versão | Alteração |
@@ -1058,6 +1077,7 @@ registrar a divergência e pedir decisão humana antes de prosseguir.
 | 2026-08-31 | 1.9 | Rodada 25 consolidada com dez jogos concordantes; Fase 5B concluída e corte ainda bloqueado |
 | 2026-09-01 | 2.0 | Ensaio real 6B aprovado; dez atualizações explicadas por relógio final, locais e escudos, sem divergência competitiva |
 | 2026-09-01 | 2.1 | Fase 6C simplificada; manutenção preparada para preservar jogos terminais e preflight da rodada 26 mantido como portão |
+| 2026-09-03 | 2.2 | Rollback da Fase 6D e escudos locais da API-Football registrados como novo portão de corte |
 
 ## Referências internas
 

@@ -13,6 +13,7 @@ assert.match(app, /\.netlify\/functions\/ensaiar-corte-api-football/);
 assert.match(app, /Number\(result\?\.writes\)===0/);
 assert.match(app, /hashes\.gamesBefore===hashes\.gamesAfter/);
 assert.match(app, /hashes\.picksBefore===hashes\.picksAfter/);
+assert.match(app, /20 escudos locais disponíveis/);
 assert.match(app, /result\?\.rollback\?\.restored===true/);
 assert.doesNotMatch(app, /adminCutover[^\n]*(?:localStorage|access_token\}\<|console\.log)/);
 assert.match(styles, /\.admin-cutover-report/);

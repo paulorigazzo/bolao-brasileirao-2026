@@ -687,3 +687,15 @@ A implementação deve declarar explicitamente qual versão atende.
 - [Visão geral da arquitetura](./OVERVIEW.md)
 - [API-Football — guia oficial](https://www.api-football.com/news/post/how-to-get-started-with-api-football-the-complete-beginners-guide)
 - [API-Football — documentação v3](https://www.api-football.com/documentation-v3)
+
+### Autoridade visual após o rollback da Fase 6D
+
+Os campos de escudo recebidos da API-Football identificam o ativo de origem,
+mas não são expostos diretamente ao navegador. Para os vinte clubes cobertos
+em 2026, a representação pública obrigatória é
+`/assets/clubs/api-football/<team-id>.png`. A sincronização de jogos e a
+classificação devem derivar essa URL do ID externo validado.
+
+O preflight exige correspondência exata entre os vinte IDs da classificação e
+o manifesto local, além de resposta HTTP `200`, `image/png`, assinatura PNG e
+resolução mínima de 64 por 64 pixels. Falha em qualquer item bloqueia o corte.

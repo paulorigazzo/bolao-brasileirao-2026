@@ -1474,3 +1474,38 @@ jogos canônicos elegíveis e mapeados. Identificadores canônicos, palpites,
 pontuação, autenticação, RLS e estrutura do Supabase não foram alterados. Falhas
 de identidade, escopo, cota, classificação ou integridade exigem o rollback
 documentado antes de nova tentativa.
+
+## DEC-2026-040 — Escudos da API-Football passam a ser servidos pelo Bolão
+
+- Data: 2026-09-03
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Impacto: alto, integração esportiva e diagnóstico
+
+### Contexto
+
+Após o corte da Fase 6D, `media.api-sports.io` retornou `NXDOMAIN` em aparelho
+real tanto no Wi-Fi quanto na rede móvel. A API esportiva, o Supabase, as
+Functions, a sincronização e o cache continuaram saudáveis, permitindo que o
+autoteste marcasse `100/100` enquanto os escudos desapareciam. O rollback para
+a football-data.org restaurou a interface e preservou os 50 palpites da rodada
+26.
+
+Os termos e o guia oficial da API-Football admitem e recomendam baixar os
+escudos uma vez e servi-los pelo armazenamento da aplicação.
+
+### Decisão
+
+- manter a API-Football como origem dos vinte escudos;
+- publicar cópias validadas como ativos estáticos da mesma origem do Bolão;
+- derivar os caminhos pelo ID estável de clube da API-Football;
+- impedir que jogos ou classificação exponham `media.api-sports.io`;
+- incluir disponibilidade real dos ativos no diagnóstico e no preflight;
+- manter a football-data.org oficial até novo corte explicitamente autorizado.
+
+### Consequências e limites
+
+Não há nova tabela, migração, serviço de armazenamento ou alteração
+competitiva. A atualização dos arquivos é controlada, versionada e submetida à
+suíte completa e à revisão visual. Marcas e escudos são usados somente para
+identificação dos clubes e permanecem sujeitos aos direitos de seus titulares.

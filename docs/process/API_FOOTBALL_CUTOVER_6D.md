@@ -178,7 +178,13 @@ Em 2026-09-03, após aprovação dos portões P0 e P1:
 - os 10 jogos permaneceram mapeados e com ambos os escudos. O hash operacional
   dos jogos passou a `caef4694f09f24edd52645a5b4074991`, refletindo somente a
   promoção prevista dos 10 jogos elegíveis;
-- a interface publicada apresentou os escudos e o sistema permaneceu saudável.
+- a inspeção inicial apresentou os escudos, mas uma verificação posterior em
+  dispositivo real revelou falha generalizada de resolução de
+  `media.api-sports.io`, apesar do diagnóstico `100/100`.
 
-O rollback não foi acionado. A football-data.org continua configurada e
-disponível durante a estabilização.
+O gatilho de escudos ausentes foi atingido e o rollback foi executado em
+2026-09-03. A configuração voltou para `football-data.org`, um novo deploy foi
+publicado e a sincronização restaurou os 380 jogos e os escudos anteriores. Os
+50 palpites da rodada 26 permaneceram presentes. Um novo corte fica bloqueado
+até que os escudos da API-Football sejam servidos pela mesma origem do Bolão e
+o preflight comprove os vinte arquivos publicados.
