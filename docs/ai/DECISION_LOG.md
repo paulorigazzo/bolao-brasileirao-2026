@@ -1401,3 +1401,39 @@ cancelados e passa a informar quantos foram preservados. As validações de
 mapeamento, identidade, estado, cota e reparos continuam ativas. A entrega não
 executa chamadas reais, não escreve no Supabase, não altera o Netlify e não
 muda a football-data.org como fonte oficial.
+
+## DEC-2026-038 — Preflight real 6C aprova a rodada 26 sem mutação
+
+- Data: 2026-09-03
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Impacto: alto na decisão futura; somente documental nesta aplicação
+
+### Contexto
+
+O preflight somente leitura da Fase 6C foi executado no ambiente publicado pela
+Central de Diagnóstico da Área ADM para a rodada 26. Antes da execução, o
+Supabase, as Netlify Functions e a football-data.org estavam online, o autoteste
+registrava 100/100 e as quatro variáveis protegidas necessárias estavam
+presentes sem exposição de seus valores.
+
+O relatório apresentou dez jogos canônicos, dez mapeamentos, dez partidas e
+vinte clubes em cada fornecedor, dez mudanças propostas, nenhum reparo e zero
+escrita. Os hashes competitivos permaneceram preservados, o rollback integral
+foi aprovado e as reservas registradas foram 7.499/7.500 chamadas diárias e
+299/300 chamadas por minuto. O hash do relatório é
+`b74a9e33a2d3a9424aa36a22c1fc582c4d6407f2cbf5f4715664657a77525d71`.
+
+### Decisão
+
+- considerar aprovado o preflight operacional da Fase 6C para a rodada 26;
+- manter as dez mudanças propostas como plano não persistido, sujeito à política
+  já aprovada de manutenção e aos portões seguintes;
+- preservar a football-data.org como fonte oficial;
+- avançar somente para o planejamento da ativação controlada da Fase 6D.
+
+### Consequências e limites
+
+A decisão não promove campos, não altera código funcional, Supabase, variáveis
+do Netlify, fonte oficial, palpites ou pontuação. Ativação, deploy, escrita,
+corte e estabilização continuam bloqueados até autorizações humanas próprias.

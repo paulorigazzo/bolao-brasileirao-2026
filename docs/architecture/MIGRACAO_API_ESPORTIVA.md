@@ -938,6 +938,22 @@ estão nas rodadas 27 a 38 e exigirão reconciliação progressiva antes de suas
 respectivas janelas. Esta preparação não executa o preflight, não altera a fonte
 oficial e não autoriza deploy ou corte.
 
+#### Evidência real do preflight 6C
+
+Em 2026-09-03, o preflight somente leitura foi executado no ambiente publicado
+pela Central de Diagnóstico da Área ADM para a rodada 26. O relatório aprovou
+os dez jogos canônicos e os dez mapeamentos, encontrou dez jogos e vinte clubes
+em cada fornecedor, propôs dez atualizações e nenhum reparo. As reservas
+registradas após as consultas foram 7.499 de 7.500 chamadas diárias e 299 de
+300 chamadas por minuto.
+
+A execução registrou zero escrita, preservou os hashes de jogos e palpites e
+aprovou a simulação do rollback integral. O hash auditável do relatório é
+`b74a9e33a2d3a9424aa36a22c1fc582c4d6407f2cbf5f4715664657a77525d71`.
+Essa evidência aprova o portão operacional da Fase 6C, mas não promove campos,
+não altera configuração ou fonte oficial e não autoriza deploy, corte ou
+estabilização. A `football-data.org` permanece oficial.
+
 ## Estratégia de rollback
 
 Antes do corte, devem existir:
