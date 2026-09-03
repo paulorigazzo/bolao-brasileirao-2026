@@ -4,6 +4,7 @@ import fixture from "../fixtures/api-football/fixture-1492340.sanitized.json" wi
 import standings from "../fixtures/api-football/standings-brasileirao.synthetic.json" with { type: "json" };
 import { normalizeApiFootballFixtureEnvelope, normalizeApiFootballStandingsEnvelope } from "../src/sports-data/api-football-adapter.mjs";
 import { apiFootballClassificationResult, apiFootballGameForCanonical, scopeApiFootballSyncGames } from "../netlify/functions/_api-football-official.mjs";
+import { buildApiFootballCanonicalTeamCatalog, canonicalizeApiFootballClassificationResult, canonicalizeApiFootballStandings } from "../src/sports-data/api-football-team-catalog.mjs";
 import { officialSportsDataProvider, providerClassificationSnapshotId, SPORTS_DATA_PROVIDERS } from "../netlify/functions/_sports-data-provider.mjs";
 
 assert.equal(officialSportsDataProvider({}), SPORTS_DATA_PROVIDERS.FOOTBALL_DATA);
@@ -33,11 +34,75 @@ assert.equal(game.time_casa_logo, `/assets/clubs/api-football/${normalized.game.
 assert.equal(game.time_fora_logo, `/assets/clubs/api-football/${normalized.game.away.providerTeamId}.png`);
 
 const normalizedStandings = normalizeApiFootballStandingsEnvelope(standings, { observedAt: "2026-08-25T00:01:00Z" });
-const classification = apiFootballClassificationResult(normalizedStandings.standings, "2026-08-25T00:01:00Z");
+const canonicalTeams = [];
+for (let index = 0; index < normalizedStandings.standings.table.length; index += 2) {
+  const home = normalizedStandings.standings.table[index];
+  const away = normalizedStandings.standings.table[index + 1];
+  canonicalTeams.push({
+    time_casa: `Clube canônico ${index + 1}`,
+    time_fora: `Clube canônico ${index + 2}`,
+    api_football_time_casa_id: home.providerTeamId,
+    api_football_time_fora_id: away.providerTeamId,
+  });
+}
+const classification = apiFootballClassificationResult(normalizedStandings.standings, canonicalTeams, "2026-08-25T00:01:00Z");
 assert.equal(classification.result.table.length, 20);
+assert.equal(classification.result.table[0].team, "Clube canônico 1");
+assert.notEqual(classification.result.table[0].team, normalizedStandings.standings.table[0].teamName);
 assert.equal(classification.result.table[0].crest,
   `/assets/clubs/api-football/${normalizedStandings.standings.table[0].providerTeamId}.png`);
 assert.equal(classification.result.table.some((row) => row.crest.includes("media.api-sports.io")), false);
+assert.equal(buildApiFootballCanonicalTeamCatalog(canonicalTeams).size, 20);
+assert.throws(() => canonicalizeApiFootballStandings(normalizedStandings.standings, canonicalTeams.slice(1)), /api_football_canonical_team_missing/);
+assert.throws(() => canonicalizeApiFootballStandings(normalizedStandings.standings, [
+  ...canonicalTeams,
+  { time_casa: "Nome conflitante", api_football_time_casa_id: canonicalTeams[0].api_football_time_casa_id },
+]), /api_football_canonical_team_conflict/);
+assert.throws(() => canonicalizeApiFootballStandings(normalizedStandings.standings, [
+  ...canonicalTeams,
+  { time_casa: "Clube inesperado", api_football_time_casa_id: 999999 },
+]), /api_football_canonical_team_unexpected/);
+
+const observedDivergences = [
+  [121, "Palmeiras", "Palmeiras"],
+  [127, "Flamengo", "Flamengo"],
+  [134, "Atletico Paranaense", "Paranaense"],
+  [1062, "Atletico-MG", "Mineiro"],
+  [119, "RB Bragantino", "Bragantino"],
+  [126, "Sao Paulo", "São Paulo"],
+  [120, "Vitoria", "Vitória"],
+  [130, "Gremio", "Grêmio"],
+  [133, "Vasco DA Gama", "Vasco da Gama"],
+  [794, "Remo", "Clube do Remo"],
+  [1198, "Chapecoense-sc", "Chapecoense"],
+];
+const divergenceStanding = {
+  ...normalizedStandings.standings,
+  table: observedDivergences.map(([providerTeamId, teamName], index) => ({
+    ...normalizedStandings.standings.table[index], providerTeamId, teamName,
+  })),
+};
+const divergenceGames = [];
+for (let index = 0; index < observedDivergences.length; index += 2) {
+  const home = observedDivergences[index];
+  const away = observedDivergences[index + 1];
+  divergenceGames.push({
+    time_casa: home[2],
+    api_football_time_casa_id: home[0],
+    ...(away ? { time_fora: away[2], api_football_time_fora_id: away[0] } : {}),
+  });
+}
+const canonicalDivergences = canonicalizeApiFootballStandings(divergenceStanding, divergenceGames);
+assert.deepEqual(canonicalDivergences.table.map((row) => row.teamName), observedDivergences.map((entry) => entry[2]));
+assert.deepEqual(
+  canonicalDivergences.table.map(({ teamName: _teamName, ...row }) => row),
+  divergenceStanding.table.map(({ teamName: _teamName, ...row }) => row),
+);
+const cachedDivergences = canonicalizeApiFootballClassificationResult({
+  table: divergenceStanding.table.map((row) => ({ teamId: row.providerTeamId, team: row.teamName, points: row.points })),
+}, divergenceGames);
+assert.deepEqual(cachedDivergences.table.map((row) => row.team), observedDivergences.map((entry) => entry[2]));
+assert.deepEqual(cachedDivergences.table.map((row) => row.points), divergenceStanding.table.map((row) => row.points));
 assert.throws(() => apiFootballGameForCanonical(normalized.game, { ...canonical, api_football_id: 1 }), /mapped_fixture_identity_conflict/);
 assert.throws(() => apiFootballGameForCanonical(normalized.game, { ...canonical, api_football_time_casa_id: 1 }), /mapped_home_identity_conflict/);
 assert.throws(() => apiFootballGameForCanonical(normalized.game, { ...canonical, api_football_time_fora_id: 1 }), /mapped_away_identity_conflict/);
@@ -57,6 +122,7 @@ const classificationSource = readFileSync(new URL("../netlify/functions/classifi
 const diagnosticSource = readFileSync(new URL("../netlify/functions/diagnostico-sistema.mjs", import.meta.url), "utf8");
 assert.match(syncSource, /officialSportsDataProvider\(\)[\s\S]*syncApiFootballGames/);
 assert.match(classificationSource, /officialSportsDataProvider\(\)[\s\S]*apiFootballClassification/);
+assert.match(classificationSource, /api_football_time_casa_id,api_football_time_fora_id/);
 assert.match(classificationSource, /providerClassificationSnapshotId/);
 assert.match(diagnosticSource, /officialSportsDataProvider: provider/);
 

@@ -20,7 +20,7 @@ import { buildFriendlyRankingsModel } from "./friendly-rankings-engine.js";
 import { adminRoundGameIds, loadAdminPickProgress } from "./admin-pick-progress.js";
 import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js";
 
-const APP_VERSION = "6.24.4";
+const APP_VERSION = "6.24.5";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
