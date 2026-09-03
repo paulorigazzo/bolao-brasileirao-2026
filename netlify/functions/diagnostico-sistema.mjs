@@ -2,6 +2,7 @@ import { jsonResponse, requireAdmin, methodNotAllowed, errorResponse } from "./_
 import { APP_VERSION, CLASSIFICATION_SNAPSHOT_ID, CACHE_FRESH_MS, CACHE_STALE_MS, MAX_API_CALLS_PER_SYNC, SCHEDULE_CHECK_MINUTES, MAINTENANCE_INTERVAL_MS } from "./_constants.mjs";
 import { assessSportsDataFreshness, SPORTS_DATA_LOOKBACK_HOURS } from "./_sports-data-health.mjs";
 import { officialSportsDataProvider, providerClassificationSnapshotId, SPORTS_DATA_PROVIDERS } from "./_sports-data-provider.mjs";
+import { probeApiFootballLocalCrests } from "./_api-football-local-crests.mjs";
 
 const countTable = async (supabase, table) => {
   const { count, error } = await supabase.from(table).select("*", { count: "exact", head: true });
@@ -19,13 +20,14 @@ export default async (request) => {
     const provider = officialSportsDataProvider();
     const snapshotId = providerClassificationSnapshotId(CLASSIFICATION_SNAPSHOT_ID, provider);
     const recentGamesAfter = new Date(Date.now() - SPORTS_DATA_LOOKBACK_HOURS * 3_600_000).toISOString();
-    const [logsResult, cacheResult, jogos, palpites, participantes, recentGamesResult] = await Promise.all([
+    const [logsResult, cacheResult, jogos, palpites, participantes, recentGamesResult, localCrests] = await Promise.all([
       supabase.from("api_sync_log").select("id,criado_em,origem,sucesso,duracao_ms,chamadas_api,jogos_atualizados,erro,detalhes").order("criado_em", { ascending: false }).limit(20),
       supabase.from("classificacao_cache").select("id,atualizado_em,payload").eq("id", snapshotId).maybeSingle(),
       countTable(supabase, "jogos"),
       countTable(supabase, "palpites"),
       countTable(supabase, "participantes_autorizados"),
       supabase.from("jogos").select("id_jogo,inicio,time_casa,time_fora,status").gte("inicio", recentGamesAfter).lte("inicio", new Date().toISOString()),
+      probeApiFootballLocalCrests(new URL(request.url).origin),
     ]);
 
     if (logsResult.error) throw new Error(`Logs: ${logsResult.error.message}`);
@@ -69,6 +71,7 @@ export default async (request) => {
       { id: "supabase", label: "Supabase respondeu", ok: jogos.ok && palpites.ok && participantes.ok },
       { id: "games", label: "Jogos carregados", ok: jogos.ok && jogos.count > 0, detail: jogos.count },
       { id: "cache", label: cacheAvailable ? `Cache encontrado (${cacheTable.length} clubes)` : "Cache da classificação ausente", ok: cacheAvailable, detail: cacheAvailable ? `${cache.id} • ${cacheStatus}` : null },
+      { id: "api-football-crests", label: localCrests.ok ? `Escudos locais da API-Football disponíveis (${localCrests.clubs} clubes)` : "Escudos locais da API-Football incompletos", ok: localCrests.ok, detail: localCrests.ok ? "mesma origem do Bolão" : `${localCrests.failures.length} falha(s)` },
       { id: "sync", label: "Há sincronização bem-sucedida", ok: Boolean(lastSuccess), detail: lastSuccess?.criado_em || null },
       { id: "rate", label: "Última execução respeitou o limite", ok: !last || Number(last.chamadas_api || 0) <= MAX_API_CALLS_PER_SYNC, detail: last?.chamadas_api ?? null },
       { id: "sports-data", label: sportsData.status === "current" ? "Dados esportivos estão atuais" : sportsData.status === "delayed" ? `${sportsData.delayedCount} jogo(s) aguardando atualização da fonte` : "Atualidade dos dados não pôde ser verificada", ok: sportsData.status === "current", detail: sportsData.status === "delayed" ? `mais de ${sportsData.thresholdMinutes} min após o início` : sportsData.error || null },
@@ -105,6 +108,7 @@ export default async (request) => {
         source: cacheSource,
         currentMatchday: cache?.payload?.currentMatchday ?? null,
       },
+      localCrests: { ok: localCrests.ok, clubs: localCrests.clubs, failures: localCrests.failures.map((item) => ({ teamId: item.teamId ?? null, errors: item.errors })) },
       database: { jogos, palpites, participantes },
       logs,
       autotest: { score, checks },

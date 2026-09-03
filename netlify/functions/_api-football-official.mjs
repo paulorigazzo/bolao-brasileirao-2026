@@ -4,6 +4,7 @@ import { sanitizeGameForStatus, sanitizeGameSchedule } from "./_sync-policy.mjs"
 import { isMissingTableError, requireEnv, serviceClient } from "./_api-helpers.mjs";
 import { API_FOOTBALL_LEAGUE_ID, CLASSIFICATION_SNAPSHOT_ID, SEASON_YEAR } from "./_constants.mjs";
 import { providerClassificationSnapshotId, SPORTS_DATA_PROVIDERS } from "./_sports-data-provider.mjs";
+import { apiFootballLocalCrestUrl } from "../../src/sports-data/api-football-local-crests.mjs";
 
 const API_BASE = "https://v3.football.api-sports.io";
 const DAILY_RESERVE_RATIO = 0.2;
@@ -53,8 +54,8 @@ export function apiFootballGameForCanonical(provider, canonical, observedAt = ne
     atualizado_em: observedAt,
     time_casa_id: canonical.time_casa_id,
     time_fora_id: canonical.time_fora_id,
-    time_casa_logo: provider.home.crestUrl || canonical.time_casa_logo || null,
-    time_fora_logo: provider.away.crestUrl || canonical.time_fora_logo || null,
+    time_casa_logo: apiFootballLocalCrestUrl(provider.home.providerTeamId),
+    time_fora_logo: apiFootballLocalCrestUrl(provider.away.providerTeamId),
     fonte: SPORTS_DATA_PROVIDERS.API_FOOTBALL,
     sincronizado_em: observedAt,
   };
@@ -133,13 +134,16 @@ export async function apiFootballClassification(fetchImpl = fetch) {
   const normalized = normalizeApiFootballStandingsEnvelope(payload, { observedAt, httpStatus: response.status, headers: response.headers });
   if (!normalized.observation.responseValid || !normalized.standings) throw new Error(normalized.observation.errors[0] || "standings_response_invalid");
   assertApiFootballQuota(normalized.observation);
-  const standing = normalized.standings;
+  return apiFootballClassificationResult(normalized.standings, observedAt);
+}
+
+export function apiFootballClassificationResult(standing, observedAt = new Date().toISOString()) {
   return {
     id: providerClassificationSnapshotId(CLASSIFICATION_SNAPSHOT_ID, SPORTS_DATA_PROVIDERS.API_FOOTBALL),
     result: { ok: true, competition: standing.competitionName, season: String(standing.season), currentMatchday: standing.currentRound,
       updatedAt: observedAt, source: "api", provider: SPORTS_DATA_PROVIDERS.API_FOOTBALL,
       table: standing.table.map((row) => ({ position: row.position, teamId: row.providerTeamId, team: row.teamName,
-        crest: row.crestUrl, playedGames: row.played, won: row.won, draw: row.drawn, lost: row.lost,
+        crest: apiFootballLocalCrestUrl(row.providerTeamId), playedGames: row.played, won: row.won, draw: row.drawn, lost: row.lost,
         points: row.points, goalsFor: row.goalsFor, goalsAgainst: row.goalsAgainst, goalDifference: row.goalDifference })) },
   };
 }

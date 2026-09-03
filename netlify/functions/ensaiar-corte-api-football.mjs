@@ -1,5 +1,6 @@
 import { errorResponse, jsonResponse, methodNotAllowed, requireAdmin, requireEnv, serviceClient } from "./_api-helpers.mjs";
 import { runApiFootballCutoverRehearsal } from "./_api-football-cutover-rehearsal.mjs";
+import { probeApiFootballLocalCrests } from "./_api-football-local-crests.mjs";
 
 export default async (request) => {
   if (request.method !== "POST") return methodNotAllowed("POST");
@@ -9,7 +10,8 @@ export default async (request) => {
   try { body = await request.json(); } catch { return jsonResponse({ ok: false, error: "Corpo JSON inválido." }, 400, { "cache-control": "no-store" }); }
   try {
     const result = await runApiFootballCutoverRehearsal({ supabase: serviceClient(), apiFootballKey: requireEnv("API_FOOTBALL_KEY"),
-      footballDataToken: requireEnv("FOOTBALL_DATA_TOKEN"), round: body?.rodada, confirmation: body?.confirmacao });
+      footballDataToken: requireEnv("FOOTBALL_DATA_TOKEN"), round: body?.rodada, confirmation: body?.confirmacao,
+      crestProbe: (teamIds) => probeApiFootballLocalCrests(new URL(request.url).origin, fetch, teamIds) });
     return jsonResponse(result, 200, { "cache-control": "no-store" });
   } catch (error) {
     const code = String(error?.message || "rehearsal_failed").split(":")[0];
