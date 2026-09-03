@@ -1437,3 +1437,40 @@ foi aprovado e as reservas registradas foram 7.499/7.500 chamadas diárias e
 A decisão não promove campos, não altera código funcional, Supabase, variáveis
 do Netlify, fonte oficial, palpites ou pontuação. Ativação, deploy, escrita,
 corte e estabilização continuam bloqueados até autorizações humanas próprias.
+
+## DEC-2026-039 — Fase 6D ativa a API-Football com rollback preservado
+
+- Data: 2026-09-03
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Impacto: alto, operacional em produção
+
+### Contexto
+
+O preflight renovado da rodada 26 aprovou novamente dez jogos, dez mapeamentos,
+vinte clubes por fornecedor, zero reparos, zero escritas, hashes preservados e
+rollback integral. A configuração restrita somente a Functions não estava
+disponível no plano atual da Netlify; foi autorizada a aplicação da chave não
+secreta em todos os escopos, limitada ao contexto de produção.
+
+O deploy `6a99ce62eddc57abc4c5c7ea` passou a identificar a API-Football como fonte
+oficial. A primeira sincronização importou dez jogos, preservou 250 terminais,
+ignorou 120 futuros sem mapeamento, manteve os palpites intactos e concluiu sem
+reparos ou falhas. O cache específico contém vinte clubes e o diagnóstico
+permaneceu em 100/100.
+
+### Decisão
+
+- considerar concluído o corte controlado da Fase 6D;
+- manter a API-Football como única fonte esportiva oficial em produção;
+- preservar a football-data.org, suas credenciais e seu adaptador para rollback;
+- iniciar estabilização supervisionada por uma ou duas rodadas;
+- bloquear a remoção do legado até um portão posterior específico.
+
+### Consequências e limites
+
+A sincronização oficial agora pode escrever dados da API-Football somente nos
+jogos canônicos elegíveis e mapeados. Identificadores canônicos, palpites,
+pontuação, autenticação, RLS e estrutura do Supabase não foram alterados. Falhas
+de identidade, escopo, cota, classificação ou integridade exigem o rollback
+documentado antes de nova tentativa.
