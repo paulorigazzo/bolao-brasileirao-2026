@@ -23,6 +23,7 @@ insert into public.ligas(id,temporada_id,codigo,nome,tipo,status,criado_por)
 select liga_id,temporada_id,'l06-sintetica','L06 Sintética','privada','ativa',administrador_id from l06_contexto;
 insert into public.liga_membros(liga_id,user_id,papel,status,adicionado_por)
 select liga_id,administrador_id,'administrador','ativo',administrador_id from l06_contexto;
+grant select on l06_contexto to authenticated;
 
 -- Um participante sem associação não administra a liga.
 select set_config('request.jwt.claim.sub',(select membro_id::text from l06_contexto),true);

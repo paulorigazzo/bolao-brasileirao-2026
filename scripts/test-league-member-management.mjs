@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const root = new URL("../", import.meta.url);
-const migration = await readFile(new URL("supabase/migrations/20260904181902_add_league_member_management.sql", root), "utf8");
+const migration = await readFile(new URL("supabase/migrations/20260904185813_add_league_member_management.sql", root), "utf8");
 const rollback = await readFile(new URL("supabase/rollback/rollback_add_league_member_management.sql", root), "utf8");
 const transactionalTest = await readFile(new URL("supabase/tests/league-member-management.sql", root), "utf8");
 const app = await readFile(new URL("js/app.js", root), "utf8");
