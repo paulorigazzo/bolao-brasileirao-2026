@@ -8,6 +8,7 @@
     { "version": "20260825151356", "name": "add_shadow_match_metadata_5b3b2a", "status": "applied" },
     { "version": "20260825202000", "name": "classifica_agendamentos_divergentes", "status": "applied" },
     { "version": "20260825202718", "name": "add_schedule_observations_index", "status": "applied" },
-    { "version": "20260901161645", "name": "add_api_football_shadow_events", "status": "applied" }
+    { "version": "20260901161645", "name": "add_api_football_shadow_events", "status": "applied" },
+    { "version": "20260904145641", "name": "add_shared_leagues_foundation", "status": "applied" }
   ]
 }
