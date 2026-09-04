@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.24.8">
-  <link rel="stylesheet" href="./css/styles.css?v=6.24.8">
-  <link rel="stylesheet" href="./css/components.css?v=6.24.8">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.24.8">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.24.8">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.24.8">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.25.0">
+  <link rel="stylesheet" href="./css/styles.css?v=6.25.0">
+  <link rel="stylesheet" href="./css/components.css?v=6.25.0">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.25.0">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.25.0">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.25.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.24.8</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.25.0</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -48,6 +48,7 @@
         </button>
         <div id="userMenu" class="user-menu hidden" role="menu">
           <button id="profileShortcut" type="button" role="menuitem">👤 Meu perfil</button>
+          <button id="leagueShortcut" class="user-menu-context" type="button" role="menuitem" aria-haspopup="dialog"><span>🏆 Liga ativa</span><small id="leagueShortcutName">Carregando…</small></button>
           <button id="standingsShortcut" type="button" role="menuitem">📋 Brasileirão</button>
           <button id="rulesShortcut" type="button" role="menuitem">📖 Regras do bolão</button>
           <button id="adminMenuShortcut" class="hidden" type="button" role="menuitem">👑 Área do administrador</button>
@@ -585,6 +586,21 @@
     </section>
   </main>
 
+  <div id="leagueSelectorModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="leagueSelectorTitle" aria-describedby="leagueSelectorSummary">
+    <section class="league-selector-modal card" tabindex="-1">
+      <header class="league-selector-header">
+        <div><span class="eyebrow">CONTEXTO COMPETITIVO</span><h2 id="leagueSelectorTitle">Escolher liga</h2><p id="leagueSelectorSummary" class="muted-note">Ranking, estatísticas, destaques e duelos acompanham a liga selecionada. Seus palpites continuam únicos.</p></div>
+        <button id="leagueSelectorClose" class="modal-close" type="button" aria-label="Fechar seleção de liga">✕</button>
+      </header>
+      <div id="leagueSelectorOptions" class="league-selector-options" role="radiogroup" aria-label="Ligas disponíveis"></div>
+      <p id="leagueSelectorStatus" class="league-selector-status" aria-live="polite"></p>
+      <div id="leagueAdminEntry" class="league-admin-entry hidden">
+        <button id="leagueAdminButton" class="secondary" type="button">⚙️ Administrar liga</button>
+        <small>Gestão de membros e funções locais será disponibilizada na L06.</small>
+      </div>
+    </section>
+  </div>
+
   <div id="temporaryRankingModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="temporaryRankingModalTitle" aria-describedby="temporaryRankingModalSummary">
     <section class="temporary-ranking-modal card" tabindex="-1">
       <header class="temporary-ranking-modal-header">
@@ -768,6 +784,6 @@
       if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.24.8"></script>
+  <script type="module" src="./js/app.js?v=6.25.0"></script>
 </body>
 </html>

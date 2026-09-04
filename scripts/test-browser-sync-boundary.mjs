@@ -10,7 +10,9 @@ const silentRefresh = app.slice(silentStart, silentEnd);
 
 assert.match(silentRefresh, /sb\.from\("jogos"\)\.select\("\*"\)/);
 assert.match(silentRefresh, /hasNewlyRevealablePublicPicks\(state\.games,data\)/);
-assert.match(silentRefresh, /sb\.from\("palpites_encerrados_publicos"\)\.select\("\*"\)/);
+assert.match(silentRefresh, /sb\.rpc\("obter_palpites_encerrados_liga",\{p_liga_id:state\.activeLeague\?\.liga_id\}\)/);
+assert.match(silentRefresh, /sb\.rpc\("obter_ranking_liga",\{p_liga_id:state\.activeLeague\?\.liga_id\}\)/);
+assert.doesNotMatch(silentRefresh, /palpites_encerrados_publicos/);
 assert.match(silentRefresh, /publicPicksRefreshPending=true/);
 assert.match(silentRefresh, /publicPicksRefreshPending=false/);
 assert.doesNotMatch(silentRefresh, /sb\.from\("palpites"\)/);
