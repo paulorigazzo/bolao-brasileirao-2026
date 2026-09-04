@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 const root=new URL("../",import.meta.url);
-const migration=await readFile(new URL("supabase/migrations/20260904210000_add_league_participant_directory.sql",root),"utf8");
+const migration=await readFile(new URL("supabase/migrations/20260904211158_add_league_participant_directory.sql",root),"utf8");
+const correction=await readFile(new URL("supabase/migrations/20260904211445_fix_league_batch_member_validation.sql",root),"utf8");
 const rollback=await readFile(new URL("supabase/rollback/rollback_add_league_participant_directory.sql",root),"utf8");
 const transactionalTest=await readFile(new URL("supabase/tests/league-participant-directory.sql",root),"utf8");
 const app=await readFile(new URL("js/app.js",root),"utf8");
@@ -11,6 +12,8 @@ assert.match(migration,/private\.usuario_gestor_central_ligas/);
 assert.match(migration,/security definer set search_path=''/);
 assert.match(migration,/cardinality\(v_ids\)>50/);
 assert.match(migration,/array_agg\(distinct id\)/);
+assert.match(correction,/as selected\(user_id\)/);
+assert.match(correction,/p\.user_id=selected\.user_id/);
 assert.match(migration,/email_mascarado text,celular_mascarado text/);
 assert.match(migration,/revoke all on function[\s\S]+from public,anon/);
 assert.doesNotMatch(migration,/(?:insert|update|delete)[\s\S]{0,30}public\.palpites/i);
