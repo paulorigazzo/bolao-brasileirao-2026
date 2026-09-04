@@ -48,4 +48,14 @@ Mudanças nessas regras exigem Sprint específica, testes e atualização explí
 
 ## Evolução para Temporadas e Ligas
 
-A evolução estrutural ocorrerá no produto independente **Bolão Brasileirão Rigazzo**, conforme [`BOLAO_BRASILEIRAO_RIGAZZO.md`](BOLAO_BRASILEIRAO_RIGAZZO.md). O aplicativo atual permanece como fonte oficial de 2026 e não receberá a fundação experimental. A transferência futura de dados será manual, unidirecional e sujeita a entregas próprias, sem autorização atual para código, banco ou serviços externos.
+A direção vigente é a evolução incremental deste aplicativo por meio de ligas
+com palpites compartilhados, conforme
+[`LIGAS_COM_PALPITES_COMPARTILHADOS.md`](LIGAS_COM_PALPITES_COMPARTILHADOS.md).
+O primeiro passo funcional previsto é uma fundação estritamente aditiva para a
+Liga Standard **Brasileirão 2026**, sem modificar as tabelas centrais nem ativar
+novas leituras antes da equivalência comprovada.
+
+O plano do produto independente Rigazzo permanece preservado como histórico e
+possível laboratório, mas deixou de ser o destino exclusivo dessa evolução.
+Cada alteração funcional, de banco ou serviço continua sujeita a plano e
+aprovação próprios.

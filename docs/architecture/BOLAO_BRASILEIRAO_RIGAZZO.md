@@ -1,12 +1,19 @@
 # Bolão Brasileirão Rigazzo
 
+> **Status histórico:** em 4 de setembro de 2026, o Rigazzo deixou de ser o
+> destino exclusivo da evolução para múltiplas ligas. A direção vigente para o
+> aplicativo atual está em
+> [`LIGAS_COM_PALPITES_COMPARTILHADOS.md`](LIGAS_COM_PALPITES_COMPARTILHADOS.md).
+> Este documento permanece como registro do produto independente e possível
+> laboratório; não autoriza retomar transferência, importação ou implementação.
+
 ## Finalidade
 
 Este documento preserva a decisão histórica, a divisão de responsabilidades e os contratos pertencentes ao lado de origem do **Bolão Brasileirão Rigazzo**. Desde a conclusão da R01A, a fonte oficial do novo produto é o repositório privado [`paulorigazzo/bolao-brasileirao-rigazzo`](https://github.com/paulorigazzo/bolao-brasileirao-rigazzo).
 
 O Rigazzo será desenvolvido com Supabase, autenticação e Netlify próprios, quando cada serviço receber plano e aprovação específicos. O projeto atual permanece como aplicação oficial e fonte histórica de 2026. Esta documentação não autoriza código, banco, serviço externo, exportação ou importação.
 
-## Direção vigente — simplificação estratégica
+## Direção histórica — simplificação estratégica
 
 Em 6 de agosto de 2026, o Rigazzo foi redefinido como uma evolução caseira, familiar e incremental do Bolão 2026. A prioridade deixa de ser a transferência completa e auditável do histórico e passa a ser um MVP direto de **Temporadas e Ligas**, desenvolvido no workspace próprio com dados sintéticos.
 

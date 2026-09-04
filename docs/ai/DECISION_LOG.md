@@ -1575,3 +1575,51 @@ como indeterminado, embora o restante do sistema estivesse saudável.
 A decisão melhora a observabilidade, sem consultar APIs adicionais nem mudar
 fonte oficial, sincronização, dados competitivos ou configuração de produção.
 Logs antigos sem fornecedor explícito não comprovam a saúde da fonte ativa.
+
+## DEC-2026-043 — Ligas compartilham o palpite único do participante
+
+- Data: 2026-09-04
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Impacto: alto, arquitetura competitiva, dados e autorização
+
+### Contexto
+
+O plano vigente direcionava temporadas e ligas ao produto independente Bolão
+Brasileirão Rigazzo. Essa separação exigia outro Auth, Supabase e Netlify, além
+de contratos de transferência, exportação, importação e reconciliação entre os
+produtos.
+
+Para o uso pretendido, cada pessoa deve registrar apenas um palpite por partida,
+mesmo participando de várias ligas. As ligas precisam diferenciar membros e
+rankings, não criar versões concorrentes do mesmo palpite. A estrutura atual já
+usa `user_id` e `id_jogo` como identidade natural desse registro.
+
+### Decisão
+
+- evoluir incrementalmente o aplicativo atual para múltiplas ligas;
+- criar primeiro a Liga Standard **Brasileirão 2026**, contendo os participantes
+  ativos e aprovados atuais;
+- manter o palpite único por participante e partida, compartilhado por todas as
+  ligas da temporada;
+- derivar cada ranking dos membros ativos da liga, dos palpites canônicos e dos
+  resultados compartilhados;
+- considerar retroativamente todos os palpites válidos da temporada quando uma
+  pessoa ingressar em uma liga;
+- iniciar por estruturas aditivas e paralelas, sem alteração das tabelas
+  centrais nem ativação antes da equivalência;
+- preservar o Rigazzo como histórico e possível laboratório, sem sincronização
+  ou transferência como dependência desta evolução.
+
+### Consequências e limites
+
+A fundação prevista adicionará temporada, liga e associação de membros, sujeita
+a um plano próprio de banco, RLS, rollback e testes. `palpites`, `participantes`,
+`participantes_autorizados`, `jogos` e as estruturas privadas de recuperação
+permanecem intactas nessa fundação.
+
+O risco continua alto por envolver autorização, privacidade e ranking, mas será
+separado entre fundação paralela e ativação funcional. Palpites diferentes ou
+pontuações personalizadas por liga, ligas públicas, cobrança e múltiplos
+campeonatos ficam fora do escopo inicial. O contrato completo está em
+[`LIGAS_COM_PALPITES_COMPARTILHADOS.md`](../architecture/LIGAS_COM_PALPITES_COMPARTILHADOS.md).

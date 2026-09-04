@@ -1,10 +1,16 @@
 # Arquitetura de Temporadas e Bolões
 
-> **Status histórico:** a evolução estrutural dentro deste mesmo projeto foi substituída pela criação do produto independente **Bolão Brasileirão Rigazzo**. A direção vigente está em [`BOLAO_BRASILEIRAO_RIGAZZO.md`](BOLAO_BRASILEIRAO_RIGAZZO.md). Este documento permanece preservado como registro da alternativa anteriormente aprovada e não autoriza implementação.
+> **Status histórico:** este plano propunha bolões com palpites independentes e
+> foi substituído pela arquitetura de
+> [`Ligas com palpites compartilhados`](LIGAS_COM_PALPITES_COMPARTILHADOS.md).
+> O conteúdo abaixo permanece preservado como registro da alternativa anterior
+> e não autoriza implementação.
 
 ## Finalidade
 
-Este documento foi a fonte principal da alternativa que evoluiria o Bolão Brasileirão 2026 dentro do mesmo projeto. Ele é preservado para explicar a decisão anterior, mas não representa mais a direção vigente.
+Este documento foi a fonte principal da alternativa que evoluiria o Bolão
+Brasileirão 2026 com palpites pertencentes a cada bolão. Ele é preservado para
+explicar a decisão anterior, mas não representa mais a direção vigente.
 
 A direção foi aprovada em 4 de agosto de 2026. A implementação ainda não foi iniciada. Qualquer mudança em código, banco, Supabase, Netlify ou interface exige plano e aprovação próprios.
 
