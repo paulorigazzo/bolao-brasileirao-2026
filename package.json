@@ -1,6 +1,6 @@
 {
   "name": "bolao-br-2026",
-  "version": "6.27.0",
+  "version": "6.28.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,9 +10,10 @@
     "test:shared-leagues-foundation": "node scripts/test-shared-leagues-foundation.mjs",
     "test:league-security-queries": "node scripts/test-league-security-queries.mjs && npm run test:league-context",
     "test:league-context": "node scripts/test-league-context.mjs",
-    "test:standard-league-equivalence": "node scripts/test-standard-league-equivalence.mjs && npm run test:league-member-management && npm run test:centralized-league-administration",
+    "test:standard-league-equivalence": "node scripts/test-standard-league-equivalence.mjs && npm run test:league-member-management && npm run test:centralized-league-administration && npm run test:league-participant-directory",
     "test:league-member-management": "node scripts/test-league-member-management.mjs",
     "test:centralized-league-administration": "node scripts/test-centralized-league-administration.mjs",
+    "test:league-participant-directory": "node scripts/test-league-participant-directory.mjs",
     "snapshot:export": "node scripts/export-snapshot.mjs",
     "test:api-football-adapter": "node scripts/test-api-football-adapter.mjs && node scripts/test-api-football-official-cutover.mjs && node scripts/test-api-football-cutover-rehearsal.mjs && node scripts/test-api-football-cutover-admin.mjs",
     "test:diagnostic-provider-status": "node scripts/test-diagnostic-provider-status.mjs",

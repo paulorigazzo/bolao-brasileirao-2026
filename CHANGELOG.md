@@ -1,3 +1,10 @@
+# v6.28.0 — Administração de ligas e diretório de participantes
+
+- Move criação e administração de ligas para um card expansível exclusivo da Área ADM; o menu do usuário mantém somente o seletor da liga ativa.
+- Permite administrar qualquer liga sem trocar silenciosamente o contexto competitivo e oferece uma ação explícita para torná-la ativa.
+- Adiciona busca protegida por nome, telefone ou e-mail, com contatos mascarados, seleção múltipla e inclusão ou reativação atômica de até 50 participantes.
+- Mantém o gestor central como único administrador, registra cada associação na auditoria e preserva palpites, pontuação e histórico.
+
 # v6.27.0 — Ativação e criação centralizada de ligas
 
 - Torna o contexto da liga ativa a leitura competitiva oficial, com falha fechada e contingência explícita.

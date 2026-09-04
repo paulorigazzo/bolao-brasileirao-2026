@@ -49,9 +49,10 @@ assert.match(app,/const COMPETITIVE_READ_MODE="league"/);
 assert.match(app,/loadLegacyCompetitiveContext/);
 assert.match(html,/id="leagueShortcut"[^>]+role="menuitem"/);
 assert.match(html,/id="leagueSelectorModal"[^>]+role="dialog"/);
-assert.match(html,/id="leagueAdminButton"[^>]*>[^<]*Administrar liga/);
-assert.match(app,/show\("leagueAdminEntry",state\.leagueManager\)/);
-assert.match(app,/addEventListener\("click",openLeagueManagement\)/);
+assert.doesNotMatch(html,/id="leagueAdminButton"/);
+assert.doesNotMatch(html,/id="leagueCreateButton"/);
+assert.match(html,/id="adminLeaguesCard"[^>]+is-collapsed/);
+assert.match(app,/show\("adminLeaguesCard",state\.leagueManager\)/);
 assert.match(html,/id="leagueAdminModal"[^>]+role="dialog"/);
 
 console.log("Contexto de liga na interface verificado com sucesso.");

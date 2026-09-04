@@ -4,7 +4,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 
 ## Estado atual
 
-- Versão funcional: `v6.27.0`.
+- Versão funcional: `v6.28.0`.
 - Prioridade, status e sequência atuais: [`ROADMAP.md`](ROADMAP.md).
 - Evolução para Temporadas e Ligas: conduzida incrementalmente neste aplicativo, com palpites compartilhados e contexto competitivo por liga. O [plano vigente](docs/architecture/LIGAS_COM_PALPITES_COMPARTILHADOS.md) substitui o Rigazzo como destino exclusivo; o produto independente permanece congelado como histórico e possível laboratório em [sua documentação](docs/architecture/BOLAO_BRASILEIRAO_RIGAZZO.md).
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.

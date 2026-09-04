@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.27.0">
-  <link rel="stylesheet" href="./css/styles.css?v=6.27.0">
-  <link rel="stylesheet" href="./css/components.css?v=6.27.0">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.27.0">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.27.0">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.27.0">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.28.0">
+  <link rel="stylesheet" href="./css/styles.css?v=6.28.0">
+  <link rel="stylesheet" href="./css/components.css?v=6.28.0">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.28.0">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.28.0">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.28.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.27.0</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.28.0</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -366,6 +366,7 @@
           <button class="admin-quick-nav-button active" type="button" data-admin-target="adminAttentionCard" aria-current="true"><span aria-hidden="true">🚦</span> Atenção <b id="adminNavAttentionBadge" class="admin-nav-indicator hidden">0</b></button>
           <button class="admin-quick-nav-button" type="button" data-admin-target="adminRoundCard"><span aria-hidden="true">⚽</span> Rodada <b id="adminNavRoundBadge" class="admin-nav-indicator hidden">0</b></button>
           <button class="admin-quick-nav-button" type="button" data-admin-target="adminQuickActionsCard"><span aria-hidden="true">⚡</span> Ações</button>
+          <button class="admin-quick-nav-button" type="button" data-admin-target="adminLeaguesCard"><span aria-hidden="true">🏆</span> Ligas</button>
           <button class="admin-quick-nav-button" type="button" data-admin-target="adminParticipantsCard"><span aria-hidden="true">👥</span> Participantes</button>
           <button class="admin-quick-nav-button" type="button" data-admin-target="adminDiagnosticCard"><span aria-hidden="true">🩺</span> Diagnóstico</button>
           <button class="admin-quick-nav-button" type="button" data-admin-target="adminAuditCard"><span aria-hidden="true">🧪</span> Auditoria</button>
@@ -443,6 +444,18 @@
             </button>
           </div>
           <small id="adminQuickActionStatus" class="admin-quick-action-status">As ações respeitam as regras e os prazos já configurados no bolão.</small>
+          <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
+        </article>
+
+        <article id="adminLeaguesCard" class="card admin-leagues-card is-collapsed" aria-live="polite">
+          <div class="admin-leagues-header" data-admin-card-header>
+            <div><span class="eyebrow">GESTÃO CENTRALIZADA</span><h2>🏆 Administração de Ligas</h2></div>
+            <div class="admin-card-header-actions"><span id="adminLeaguesCount" class="admin-leagues-badge">Carregando…</span><button class="admin-card-toggle" type="button" data-admin-collapse="adminLeaguesCard" aria-expanded="false" aria-label="Expandir Administração de Ligas">⌃</button></div>
+          </div>
+          <p class="admin-leagues-intro">Crie ligas e administre membros sem alterar a liga que você está acompanhando.</p>
+          <div class="admin-leagues-toolbar"><button id="adminCreateLeagueButton" class="primary" type="button">＋ Criar nova liga</button><small>A Liga Standard permanece protegida.</small></div>
+          <div id="adminLeaguesList" class="admin-leagues-list"><p class="muted-note">Expanda o card para carregar as ligas.</p></div>
+          <p id="adminLeaguesStatus" class="league-selector-status" aria-live="polite"></p>
           <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
         </article>
 
@@ -594,14 +607,6 @@
       </header>
       <div id="leagueSelectorOptions" class="league-selector-options" role="radiogroup" aria-label="Ligas disponíveis"></div>
       <p id="leagueSelectorStatus" class="league-selector-status" aria-live="polite"></p>
-      <div id="leagueCreationEntry" class="league-admin-entry hidden">
-        <button id="leagueCreateButton" class="primary" type="button">＋ Criar nova liga</button>
-        <small>Somente o gestor central pode criar e administrar ligas.</small>
-      </div>
-      <div id="leagueAdminEntry" class="league-admin-entry hidden">
-        <button id="leagueAdminButton" class="secondary" type="button">⚙️ Administrar liga</button>
-        <small>Gerencie a liga, seus membros e o histórico.</small>
-      </div>
     </section>
   </div>
 
@@ -609,7 +614,7 @@
     <section class="league-admin-modal card" tabindex="-1">
       <header class="league-selector-header"><div><span class="eyebrow">GESTÃO CENTRALIZADA</span><h2 id="leagueAdminTitle">Administrar liga</h2><p id="leagueAdminSummary" class="muted-note"></p></div><button id="leagueAdminClose" class="modal-close" type="button" aria-label="Fechar administração da liga">✕</button></header>
       <form id="leagueLifecycleForm" class="league-lifecycle-form"><label>Nome da liga<input id="leagueNameInput" type="text" minlength="2" maxlength="100" required></label><button id="leagueRenameButton" class="secondary" type="submit">Renomear</button><button id="leagueArchiveButton" class="secondary" type="button">Arquivar</button></form>
-      <form id="leagueMemberForm" class="league-member-form"><label>E-mail do participante<input id="leagueMemberEmail" type="email" autocomplete="off" required></label><button class="primary" type="submit">Adicionar membro</button></form>
+      <section class="league-directory" aria-labelledby="leagueDirectoryTitle"><div class="league-directory-heading"><div><h3 id="leagueDirectoryTitle">Adicionar participantes</h3><small>Busque por nome, telefone ou e-mail. Os dados de contato aparecem protegidos.</small></div><span id="leagueDirectorySelection">0 selecionados</span></div><form id="leagueDirectorySearchForm" class="league-directory-search"><label for="leagueDirectorySearch">Buscar participante</label><div><input id="leagueDirectorySearch" type="search" autocomplete="off" placeholder="Nome, telefone ou e-mail"><button class="secondary" type="submit">Buscar</button></div></form><div id="leagueDirectoryList" class="league-directory-list"><p class="muted-note">Carregando participantes elegíveis…</p></div><button id="leagueDirectoryAddButton" class="primary" type="button" disabled>Adicionar selecionados</button></section>
       <p id="leagueAdminStatus" class="league-selector-status" aria-live="polite"></p>
       <div class="league-admin-tabs" role="tablist" aria-label="Conteúdo da administração"><button class="active" type="button" role="tab" aria-selected="true" aria-controls="leagueMembersList" data-league-admin-view="members">Membros</button><button type="button" role="tab" aria-selected="false" aria-controls="leagueAuditList" data-league-admin-view="audit">Histórico</button></div>
       <div id="leagueMembersList" class="league-members-list" role="tabpanel"></div><div id="leagueAuditList" class="league-members-list hidden" role="tabpanel"></div>
@@ -621,7 +626,6 @@
       <header class="league-selector-header"><div><span class="eyebrow">NOVA LIGA</span><h2 id="leagueCreateTitle">Criar liga</h2><p class="muted-note">Os palpites permanecem únicos e compartilhados.</p></div><button id="leagueCreateClose" class="modal-close" type="button" aria-label="Fechar criação de liga">✕</button></header>
       <form id="leagueCreateForm" class="league-create-form"><label>Nome da liga<input id="newLeagueName" type="text" minlength="2" maxlength="100" required autofocus></label><button class="primary" type="submit">Criar liga</button></form>
       <p id="leagueCreateStatus" class="league-selector-status" aria-live="polite"></p>
-      <div id="archivedLeaguesList" class="league-members-list"></div>
     </section>
   </div>
 
@@ -808,6 +812,6 @@
       if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.27.0"></script>
+  <script type="module" src="./js/app.js?v=6.28.0"></script>
 </body>
 </html>
