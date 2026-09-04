@@ -1653,3 +1653,34 @@ de toda liga.
 A autorização local entregue na L06 é centralizada nesta versão. O ciclo de
 vida das ligas exige funções protegidas e auditoria própria, mas não altera a
 identidade dos palpites nem as tabelas competitivas centrais.
+
+## DEC-2026-045 — Gestão de ligas pertence à Área ADM
+
+- Data: 2026-09-04
+- Status: aceita
+- Responsáveis: responsável pelo produto
+- Impacto: médio, organização da interface e privacidade administrativa
+
+### Contexto
+
+O seletor de liga ativa acumulava criação, ciclo de vida e gestão de membros no
+menu do usuário. A mesma entrada servia, portanto, para escolher o contexto
+competitivo e para executar operações administrativas sobre ele.
+
+### Decisão
+
+- manter no menu do usuário somente a escolha da liga ativa;
+- concentrar criação, ciclo de vida, membros e auditoria no card expansível
+  **Administração de Ligas**, dentro da Área ADM;
+- permitir que o gestor selecione uma liga-alvo sem trocar implicitamente o
+  contexto competitivo;
+- exigir a ação explícita **Usar como liga ativa** para essa troca;
+- localizar participantes elegíveis por nome, telefone ou e-mail, exibindo os
+  contatos mascarados e permitindo inclusão atômica em lote.
+
+### Consequências
+
+A navegação separa o uso cotidiano da administração e reduz trocas acidentais
+de contexto. A autorização continua integralmente validada no banco e restrita
+ao gestor central. Palpites, pontuação e histórico competitivo permanecem
+compartilhados e inalterados.
