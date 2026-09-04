@@ -1,3 +1,10 @@
+# v6.27.0 — Ativação e criação centralizada de ligas
+
+- Torna o contexto da liga ativa a leitura competitiva oficial, com falha fechada e contingência explícita.
+- Permite somente ao gestor central criar, renomear, arquivar e reativar ligas privadas.
+- Mantém o gestor como único administrador de todas as ligas e restringe participantes à função de membro.
+- Audita o ciclo de vida das ligas sem alterar palpites, jogos, resultados ou regras de pontuação.
+
 # v6.26.0 — Gestão auditável de membros da liga
 
 - Permite aos administradores locais adicionar participantes existentes, reativar ou inativar associações e atribuir funções dentro da própria liga.

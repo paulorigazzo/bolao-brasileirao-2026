@@ -1623,3 +1623,33 @@ separado entre fundação paralela e ativação funcional. Palpites diferentes o
 pontuações personalizadas por liga, ligas públicas, cobrança e múltiplos
 campeonatos ficam fora do escopo inicial. O contrato completo está em
 [`LIGAS_COM_PALPITES_COMPARTILHADOS.md`](../architecture/LIGAS_COM_PALPITES_COMPARTILHADOS.md).
+
+## DEC-2026-044 — Administração centralizada das ligas nesta versão
+
+- Data: 2026-09-04
+- Status: aceita
+- Responsáveis: responsável pelo produto
+- Substitui: parcialmente DEC-2026-043 quanto ao limite inicial de criação de ligas
+- Impacto: alto
+
+### Contexto
+
+A criação de ligas foi antecipada para a mesma entrega da ativação controlada.
+Nesta versão, o responsável pelo produto será o único criador e administrador
+de toda liga.
+
+### Decisão
+
+- combinar ativação e criação de ligas na L07;
+- reconhecer o gestor central pelo criador da Liga Standard, condicionado à
+  autorização global ativa e aprovada;
+- criar ligas privadas atomicamente com o gestor como único administrador;
+- restringir todos os demais participantes à função de membro;
+- manter criação pública, convites e delegação administrativa fora do escopo;
+- proteger a Liga Standard contra renomeação e arquivamento.
+
+### Consequências
+
+A autorização local entregue na L06 é centralizada nesta versão. O ciclo de
+vida das ligas exige funções protegidas e auditoria própria, mas não altera a
+identidade dos palpites nem as tabelas competitivas centrais.

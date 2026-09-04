@@ -13,6 +13,7 @@
     { "version": "20260904155501", "name": "add_league_security_queries", "status": "applied" },
     { "version": "20260904160516", "name": "fix_league_provisional_ranking_ambiguity", "status": "applied" },
     { "version": "20260904160910", "name": "align_official_league_ranking_status", "status": "applied" },
-    { "version": "20260904185813", "name": "add_league_member_management", "status": "applied" }
+    { "version": "20260904185813", "name": "add_league_member_management", "status": "applied" },
+    { "version": "20260904194756", "name": "centralize_league_administration", "status": "applied" }
   ]
 }
