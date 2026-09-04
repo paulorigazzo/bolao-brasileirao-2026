@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 const root=new URL("../",import.meta.url);
-const migration=await readFile(new URL("supabase/migrations/20260904190000_centralize_league_administration.sql",root),"utf8");
+const migration=await readFile(new URL("supabase/migrations/20260904194756_centralize_league_administration.sql",root),"utf8");
 const app=await readFile(new URL("js/app.js",root),"utf8");
 const html=await readFile(new URL("index.html",root),"utf8");
 const rollback=await readFile(new URL("supabase/rollback/rollback_centralize_league_administration.sql",root),"utf8");
