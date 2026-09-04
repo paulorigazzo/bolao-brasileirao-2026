@@ -1535,6 +1535,9 @@ participantes e correspondências usadas por Home, Meu Time e Ranking.
   conflitante;
 - preservar os nomes armazenados nos jogos e a apresentação já existente para
   `Mineiro` e `Paranaense`.
+- aplicar os nomes de exibição em toda saída destinada ao participante ou ao
+  administrador, inclusive mensagens e descrições acessíveis, sem alterar os
+  valores usados internamente para associação.
 
 ### Consequências e limites
 

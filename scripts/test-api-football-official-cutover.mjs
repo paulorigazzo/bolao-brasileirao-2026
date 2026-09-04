@@ -65,6 +65,10 @@ assert.throws(() => canonicalizeApiFootballStandings(normalizedStandings.standin
 ]), /api_football_canonical_team_unexpected/);
 
 const observedDivergences = teams.map((team) => [team.id, team.providerName, team.canonicalName]);
+assert.deepEqual(
+  teams.filter((team) => team.canonicalName !== team.displayName).map((team) => [team.canonicalName, team.displayName]),
+  [["Paranaense", "Athletico-PR"], ["Mineiro", "Atlético-MG"]],
+);
 const divergenceStanding = {
   ...normalizedStandings.standings,
   table: observedDivergences.map(([providerTeamId, teamName], index) => ({
@@ -117,5 +121,12 @@ assert.match(classificationSource, /providerClassificationSnapshotId/);
 assert.match(diagnosticSource, /officialSportsDataProvider: provider/);
 assert.match(appSource, /function standingsTeamExpandedContent\(row\)\{[\s\S]*const displayName=teamDisplayName\(row\.team\)[\s\S]*Ver jogos do \$\{escapeHtml\(displayName\)\}/);
 assert.match(appSource, /function renderStandings\(\)\{[\s\S]*const displayName=teamDisplayName\(row\.team\)[\s\S]*standings-mobile-team[\s\S]*escapeHtml\(displayName\)[\s\S]*standings-team[\s\S]*escapeHtml\(displayName\)/);
+assert.match(appSource, /const canonical=\{CAM:"Atlético-MG",CAP:"Athletico-PR"\}\[teamAbbreviation\(name\)\]/);
+assert.match(appSource, /function teamNamesDisplayText\(value\)\{[\s\S]*Mineiro[\s\S]*Atlético-MG[\s\S]*Paranaense[\s\S]*Athletico-PR/);
+assert.doesNotMatch(appSource, /escapeHtml\((?:g|game|next|nextGame|occurrence)\.time_(?:casa|fora)\)/);
+assert.doesNotMatch(appSource, /\$\{(?:g|game|next|nextGame|occurrence)\.time_(?:casa|fora)\}/);
+assert.doesNotMatch(appSource, /(?:Time do coração|Tema do torcedor|Meu desempenho com o|ver detalhes do) \$\{team\.name\}/);
+assert.equal((appSource.match(/escapeHtml\(team\.name\)/g) || []).length, 1);
+assert.match(appSource, /data-team="\$\{escapeHtml\(team\.name\)\}"/);
 
 console.log("Fundação de corte controlado da API-Football verificada com sucesso.");

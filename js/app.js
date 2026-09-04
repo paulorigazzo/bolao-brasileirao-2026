@@ -20,7 +20,7 @@ import { buildFriendlyRankingsModel } from "./friendly-rankings-engine.js";
 import { adminRoundGameIds, loadAdminPickProgress } from "./admin-pick-progress.js";
 import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js";
 
-const APP_VERSION = "6.24.6";
+const APP_VERSION = "6.24.7";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -234,6 +234,12 @@ function teamDisplayName(name){
   return canonical || String(name||"");
 }
 
+function teamNamesDisplayText(value){
+  return String(value||"")
+    .replace(/\bMineiro\b/g,"Atlético-MG")
+    .replace(/\bParanaense\b/g,"Athletico-PR");
+}
+
 function availableTeams(){
   const teams=new Map();
   state.games.forEach(game=>{
@@ -289,7 +295,8 @@ function favoriteTeamMatchData(game){
 }
 
 function favoriteHeartBadge(teamName){
-  return `<span class="favorite-heart-badge" title="${escapeHtml(teamName)} é seu time favorito" aria-label="Jogo do seu time favorito: ${escapeHtml(teamName)}"><span aria-hidden="true">♥</span></span>`;
+  const displayName=teamDisplayName(teamName);
+  return `<span class="favorite-heart-badge" title="${escapeHtml(displayName)} é seu time favorito" aria-label="Jogo do seu time favorito: ${escapeHtml(displayName)}"><span aria-hidden="true">♥</span></span>`;
 }
 
 function setAvatar(element, team, fallback){
@@ -311,7 +318,7 @@ function applyFavoriteTeamIdentity(){
 
   const summary=$("favoriteTeamSummary");
   if(summary){
-    summary.textContent=team ? `Time do coração: ${team.name}` : "Time do coração: não escolhido";
+    summary.textContent=team ? `Time do coração: ${teamDisplayName(team.name)}` : "Time do coração: não escolhido";
     summary.classList.toggle("has-fan-theme",themed);
   }
 
@@ -329,8 +336,8 @@ function applyFavoriteTeamIdentity(){
   profileAvatar?.classList.toggle("has-fan-theme",themed);
   if(chip){
     chip.dataset.teamTheme=team?.key || "default";
-    chip.setAttribute("aria-label",team ? `Abrir menu do usuário. Tema do torcedor: ${team.name}` : "Abrir menu do usuário");
-    chip.title=team ? `Tema do Torcedor: ${team.name}` : "Menu do usuário";
+    chip.setAttribute("aria-label",team ? `Abrir menu do usuário. Tema do torcedor: ${teamDisplayName(team.name)}` : "Abrir menu do usuário");
+    chip.title=team ? `Tema do Torcedor: ${teamDisplayName(team.name)}` : "Menu do usuário";
   }
 }
 
@@ -341,7 +348,7 @@ function renderFavoriteTeamSelector(){
   if(!grid) return;
   renderTeamOptions(grid,teams,state.selectedFavoriteTeam,team=>{
     state.selectedFavoriteTeam=team;
-    $("favoriteTeamStatus").textContent=`Selecionado: ${team}. Toque em “Salvar escolha”.`;
+    $("favoriteTeamStatus").textContent=`Selecionado: ${teamDisplayName(team)}. Toque em “Salvar escolha”.`;
   });
 }
 
@@ -356,7 +363,7 @@ async function saveFavoriteTeam(){
     applyFavoriteTeamIdentity();
     renderFavoriteTeamSelector();
     renderHome();
-    $("favoriteTeamStatus").textContent=value ? `Time do coração salvo: ${value}.` : "Preferência removida.";
+    $("favoriteTeamStatus").textContent=value ? `Time do coração salvo: ${teamDisplayName(value)}.` : "Preferência removida.";
     message("Time do coração atualizado com sucesso.");
   }catch(err){
     $("favoriteTeamStatus").textContent="Não foi possível salvar o time favorito. Consulte o diagnóstico administrativo e as migrações versionadas do Supabase.";
@@ -514,7 +521,7 @@ function renderRegistrationTeamSelector(){
   renderTeamOptions(grid,state.registrationTeams,state.selectedRegistrationTeam,team=>{
     state.selectedRegistrationTeam=team;
     persistRegistrationDraft();
-    if($("registrationFormStatus")) $("registrationFormStatus").textContent=`Time selecionado: ${team}.`;
+    if($("registrationFormStatus")) $("registrationFormStatus").textContent=`Time selecionado: ${teamDisplayName(team)}.`;
   });
 }
 
@@ -1164,7 +1171,7 @@ function premiumMatchCard(g){
     ? `<div class="premium-score-display"><strong>${g.gols_casa}</strong><span>×</span><strong>${g.gols_fora}</strong><small>Resultado final</small></div>`
     : live&&hasScore
       ? `<div class="premium-score-display live"><strong>${g.gols_casa}</strong><span>×</span><strong>${g.gols_fora}</strong><small>Placar ao vivo</small></div>`
-      : `<div class="premium-pick-inputs"><input class="home-score" inputmode="numeric" pattern="[0-9]*" enterkeyhint="next" autocomplete="off" type="number" min="0" max="15" step="1" aria-label="Gols do ${escapeHtml(g.time_casa)}" value="${escapeHtml(draft?.gols_casa??pick?.gols_casa??"")}" ${isLocked?"disabled":""}><span>×</span><input class="away-score" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" autocomplete="off" type="number" min="0" max="15" step="1" aria-label="Gols do ${escapeHtml(g.time_fora)}" value="${escapeHtml(draft?.gols_fora??pick?.gols_fora??"")}" ${isLocked?"disabled":""}><small>${draft?"Alteração não salva":pick?"Seu palpite":"Palpite não feito"}</small></div>`;
+      : `<div class="premium-pick-inputs"><input class="home-score" inputmode="numeric" pattern="[0-9]*" enterkeyhint="next" autocomplete="off" type="number" min="0" max="15" step="1" aria-label="Gols do ${escapeHtml(teamDisplayName(g.time_casa))}" value="${escapeHtml(draft?.gols_casa??pick?.gols_casa??"")}" ${isLocked?"disabled":""}><span>×</span><input class="away-score" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" autocomplete="off" type="number" min="0" max="15" step="1" aria-label="Gols do ${escapeHtml(teamDisplayName(g.time_fora))}" value="${escapeHtml(draft?.gols_fora??pick?.gols_fora??"")}" ${isLocked?"disabled":""}><small>${draft?"Alteração não salva":pick?"Seu palpite":"Palpite não feito"}</small></div>`;
   const showComparison=(finished||live)&&hasScore;
   const comparisonPoints=pick?(finished?points(pick,g):calculatePredictionPoints(pick,g)):0;
   const headerPointsLabel=finished&&hasScore?`${comparisonPoints}`:"";
@@ -1640,7 +1647,7 @@ function homeRoundHighlightsHtml(context){
   return `<section class="home-round-highlights" aria-label="Destaques da Rodada ${context.round}">
     <div class="home-round-highlights-heading"><span>${label}</span><strong>Rodada ${context.round}</strong></div>
     ${partial?`<div class="round-highlights-partial-notice" role="status"><strong>⚠ Rodada com jogos adiados</strong><span>Destaques consideram ${model.lifecycle.finished} de ${model.lifecycle.total} jogos concluídos.</span></div>`:""}
-    <div class="home-round-highlights-list">${facts.map(fact=>`<div><i aria-hidden="true">${roundHighlightIcon(fact.key)}</i><p><strong>${escapeHtml(fact.title)}</strong><small>${escapeHtml(fact.detail)}</small></p></div>`).join("")}</div>
+    <div class="home-round-highlights-list">${facts.map(fact=>`<div><i aria-hidden="true">${roundHighlightIcon(fact.key)}</i><p><strong>${escapeHtml(fact.title)}</strong><small>${escapeHtml(teamNamesDisplayText(fact.detail))}</small></p></div>`).join("")}</div>
     <button class="home-round-highlights-action" type="button" data-home-action="round-highlights" data-round-highlights-round="${context.round}">Ver todos os destaques <b aria-hidden="true">›</b></button>
   </section>`;
 }
@@ -1650,7 +1657,7 @@ function renderRoundHighlightsModal(model){
   if(!content) return;
   const partial=isPostponedRoundHighlightsEligible(model.lifecycle);
   const displayFact=fact=>partial?provisionalRoundHighlightFact(fact):fact;
-  const factCard=fact=>{const display=displayFact(fact);return `<article class="round-highlight-fact"><i aria-hidden="true">${roundHighlightIcon(display.key)}</i><div><strong>${escapeHtml(display.title)}</strong><p>${escapeHtml(display.detail)}</p></div></article>`;};
+  const factCard=fact=>{const display=displayFact(fact);return `<article class="round-highlight-fact"><i aria-hidden="true">${roundHighlightIcon(display.key)}</i><div><strong>${escapeHtml(display.title)}</strong><p>${escapeHtml(teamNamesDisplayText(display.detail))}</p></div></article>`;};
   const sections=[];
   const personalKeys=new Set(model.facts.personal.map(fact=>fact.key));
   const groupFacts=model.facts.group.filter(fact=>!personalKeys.has(fact.key));
@@ -1734,7 +1741,7 @@ function renderMatchCalendar(){
   }
 
   const postponed=$("matchCalendarPostponed");
-  if(postponed) postponed.innerHTML=model.postponed.length?`<section><span class="eyebrow">AGUARDANDO NOVA DATA</span><h3>Partidas adiadas</h3><div>${model.postponed.map(game=>`<article><span>R${Number(game.rodada)||"—"}</span><p><strong>${escapeHtml(game.time_casa||"Mandante a definir")}</strong><i aria-hidden="true">×</i><strong>${escapeHtml(game.time_fora||"Visitante a definir")}</strong></p></article>`).join("")}</div></section>`:"";
+  if(postponed) postponed.innerHTML=model.postponed.length?`<section><span class="eyebrow">AGUARDANDO NOVA DATA</span><h3>Partidas adiadas</h3><div>${model.postponed.map(game=>`<article><span>R${Number(game.rodada)||"—"}</span><p><strong>${escapeHtml(teamDisplayName(game.time_casa||"Mandante a definir"))}</strong><i aria-hidden="true">×</i><strong>${escapeHtml(teamDisplayName(game.time_fora||"Visitante a definir"))}</strong></p></article>`).join("")}</div></section>`:"";
 }
 
 function openMatchCalendar(trigger){
@@ -1788,7 +1795,7 @@ function openSelectedGame(gameId,sourceLabel){
     card.querySelector(".game-toggle")?.focus({preventScroll:true});
     setTimeout(()=>card.classList.remove("is-calendar-target"),prefersReducedMotion()?1200:3200);
   },120);
-  message(`Exibindo ${game.time_casa} × ${game.time_fora}, da rodada ${Number(game.rodada)}, ${sourceLabel}.`);
+  message(`Exibindo ${teamDisplayName(game.time_casa)} × ${teamDisplayName(game.time_fora)}, da rodada ${Number(game.rodada)}, ${sourceLabel}.`);
 }
 
 function openGameFromCalendar(gameId){
@@ -1882,11 +1889,12 @@ function renderFavoriteTeamPredictionCard(team){
     </article>`;
   }
   const stats=favoriteTeamPredictionStats(team);
+  const teamName=teamDisplayName(team.name);
   const plural=stats.games===1?'jogo analisado':'jogos analisados';
   const aria=`${stats.rate}% de aproveitamento`;
   return `<article class="premium-feature-card favorite-predictions-card home-navigable-card" data-home-action="myTeam" role="button" tabindex="0" aria-label="Abrir Meu Time 2.0">
     <span class="home-card-chevron" aria-hidden="true">›</span>
-    <header class="premium-card-header favorite-predictions-header"><div><span class="premium-kicker">MEUS PALPITES</span><h2>🎯 Meu desempenho com o ${escapeHtml(team.name)}</h2></div></header>
+    <header class="premium-card-header favorite-predictions-header"><div><span class="premium-kicker">MEUS PALPITES</span><h2>🎯 Meu desempenho com o ${escapeHtml(teamName)}</h2></div></header>
     ${stats.games?`<div class="favorite-predictions-metrics">
       <div><strong>${stats.games}</strong><span>${plural}</span></div>
       <div><strong>${stats.points}</strong><span>pontos</span></div>
@@ -1897,13 +1905,14 @@ function renderFavoriteTeamPredictionCard(team){
       <div class="favorite-rate-heading"><span>Aproveitamento</span><strong>${stats.rate}%</strong></div>
       <div class="favorite-rate-track" role="progressbar" aria-label="${aria}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${stats.rate}"><i style="width:${stats.rate}%"></i></div>
       <small>Pontos conquistados em relação ao máximo possível nesses jogos.</small>
-    </div>`:`<div class="favorite-predictions-no-data"><span aria-hidden="true">⏳</span><div><strong>Ainda não há jogos pontuados</strong><p>O card será preenchido quando uma partida do ${escapeHtml(team.name)} terminar e seu palpite puder ser calculado.</p></div></div>`}
+    </div>`:`<div class="favorite-predictions-no-data"><span aria-hidden="true">⏳</span><div><strong>Ainda não há jogos pontuados</strong><p>O card será preenchido quando uma partida do ${escapeHtml(teamName)} terminar e seu palpite puder ser calculado.</p></div></div>`}
   </article>`;
 }
 
 
 function favoriteTeamContext(team){
   if(!team) return null;
+  const displayName=teamDisplayName(team.name);
   const row=favoriteTeamStandingsRow(team);
   const games=favoriteTeamGames(team).slice().sort((a,b)=>new Date(a.inicio)-new Date(b.inicio));
   const completed=games.filter(isScorableGame);
@@ -1934,7 +1943,7 @@ function favoriteTeamContext(team){
   const formScore=recent.length?Math.round(trendScore/(recent.length*3)*100):50;
   const synergy=Math.max(0,Math.min(100,Math.round(accuracy*.55+exactRate*.2+formScore*.15+(bestSequence?Math.min(bestSequence*10,100):0)*.1)));
   let profile={icon:'⚖️',name:'O Equilibrado',text:'Você combina emoção e leitura do momento do clube.'};
-  if(stats.games>=3 && stats.rate>=70) profile={icon:'🎯',name:'O Especialista',text:`Seus melhores palpites aparecem com frequência nos jogos do ${team.name}.`};
+  if(stats.games>=3 && stats.rate>=70) profile={icon:'🎯',name:'O Especialista',text:`Seus melhores palpites aparecem com frequência nos jogos do ${displayName}.`};
   else if(confidence>=80 && accuracy<60) profile={icon:'❤️',name:'O Apaixonado',text:'Você acredita no seu time até quando o cenário pede cautela.'};
   else if(accuracy>=65 && confidence<80) profile={icon:'🧠',name:'O Estratégico',text:'Você ajusta os palpites de acordo com a fase da equipe.'};
   else if(confidence>=70) profile={icon:'🔥',name:'O Confiante',text:'Você mantém a confiança no seu time ao longo da temporada.'};
@@ -1942,8 +1951,8 @@ function favoriteTeamContext(team){
   const nextPick=next?state.ownPicks.find(pick=>Number(pick.id_jogo)===Number(next.id_jogo)):null;
   const nextPickLabel=nextPick?`${Number(nextPick.gols_casa)} × ${Number(nextPick.gols_fora)}`:"";
   const referenceRound=Number(completed.at(-1)?.rodada)||0;
-  const moment=buildMyTeamMoment({teamName:team.name,games:stats.games,points:stats.points,hits:stats.hits,exact:stats.exact,accuracy,confidence,currentSequence,latestEarned,latestExact,predictedWins,recentClubPoints,recentClubGames:recent.length,nextPickLabel,referenceRound});
-  const achievements=buildMyTeamAchievements({teamName:team.name,games:stats.games,exact:stats.exact,bestSequence,accuracy});
+  const moment=buildMyTeamMoment({teamName:displayName,games:stats.games,points:stats.points,hits:stats.hits,exact:stats.exact,accuracy,confidence,currentSequence,latestEarned,latestExact,predictedWins,recentClubPoints,recentClubGames:recent.length,nextPickLabel,referenceRound});
+  const achievements=buildMyTeamAchievements({teamName:displayName,games:stats.games,exact:stats.exact,bestSequence,accuracy});
   return {team,row,games,completed,recent,next,stats,accuracy,confidence,synergy,profile,moment,achievements,bestSequence};
 }
 
@@ -1970,8 +1979,10 @@ function renderMyTeam(){
   }
   const context=favoriteTeamContext(team);
   const {row,next,stats,profile,synergy,achievements,moment}=context;
-  const crest=team.logo?`<img src="${escapeHtml(team.logo)}" alt="Escudo do ${escapeHtml(team.name)}">`:`<span>${escapeHtml(initials(team.name).slice(0,3))}</span>`;
+  const teamName=teamDisplayName(team.name);
+  const crest=team.logo?`<img src="${escapeHtml(team.logo)}" alt="Escudo do ${escapeHtml(teamName)}">`:`<span>${escapeHtml(initials(teamName).slice(0,3))}</span>`;
   const nextOpponent=next?(normalizeTeamKey(next.time_casa)===team.key?next.time_fora:next.time_casa):null;
+  const nextOpponentName=teamDisplayName(nextOpponent);
   const nextVenue=next?(normalizeTeamKey(next.time_casa)===team.key?'Casa':'Fora'):'';
   const nextDate=next?new Date(next.inicio):null;
   const maxPoints=Math.max(1,stats.games*10);
@@ -1980,8 +1991,8 @@ function renderMyTeam(){
   host.innerHTML=`
     <article class="my-team-hero card">
       <div class="my-team-hero-overview">
-        <div class="my-team-hero-main"><span class="my-team-crest">${crest}</span><div><span class="eyebrow">MEU TIME</span><h1 id="myTeamPageTitle">${escapeHtml(team.name)}</h1><p>Brasileirão 2026</p></div></div>
-        <button class="my-team-standing-summary" type="button" data-my-team-action="standings" aria-label="${escapeHtml(`Abrir classificação completa${row?`. ${team.name} está em ${row.position}º lugar com ${row.points} pontos`:''}`)}">
+        <div class="my-team-hero-main"><span class="my-team-crest">${crest}</span><div><span class="eyebrow">MEU TIME</span><h1 id="myTeamPageTitle">${escapeHtml(teamName)}</h1><p>Brasileirão 2026</p></div></div>
+        <button class="my-team-standing-summary" type="button" data-my-team-action="standings" aria-label="${escapeHtml(`Abrir classificação completa${row?`. ${teamName} está em ${row.position}º lugar com ${row.points} pontos`:''}`)}">
           ${row?`<span><strong>${row.position}º</strong><small>posição</small></span><span><strong>${row.points}</strong><small>pontos</small></span><em>${Number(row.goalDifference)>0?'+':''}${row.goalDifference} saldo</em>`:'<span class="my-team-standing-unavailable"><strong>—</strong><small>Classificação em atualização</small></span>'}
           <i aria-hidden="true">›</i>
         </button>
@@ -1989,7 +2000,7 @@ function renderMyTeam(){
       <div class="my-team-hero-context">
         <div class="my-team-hero-form"><span>Momento recente</span>${favoriteFormMarkup(context)}<small>${formPoints} ponto${formPoints===1?'':'s'} nos últimos ${context.recent.length} jogos</small></div>
         <div class="my-team-hero-next">
-          <div><span class="eyebrow">PRÓXIMO JOGO</span>${next?`<strong>${escapeHtml(team.name)} × ${escapeHtml(nextOpponent)}</strong><small>${escapeHtml(nextDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'}))} · ${escapeHtml(nextDate.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}))} · ${escapeHtml(nextVenue)}</small>`:'<strong>Próxima partida a definir</strong><small>Aguardando atualização da tabela.</small>'}</div>
+          <div><span class="eyebrow">PRÓXIMO JOGO</span>${next?`<strong>${escapeHtml(teamName)} × ${escapeHtml(nextOpponentName)}</strong><small>${escapeHtml(nextDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'}))} · ${escapeHtml(nextDate.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}))} · ${escapeHtml(nextVenue)}</small>`:'<strong>Próxima partida a definir</strong><small>Aguardando atualização da tabela.</small>'}</div>
           <button class="secondary" type="button" data-my-team-action="games">${next?'Ver jogo':'Ver jogos'} <span aria-hidden="true">›</span></button>
         </div>
       </div>
@@ -1999,7 +2010,7 @@ function renderMyTeam(){
       <article class="card my-team-synergy-card"><span class="eyebrow">ÍNDICE DE SINTONIA</span><div class="my-team-synergy-score"><strong>${synergy}%</strong><span>${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</span></div><h2>${favoriteSynergyLabel(synergy)}</h2><p>Mede sua leitura dos resultados, placares exatos, regularidade e o momento recente do clube.</p><div class="my-team-progress"><i style="width:${synergy}%"></i></div></article>
     </section>
 
-    <section class="my-team-section"><div class="my-team-section-heading"><div><span class="eyebrow">VOCÊ E O CLUBE</span><h2>Meu desempenho com o ${escapeHtml(team.name)}</h2></div></div>
+    <section class="my-team-section"><div class="my-team-section-heading"><div><span class="eyebrow">VOCÊ E O CLUBE</span><h2>Meu desempenho com o ${escapeHtml(teamName)}</h2></div></div>
       <div class="my-team-metrics">
         <article class="card"><span>Jogos analisados</span><strong>${stats.games}</strong><small>palpites concluídos</small></article>
         <article class="card"><span>Resultados certos</span><strong>${stats.hits}</strong><small>${stats.games?Math.round(stats.hits/stats.games*100):0}% dos jogos</small></article>
@@ -2043,7 +2054,9 @@ function renderHomeFavoriteTeam(){
   const allFuture=state.games.filter(game=>!isFinished(game) && new Date(game.inicio).getTime()>Date.now()).sort((a,b)=>new Date(a.inicio)-new Date(b.inicio));
   const isNextChampionshipGame=next && Number(allFuture[0]?.id_jogo)===Number(next.id_jogo);
   const opponent=next ? (normalizeTeamKey(next.time_casa)===team.key?next.time_fora:next.time_casa) : null;
-  const crest=team.logo?`<img src="${escapeHtml(team.logo)}" alt="Escudo do ${escapeHtml(team.name)}" loading="lazy" referrerpolicy="no-referrer">`:`<span>${escapeHtml(initials(team.name).slice(0,3))}</span>`;
+  const teamName=teamDisplayName(team.name);
+  const opponentName=teamDisplayName(opponent);
+  const crest=team.logo?`<img src="${escapeHtml(team.logo)}" alt="Escudo do ${escapeHtml(teamName)}" loading="lazy" referrerpolicy="no-referrer">`:`<span>${escapeHtml(initials(teamName).slice(0,3))}</span>`;
   const historyByRound=new Map(positionHistory.map(item=>[Number(item.round),item]));
   const historyHtml=form.length?`<div class="favorite-history" aria-label="Últimos jogos e posição do time em cada rodada">
     <span class="favorite-history-label">Últimos jogos</span>
@@ -2053,9 +2066,9 @@ function renderHomeFavoriteTeam(){
   const contextBadge=isToday?'<span class="favorite-context-badge is-today">● Joga hoje</span>':isNextChampionshipGame?'<span class="favorite-context-badge">Próximo jogo do campeonato</span>':'';
 
   host.innerHTML=`<article class="premium-feature-card favorite-home-card">
-    <div class="favorite-home-overview home-navigable-card" role="button" tabindex="0" data-home-action="myTeam" aria-label="Abrir Meu Time e ver detalhes do ${escapeHtml(team.name)}">
+    <div class="favorite-home-overview home-navigable-card" role="button" tabindex="0" data-home-action="myTeam" aria-label="Abrir Meu Time e ver detalhes do ${escapeHtml(teamName)}">
       <header class="premium-card-header favorite-home-header">
-        <div><span class="premium-kicker">MEU TIME</span><h2>${escapeHtml(team.name)}</h2></div>
+        <div><span class="premium-kicker">MEU TIME</span><h2>${escapeHtml(teamName)}</h2></div>
         <span class="favorite-home-crest">${crest}</span>
       </header>
       ${row?`<div class="favorite-standing-main"><div class="favorite-position-link"><strong>${row.position}º <i class="favorite-standing-chevron" aria-hidden="true">›</i></strong><span>posição</span></div><div><strong>${row.points}</strong><span>pontos</span></div></div>
@@ -2063,7 +2076,7 @@ function renderHomeFavoriteTeam(){
     </div>
     ${historyHtml}
     <div class="favorite-next-match">
-      <div><span class="favorite-next-label">PRÓXIMA PARTIDA</span>${contextBadge}<strong>${next?`${escapeHtml(team.name)} × ${escapeHtml(opponent)}`:'A definir'}</strong><small>${nextDate?`${escapeHtml(nextDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'}))} • ${escapeHtml(nextDate.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}))}${next.local?` • ${escapeHtml(next.local)}`:''}`:'Aguardando a tabela de jogos'}</small></div>
+      <div><span class="favorite-next-label">PRÓXIMA PARTIDA</span>${contextBadge}<strong>${next?`${escapeHtml(teamName)} × ${escapeHtml(opponentName)}`:'A definir'}</strong><small>${nextDate?`${escapeHtml(nextDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'}))} • ${escapeHtml(nextDate.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}))}${next.local?` • ${escapeHtml(next.local)}`:''}`:'Aguardando a tabela de jogos'}</small></div>
       ${next?`<button class="favorite-next-action" type="button" data-home-action="games" aria-label="Abrir jogos">›</button>`:''}
     </div>
   </article>${renderFavoriteTeamPredictionCard(team)}`;
@@ -2106,7 +2119,7 @@ function renderHome(){
   }else if(roundGames.length && lifecycle.status==="FINISHED"){
     priority={tone:"gold",badge:"RODADA ENCERRADA",icon:"🏆",title:`Rodada ${round} concluída`,subtitle:`Você fez ${me.total} ${me.total===1?"ponto":"pontos"}`,meta:"Confira sua posição final na rodada",action:"ranking",label:"Ver resultado"};
   }else{
-    priority={tone:"success",badge:"TUDO EM DIA",icon:"✓",title:"Palpites completos",subtitle:`Rodada ${round}`,meta:nextGame?`Próximo: ${nextGame.time_casa} × ${nextGame.time_fora}`:"Nenhuma ação necessária agora",action:"games",label:"Ver jogos"};
+    priority={tone:"success",badge:"TUDO EM DIA",icon:"✓",title:"Palpites completos",subtitle:`Rodada ${round}`,meta:nextGame?`Próximo: ${teamDisplayName(nextGame.time_casa)} × ${teamDisplayName(nextGame.time_fora)}`:"Nenhuma ação necessária agora",action:"games",label:"Ver jogos"};
   }
 
   const positionText=meIndex===0
@@ -2153,7 +2166,7 @@ function renderHome(){
     <article class="home-mini-card card mini-tone-gold home-navigable-card" role="button" tabindex="0" data-home-action="stats" aria-label="Abrir estatísticas"><span class="mini-card-icon">⭐</span><span>Pontos na rodada</span><b aria-hidden="true">›</b><strong>${roundPoints}</strong><small>${me.exact} placar${me.exact===1?"":"es"} exato${me.exact===1?"":"s"} no total</small></article>`;
 
   if(displayedLive.length){
-    $("homeLiveSection").innerHTML=`<article class="premium-feature-card premium-live-card" aria-label="Partidas ao vivo"><header class="premium-card-header"><div><span class="premium-kicker"><i>●</i> AO VIVO</span><h2>Partidas em andamento</h2></div><button class="premium-inline-action" type="button" data-home-action="games">Ver jogos <b aria-hidden="true">›</b></button></header><div class="home-live-list">${displayedLive.slice(0,3).map(game=>{const estimated=isScheduledLiveEstimate(game,now);const minute=estimated?"":liveMatchMinute(game);const title=estimated?' title="Início e minuto estimados pelo horário programado; aguardando confirmação da fonte"':minute.startsWith("~")?' title="Minuto estimado; a fonte não informou o relógio oficial"':"";const score=!estimated&&hasValidScore(game)?[Number(game.gols_casa),Number(game.gols_fora)]:["–","–"];const label=estimated?scheduledLiveLabel(game,now):`AO VIVO${minute?` • ${minute}'`:""}`;return `<button class="home-live-card${estimated?" is-estimated":""}" type="button" data-home-live-game="${Number(game.id_jogo)}" aria-label="Abrir ${escapeHtml(game.time_casa)} × ${escapeHtml(game.time_fora)} na Rodada ${Number(game.rodada)}"><span class="live-dot"></span><span class="home-live-match"><strong>${escapeHtml(teamAbbreviation(game.time_casa))} ${score[0]} × ${score[1]} ${escapeHtml(teamAbbreviation(game.time_fora))}</strong><small>${escapeHtml(game.time_casa)} × ${escapeHtml(game.time_fora)}</small></span><b${title}>${label}</b></button>`;}).join("")}</div></article>`;
+    $("homeLiveSection").innerHTML=`<article class="premium-feature-card premium-live-card" aria-label="Partidas ao vivo"><header class="premium-card-header"><div><span class="premium-kicker"><i>●</i> AO VIVO</span><h2>Partidas em andamento</h2></div><button class="premium-inline-action" type="button" data-home-action="games">Ver jogos <b aria-hidden="true">›</b></button></header><div class="home-live-list">${displayedLive.slice(0,3).map(game=>{const estimated=isScheduledLiveEstimate(game,now);const minute=estimated?"":liveMatchMinute(game);const title=estimated?' title="Início e minuto estimados pelo horário programado; aguardando confirmação da fonte"':minute.startsWith("~")?' title="Minuto estimado; a fonte não informou o relógio oficial"':"";const score=!estimated&&hasValidScore(game)?[Number(game.gols_casa),Number(game.gols_fora)]:["–","–"];const label=estimated?scheduledLiveLabel(game,now):`AO VIVO${minute?` • ${minute}'`:""}`;return `<button class="home-live-card${estimated?" is-estimated":""}" type="button" data-home-live-game="${Number(game.id_jogo)}" aria-label="Abrir ${escapeHtml(teamDisplayName(game.time_casa))} × ${escapeHtml(teamDisplayName(game.time_fora))} na Rodada ${Number(game.rodada)}"><span class="live-dot"></span><span class="home-live-match"><strong>${escapeHtml(teamAbbreviation(game.time_casa))} ${score[0]} × ${score[1]} ${escapeHtml(teamAbbreviation(game.time_fora))}</strong><small>${escapeHtml(teamDisplayName(game.time_casa))} × ${escapeHtml(teamDisplayName(game.time_fora))}</small></span><b${title}>${label}</b></button>`;}).join("")}</div></article>`;
   }else{
     $("homeLiveSection").innerHTML="";
   }
@@ -2165,7 +2178,7 @@ function renderHome(){
     <div class="premium-round-stats integrity-stats"><div class="is-finished"><i>✓</i><strong>${lifecycle.finished}</strong><span>finalizados</span></div><div class="is-live"><i>◉</i><strong>${lifecycle.live}</strong><span>ao vivo</span></div><div class="is-postponed"><i>!</i><strong>${lifecycle.postponed}</strong><span>adiados</span></div><div class="is-future"><i>◷</i><strong>${lifecycle.future}</strong><span>futuros</span></div></div>
     <p class="round-integrity-note">${lifecycleView.message}${lifecycle.cancelled?` · ${lifecycle.cancelled} cancelado${lifecycle.cancelled===1?"":"s"}.`:""}</p>
     ${homeRoundHighlightsHtml(highlightsContext)}
-    ${nextGame?`<div class="premium-next-game"><span class="premium-next-label">PRÓXIMO JOGO</span><div class="premium-matchup"><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_casa_logo,nextGame.time_casa)}</span><strong>${escapeHtml(nextGame.time_casa)}</strong></div><b>×</b><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_fora_logo,nextGame.time_fora)}</span><strong>${escapeHtml(nextGame.time_fora)}</strong></div></div><div class="premium-game-meta"><span>📅 ${escapeHtml(new Date(nextGame.inicio).toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit"}))}</span><span>◷ ${escapeHtml(new Date(nextGame.inicio).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}))}</span>${nextGame.local_partida?`<span>⌖ ${escapeHtml(nextGame.local_partida)}</span>`:""}</div><button class="premium-next-games-action" type="button" data-home-action="calendar">Abrir calendário <b aria-hidden="true">›</b></button></div>`:`<div class="premium-next-game is-empty"><span class="premium-next-label">AGENDA DE JOGOS</span><p class="muted-note">Consulte as próximas datas e as partidas que aguardam reagendamento.</p><button class="premium-next-games-action" type="button" data-home-action="calendar">Abrir calendário <b aria-hidden="true">›</b></button></div>`}
+    ${nextGame?`<div class="premium-next-game"><span class="premium-next-label">PRÓXIMO JOGO</span><div class="premium-matchup"><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_casa_logo,nextGame.time_casa)}</span><strong>${escapeHtml(teamDisplayName(nextGame.time_casa))}</strong></div><b>×</b><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_fora_logo,nextGame.time_fora)}</span><strong>${escapeHtml(teamDisplayName(nextGame.time_fora))}</strong></div></div><div class="premium-game-meta"><span>📅 ${escapeHtml(new Date(nextGame.inicio).toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit"}))}</span><span>◷ ${escapeHtml(new Date(nextGame.inicio).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}))}</span>${nextGame.local_partida?`<span>⌖ ${escapeHtml(nextGame.local_partida)}</span>`:""}</div><button class="premium-next-games-action" type="button" data-home-action="calendar">Abrir calendário <b aria-hidden="true">›</b></button></div>`:`<div class="premium-next-game is-empty"><span class="premium-next-label">AGENDA DE JOGOS</span><p class="muted-note">Consulte as próximas datas e as partidas que aguardam reagendamento.</p><button class="premium-next-games-action" type="button" data-home-action="calendar">Abrir calendário <b aria-hidden="true">›</b></button></div>`}
   </article>`;
 
   const medals=["🥇","🥈","🥉"];
@@ -2310,7 +2323,7 @@ function renderRanking(){
     const medal=i===0?'gold':i===1?'silver':i===2?'bronze':'';
     return `<tr class="ranking-row ranking-premium-row${placeClass} ${isMe?"me-row":""}">
       <td><div class="rank-position"><span class="rank-medal ${medal}">${i<3?i+1:""}</span><span class="rank-number">${i+1}º</span>${movementBadge(r)}</div></td>
-      <td><div class="rank-participant">${rankingAvatar(r)}<div><strong title="${escapeHtml(r.name)}">${escapeHtml(r.name)}</strong>${isMe?'<span class="you-chip">VOCÊ</span>':""}<small>${team?escapeHtml(team.name):"Participante"}</small></div></div></td>
+      <td><div class="rank-participant">${rankingAvatar(r)}<div><strong title="${escapeHtml(r.name)}">${escapeHtml(r.name)}</strong>${isMe?'<span class="you-chip">VOCÊ</span>':""}<small>${team?escapeHtml(teamDisplayName(team.name)):"Participante"}</small></div></div></td>
       <td data-label="Pontos"><strong class="rank-points">${r.total}</strong></td>
       <td data-label="Exatos"><strong>${r.exact}</strong></td>
       <td data-label="Aproveitamento"><div class="rank-rate"><div class="rank-rate-track"><span style="width:${rate}%"></span></div><strong>${rate}%</strong></div></td>
@@ -2329,7 +2342,7 @@ function renderRanking(){
       <strong>${escapeHtml(r.name)}</strong>
       ${isCurrentRankingParticipant(r)?'<span class="podium-you">VOCÊ</span>':""}
       <span class="podium-points">${r.total} pontos</span>
-      <small>${team?escapeHtml(team.name):`${r.exact} exato${r.exact===1?"":"s"}`}</small>
+      <small>${team?escapeHtml(teamDisplayName(team.name)):`${r.exact} exato${r.exact===1?"":"s"}`}</small>
       <div class="podium-rate"><span style="width:${rate}%"></span></div><em>${rate}% de aproveitamento</em>
     </article>`;
   }).join('') || '<p class="muted-note">O pódio será exibido após os primeiros resultados.</p>';
@@ -2815,7 +2828,7 @@ function renderStats(){
       .sort((a,b)=>Number(a.rodada)-Number(b.rodada) || new Date(a.inicio)-new Date(b.inicio));
     const postponedDetails=postponedGames.length?`<div class="stats-postponed-details" aria-label="Partidas adiadas fora dos cálculos">
       <strong>Partidas adiadas por rodada original</strong>
-      <div class="stats-postponed-list">${postponedGames.map(game=>`<div class="stats-postponed-row"><span>R${Number(game.rodada)||"—"}</span><p><b>${escapeHtml(game.time_casa||"Mandante a definir")}</b><i aria-hidden="true">×</i><b>${escapeHtml(game.time_fora||"Visitante a definir")}</b></p></div>`).join("")}</div>
+      <div class="stats-postponed-list">${postponedGames.map(game=>`<div class="stats-postponed-row"><span>R${Number(game.rodada)||"—"}</span><p><b>${escapeHtml(teamDisplayName(game.time_casa||"Mandante a definir"))}</b><i aria-hidden="true">×</i><b>${escapeHtml(teamDisplayName(game.time_fora||"Visitante a definir"))}</b></p></div>`).join("")}</div>
     </div>`:"";
     if(quality.awaitingResult) reasons.push(`<li><strong>${quality.awaitingResult}</strong> aguardando resultado oficial</li>`);
     if(quality.postponed) reasons.push(`<li><strong>${quality.postponed}</strong> jogo${quality.postponed===1?"":"s"} adiado${quality.postponed===1?"":"s"} na temporada fora dos cálculos</li>`);
@@ -2851,7 +2864,7 @@ function renderStats(){
   if(affinityPanel){
     const best=predictionProfile.bestTeam;
     const challenge=predictionProfile.challengeTeam;
-    const teamItem=(type,icon,title,item,empty)=>item?`<article class="stats-team-affinity-item ${type}"><span class="stats-team-affinity-icon" aria-hidden="true">${icon}</span><div><small>${title}</small><strong>${escapeHtml(item.name)}</strong><p>${item.points} ponto${item.points===1?"":"s"} em ${item.games} jogo${item.games===1?"":"s"} · ${item.hitRate}% com pontos</p></div></article>`:`<article class="stats-team-affinity-item is-empty"><span class="stats-team-affinity-icon" aria-hidden="true">${icon}</span><div><small>${title}</small><strong>Em formação</strong><p>${empty}</p></div></article>`;
+    const teamItem=(type,icon,title,item,empty)=>item?`<article class="stats-team-affinity-item ${type}"><span class="stats-team-affinity-icon" aria-hidden="true">${icon}</span><div><small>${title}</small><strong>${escapeHtml(teamDisplayName(item.name))}</strong><p>${item.points} ponto${item.points===1?"":"s"} em ${item.games} jogo${item.games===1?"":"s"} · ${item.hitRate}% com pontos</p></div></article>`:`<article class="stats-team-affinity-item is-empty"><span class="stats-team-affinity-icon" aria-hidden="true">${icon}</span><div><small>${title}</small><strong>Em formação</strong><p>${empty}</p></div></article>`;
     affinityPanel.innerHTML=`<div class="stats-profile-head"><div><span class="eyebrow">AFINIDADE COM CLUBES</span><h2>Times no seu radar</h2></div><span class="stats-profile-chip">mín. 2 jogos</span></div><div class="stats-team-affinity-list">${teamItem("best","⭐","MAIS PONTOS",best,"Os resultados indicarão os clubes em que você mais pontua.")}${teamItem("challenge","🧩","MAIOR DESAFIO",challenge,"Ainda não há erros suficientes para identificar um desafio recorrente.")}</div><p class="stats-profile-note">A análise considera os dois clubes de cada partida e não interfere na pontuação oficial.</p>`;
   }
 
@@ -3517,9 +3530,9 @@ function renderAdminRoundStatus(){
     const round=Number.isFinite(Number(game.rodada))?`Rodada ${Number(game.rodada)}`:"Rodada a definir";
     return `<article class="admin-postponed-game">
       <div class="admin-postponed-matchup">
-        <span class="admin-postponed-team"><span class="admin-postponed-crest">${teamLogo(game.time_casa_logo,game.time_casa)}</span><strong>${escapeHtml(game.time_casa||"Mandante a definir")}</strong></span>
+        <span class="admin-postponed-team"><span class="admin-postponed-crest">${teamLogo(game.time_casa_logo,game.time_casa)}</span><strong>${escapeHtml(teamDisplayName(game.time_casa||"Mandante a definir"))}</strong></span>
         <span class="admin-postponed-versus">×</span>
-        <span class="admin-postponed-team is-away"><span class="admin-postponed-crest">${teamLogo(game.time_fora_logo,game.time_fora)}</span><strong>${escapeHtml(game.time_fora||"Visitante a definir")}</strong></span>
+        <span class="admin-postponed-team is-away"><span class="admin-postponed-crest">${teamLogo(game.time_fora_logo,game.time_fora)}</span><strong>${escapeHtml(teamDisplayName(game.time_fora||"Visitante a definir"))}</strong></span>
       </div>
       <div class="admin-postponed-meta">
         <span><b>📅 Nova data:</b> a definir</span>
@@ -3537,14 +3550,14 @@ function renderAdminRoundStatus(){
     </summary>
     <div class="admin-postponed-list">${postponedRows}</div>
   </details>`:"";
-  const nextHtml=next?`<section class="admin-next-game"><span class="admin-next-label">PRÓXIMO JOGO</span><div class="admin-next-match"><strong>${escapeHtml(next.time_casa)} <span>×</span> ${escapeHtml(next.time_fora)}</strong><small>${escapeHtml(formatDate(next.inicio))}${next.local?` • ${escapeHtml(next.local)}`:""}</small></div><span class="admin-next-countdown">${formatRemaining(new Date(next.inicio).getTime()-now)}</span></section>`:`<section class="admin-next-game is-empty"><strong>${total?"Todos os jogos da rodada foram concluídos.":"Nenhum jogo cadastrado para esta rodada."}</strong></section>`;
+  const nextHtml=next?`<section class="admin-next-game"><span class="admin-next-label">PRÓXIMO JOGO</span><div class="admin-next-match"><strong>${escapeHtml(teamDisplayName(next.time_casa))} <span>×</span> ${escapeHtml(teamDisplayName(next.time_fora))}</strong><small>${escapeHtml(formatDate(next.inicio))}${next.local?` • ${escapeHtml(next.local)}`:""}</small></div><span class="admin-next-countdown">${formatRemaining(new Date(next.inicio).getTime()-now)}</span></section>`:`<section class="admin-next-game is-empty"><strong>${total?"Todos os jogos da rodada foram concluídos.":"Nenhum jogo cadastrado para esta rodada."}</strong></section>`;
   const gameRows=games.map(game=>{
     const phase=adminGamePhase(game,now);
     const displayStatus=gameStatusDisplay(game);
     const icon=displayStatus.icon;
     const label=displayStatus.label;
     const score=game.gols_casa!=null&&game.gols_fora!=null?`<strong class="admin-round-score">${game.gols_casa} × ${game.gols_fora}</strong>`:"";
-    return `<article class="admin-round-game status-${phase}"><span class="admin-round-game-icon">${icon}</span><div class="admin-round-game-main"><strong>${escapeHtml(game.time_casa)} × ${escapeHtml(game.time_fora)}</strong><small>${escapeHtml(formatDate(game.inicio))} • ${label}</small></div>${score}</article>`;
+    return `<article class="admin-round-game status-${phase}"><span class="admin-round-game-icon">${icon}</span><div class="admin-round-game-main"><strong>${escapeHtml(teamDisplayName(game.time_casa))} × ${escapeHtml(teamDisplayName(game.time_fora))}</strong><small>${escapeHtml(formatDate(game.inicio))} • ${label}</small></div>${score}</article>`;
   }).join("");
   $("adminRoundContent").innerHTML=`${metrics}${progressHtml}${postponedHtml}${nextHtml}<details class="admin-round-details"><summary>Ver todos os jogos <span>${total}</span></summary><div class="admin-round-games">${gameRows||'<p class="muted-note">Nenhum jogo disponível.</p>'}</div></details>`;
 }
@@ -3620,7 +3633,7 @@ function auditFindingHtml(row){
   return `<article class="admin-audit-item admin-audit-game ${row.type}" data-audit-code="${escapeHtml(row.code)}">
     <span class="admin-audit-icon">${row.icon}</span>
     <div class="admin-audit-game-content">
-      <div class="admin-audit-game-title"><strong>${escapeHtml(game.home)} <b>${escapeHtml(game.score)}</b> ${escapeHtml(game.away)}</strong><span>${escapeHtml(game.status)}</span></div>
+      <div class="admin-audit-game-title"><strong>${escapeHtml(teamDisplayName(game.home))} <b>${escapeHtml(game.score)}</b> ${escapeHtml(teamDisplayName(game.away))}</strong><span>${escapeHtml(game.status)}</span></div>
       <p>${escapeHtml(row.text)}</p>
       <div class="admin-audit-game-meta">
         <span>🏁 ${escapeHtml(round)}</span><span>📅 ${escapeHtml(game.kickoff)}</span><span>🏟 ${escapeHtml(game.venue)}</span>
@@ -3675,7 +3688,7 @@ function renderRecoveryOccurrence(occurrence){
     ?`Resultado atual: ${current}`
     :`Primeira captura: ${preserved} · Atual: ${current}`;
   return `<article class="admin-recovery-occurrence is-${model.tone}">
-    <header><div><small>Rodada ${Number(occurrence.rodada)||"—"} · jogo ${Number(occurrence.id_jogo)||"—"}</small><strong>${escapeHtml(occurrence.time_casa||"Mandante")} × ${escapeHtml(occurrence.time_fora||"Visitante")}</strong></div><span>${escapeHtml(model.label)}</span></header>
+    <header><div><small>Rodada ${Number(occurrence.rodada)||"—"} · jogo ${Number(occurrence.id_jogo)||"—"}</small><strong>${escapeHtml(teamDisplayName(occurrence.time_casa||"Mandante"))} × ${escapeHtml(teamDisplayName(occurrence.time_fora||"Visitante"))}</strong></div><span>${escapeHtml(model.label)}</span></header>
     <p>${escapeHtml(occurrence.explicacao||"Ocorrência detectada pela proteção de recuperação.")}</p>
     <div class="admin-recovery-comparison">${escapeHtml(comparison)}</div>
     <ul><li>${occurrence.alteracao_registrada?"Alteração registrada no histórico":"Sem alteração correspondente no histórico"}</li><li>${Number(occurrence.palpites_afetados)||0} palpite(s) com pontuação diferente entre os placares</li><li>${escapeHtml(checkpoint)}</li></ul>
@@ -3778,7 +3791,7 @@ function openAdminParticipantDetail(email){
   $("adminParticipantGames").innerHTML=games.map((game,index)=>{
     const hasPick=pickedIds.has(Number(game.id_jogo));
     const date=formatDate(game.inicio);
-    return `<article class="admin-detail-game ${hasPick?"has-pick":"missing-pick"}"><span class="admin-detail-game-icon" aria-hidden="true">${hasPick?"✅":"❌"}</span><div><strong>Jogo ${index+1}: ${escapeHtml(game.time_casa)} × ${escapeHtml(game.time_fora)}</strong><small>${escapeHtml(date)} • ${hasPick?"Palpite preenchido":"Palpite pendente"}</small></div></article>`;
+    return `<article class="admin-detail-game ${hasPick?"has-pick":"missing-pick"}"><span class="admin-detail-game-icon" aria-hidden="true">${hasPick?"✅":"❌"}</span><div><strong>Jogo ${index+1}: ${escapeHtml(teamDisplayName(game.time_casa))} × ${escapeHtml(teamDisplayName(game.time_fora))}</strong><small>${escapeHtml(date)} • ${hasPick?"Palpite preenchido":"Palpite pendente"}</small></div></article>`;
   }).join("") || `<p class="muted-note">Não há jogos cadastrados nesta rodada.</p>`;
   $("adminParticipantModal").classList.remove("hidden");
   document.body.classList.add("modal-open");

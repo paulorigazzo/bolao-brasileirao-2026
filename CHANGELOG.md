@@ -1,3 +1,10 @@
+# v6.24.7 — Nomes de clubes uniformes em toda a interface
+
+- Apresenta `Mineiro` como `Atlético-MG` e `Paranaense` como `Athletico-PR` em todas as superfícies visíveis do aplicativo.
+- Abrange Home, Meu Time, Perfil, Jogos, Ranking, Estatísticas, calendário, destaques e Área ADM, incluindo mensagens e descrições acessíveis.
+- Preserva os nomes internos usados em armazenamento, busca, preferências, identidade e associações competitivas.
+- Amplia a regressão automatizada para detectar novas exposições diretas dos nomes internos.
+
 # v6.24.6 — Identidade visual uniforme dos clubes
 
 - Exibe `Atlético-MG` e `Athletico-PR` também na Classificação, preservando os nomes internos `Mineiro` e `Paranaense` para associações.
