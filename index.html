@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.25.0">
-  <link rel="stylesheet" href="./css/styles.css?v=6.25.0">
-  <link rel="stylesheet" href="./css/components.css?v=6.25.0">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.25.0">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.25.0">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.25.0">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.26.0">
+  <link rel="stylesheet" href="./css/styles.css?v=6.26.0">
+  <link rel="stylesheet" href="./css/components.css?v=6.26.0">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.26.0">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.26.0">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.26.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.25.0</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.26.0</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -596,8 +596,18 @@
       <p id="leagueSelectorStatus" class="league-selector-status" aria-live="polite"></p>
       <div id="leagueAdminEntry" class="league-admin-entry hidden">
         <button id="leagueAdminButton" class="secondary" type="button">⚙️ Administrar liga</button>
-        <small>Gestão de membros e funções locais será disponibilizada na L06.</small>
+        <small>Gerencie membros, funções locais e o histórico desta liga.</small>
       </div>
+    </section>
+  </div>
+
+  <div id="leagueAdminModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="leagueAdminTitle">
+    <section class="league-admin-modal card" tabindex="-1">
+      <header class="league-selector-header"><div><span class="eyebrow">ADMINISTRAÇÃO LOCAL</span><h2 id="leagueAdminTitle">Administrar liga</h2><p id="leagueAdminSummary" class="muted-note"></p></div><button id="leagueAdminClose" class="modal-close" type="button" aria-label="Fechar administração da liga">✕</button></header>
+      <form id="leagueMemberForm" class="league-member-form"><label>E-mail do participante<input id="leagueMemberEmail" type="email" autocomplete="off" required></label><label>Função<select id="leagueMemberRole"><option value="membro">Membro</option><option value="administrador">Administrador</option></select></label><button class="primary" type="submit">Adicionar</button></form>
+      <p id="leagueAdminStatus" class="league-selector-status" aria-live="polite"></p>
+      <div class="league-admin-tabs" role="tablist" aria-label="Conteúdo da administração"><button class="active" type="button" role="tab" aria-selected="true" aria-controls="leagueMembersList" data-league-admin-view="members">Membros</button><button type="button" role="tab" aria-selected="false" aria-controls="leagueAuditList" data-league-admin-view="audit">Histórico</button></div>
+      <div id="leagueMembersList" class="league-members-list" role="tabpanel"></div><div id="leagueAuditList" class="league-members-list hidden" role="tabpanel"></div>
     </section>
   </div>
 
@@ -784,6 +794,6 @@
       if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.25.0"></script>
+  <script type="module" src="./js/app.js?v=6.26.0"></script>
 </body>
 </html>
