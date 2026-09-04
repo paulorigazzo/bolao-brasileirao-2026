@@ -1545,3 +1545,33 @@ A correção não altera esquema, RLS, autenticação, dados competitivos, regra
 pontuação ou o fornecedor oficial. O cache anterior só é substituído depois de
 uma resposta integralmente validada; a football-data.org permanece disponível
 para rollback operacional.
+
+## DEC-2026-042 — Diagnóstico acompanha a fonte esportiva oficial
+
+- Data: 2026-09-03
+- Status: aceita
+- Responsáveis: manutenção do projeto
+- Impacto: médio, observabilidade administrativa
+
+### Contexto
+
+Após a ativação da API-Football, o backend passou a informar os dois
+fornecedores e a fonte oficial, mas a Central de Diagnóstico continuou exibindo
+somente a football-data.org. O estado de espera do rollback era apresentado
+como indeterminado, embora o restante do sistema estivesse saudável.
+
+### Decisão
+
+- apresentar como principal apenas o fornecedor oficial configurado;
+- inferir seu estado exclusivamente por logs identificados com o mesmo
+  fornecedor;
+- calcular o identificador esperado do cache pelo namespace do fornecedor;
+- exigir os escudos locais na nota de saúde quando a API-Football estiver
+  oficial e mantê-los apenas informativos durante rollback;
+- preservar os ensaios anteriores como ferramentas avançadas de transição.
+
+### Consequências e limites
+
+A decisão melhora a observabilidade, sem consultar APIs adicionais nem mudar
+fonte oficial, sincronização, dados competitivos ou configuração de produção.
+Logs antigos sem fornecedor explícito não comprovam a saúde da fonte ativa.

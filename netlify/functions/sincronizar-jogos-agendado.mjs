@@ -1,6 +1,7 @@
 import { syncGames } from "./_sync-shared.mjs";
 import { serviceClient, isMissingTableError, safeErrorMessage } from "./_api-helpers.mjs";
 import { MAX_API_CALLS_PER_SYNC, MAINTENANCE_INTERVAL_MS } from "./_constants.mjs";
+import { officialSportsDataProvider } from "./_sports-data-provider.mjs";
 
 const TERMINAL_STATUSES = new Set(["encerrado", "adiado", "cancelado"]);
 
@@ -62,6 +63,7 @@ export default async () => {
         origem: "agendado",
         sucesso: false,
         erro: safeErrorMessage(error),
+        detalhes: { provider: officialSportsDataProvider() },
       });
       if (logError && !isMissingTableError(logError)) console.warn(logError.message);
     } catch (_) {}

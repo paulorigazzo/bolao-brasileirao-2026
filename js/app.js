@@ -20,7 +20,7 @@ import { buildFriendlyRankingsModel } from "./friendly-rankings-engine.js";
 import { adminRoundGameIds, loadAdminPickProgress } from "./admin-pick-progress.js";
 import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js";
 
-const APP_VERSION = "6.24.7";
+const APP_VERSION = "6.24.8";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -3921,7 +3921,22 @@ async function copyPoolLink(){
 function diagnosticStatusLabel(status){
   if(status==="online") return ["🟢","Online"];
   if(status==="degraded") return ["🟠","Atenção"];
+  if(status==="standby") return ["⚪","Em espera"];
   return ["⚪","Indeterminado"];
+}
+function diagnosticProviderName(provider){
+  return provider==="api-football" ? "API-Football" : provider==="football-data.org" ? "Football Data API" : "Fonte esportiva";
+}
+function diagnosticProviderPresentation(d){
+  const provider=d?.officialSportsDataProvider;
+  const apiFootball=provider==="api-football";
+  return {
+    provider,
+    activeName:diagnosticProviderName(provider),
+    active:apiFootball?d?.services?.apiFootball:d?.services?.footballData,
+    standbyName:apiFootball?diagnosticProviderName("football-data.org"):diagnosticProviderName("api-football"),
+    standby:apiFootball?d?.services?.footballData:d?.services?.apiFootball,
+  };
 }
 function diagnosticServiceLabel(item){
   if(item?.dataStatus==="delayed") return ["🟠","Online · dados atrasados"];
@@ -4046,16 +4061,20 @@ async function renderAdminDiagnostic(){
   if(badge){ badge.textContent="Verificando…"; badge.className="admin-diagnostic-badge"; }
   try{
     const d=await fetchAdminDiagnostic();
-    const services=Object.entries({"Supabase":d.services.supabase,"Netlify Functions":d.services.netlifyFunctions,"Football Data API":d.services.footballData});
+    const providerView=diagnosticProviderPresentation(d);
+    const services=Object.entries({"Supabase":d.services.supabase,"Netlify Functions":d.services.netlifyFunctions,[`${providerView.activeName} · fonte oficial`]:providerView.active});
     const last=d.sync.last, lastSuccess=d.sync.lastSuccess;
+    const quota=d.sync.quota||{};
+    const quotaHtml=providerView.provider==="api-football"?`<div><span>Cota diária restante</span><strong>${quota.dailyRemaining??"—"} / ${quota.dailyLimit??"—"}</strong></div><div><span>Cota por minuto restante</span><strong>${quota.minuteRemaining??"—"} / ${quota.minuteLimit??"—"}</strong></div>`:"";
     const [cacheIcon,cacheLabel]=diagnosticCacheStatus(d.cache);
     content.innerHTML=`
       <div class="diagnostic-health-grid">${services.map(([name,item])=>{const [icon,label]=diagnosticServiceLabel(item);return `<article><span>${escapeHtml(name)}</span><strong>${icon} ${label}</strong></article>`}).join("")}</div>
+      <small class="diagnostic-note">${escapeHtml(providerView.standbyName)} permanece ${diagnosticStatusLabel(providerView.standby?.status)[1].toLowerCase()} para rollback.</small>
       ${d.sportsData?.status==="delayed"?`<div class="diagnostic-data-alert" role="alert"><strong>⚠ Dados esportivos aguardando atualização</strong><p>${Number(d.sportsData.delayedCount)||0} jogo(s) permanecem agendados mais de ${Number(d.sportsData.thresholdMinutes)||30} minutos após o início informado. A API pode estar online sem ter publicado o conteúdo atual.</p><ul>${(d.sportsData.delayedGames||[]).slice(0,6).map(game=>`<li>${escapeHtml(teamDisplayName(game.home))} × ${escapeHtml(teamDisplayName(game.away))} · ${diagnosticDate(game.kickoff)}</li>`).join("")}</ul></div>`:""}
       <div class="diagnostic-section"><h3>Sincronização</h3><div class="diagnostic-metrics">
         <div><span>Última execução</span><strong>${diagnosticDate(last?.criado_em)}</strong></div><div><span>Resultado</span><strong>${last?(last.sucesso?"🟢 Sucesso":"🔴 Erro"):"—"}</strong></div>
         <div><span>Duração</span><strong>${diagnosticDuration(last?.duracao_ms)}</strong></div><div><span>Jogos atualizados</span><strong>${last?.jogos_atualizados??"—"}</strong></div>
-        <div><span>Chamadas API</span><strong>${last?.chamadas_api??"—"} / 8</strong></div><div><span>Próxima verificação</span><strong>${diagnosticDate(d.sync.nextScheduledCheck)}</strong></div>
+        <div><span>Chamadas nesta execução</span><strong>${last?.chamadas_api??"—"} / 8</strong></div><div><span>Próxima verificação</span><strong>${diagnosticDate(d.sync.nextScheduledCheck)}</strong></div>${quotaHtml}
       </div><small>${escapeHtml(d.sync.scheduleMode)}</small></div>
       <div class="diagnostic-section"><h3>Banco e cache</h3><div class="diagnostic-metrics">
         <div><span>Jogos cadastrados</span><strong>${d.database.jogos.count??"—"}</strong></div><div><span>Palpites registrados</span><strong>${d.database.palpites.count??"—"}</strong></div>
@@ -4063,13 +4082,13 @@ async function renderAdminDiagnostic(){
         <div><span>Atualização do cache</span><strong>${diagnosticDate(d.cache.updatedAt)}</strong></div><div><span>Idade do cache</span><strong>${diagnosticAge(d.cache.ageMs)}</strong></div>
         <div><span>Clubes no cache</span><strong>${d.cache.clubs??"—"}</strong></div><div><span>Rodada atual</span><strong>${d.cache.currentMatchday??"—"}</strong></div>
         <div><span>Identificador</span><strong>${escapeHtml(d.cache.id||"—")}</strong></div><div><span>Origem</span><strong>${escapeHtml(d.cache.source||"—")}</strong></div>
-      </div>${d.cache.lookup==="latest-fallback"?'<small class="diagnostic-cache-warning">⚠ Cache localizado pelo registro mais recente; verifique se o identificador oficial é BSA-2026.</small>':''}</div>
+      </div>${d.cache.lookup==="latest-fallback"?`<small class="diagnostic-cache-warning">⚠ Cache localizado pelo registro mais recente; o identificador esperado para ${escapeHtml(providerView.activeName)} é ${escapeHtml(d.cache.expectedId||"—")}.</small>`:""}</div>
       <div class="diagnostic-section"><div class="diagnostic-autotest-head"><h3>Autoteste detalhado</h3><strong>${d.autotest.score}/100</strong></div><div class="diagnostic-checks">${d.autotest.checks.map(c=>`<div class="${c.ok?"ok":"fail"}"><span>${c.ok?"✔":"✕"}</span><span>${escapeHtml(c.label)}${diagnosticCheckDetail(c)}</span></div>`).join("")}</div></div>
-      <div class="diagnostic-section"><h3>Logs recentes</h3><div class="diagnostic-log-list">${d.logs.slice(0,8).map(log=>`<div><span>${diagnosticDate(log.criado_em)}</span><strong>${log.sucesso?"🟢":"🔴"} ${escapeHtml(log.origem||"sincronização")}</strong><small>${log.sucesso?`${log.jogos_atualizados??0} jogos • ${diagnosticDuration(log.duracao_ms)}`:escapeHtml(log.erro||"Falha sem detalhes")}</small></div>`).join("")||'<p class="muted-note">Nenhum log disponível.</p>'}</div></div>
-      <div class="diagnostic-section admin-shadow-section"><div class="admin-shadow-heading"><div><span>API-FOOTBALL</span><h3>Coleta em sombra — ensaio</h3></div><strong>Sem efeito competitivo</strong></div><p>Executa uma única observação e grava somente fotografias nas tabelas de transição.</p><form id="adminShadowForm" class="admin-shadow-form"><label>ID do jogo no Bolão<input id="adminShadowGameId" name="id_jogo" type="number" min="1" step="1" value="554970" required></label><label>Fixture da API-Football<input id="adminShadowFixtureId" name="fixture_id" type="number" min="1" step="1" value="1492340" required></label><button id="adminShadowSubmit" class="secondary" type="submit">Executar ensaio</button></form><p id="adminShadowFeedback" class="admin-shadow-feedback" role="status" aria-live="polite"></p></div>
-      <div class="diagnostic-section admin-shadow-section admin-cutover-section"><div class="admin-shadow-heading"><div><span>FASE 6B</span><h3>Ensaio do corte e rollback</h3></div><strong>Somente leitura</strong></div><p>Compara rodada e classificação nas duas fontes, valida cota e prova por hashes que jogos e palpites permanecem intactos.</p><form id="adminCutoverForm" class="admin-shadow-form admin-cutover-form"><label>Rodada do ensaio<input id="adminCutoverRound" name="rodada" type="number" min="1" max="38" step="1" value="25" required></label><button id="adminCutoverSubmit" class="secondary" type="submit">Executar ensaio 6B</button></form><p id="adminCutoverFeedback" class="admin-shadow-feedback" role="status" aria-live="polite"></p><div id="adminCutoverReport" class="admin-cutover-report" aria-live="polite"></div></div>
+      <div class="diagnostic-section"><h3>Logs recentes</h3><div class="diagnostic-log-list">${d.logs.slice(0,8).map(log=>`<div><span>${diagnosticDate(log.criado_em)}</span><strong>${log.sucesso?"🟢":"🔴"} ${escapeHtml(log.origem||"sincronização")}</strong><small>${escapeHtml(diagnosticProviderName(log?.detalhes?.provider))} • ${log.sucesso?`${log.jogos_atualizados??0} jogos • ${diagnosticDuration(log.duracao_ms)}`:escapeHtml(log.erro||"Falha sem detalhes")}</small></div>`).join("")||'<p class="muted-note">Nenhum log disponível.</p>'}</div></div>
+      <div class="diagnostic-section admin-shadow-section"><div class="admin-shadow-heading"><div><span>TRANSIÇÃO · AVANÇADO</span><h3>Coleta histórica em sombra</h3></div><strong>Sem efeito competitivo</strong></div><p>Ferramenta preservada para auditoria técnica. Executa uma observação informada manualmente e grava somente fotografias nas tabelas de transição.</p><form id="adminShadowForm" class="admin-shadow-form"><label>ID do jogo no Bolão<input id="adminShadowGameId" name="id_jogo" type="number" min="1" step="1" value="554970" required></label><label>Fixture da API-Football<input id="adminShadowFixtureId" name="fixture_id" type="number" min="1" step="1" value="1492340" required></label><button id="adminShadowSubmit" class="secondary" type="submit">Executar coleta avançada</button></form><p id="adminShadowFeedback" class="admin-shadow-feedback" role="status" aria-live="polite"></p></div>
+      <div class="diagnostic-section admin-shadow-section admin-cutover-section"><div class="admin-shadow-heading"><div><span>FASE 6B · HISTÓRICO</span><h3>Ensaio de corte e rollback</h3></div><strong>Somente leitura</strong></div><p>Ferramenta preservada para revalidação excepcional. Compara rodada e classificação nas duas fontes, valida cota e prova por hashes que jogos e palpites permanecem intactos.</p><form id="adminCutoverForm" class="admin-shadow-form admin-cutover-form"><label>Rodada do ensaio<input id="adminCutoverRound" name="rodada" type="number" min="1" max="38" step="1" value="25" required></label><button id="adminCutoverSubmit" class="secondary" type="submit">Executar ensaio histórico</button></form><p id="adminCutoverFeedback" class="admin-shadow-feedback" role="status" aria-live="polite"></p><div id="adminCutoverReport" class="admin-cutover-report" aria-live="polite"></div></div>
       <div class="diagnostic-actions"><button id="diagnosticRefreshBtn" class="secondary" type="button">🔄 Atualizar diagnóstico</button><button id="diagnosticSyncBtn" class="primary" type="button">⚽ Sincronizar agora</button><button id="diagnosticExportBtn" class="secondary" type="button">📥 Exportar logs</button></div>
-      <small class="diagnostic-note">A disponibilidade da Football Data API é inferida pelos logs para não consumir cota; a atualidade do conteúdo é verificada separadamente nos jogos armazenados.</small>`;
+      <small class="diagnostic-note">A disponibilidade da fonte oficial é inferida apenas por seus próprios logs para não consumir cota; a atualidade do conteúdo é verificada separadamente nos jogos armazenados.</small>`;
     const sportsDelayed=d.sportsData?.status==="delayed";
     state.adminDiagnosticSummary={score:Number(d.autotest.score)||0,label:sportsDelayed?"Dados atrasados":d.autotest.score>=90?"Saudável":d.autotest.score>=70?"Atenção":"Problemas"};
     renderAdminControlCenter();

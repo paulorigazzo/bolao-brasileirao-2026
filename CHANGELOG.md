@@ -1,3 +1,10 @@
+# v6.24.8 — Diagnóstico da fonte esportiva oficial
+
+- Faz a Central de Diagnóstico apresentar dinamicamente a API-Football ou a football-data.org conforme a fonte oficial ativa.
+- Infere disponibilidade e última sincronização somente pelos logs do fornecedor selecionado, incluindo a identificação do fornecedor em novas falhas.
+- Valida o namespace de cache correto, apresenta as cotas da API-Football e torna a exigência dos escudos compatível com o rollback.
+- Reclassifica os ensaios anteriores como ferramentas avançadas de transição e cobre operação normal, rollback e ausência de evidência em testes.
+
 # v6.24.7 — Nomes de clubes uniformes em toda a interface
 
 - Apresenta `Mineiro` como `Atlético-MG` e `Paranaense` como `Athletico-PR` em todas as superfícies visíveis do aplicativo.
