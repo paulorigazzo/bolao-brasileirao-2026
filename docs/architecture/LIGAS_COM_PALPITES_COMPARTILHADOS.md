@@ -159,11 +159,13 @@ ADM. A Tela de Jogos continua usando o palpite compartilhado, sem duplicação.
 Permitir gestão auditável de associações e funções locais. Convites públicos e
 fluxos comerciais permanecem fora do escopo inicial.
 
-### L07 — Ativação controlada
+### L07 — Ativação e criação centralizada
 
 Tornar a Liga Standard a leitura oficial somente após equivalência, segurança,
-retorno e validação funcional comprovados. Preservar temporariamente o caminho
-anterior; remover o legado exige decisão própria.
+retorno e validação funcional comprovados. Permitir que somente o gestor central
+crie e administre ligas privadas, mantendo todos os demais participantes como
+membros. Preservar temporariamente o caminho anterior; remover o legado exige
+decisão própria.
 
 ## Retorno e interrupção
 

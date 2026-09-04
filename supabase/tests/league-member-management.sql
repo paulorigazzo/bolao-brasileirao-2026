@@ -3,9 +3,9 @@ begin;
 
 create temporary table l06_contexto on commit drop as
 select t.id temporada_id,gen_random_uuid() liga_id,
-  (array_agg(p.user_id order by p.criado_em,p.user_id))[1] administrador_id,
-  (array_agg(p.user_id order by p.criado_em,p.user_id))[2] membro_id,
-  (array_agg(p.email order by p.criado_em,p.user_id))[2] membro_email
+  (select l.criado_por from public.ligas l where l.temporada_id=t.id and l.tipo='standard') administrador_id,
+  (array_agg(p.user_id order by (p.user_id=(select l.criado_por from public.ligas l where l.temporada_id=t.id and l.tipo='standard')),p.criado_em,p.user_id))[1] membro_id,
+  (array_agg(p.email order by (p.user_id=(select l.criado_por from public.ligas l where l.temporada_id=t.id and l.tipo='standard')),p.criado_em,p.user_id))[1] membro_email
 from public.temporadas t
 cross join public.participantes p
 join public.participantes_autorizados pa on lower(pa.email)=lower(p.email)
@@ -14,7 +14,7 @@ where t.codigo='brasileirao-2026' and p.ativo is true and pa.ativo is true
 group by t.id;
 
 do $$ begin
-  if exists(select 1 from l06_contexto where administrador_id is null or membro_id is null) then
+  if exists(select 1 from l06_contexto where administrador_id is null or membro_id is null or administrador_id=membro_id) then
     raise exception 'L06: são necessários dois participantes elegíveis.';
   end if;
 end $$;
@@ -55,13 +55,12 @@ do $$ begin
   exception when insufficient_privilege then null;
   end;
 end $$;
-select public.alterar_papel_membro_liga((select liga_id from l06_contexto),(select membro_id from l06_contexto),'administrador');
 select public.alterar_status_membro_liga((select liga_id from l06_contexto),(select membro_id from l06_contexto),false);
 select public.alterar_status_membro_liga((select liga_id from l06_contexto),(select membro_id from l06_contexto),true);
 reset role;
 
 do $$ begin
-  if (select count(*) from private.liga_membros_auditoria a cross join l06_contexto c where a.liga_id=c.liga_id)<>4 then
+  if (select count(*) from private.liga_membros_auditoria a cross join l06_contexto c where a.liga_id=c.liga_id)<>3 then
     raise exception 'L06: sequência de auditoria incompleta.';
   end if;
   begin

@@ -25,13 +25,14 @@ assert.match(migration, /grant execute on function public\.listar_gestao_membros
 assert.doesNotMatch(migration, /(?:insert|update|delete)\s+(?:into\s+|from\s+)?public\.palpites/i);
 assert.doesNotMatch(migration, /delete\s+from\s+public\.(?:participantes|liga_membros)/i);
 
-for (const rpc of ["listar_gestao_membros_liga", "listar_auditoria_membros_liga", "adicionar_membro_liga", "alterar_papel_membro_liga", "alterar_status_membro_liga"]) {
+for (const rpc of ["listar_gestao_membros_liga", "listar_auditoria_membros_liga", "adicionar_membro_liga", "alterar_status_membro_liga"]) {
   assert.match(app, new RegExp(`rpc\\(\"${rpc}\"`));
 }
-assert.match(app, /state\.activeLeague\?\.papel==="administrador"/);
+assert.match(app, /state\.leagueManager/);
 assert.match(html, /id="leagueAdminModal"/);
 assert.match(html, /id="leagueMemberEmail" type="email"/);
 assert.match(html, /data-league-admin-view="audit"/);
+assert.doesNotMatch(html, /id="leagueMemberRole"/);
 assert.match(rollback, /drop table if exists private\.liga_membros_auditoria/i);
 assert.doesNotMatch(rollback, /drop table if exists public\.(?:liga_membros|ligas|temporadas|palpites)/i);
 assert.match(transactionalTest, /participante sem associação administrou a liga/i);

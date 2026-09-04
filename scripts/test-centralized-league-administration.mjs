@@ -1,0 +1,27 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+const root=new URL("../",import.meta.url);
+const migration=await readFile(new URL("supabase/migrations/20260904190000_centralize_league_administration.sql",root),"utf8");
+const app=await readFile(new URL("js/app.js",root),"utf8");
+const html=await readFile(new URL("index.html",root),"utf8");
+const rollback=await readFile(new URL("supabase/rollback/rollback_centralize_league_administration.sql",root),"utf8");
+assert.match(migration,/private\.usuario_gestor_central_ligas/);
+assert.match(migration,/l\.criado_por=\(select auth\.uid\(\)\)/);
+assert.match(migration,/create or replace function public\.criar_liga/);
+assert.match(migration,/insert into public\.ligas[\s\S]*insert into public\.liga_membros[\s\S]*insert into private\.ligas_auditoria/);
+assert.match(migration,/A Liga Standard não pode ser (?:renomeada|arquivada)/);
+assert.match(migration,/Somente a função de membro pode ser atribuída/);
+assert.match(migration,/revoke execute on function public\.alterar_papel_membro_liga/);
+assert.match(migration,/security definer set search_path=''/);
+assert.doesNotMatch(migration,/(?:insert|update|delete)[\s\S]{0,30}public\.palpites/i);
+for(const rpc of ["sou_gestor_central_ligas","criar_liga","renomear_liga","alterar_status_liga","listar_ligas_administracao","listar_auditoria_ligas"]){assert.match(app,new RegExp(`rpc\\(\\"${rpc}\\"`));}
+assert.match(app,/const COMPETITIVE_READ_MODE="league"/);
+assert.match(app,/COMPETITIVE_READ_MODE==="legacy"/);
+assert.match(app,/if\(COMPETITIVE_READ_MODE==="league"\)\{\s*state\.ranking=\[\]/);
+assert.doesNotMatch(html,/id="leagueMemberRole"/);
+assert.match(html,/id="leagueCreateModal"/);
+assert.match(html,/id="leagueLifecycleForm"/);
+assert.match(rollback,/drop table if exists private\.ligas_auditoria/);
+assert.match(rollback,/create or replace function private\.usuario_administrador_liga/);
+assert.doesNotMatch(rollback,/drop table if exists public\.(?:ligas|liga_membros|palpites)/);
+console.log("Contrato da ativação e administração centralizada de ligas verificado com sucesso.");

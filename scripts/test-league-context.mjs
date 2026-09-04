@@ -45,11 +45,12 @@ assert.match(app,/const params=\{p_liga_id:league\.liga_id\}/);
 assert.doesNotMatch(app,/const payloads?=\{[^}]*liga_id\s*:/i);
 assert.doesNotMatch(app,/state\.leagueContextStatus="loading"/);
 assert.doesNotMatch(app,/state\.leagueContextStatus="error"/);
-assert.doesNotMatch(app,/palpites_encerrados_publicos|contagem_palpites_participantes/);
+assert.match(app,/const COMPETITIVE_READ_MODE="league"/);
+assert.match(app,/loadLegacyCompetitiveContext/);
 assert.match(html,/id="leagueShortcut"[^>]+role="menuitem"/);
 assert.match(html,/id="leagueSelectorModal"[^>]+role="dialog"/);
 assert.match(html,/id="leagueAdminButton"[^>]*>[^<]*Administrar liga/);
-assert.match(app,/show\("leagueAdminEntry",state\.activeLeague\?\.papel==="administrador"\)/);
+assert.match(app,/show\("leagueAdminEntry",state\.leagueManager\)/);
 assert.match(app,/addEventListener\("click",openLeagueManagement\)/);
 assert.match(html,/id="leagueAdminModal"[^>]+role="dialog"/);
 
