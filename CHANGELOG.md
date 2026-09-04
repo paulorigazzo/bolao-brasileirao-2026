@@ -1,6 +1,7 @@
 # v6.25.0 — Contexto de liga na interface
 
 - Adiciona a Liga ativa ao menu do usuário e preserva a escolha por conta.
+- Oferece aos administradores locais a entrada **Administrar liga**, identificando a gestão de membros e funções como continuidade da L06.
 - Faz Home, Ranking, Estatísticas, destaques, duelos e indicadores competitivos da Área ADM usarem membros e consultas protegidas da liga selecionada.
 - Mantém partidas e palpites próprios compartilhados, sem adicionar `liga_id` ao salvamento da Tela de Jogos.
 - Impede fallback para dados globais quando a troca de liga falha e descarta respostas assíncronas obsoletas.

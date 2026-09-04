@@ -858,6 +858,7 @@ function renderSyncStatus(){
 function renderLeagueContext(){
   const name=activeLeagueName(state.activeLeague);
   if($("leagueShortcutName")) $("leagueShortcutName").textContent=name;
+  show("leagueAdminEntry",state.activeLeague?.papel==="administrador");
   const options=$("leagueSelectorOptions");
   if(!options) return;
   options.innerHTML=(state.leagues||[]).map(league=>{
@@ -4965,6 +4966,10 @@ $("standingsShortcut").onclick=()=>{ closeUserMenu(); navigateTo("standings"); }
 $("rulesShortcut").onclick=()=>{ closeUserMenu(); navigateTo("rules"); };
 $("adminMenuShortcut").onclick=()=>{ closeUserMenu(); navigateTo("admin"); };
 $("leagueSelectorClose")?.addEventListener("click",closeLeagueSelector);
+$("leagueAdminButton")?.addEventListener("click",()=>{
+  $("leagueSelectorStatus").textContent=`Administração de ${activeLeagueName(state.activeLeague)} preparada para a L06: membros e funções locais ainda não podem ser alterados.`;
+  message("A gestão da liga será habilitada na L06.");
+});
 $("leagueSelectorModal")?.addEventListener("click",event=>{if(event.target===$("leagueSelectorModal")) closeLeagueSelector();});
 $("leagueSelectorOptions")?.addEventListener("click",event=>{const option=event.target.closest("[data-league-id]");if(option) selectActiveLeague(option.dataset.leagueId);});
 document.addEventListener("click",event=>{

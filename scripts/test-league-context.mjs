@@ -48,5 +48,8 @@ assert.doesNotMatch(app,/state\.leagueContextStatus="error"/);
 assert.doesNotMatch(app,/palpites_encerrados_publicos|contagem_palpites_participantes/);
 assert.match(html,/id="leagueShortcut"[^>]+role="menuitem"/);
 assert.match(html,/id="leagueSelectorModal"[^>]+role="dialog"/);
+assert.match(html,/id="leagueAdminButton"[^>]*>[^<]*Administrar liga/);
+assert.match(app,/show\("leagueAdminEntry",state\.activeLeague\?\.papel==="administrador"\)/);
+assert.match(app,/Administração de \$\{activeLeagueName\(state\.activeLeague\)\} preparada para a L06/);
 
 console.log("Contexto de liga na interface verificado com sucesso.");
