@@ -6,7 +6,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 - Versão funcional: `v6.24.8`.
 - Prioridade: **manter o Bolão 2026 estável e evoluí-lo incrementalmente para múltiplas ligas com palpites compartilhados**.
-- Próxima etapa coordenada: comprovar na L04 a equivalência e o isolamento da Liga Standard, mantendo a estabilização da API-Football como linha operacional paralela e o Rigazzo congelado como histórico e possível laboratório.
+- Próxima etapa coordenada: planejar a L05, introduzindo o contexto de liga na interface após a equivalência e o isolamento comprovados na L04, mantendo a estabilização da API-Football como linha operacional paralela e o Rigazzo congelado como histórico e possível laboratório.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -27,7 +27,7 @@ A classificação considera valor percebido, esforço restante e reaproveitament
 
 Situação das candidatas recentes:
 
-1. **Ligas com palpites compartilhados:** L01, L02 e L03 concluídas; L04 compara o modelo atual e a Liga Standard antes de qualquer ativação na interface;
+1. **Ligas com palpites compartilhados:** L01, L02, L03 e L04 concluídas; a L05 introduzirá o contexto de liga na interface sem duplicar palpites;
 2. **Reavaliar quando necessário:** testes automatizados por fluxo e narrativa assistida por IA;
 3. **Reavaliar quando necessário:** auditoria ampliada de acessibilidade.
 
