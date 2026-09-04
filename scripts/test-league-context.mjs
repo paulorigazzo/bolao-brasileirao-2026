@@ -50,6 +50,7 @@ assert.match(html,/id="leagueShortcut"[^>]+role="menuitem"/);
 assert.match(html,/id="leagueSelectorModal"[^>]+role="dialog"/);
 assert.match(html,/id="leagueAdminButton"[^>]*>[^<]*Administrar liga/);
 assert.match(app,/show\("leagueAdminEntry",state\.activeLeague\?\.papel==="administrador"\)/);
-assert.match(app,/Administração de \$\{activeLeagueName\(state\.activeLeague\)\} preparada para a L06/);
+assert.match(app,/addEventListener\("click",openLeagueManagement\)/);
+assert.match(html,/id="leagueAdminModal"[^>]+role="dialog"/);
 
 console.log("Contexto de liga na interface verificado com sucesso.");

@@ -1,3 +1,10 @@
+# v6.26.0 — Gestão auditável de membros da liga
+
+- Permite aos administradores locais adicionar participantes existentes, reativar ou inativar associações e atribuir funções dentro da própria liga.
+- Registra as alterações em histórico privado, imutável pela API e acessível somente aos administradores ativos da liga.
+- Protege a última administração ativa, impede alterações na própria função ou associação e serializa operações concorrentes por liga.
+- Preserva contas, palpites compartilhados, resultados, pontuação e o histórico competitivo ao inativar uma associação.
+
 # v6.25.0 — Contexto de liga na interface
 
 - Adiciona a Liga ativa ao menu do usuário e preserva a escolha por conta.

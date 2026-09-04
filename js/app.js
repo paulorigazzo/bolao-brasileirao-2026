@@ -21,7 +21,7 @@ import { adminRoundGameIds, loadAdminPickProgress } from "./admin-pick-progress.
 import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js";
 import { activeLeagueName, chooseActiveLeague, createLeagueRequestGate, filterProfilesByMembers, persistActiveLeague } from "./league-context.js";
 
-const APP_VERSION = "6.25.0";
+const APP_VERSION = "6.26.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -29,7 +29,7 @@ installFirstVisitTips();
 const sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
 const TEMPORARY_RANKING_SYNTHETIC_PREVIEW=isTemporaryRankingSyntheticPreview(window.location);
 const TEMPORARY_RANKING_PREVIEW_FIXTURE=TEMPORARY_RANKING_SYNTHETIC_PREVIEW?buildTemporaryRankingSyntheticFixture():null;
-const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], leagueRanking:[], leagues:[], activeLeague:null, leagueContextStatus:"idle", standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{} };
+const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], leagueRanking:[], leagues:[], activeLeague:null, leagueContextStatus:"idle", leagueManagedMembers:[], leagueMemberAudit:[], standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{} };
 const leagueRequestGate=createLeagueRequestGate();
 let leagueSelectorReturnFocus=null;
 let matchClockRefreshTimer=null;
@@ -883,6 +883,32 @@ function closeLeagueSelector(){
   leagueSelectorReturnFocus=null;
   target?.focus?.();
 }
+
+function leagueActionLabel(action){return ({adicionado:"adicionou",reativado:"reativou",inativado:"inativou",papel_alterado:"alterou a função de"})[action]||action;}
+function renderLeagueManagement(){
+  $("leagueAdminSummary").textContent=`${activeLeagueName(state.activeLeague)} · gestão independente das contas do Bolão`;
+  $("leagueMembersList").innerHTML=(state.leagueManagedMembers||[]).map(member=>{
+    const ownMembership=String(member.user_id)===String(state.user?.id);
+    const actions=ownMembership?'<small>Sua associação</small>':member.status==='ativo'?`<button class="secondary" type="button" data-league-member-role="${escapeHtml(member.user_id)}" data-next-role="${member.papel==='administrador'?'membro':'administrador'}">${member.papel==='administrador'?'Tornar membro':'Tornar administrador'}</button><button class="secondary" type="button" data-league-member-status="${escapeHtml(member.user_id)}" data-next-active="false">Inativar</button>`:`<button class="secondary" type="button" data-league-member-status="${escapeHtml(member.user_id)}" data-next-active="true">Reativar</button>`;
+    return `<article class="league-member-row ${member.status==='ativo'?'':'is-inactive'}"><div><strong>${escapeHtml(member.nome)}</strong><small>${escapeHtml(member.email)} · ${member.papel==='administrador'?'Administrador':'Membro'} · ${member.status==='ativo'?'Ativo':'Inativo'}</small></div><div class="league-member-actions">${actions}</div></article>`;
+  }).join("")||'<p class="muted-note">Nenhum membro encontrado.</p>';
+  $("leagueAuditList").innerHTML=(state.leagueMemberAudit||[]).map(row=>`<article class="league-audit-row"><strong>${escapeHtml(row.autor_nome)} ${escapeHtml(leagueActionLabel(row.acao))} ${escapeHtml(row.nome)}</strong><small>${escapeHtml(new Date(row.criado_em).toLocaleString('pt-BR'))}${row.papel_anterior!==row.papel_novo?` · ${escapeHtml(row.papel_anterior||'—')} → ${escapeHtml(row.papel_novo||'—')}`:''}</small></article>`).join("")||'<p class="muted-note">Nenhuma alteração registrada.</p>';
+}
+async function loadLeagueManagement(){
+  const params={p_liga_id:state.activeLeague?.liga_id};
+  const [{data:members,error:membersError},{data:audit,error:auditError}]=await Promise.all([sb.rpc("listar_gestao_membros_liga",params),sb.rpc("listar_auditoria_membros_liga",params)]);
+  if(membersError||auditError) throw membersError||auditError;
+  state.leagueManagedMembers=members||[]; state.leagueMemberAudit=audit||[]; renderLeagueManagement();
+}
+async function openLeagueManagement(){
+  closeLeagueSelector(); show("leagueAdminModal",true); document.body.classList.add("modal-open"); $("leagueAdminStatus").textContent="Carregando membros…";
+  try{await loadLeagueManagement();$("leagueAdminStatus").textContent="";setTimeout(()=>$("leagueMemberEmail")?.focus(),30);}catch(error){$("leagueAdminStatus").textContent=error.message||"Não foi possível carregar a administração da liga.";}
+}
+function closeLeagueManagement(){show("leagueAdminModal",false);document.body.classList.remove("modal-open");$("leagueShortcut")?.focus();}
+async function refreshAfterLeagueMutation(messageText){await loadLeagueManagement();await loadLeagueContext(state.activeLeague);renderLeagueScopedViews();message(messageText);}
+async function addLeagueMember(event){event.preventDefault();const email=$("leagueMemberEmail").value.trim();const papel=$("leagueMemberRole").value;$("leagueAdminStatus").textContent="Adicionando…";try{const {error}=await sb.rpc("adicionar_membro_liga",{p_liga_id:state.activeLeague.liga_id,p_email:email,p_papel:papel});if(error)throw error;$("leagueMemberForm").reset();await refreshAfterLeagueMutation("Membro adicionado à liga.");$("leagueAdminStatus").textContent="";}catch(error){$("leagueAdminStatus").textContent=error.message||"Não foi possível adicionar o membro.";}}
+async function changeLeagueMemberRole(userId,nextRole){if(!confirm(`Alterar a função local deste participante para ${nextRole}?`))return;try{const {error}=await sb.rpc("alterar_papel_membro_liga",{p_liga_id:state.activeLeague.liga_id,p_user_id:userId,p_papel:nextRole});if(error)throw error;await refreshAfterLeagueMutation("Função local atualizada.");}catch(error){message(error.message||"Não foi possível alterar a função.",true);}}
+async function changeLeagueMemberStatus(userId,active){if(!confirm(`${active?'Reativar':'Inativar'} este membro somente nesta liga? Os palpites serão preservados.`))return;try{const {error}=await sb.rpc("alterar_status_membro_liga",{p_liga_id:state.activeLeague.liga_id,p_user_id:userId,p_ativo:active});if(error)throw error;await refreshAfterLeagueMutation(active?"Membro reativado.":"Membro inativado. Histórico preservado.");}catch(error){message(error.message||"Não foi possível alterar o membro.",true);}}
 
 function renderLeagueScopedViews(){
   state.adminSnapshot=null;
@@ -4944,7 +4970,8 @@ $("adminParticipantModalClose").onclick=closeAdminParticipantDetail;
 $("adminParticipantModal").onclick=event=>{ if(event.target===$("adminParticipantModal")) closeAdminParticipantDetail(); };
 document.addEventListener("keydown",event=>{
   if(event.key!=="Escape") return;
-  if(!$("leagueSelectorModal")?.classList.contains("hidden")) closeLeagueSelector();
+  if(!$("leagueAdminModal")?.classList.contains("hidden")) closeLeagueManagement();
+  else if(!$("leagueSelectorModal")?.classList.contains("hidden")) closeLeagueSelector();
   else if(!$("temporaryRankingModal")?.classList.contains("hidden")) closeTemporaryRanking();
   else if(!$("friendlyRankingsModal")?.classList.contains("hidden")) closeFriendlyRankings();
   else if(!$("adminRoundShareModal")?.classList.contains("hidden")) closeAdminRoundShare();
@@ -4966,10 +4993,12 @@ $("standingsShortcut").onclick=()=>{ closeUserMenu(); navigateTo("standings"); }
 $("rulesShortcut").onclick=()=>{ closeUserMenu(); navigateTo("rules"); };
 $("adminMenuShortcut").onclick=()=>{ closeUserMenu(); navigateTo("admin"); };
 $("leagueSelectorClose")?.addEventListener("click",closeLeagueSelector);
-$("leagueAdminButton")?.addEventListener("click",()=>{
-  $("leagueSelectorStatus").textContent=`Administração de ${activeLeagueName(state.activeLeague)} preparada para a L06: membros e funções locais ainda não podem ser alterados.`;
-  message("A gestão da liga será habilitada na L06.");
-});
+$("leagueAdminButton")?.addEventListener("click",openLeagueManagement);
+$("leagueAdminClose")?.addEventListener("click",closeLeagueManagement);
+$("leagueAdminModal")?.addEventListener("click",event=>{if(event.target===$("leagueAdminModal"))closeLeagueManagement();});
+$("leagueMemberForm")?.addEventListener("submit",addLeagueMember);
+$("leagueMembersList")?.addEventListener("click",event=>{const role=event.target.closest("[data-league-member-role]");const status=event.target.closest("[data-league-member-status]");if(role)changeLeagueMemberRole(role.dataset.leagueMemberRole,role.dataset.nextRole);if(status)changeLeagueMemberStatus(status.dataset.leagueMemberStatus,status.dataset.nextActive==="true");});
+document.querySelectorAll("[data-league-admin-view]").forEach(button=>button.addEventListener("click",()=>{document.querySelectorAll("[data-league-admin-view]").forEach(item=>{const active=item===button;item.classList.toggle("active",active);item.setAttribute("aria-selected",String(active));});show("leagueMembersList",button.dataset.leagueAdminView==="members");show("leagueAuditList",button.dataset.leagueAdminView==="audit");}));
 $("leagueSelectorModal")?.addEventListener("click",event=>{if(event.target===$("leagueSelectorModal")) closeLeagueSelector();});
 $("leagueSelectorOptions")?.addEventListener("click",event=>{const option=event.target.closest("[data-league-id]");if(option) selectActiveLeague(option.dataset.leagueId);});
 document.addEventListener("click",event=>{
