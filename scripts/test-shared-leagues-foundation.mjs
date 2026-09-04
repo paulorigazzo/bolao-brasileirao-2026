@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const migrationPath = fileURLToPath(new URL(
-  "../supabase/migrations/20260904145641_add_shared_leagues_foundation.sql",
+  "../supabase/migrations/20260904150336_add_shared_leagues_foundation.sql",
   import.meta.url
 ));
 const rollbackPath = fileURLToPath(new URL(
