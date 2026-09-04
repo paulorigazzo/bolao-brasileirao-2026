@@ -1,3 +1,10 @@
+# v6.25.0 — Contexto de liga na interface
+
+- Adiciona a Liga ativa ao menu do usuário e preserva a escolha por conta.
+- Faz Home, Ranking, Estatísticas, destaques, duelos e indicadores competitivos da Área ADM usarem membros e consultas protegidas da liga selecionada.
+- Mantém partidas e palpites próprios compartilhados, sem adicionar `liga_id` ao salvamento da Tela de Jogos.
+- Impede fallback para dados globais quando a troca de liga falha e descarta respostas assíncronas obsoletas.
+
 # v6.24.8 — Diagnóstico da fonte esportiva oficial
 
 - Faz a Central de Diagnóstico apresentar dinamicamente a API-Football ou a football-data.org conforme a fonte oficial ativa.

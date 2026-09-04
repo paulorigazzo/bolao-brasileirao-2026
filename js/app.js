@@ -19,8 +19,9 @@ import { isScheduledLiveEstimate, scheduledLiveLabel } from "./scheduled-live-es
 import { buildFriendlyRankingsModel } from "./friendly-rankings-engine.js";
 import { adminRoundGameIds, loadAdminPickProgress } from "./admin-pick-progress.js";
 import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js";
+import { activeLeagueName, chooseActiveLeague, createLeagueRequestGate, filterProfilesByMembers, persistActiveLeague } from "./league-context.js";
 
-const APP_VERSION = "6.24.8";
+const APP_VERSION = "6.25.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -28,7 +29,9 @@ installFirstVisitTips();
 const sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
 const TEMPORARY_RANKING_SYNTHETIC_PREVIEW=isTemporaryRankingSyntheticPreview(window.location);
 const TEMPORARY_RANKING_PREVIEW_FIXTURE=TEMPORARY_RANKING_SYNTHETIC_PREVIEW?buildTemporaryRankingSyntheticFixture():null;
-const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{} };
+const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], leagueRanking:[], leagues:[], activeLeague:null, leagueContextStatus:"idle", standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{} };
+const leagueRequestGate=createLeagueRequestGate();
+let leagueSelectorReturnFocus=null;
 let matchClockRefreshTimer=null;
 let liveScoreRefreshTimer=null;
 let liveScoreRefreshInFlight=false;
@@ -120,7 +123,7 @@ function gameStatusDisplay(game){
 }
 
 function participantDirectory(){
-  return buildParticipantDirectory(state.participants,state.authorizedParticipants);
+  return buildParticipantDirectory(state.participants,[]);
 }
 
 const TEAM_THEMES = {
@@ -794,27 +797,54 @@ function applyCanonicalParticipantNames(){
     .map(([usuario,quantidade])=>({usuario,quantidade,user_id:(state.participants||[]).find(item=>String(item?.nome||'').trim()===usuario)?.user_id||null}));
 }
 
+async function loadLeagueContext(league){
+  if(!league?.liga_id) throw new Error("Nenhuma liga ativa está disponível para esta conta.");
+  const requestId=leagueRequestGate.issue();
+  const params={p_liga_id:league.liga_id};
+  const [{data:members,error:membersErr},{data:publicPicks,error:publicPicksErr},{data:counts,error:countsErr},{data:ranking,error:rankingErr},{data:profiles,error:profilesErr}]=await Promise.all([
+    sb.rpc("listar_membros_liga",params),
+    sb.rpc("obter_palpites_encerrados_liga",params),
+    sb.rpc("obter_contagem_palpites_liga",params),
+    sb.rpc("obter_ranking_liga",params),
+    sb.from("participantes").select("user_id,nome,email,time_favorito,ativo")
+  ]);
+  const error=membersErr||publicPicksErr||countsErr||rankingErr||profilesErr;
+  if(error) throw error;
+  if(!leagueRequestGate.isCurrent(requestId)) return false;
+  const scopedProfiles=filterProfilesByMembers(profiles||[],members||[]);
+  const memberById=new Map((members||[]).map(member=>[String(member.user_id),member]));
+  state.participants=scopedProfiles.map(profile=>({...profile,...memberById.get(String(profile.user_id))}));
+  state.publicPicks=publicPicks||[];
+  state.pickCounts=counts||[];
+  state.leagueRanking=ranking||[];
+  state.activeLeague=league;
+  state.leagueContextStatus="ready";
+  persistActiveLeague(league,{userId:state.user?.id,storage:localStorage});
+  applyCanonicalParticipantNames();
+  renderLeagueContext();
+  return true;
+}
+
 async function loadData(){
   const {data:games,error:gErr}=await sb.from("jogos").select("*").order("rodada").order("inicio");
   if(gErr) throw gErr;
   const adminGameIds=adminRoundGameIds(games,currentRoundNumber(games));
-  const [{data:picks,error:pErr},{data:pub,error:pubErr},{data:counts,error:countsErr},{data:participants,error:participantsErr},{data:adminProgress,error:adminProgressErr},{data:authorized,error:authorizedErr},{data:participantLimit,error:participantLimitErr}] = await Promise.all([
+  const [{data:picks,error:pErr},{data:leagues,error:leaguesErr},{data:adminProgress,error:adminProgressErr},{data:authorized,error:authorizedErr},{data:participantLimit,error:participantLimitErr}] = await Promise.all([
     sb.from("palpites").select("*").eq("user_id",state.user.id),
-    sb.from("palpites_encerrados_publicos").select("*"),
-    sb.from("contagem_palpites_participantes").select("*"),
-    sb.from("participantes").select("user_id,nome,email,time_favorito,ativo"),
+    sb.rpc("listar_minhas_ligas"),
     loadAdminPickProgress({supabase:sb,isAdmin:isAdminUser(),gameIds:adminGameIds}),
     sb.from("participantes_autorizados").select("id,nome,email,celular,time_favorito,ativo,administrador,status,solicitado_em,aprovado_em,criado_em,atualizado_em").order("nome"),
     isAdminUser() ? sb.rpc("obter_limite_participantes_ativos") : Promise.resolve({data:10,error:null})
   ]);
-  if(pErr) throw pErr; if(pubErr) console.warn(pubErr);
-  if(countsErr) console.warn("Não foi possível carregar a contagem geral de palpites. Verifique a view correspondente e as migrações versionadas do Supabase.", countsErr);
-  if(participantsErr) console.warn("Os times dos demais participantes não puderam ser carregados.", participantsErr);
-  if(adminProgressErr) console.warn("O progresso administrativo não pôde ser carregado. Verifique a view correspondente e as migrações versionadas do Supabase.", adminProgressErr);
-  if(authorizedErr) console.warn("O cadastro dinâmico de participantes não pôde ser carregado. Verifique a estrutura de participantes e as migrações versionadas do Supabase.",authorizedErr);
-  if(participantLimitErr) console.warn("O limite configurável de participantes não pôde ser carregado. Verifique as funções administrativas e as migrações versionadas do Supabase.",participantLimitErr);
-  state.games=games||[]; state.ownPicks=picks||[]; state.publicPicks=pub||[]; state.pickCounts=counts||[]; state.participants=participants||[]; state.adminPickProgress=adminProgress||[]; state.authorizedParticipants=authorized||[]; state.participantLimit=Math.max(1,Number(participantLimit)||10);
-  applyCanonicalParticipantNames();
+  if(pErr) throw pErr;
+  if(leaguesErr) throw new Error("Não foi possível carregar suas ligas.");
+  if(adminProgressErr) console.warn("O progresso administrativo não pôde ser carregado.",adminProgressErr);
+  if(authorizedErr) console.warn("O cadastro dinâmico de participantes não pôde ser carregado.",authorizedErr);
+  if(participantLimitErr) console.warn("O limite configurável de participantes não pôde ser carregado.",participantLimitErr);
+  state.games=games||[]; state.ownPicks=picks||[]; state.leagues=leagues||[]; state.adminPickProgress=adminProgress||[]; state.authorizedParticipants=authorized||[]; state.participantLimit=Math.max(1,Number(participantLimit)||10);
+  const league=chooseActiveLeague(state.leagues,{userId:state.user?.id,storage:localStorage});
+  if(!league) throw new Error("Sua conta não possui associação ativa com uma liga.");
+  await loadLeagueContext(league);
   renderSyncStatus();
 }
 
@@ -823,6 +853,64 @@ function renderSyncStatus(){
   if(!latest) return;
   $("syncStatus").textContent=`Atualizado ${new Date(latest).toLocaleDateString("pt-BR")}`;
   show("syncStatus",true);
+}
+
+function renderLeagueContext(){
+  const name=activeLeagueName(state.activeLeague);
+  if($("leagueShortcutName")) $("leagueShortcutName").textContent=name;
+  const options=$("leagueSelectorOptions");
+  if(!options) return;
+  options.innerHTML=(state.leagues||[]).map(league=>{
+    const selected=String(league.liga_id)===String(state.activeLeague?.liga_id);
+    return `<button type="button" class="league-selector-option ${selected?'is-selected':''}" role="radio" aria-checked="${selected}" data-league-id="${escapeHtml(league.liga_id)}"><span aria-hidden="true">${league.liga_tipo==='standard'?'🏆':'👥'}</span><span><strong>${escapeHtml(activeLeagueName(league))}</strong><small>${league.liga_tipo==='standard'?'Liga Standard':'Liga privada'} · ${escapeHtml(league.temporada_nome||league.temporada_ano||'Temporada ativa')}</small></span><i aria-hidden="true">${selected?'✓':'›'}</i></button>`;
+  }).join("");
+}
+
+function openLeagueSelector(trigger){
+  leagueSelectorReturnFocus=trigger||document.activeElement;
+  renderLeagueContext();
+  $("leagueSelectorStatus").textContent=(state.leagues||[]).length===1?"Esta é sua única liga ativa no momento.":"Escolha a liga que deseja acompanhar.";
+  $("leagueSelectorModal")?.classList.remove("hidden");
+  document.body.classList.add("modal-open");
+  setTimeout(()=>document.querySelector('#leagueSelectorModal .league-selector-option[aria-checked="true"]')?.focus()||$("leagueSelectorClose")?.focus(),40);
+}
+
+function closeLeagueSelector(){
+  $("leagueSelectorModal")?.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+  const target=leagueSelectorReturnFocus;
+  leagueSelectorReturnFocus=null;
+  target?.focus?.();
+}
+
+function renderLeagueScopedViews(){
+  state.adminSnapshot=null;
+  renderRanking(); renderStats(); renderHome(); renderMyTeam();
+  if(isAdminUser()){
+    renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions();
+    renderAdminExecutiveDashboard(); renderAdminAudit();
+  }
+}
+
+async function selectActiveLeague(leagueId){
+  const league=(state.leagues||[]).find(item=>String(item.liga_id)===String(leagueId));
+  if(!league) return;
+  if(String(league.liga_id)===String(state.activeLeague?.liga_id)){ closeLeagueSelector(); return; }
+  const status=$("leagueSelectorStatus");
+  const buttons=$("leagueSelectorOptions")?.querySelectorAll("button")||[];
+  buttons.forEach(button=>button.disabled=true);
+  if(status) status.textContent=`Carregando ${activeLeagueName(league)}…`;
+  try{
+    const applied=await loadLeagueContext(league);
+    if(!applied) return;
+    renderLeagueScopedViews();
+    closeLeagueSelector();
+    message(`Liga ativa: ${activeLeagueName(league)}.`);
+  }catch(error){
+    if(status) status.textContent="Não foi possível trocar de liga. O contexto anterior foi preservado.";
+    buttons.forEach(button=>button.disabled=false);
+    console.warn("Falha ao trocar a liga ativa.",error);
+  }
 }
 
 function updateCurrentRoundButton(){
@@ -1374,6 +1462,16 @@ async function savePick(event){
 }
 
 function calculateRanking(){
+  if(state.leagueContextStatus==="ready" && Array.isArray(state.leagueRanking)){
+    const counts=new Map((state.pickCounts||[]).map(item=>[String(item.user_id||""),Number(item.quantidade)||0]));
+    state.ranking=state.leagueRanking.map(item=>({
+      key:`id:${item.user_id}`,userId:item.user_id,name:item.nome,
+      total:Number(item.pontos)||0,exact:Number(item.exatos)||0,
+      count:(counts.get(String(item.user_id))??Number(item.palpites))||0,
+      scored:Number(item.avaliados)||0
+    }));
+    return;
+  }
   // A identidade canônica do ranking é user_id. O nome permanece somente como
   // informação de exibição e como fallback temporário para registros legados.
   const players=new Map();
@@ -1485,7 +1583,7 @@ async function refreshTemporaryRankingModal({silent=false}={}){
     return;
   }
   if(!silent && content) content.innerHTML='<div class="temporary-ranking-loading"><span></span><strong>Calculando projeção…</strong></div>';
-  const {data,error}=await sb.rpc('obter_ranking_provisorio',{p_rodada:context.round});
+  const {data,error}=await sb.rpc('obter_ranking_provisorio_liga',{p_liga_id:state.activeLeague?.liga_id,p_rodada:context.round});
   if(error){
     if(content) content.innerHTML=`<div class="temporary-ranking-error"><strong>Projeção indisponível</strong><p>${escapeHtml(error.message||'Não foi possível calcular o Ranking provisório.')}</p><button class="secondary" type="button" data-temporary-ranking-retry>Tentar novamente</button></div>`;
     return;
@@ -1537,8 +1635,9 @@ function renderDashboard(){
   $("averagePoints").textContent=`${me.scored? (me.total/me.scored).toFixed(1):"0"} por jogo finalizado`;
   $("exactRate").textContent=`${me.scored?Math.round(me.exact/me.scored*100):0}% de precisão`;
   $("pickCoverage").textContent=`${Math.round(state.ownPicks.length/totalGames*100)}% da temporada`;
-  $("positionHint").textContent=state.ranking.length?`entre ${state.ranking.length} participantes`:"Ranking geral";
-  if($("headerUserPosition")) $("headerUserPosition").textContent=pos>=0?`${pos+1}º lugar · ${me.total} ${me.total===1?"ponto":"pontos"}`:"Ranking geral";
+  const leagueName=activeLeagueName(state.activeLeague);
+  $("positionHint").textContent=state.ranking.length?`entre ${state.ranking.length} participantes · ${leagueName}`:leagueName;
+  if($("headerUserPosition")) $("headerUserPosition").textContent=pos>=0?`${pos+1}º em ${leagueName}`:leagueName;
 }
 
 
@@ -3069,7 +3168,7 @@ function formatRemaining(ms){
 
 function buildAdminSnapshot(){
   const {round,games}=adminCurrentRound();
-  const participantEntries=Object.entries(participantDirectory()).map(([email,name])=>({email:email.toLowerCase(),name}));
+  const participantEntries=(state.participants||[]).map(profile=>({email:String(profile.email||"").toLowerCase(),name:profile.nome,userId:profile.user_id}));
   const gameIds=new Set(games.map(game=>Number(game.id_jogo)));
 
   // A view administrativa informa somente a existência do palpite, nunca o placar.
@@ -3175,7 +3274,7 @@ function renderAdminAttention(){
   const wasCollapsed=card.classList.contains("is-collapsed");
   card.className=`card admin-attention-card state-${view.key}${wasCollapsed?" is-collapsed":""}`;
   $("adminAttentionBadge").textContent=view.label;
-  $("adminRoundContext").textContent=`Rodada ${snapshot.round} • ${snapshot.games.length} jogo${snapshot.games.length===1?"":"s"}`;
+  $("adminRoundContext").textContent=`${activeLeagueName(state.activeLeague)} • Rodada ${snapshot.round} • ${snapshot.games.length} jogo${snapshot.games.length===1?"":"s"}`;
   const completedCount=snapshot.completed.length;
   const participantSummary=`<div class="admin-participant-summary"><span>Participantes</span><strong>${completedCount}/${snapshot.participants.length} concluíram</strong></div>`;
   const participantCard=item=>{
@@ -4552,12 +4651,14 @@ async function refreshLiveScoresSilently(){
     if(Array.isArray(data)){
       const shouldRefreshPublicPicks=publicPicksRefreshPending||hasNewlyRevealablePublicPicks(state.games,data);
       if(shouldRefreshPublicPicks){
-        const {data:publicPicks,error:publicPicksError}=await sb.from("palpites_encerrados_publicos").select("*");
+        const {data:publicPicks,error:publicPicksError}=await sb.rpc("obter_palpites_encerrados_liga",{p_liga_id:state.activeLeague?.liga_id});
         if(publicPicksError){
           publicPicksRefreshPending=true;
           console.warn("Os palpites recém-encerrados ainda não puderam ser atualizados; uma nova tentativa será feita automaticamente.",publicPicksError);
         }else{
           state.publicPicks=publicPicks||[];
+          const {data:leagueRanking,error:leagueRankingError}=await sb.rpc("obter_ranking_liga",{p_liga_id:state.activeLeague?.liga_id});
+          if(!leagueRankingError) state.leagueRanking=leagueRanking||[];
           publicPicksRefreshPending=false;
           applyCanonicalParticipantNames();
         }
@@ -4842,7 +4943,8 @@ $("adminParticipantModalClose").onclick=closeAdminParticipantDetail;
 $("adminParticipantModal").onclick=event=>{ if(event.target===$("adminParticipantModal")) closeAdminParticipantDetail(); };
 document.addEventListener("keydown",event=>{
   if(event.key!=="Escape") return;
-  if(!$("temporaryRankingModal")?.classList.contains("hidden")) closeTemporaryRanking();
+  if(!$("leagueSelectorModal")?.classList.contains("hidden")) closeLeagueSelector();
+  else if(!$("temporaryRankingModal")?.classList.contains("hidden")) closeTemporaryRanking();
   else if(!$("friendlyRankingsModal")?.classList.contains("hidden")) closeFriendlyRankings();
   else if(!$("adminRoundShareModal")?.classList.contains("hidden")) closeAdminRoundShare();
   else if(!$("matchCalendarModal")?.classList.contains("hidden")) closeMatchCalendar();
@@ -4858,9 +4960,13 @@ $("clearFavoriteTeamBtn").onclick=()=>{
 $("userMenuBtn").onclick=()=>{ const open=$("userMenu").classList.contains("hidden"); show("userMenu",open); $("userMenuBtn").setAttribute("aria-expanded",String(open)); };
 const closeUserMenu=()=>{ show("userMenu",false); $("userMenuBtn").setAttribute("aria-expanded","false"); };
 $("profileShortcut").onclick=()=>{ closeUserMenu(); navigateTo("profile"); };
+$("leagueShortcut").onclick=()=>{ closeUserMenu(); openLeagueSelector($("leagueShortcut")); };
 $("standingsShortcut").onclick=()=>{ closeUserMenu(); navigateTo("standings"); };
 $("rulesShortcut").onclick=()=>{ closeUserMenu(); navigateTo("rules"); };
 $("adminMenuShortcut").onclick=()=>{ closeUserMenu(); navigateTo("admin"); };
+$("leagueSelectorClose")?.addEventListener("click",closeLeagueSelector);
+$("leagueSelectorModal")?.addEventListener("click",event=>{if(event.target===$("leagueSelectorModal")) closeLeagueSelector();});
+$("leagueSelectorOptions")?.addEventListener("click",event=>{const option=event.target.closest("[data-league-id]");if(option) selectActiveLeague(option.dataset.leagueId);});
 document.addEventListener("click",event=>{
   const tab=event.target.closest?.("[data-stats-achievement-tab]");
   if(tab){

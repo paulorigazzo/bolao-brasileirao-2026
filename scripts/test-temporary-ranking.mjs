@@ -63,7 +63,7 @@ assert.match(sql,/revoke all on function public\.obter_ranking_provisorio\(integ
 assert.match(sql,/grant execute on function public\.obter_ranking_provisorio\(integer\) to authenticated/i);
 assert.doesNotMatch(sql,/returns table[\s\S]*gols_palpite/i);
 assert.doesNotMatch(sql,/insert\s+into|update\s+public\.|delete\s+from/i);
-assert.match(app,/if\(TEMPORARY_RANKING_PREVIEW_FIXTURE\)[\s\S]*return;[\s\S]*sb\.rpc\('obter_ranking_provisorio'/i);
+assert.match(app,/if\(TEMPORARY_RANKING_PREVIEW_FIXTURE\)[\s\S]*return;[\s\S]*sb\.rpc\('obter_ranking_provisorio_liga',\{p_liga_id:state\.activeLeague\?\.liga_id,p_rodada:context\.round\}\)/i);
 assert.match(app,/if\(TEMPORARY_RANKING_SYNTHETIC_PREVIEW\)[\s\S]*installTemporaryRankingSyntheticPreview\(\);[\s\S]*}else{[\s\S]*sb\.auth\.getSession\(\)/i);
 assert.match(app,/temporary-ranking-result-main[\s\S]*temporaryMovementLabel\(item\.movement\)[\s\S]*temporary-ranking-points[\s\S]*temporary-ranking-comparison/i);
 assert.match(app,/Atual <b>\$\{officialPosition\}<\/b>[\s\S]*Prov\. <b>\$\{item\.position\}º<\/b>/i);
