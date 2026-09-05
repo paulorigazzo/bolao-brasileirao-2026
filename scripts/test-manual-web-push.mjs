@@ -7,7 +7,7 @@ const [html,app,worker,migration,rollback,sender,config]=await Promise.all([
   readFile(new URL("index.html",root),"utf8"),
   readFile(new URL("js/app.js",root),"utf8"),
   readFile(new URL("service-worker.js",root),"utf8"),
-  readFile(new URL("supabase/migrations/20260905034102_add_manual_web_push_subscriptions.sql",root),"utf8"),
+  readFile(new URL("supabase/migrations/20260905040628_add_manual_web_push_subscriptions.sql",root),"utf8"),
   readFile(new URL("supabase/rollback/rollback_add_manual_web_push_subscriptions.sql",root),"utf8"),
   readFile(new URL("netlify/functions/enviar-lembrete-palpites.mjs",root),"utf8"),
   readFile(new URL("netlify/functions/configuracao-web-push.mjs",root),"utf8"),
