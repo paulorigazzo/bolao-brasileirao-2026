@@ -35,3 +35,13 @@ O deploy manual deve ser usado somente como contingência. Extraia o pacote e en
 ## Banco de dados e variáveis
 
 Uma atualização de interface ou documentação não exige SQL nem alteração de variáveis de ambiente, salvo quando a nota específica da versão disser o contrário.
+
+### Web Push
+
+Os lembretes manuais exigem três variáveis protegidas no Netlify:
+
+- `VAPID_SUBJECT`: contato do responsável, em formato `mailto:` ou URL HTTPS;
+- `VAPID_PUBLIC_KEY`: chave pública entregue aos navegadores autorizados;
+- `VAPID_PRIVATE_KEY`: chave privada, disponível somente para a Function.
+
+O mesmo par de chaves deve ser preservado entre deploys. A chave privada nunca deve ser colocada em arquivos públicos, logs ou respostas da aplicação.
