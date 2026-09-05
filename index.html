@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.28.0">
-  <link rel="stylesheet" href="./css/styles.css?v=6.28.0">
-  <link rel="stylesheet" href="./css/components.css?v=6.28.0">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.28.0">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.28.0">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.28.0">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.29.0">
+  <link rel="stylesheet" href="./css/styles.css?v=6.29.0">
+  <link rel="stylesheet" href="./css/components.css?v=6.29.0">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.29.0">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.29.0">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.29.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.28.0</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.29.0</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -105,6 +105,15 @@
       <p id="membershipStatusText"></p>
       <div class="membership-status-account"><span>Conta utilizada</span><strong id="membershipStatusEmail"></strong></div>
       <button id="membershipLogoutBtn" class="secondary" type="button">Sair desta conta</button>
+    </section>
+
+    <section id="noLeagueStatus" class="membership-status card hidden" aria-live="polite">
+      <span class="membership-status-icon" aria-hidden="true">🏆</span>
+      <span class="eyebrow">ACESSO APROVADO</span>
+      <h2>Aguardando inclusão em uma liga</h2>
+      <p>Seu cadastro está ativo, mas ainda não há uma liga disponível para você. O administrador poderá concluir essa inclusão sem afetar seus dados.</p>
+      <div class="membership-status-account"><span>Conta utilizada</span><strong id="noLeagueStatusEmail"></strong></div>
+      <button id="noLeagueLogoutBtn" class="secondary" type="button">Sair desta conta</button>
     </section>
 
     <section id="app" class="hidden">
@@ -610,6 +619,18 @@
     </section>
   </div>
 
+  <div id="participantLeagueApprovalModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="participantLeagueApprovalTitle">
+    <section class="league-selector-modal participant-league-approval-modal card" tabindex="-1">
+      <header class="league-selector-header"><div><span class="eyebrow">APROVAÇÃO E LIGAS</span><h2 id="participantLeagueApprovalTitle">Aprovar participante</h2><p id="participantLeagueApprovalSummary" class="muted-note"></p></div><button id="participantLeagueApprovalClose" class="modal-close" type="button" aria-label="Fechar aprovação">✕</button></header>
+      <form id="participantLeagueApprovalForm">
+        <fieldset class="participant-league-options"><legend>Em quais ligas esta pessoa participará?</legend><p>Os palpites serão únicos e a pontuação anterior será considerada automaticamente.</p><div id="participantLeagueApprovalOptions" class="league-selector-options"></div></fieldset>
+        <label class="participant-no-league-option"><input id="participantApproveWithoutLeague" type="checkbox"><span><strong>Aprovar sem liga</strong><small>Exceção: o participante verá uma tela de espera até ser incluído em uma liga.</small></span></label>
+        <p id="participantLeagueApprovalStatus" class="league-selector-status" aria-live="polite"></p>
+        <div class="participant-league-approval-actions"><button id="participantLeagueAssignmentsCancel" class="danger hidden" type="button">Cancelar designações pendentes</button><button id="participantLeagueApprovalCancel" class="secondary" type="button">Fechar</button><button id="participantLeagueApprovalSubmit" class="primary" type="submit">Aprovar e designar ligas</button></div>
+      </form>
+    </section>
+  </div>
+
   <div id="leagueAdminModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="leagueAdminTitle">
     <section class="league-admin-modal card" tabindex="-1">
       <header class="league-selector-header"><div><span class="eyebrow">GESTÃO CENTRALIZADA</span><h2 id="leagueAdminTitle">Administrar liga</h2><p id="leagueAdminSummary" class="muted-note"></p></div><button id="leagueAdminClose" class="modal-close" type="button" aria-label="Fechar administração da liga">✕</button></header>
@@ -812,6 +833,6 @@
       if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.28.0"></script>
+  <script type="module" src="./js/app.js?v=6.29.0"></script>
 </body>
 </html>

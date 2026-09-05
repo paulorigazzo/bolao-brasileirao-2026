@@ -167,6 +167,19 @@ crie e administre ligas privadas, mantendo todos os demais participantes como
 membros. Preservar temporariamente o caminho anterior; remover o legado exige
 decisão própria.
 
+### L08 — Administração e diretório protegido
+
+Concentrar a gestão na Área ADM e permitir localizar, selecionar e incluir
+participantes elegíveis em lote, preservando o seletor do menu para a troca da
+liga ativa.
+
+### L09 — Aprovação com designações pendentes
+
+Selecionar uma ou várias ligas durante a aprovação global e efetivar as
+associações somente após a consolidação do `user_id`. Manter a Liga Standard
+como sugestão, permitir a exceção explícita sem liga e repetir o processamento
+com segurança em acessos posteriores.
+
 ## Retorno e interrupção
 
 Enquanto a nova camada estiver em validação, o retorno consiste em desativar as

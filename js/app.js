@@ -21,7 +21,7 @@ import { adminRoundGameIds, loadAdminPickProgress } from "./admin-pick-progress.
 import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js";
 import { activeLeagueName, chooseActiveLeague, createLeagueRequestGate, filterProfilesByMembers, persistActiveLeague } from "./league-context.js";
 
-const APP_VERSION = "6.28.0";
+const APP_VERSION = "6.29.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -29,12 +29,13 @@ installFirstVisitTips();
 const sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
 const TEMPORARY_RANKING_SYNTHETIC_PREVIEW=isTemporaryRankingSyntheticPreview(window.location);
 const TEMPORARY_RANKING_PREVIEW_FIXTURE=TEMPORARY_RANKING_SYNTHETIC_PREVIEW?buildTemporaryRankingSyntheticFixture():null;
-const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], leagueRanking:[], leagues:[], activeLeague:null, leagueContextStatus:"idle", leagueManagedMembers:[], leagueMemberAudit:[], leagueLifecycleAudit:[], leagueManager:false, administeredLeagues:[], adminTargetLeague:null, leagueDirectory:[], standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{} };
+const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], leagueRanking:[], leagues:[], activeLeague:null, leagueContextStatus:"idle", leagueManagedMembers:[], leagueMemberAudit:[], leagueLifecycleAudit:[], leagueManager:false, administeredLeagues:[], adminTargetLeague:null, leagueDirectory:[], leagueAssignments:[], participantApprovalTarget:null, standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{} };
 const COMPETITIVE_READ_MODE="league"; // "legacy" é mantido apenas para uma publicação de contingência.
 const leagueRequestGate=createLeagueRequestGate();
 let leagueSelectorReturnFocus=null;
 let leagueAdminReturnFocus=null;
 let selectedLeagueDirectoryUsers=new Set();
+let selectedParticipantApprovalLeagues=new Set();
 let matchClockRefreshTimer=null;
 let liveScoreRefreshTimer=null;
 let liveScoreRefreshInFlight=false;
@@ -844,13 +845,14 @@ async function loadData(){
   const {data:games,error:gErr}=await sb.from("jogos").select("*").order("rodada").order("inicio");
   if(gErr) throw gErr;
   const adminGameIds=adminRoundGameIds(games,currentRoundNumber(games));
-  const [{data:picks,error:pErr},{data:leagues,error:leaguesErr},{data:adminProgress,error:adminProgressErr},{data:authorized,error:authorizedErr},{data:participantLimit,error:participantLimitErr},{data:leagueManager,error:leagueManagerErr}] = await Promise.all([
+  const [{data:picks,error:pErr},{data:leagues,error:leaguesErr},{data:adminProgress,error:adminProgressErr},{data:authorized,error:authorizedErr},{data:participantLimit,error:participantLimitErr},{data:leagueManager,error:leagueManagerErr},{data:leagueAssignments,error:leagueAssignmentsErr}] = await Promise.all([
     sb.from("palpites").select("*").eq("user_id",state.user.id),
     sb.rpc("listar_minhas_ligas"),
     loadAdminPickProgress({supabase:sb,isAdmin:isAdminUser(),gameIds:adminGameIds}),
     sb.from("participantes_autorizados").select("id,nome,email,celular,time_favorito,ativo,administrador,status,solicitado_em,aprovado_em,criado_em,atualizado_em").order("nome"),
     isAdminUser() ? sb.rpc("obter_limite_participantes_ativos") : Promise.resolve({data:10,error:null}),
-    isAdminUser() ? sb.rpc("sou_gestor_central_ligas") : Promise.resolve({data:false,error:null})
+    isAdminUser() ? sb.rpc("sou_gestor_central_ligas") : Promise.resolve({data:false,error:null}),
+    isAdminUser() ? sb.rpc("listar_designacoes_participantes") : Promise.resolve({data:[],error:null})
   ]);
   if(pErr) throw pErr;
   if(leaguesErr) throw new Error("Não foi possível carregar suas ligas.");
@@ -858,13 +860,15 @@ async function loadData(){
   if(authorizedErr) console.warn("O cadastro dinâmico de participantes não pôde ser carregado.",authorizedErr);
   if(participantLimitErr) console.warn("O limite configurável de participantes não pôde ser carregado.",participantLimitErr);
   if(leagueManagerErr) console.warn("A gestão central de ligas não pôde ser confirmada.",leagueManagerErr);
-  state.games=games||[]; state.ownPicks=picks||[]; state.leagues=leagues||[]; state.adminPickProgress=adminProgress||[]; state.authorizedParticipants=authorized||[]; state.participantLimit=Math.max(1,Number(participantLimit)||10); state.leagueManager=leagueManager===true;
+  if(leagueAssignmentsErr) console.warn("As designações pendentes não puderam ser carregadas.",leagueAssignmentsErr);
+  state.games=games||[]; state.ownPicks=picks||[]; state.leagues=leagues||[]; state.adminPickProgress=adminProgress||[]; state.authorizedParticipants=authorized||[]; state.participantLimit=Math.max(1,Number(participantLimit)||10); state.leagueManager=leagueManager===true; state.leagueAssignments=leagueAssignments||[];
   const league=chooseActiveLeague(state.leagues,{userId:state.user?.id,storage:localStorage});
-  if(!league) throw new Error("Sua conta não possui associação ativa com uma liga.");
+  if(!league){ if(state.leagueManager) await refreshAdminLeagues(); return false; }
   if(COMPETITIVE_READ_MODE==="legacy") await loadLegacyCompetitiveContext(league);
   else await loadLeagueContext(league);
   if(state.leagueManager) await refreshAdminLeagues();
   renderSyncStatus();
+  return true;
 }
 
 function renderSyncStatus(){
@@ -3479,14 +3483,54 @@ function renderAdminParticipants(){
     const isCurrentUser=String(item.email||"").toLowerCase()===String(state.user?.email||"").toLowerCase();
     const canDelete=!item.administrador && !isCurrentUser;
     const whatsappButton=adminWhatsAppButton(item);
-    const pendingActions=status==="pending"?`<div class="admin-member-actions">${whatsappButton}<button type="button" class="primary" data-membership-decision="approve" data-participant-id="${escapeHtml(item.id)}" ${atLimit?'disabled title="Aumente o limite ou desative um participante ativo para aprovar"':''}>${atLimit?"Limite atingido":"Aprovar"}</button><button type="button" class="secondary" data-membership-decision="reject" data-participant-id="${escapeHtml(item.id)}">Recusar</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`:
-      `<div class="admin-member-actions">${whatsappButton}<button type="button" class="secondary admin-member-toggle" data-participant-id="${escapeHtml(item.id)}" data-participant-active="${item.ativo!==false}">${item.ativo===false?"Reativar":"Desativar"}</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`;
+    const assignments=(state.leagueAssignments||[]).filter(row=>String(row.participante_autorizado_id)===String(item.id)&&row.estado==="pendente");
+    const assignmentLabel=assignments.some(row=>row.sem_liga)?"Aprovado sem liga":assignments.length?`${assignments.length} liga${assignments.length===1?'':'s'} pendente${assignments.length===1?'':'s'}`:"";
+    const pendingActions=status==="pending"?`<div class="admin-member-actions">${whatsappButton}<button type="button" class="primary" data-participant-league-approval="${escapeHtml(item.id)}" ${atLimit?'disabled title="Aumente o limite ou desative um participante ativo para aprovar"':''}>${atLimit?"Limite atingido":"Aprovar"}</button><button type="button" class="secondary" data-membership-decision="reject" data-participant-id="${escapeHtml(item.id)}">Recusar</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`:
+      `<div class="admin-member-actions">${whatsappButton}${assignments.length?`<button type="button" class="secondary" data-participant-league-approval="${escapeHtml(item.id)}">${escapeHtml(assignmentLabel)}</button>`:''}<button type="button" class="secondary admin-member-toggle" data-participant-id="${escapeHtml(item.id)}" data-participant-active="${item.ativo!==false}">${item.ativo===false?"Reativar":"Desativar"}</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`;
     return `<div class="admin-member-row status-${escapeHtml(status)}">
       ${participantAvatar(item.nome,team,"admin-member-avatar")}
       <div class="admin-member-copy"><strong>${escapeHtml(item.nome)}</strong><span class="admin-member-team${team?"":" is-unset"}">${escapeHtml(teamLabel)}</span><span>${escapeHtml(item.email)}</span><small>${escapeHtml(phone)}${requested&&status==="pending"?` • solicitado em ${escapeHtml(requested)}`:""}</small><small>${membershipStatusLabel(item)}</small></div>
       ${pendingActions}
     </div>`;
   }).join(""):`<p class="muted-note">Nenhum participante cadastrado.</p>`;
+}
+
+function renderParticipantLeagueApproval(){
+  const target=state.participantApprovalTarget;
+  if(!target)return;
+  $("participantLeagueApprovalSummary").textContent=`${target.nome} · ${target.email}`;
+  $("participantLeagueApprovalOptions").innerHTML=(state.administeredLeagues||[]).filter(league=>league.liga_status==="ativa").map(league=>{
+    const checked=selectedParticipantApprovalLeagues.has(String(league.liga_id));
+    return `<label class="participant-league-option"><input type="checkbox" value="${escapeHtml(league.liga_id)}" ${checked?'checked':''}><span><strong>${escapeHtml(league.liga_nome)}</strong><small>${league.liga_tipo==='standard'?'Liga Standard':'Liga privada'} · ${Number(league.membros_ativos)||0} membros</small></span></label>`;
+  }).join("")||'<p class="muted-note">Nenhuma liga ativa disponível.</p>';
+  $("participantLeagueAssignmentsCancel").classList.toggle("hidden",!(state.leagueAssignments||[]).some(row=>String(row.participante_autorizado_id)===String(target.id)&&row.estado==="pendente"));
+}
+
+async function openParticipantLeagueApproval(id){
+  state.participantApprovalTarget=(state.authorizedParticipants||[]).find(item=>String(item.id)===String(id));
+  if(!state.participantApprovalTarget)return;
+  if(!state.administeredLeagues.length)await loadAdministeredLeagues();
+  const pending=(state.leagueAssignments||[]).filter(row=>String(row.participante_autorizado_id)===String(id)&&row.estado==="pendente");
+  selectedParticipantApprovalLeagues=new Set(pending.filter(row=>row.liga_id).map(row=>String(row.liga_id)));
+  const withoutLeague=pending.some(row=>row.sem_liga);
+  if(!pending.length){const standard=state.administeredLeagues.find(row=>row.liga_tipo==="standard"&&row.liga_status==="ativa");if(standard)selectedParticipantApprovalLeagues.add(String(standard.liga_id));}
+  $("participantApproveWithoutLeague").checked=withoutLeague;
+  $("participantLeagueApprovalStatus").textContent="";
+  renderParticipantLeagueApproval();
+  show("participantLeagueApprovalModal",true);document.body.classList.add("modal-open");setTimeout(()=>$("participantLeagueApprovalOptions")?.querySelector("input")?.focus(),30);
+}
+function closeParticipantLeagueApproval(){show("participantLeagueApprovalModal",false);document.body.classList.remove("modal-open");state.participantApprovalTarget=null;selectedParticipantApprovalLeagues.clear();}
+async function submitParticipantLeagueApproval(event){
+  event.preventDefault();const target=state.participantApprovalTarget;if(!target)return;
+  const withoutLeague=$("participantApproveWithoutLeague").checked;
+  if(!withoutLeague&&!selectedParticipantApprovalLeagues.size){$("participantLeagueApprovalStatus").textContent="Selecione ao menos uma liga ou confirme a aprovação sem liga.";return;}
+  const button=$("participantLeagueApprovalSubmit");button.disabled=true;$("participantLeagueApprovalStatus").textContent="Aprovando e registrando as ligas…";
+  try{const {error}=await sb.rpc("aprovar_participante_com_ligas",{p_participante_autorizado_id:target.id,p_liga_ids:[...selectedParticipantApprovalLeagues],p_sem_liga:withoutLeague});if(error)throw error;await loadData();renderAdminParticipants();closeParticipantLeagueApproval();setAdminParticipantsFeedback(withoutLeague?"Participante aprovado sem liga.":"Participante aprovado. As ligas serão aplicadas no próximo acesso.","success");}
+  catch(error){$("participantLeagueApprovalStatus").textContent=error.message||"Não foi possível concluir a aprovação.";}finally{button.disabled=false;}
+}
+async function cancelPendingParticipantLeagueAssignments(){
+  const target=state.participantApprovalTarget;if(!target||!confirm("Cancelar todas as designações ainda pendentes deste participante?"))return;
+  try{const {error}=await sb.rpc("cancelar_designacoes_pendentes_participante",{p_participante_autorizado_id:target.id});if(error)throw error;await loadData();renderAdminParticipants();closeParticipantLeagueApproval();setAdminParticipantsFeedback("Designações pendentes canceladas.","success");}catch(error){$("participantLeagueApprovalStatus").textContent=error.message||"Não foi possível cancelar as designações.";}
 }
 
 
@@ -4778,7 +4822,10 @@ async function initialize(session){
     return;
   }
   sessionStorage.removeItem("bolaoRegistrationIntent");
-  await loadData();
+  try{const {error}=await sb.rpc("processar_minhas_designacoes_liga");if(error)throw error;}catch(error){console.warn("As designações de liga ainda não puderam ser processadas.",error);}
+  const hasLeague=await loadData();
+  if(!hasLeague){show("welcome",false);show("app",false);show("noLeagueStatus",true);$("noLeagueStatusEmail").textContent=state.user.email||"";return;}
+  show("noLeagueStatus",false);
   renderEditableProfile();
   applyFavoriteTeamIdentity();
   renderFavoriteTeamSelector();
@@ -4990,11 +5037,21 @@ $("adminParticipantsList")?.addEventListener("click",event=>{
   if(whatsapp){ openParticipantWhatsApp(whatsapp.dataset.participantWhatsapp); return; }
   const decision=event.target.closest("[data-membership-decision]");
   if(decision){ decideMembership(decision.dataset.participantId,decision.dataset.membershipDecision); return; }
+  const leagueApproval=event.target.closest("[data-participant-league-approval]");
+  if(leagueApproval){ openParticipantLeagueApproval(leagueApproval.dataset.participantLeagueApproval); return; }
   const deleteButton=event.target.closest("[data-participant-delete]");
   if(deleteButton){ deleteParticipantPermanently(deleteButton.dataset.participantDelete,deleteButton.dataset.participantName); return; }
   const button=event.target.closest("[data-participant-active]");
   if(button) toggleAuthorizedParticipant(button.dataset.participantId,button.dataset.participantActive==="true");
 });
+$("participantLeagueApprovalClose")?.addEventListener("click",closeParticipantLeagueApproval);
+$("participantLeagueApprovalCancel")?.addEventListener("click",closeParticipantLeagueApproval);
+$("participantLeagueApprovalModal")?.addEventListener("click",event=>{if(event.target===$("participantLeagueApprovalModal"))closeParticipantLeagueApproval();});
+$("participantLeagueApprovalForm")?.addEventListener("submit",submitParticipantLeagueApproval);
+$("participantLeagueAssignmentsCancel")?.addEventListener("click",cancelPendingParticipantLeagueAssignments);
+$("participantLeagueApprovalOptions")?.addEventListener("change",event=>{const input=event.target.closest('input[type="checkbox"]');if(!input)return;if(input.checked)selectedParticipantApprovalLeagues.add(input.value);else selectedParticipantApprovalLeagues.delete(input.value);if(selectedParticipantApprovalLeagues.size)$("participantApproveWithoutLeague").checked=false;});
+$("participantApproveWithoutLeague")?.addEventListener("change",event=>{if(!event.target.checked)return;selectedParticipantApprovalLeagues.clear();renderParticipantLeagueApproval();});
+$("noLeagueLogoutBtn")?.addEventListener("click",logout);
 $("adminParticipantManagerModal")?.addEventListener("click",event=>{if(event.target===$("adminParticipantManagerModal")) closeParticipantManager();});
 $("adminWhatsAppModal")?.addEventListener("click",event=>{if(event.target===$("adminWhatsAppModal")) closeParticipantWhatsApp();});
 $("adminWhatsAppClose")?.addEventListener("click",closeParticipantWhatsApp);
