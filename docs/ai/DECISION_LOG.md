@@ -1684,3 +1684,32 @@ A navegação separa o uso cotidiano da administração e reduz trocas acidentai
 de contexto. A autorização continua integralmente validada no banco e restrita
 ao gestor central. Palpites, pontuação e histórico competitivo permanecem
 compartilhados e inalterados.
+
+## DEC-2026-046 — Designações de ligas pendentes até a consolidação do perfil
+
+- Data: 2026-09-04
+- Status: aceita
+- Responsáveis: responsável pelo produto
+- Impacto: alto
+
+### Contexto
+
+A aprovação global ocorre antes de existir, em todos os casos, um perfil
+competitivo consolidado com `user_id`. Exigir uma segunda ação administrativa
+depois do primeiro acesso deixa participantes aprovados temporariamente sem
+contexto competitivo.
+
+### Decisão
+
+- escolher uma ou várias ligas durante a aprovação;
+- manter a Liga Standard sugerida, sem torná-la obrigatória;
+- registrar as escolhas em estrutura privada ligada ao cadastro autorizado;
+- efetivar as associações somente após validar e consolidar a identidade;
+- repetir o processamento em acessos posteriores de forma idempotente;
+- admitir aprovação sem liga apenas como exceção explícita e orientada.
+
+### Consequências
+
+O gestor conclui a decisão em uma única etapa, sem criar antecipadamente uma
+identidade competitiva. O participante não pode assumir designações de outro
+cadastro, e palpites, jogos, resultados e pontuação permanecem inalterados.

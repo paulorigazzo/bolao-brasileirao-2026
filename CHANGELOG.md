@@ -1,3 +1,10 @@
+# v6.29.0 — Aprovação com designações pendentes de ligas
+
+- Permite escolher uma ou várias ligas durante a aprovação global de um participante, mantendo a Liga Standard apenas como sugestão.
+- Registra a intenção de forma privada e aplica as associações somente depois que a identidade competitiva estiver consolidada.
+- Processa novamente designações pendentes em cada acesso, sem duplicar membros ou auditoria, e preserva a exceção explícita de aprovação sem liga.
+- Exibe um estado orientativo para participantes aprovados sem associação ativa, preservando palpites, jogos, resultados e pontuação.
+
 # v6.28.0 — Administração de ligas e diretório de participantes
 
 - Move criação e administração de ligas para um card expansível exclusivo da Área ADM; o menu do usuário mantém somente o seletor da liga ativa.

@@ -1,6 +1,6 @@
-6.28.0
+6.29.0
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.28.0-administracao-ligas-diretorio-participantes.md`](docs/releases/v6.28.0-administracao-ligas-diretorio-participantes.md)
+- Nota da versão atual: [`docs/releases/v6.29.0-designacoes-pendentes-ligas.md`](docs/releases/v6.29.0-designacoes-pendentes-ligas.md)
