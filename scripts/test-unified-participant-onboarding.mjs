@@ -3,7 +3,7 @@ import {readFile} from "node:fs/promises";
 const root=new URL("../",import.meta.url);
 const [app,html,css,migration,test]=await Promise.all([
   readFile(new URL("js/app.js",root),"utf8"),readFile(new URL("index.html",root),"utf8"),readFile(new URL("css/styles.css",root),"utf8"),
-  readFile(new URL("supabase/migrations/20260905030000_unify_participant_onboarding.sql",root),"utf8"),readFile(new URL("supabase/tests/unified-participant-onboarding.sql",root),"utf8")
+  readFile(new URL("supabase/migrations/20260905024503_unify_participant_onboarding.sql",root),"utf8"),readFile(new URL("supabase/tests/unified-participant-onboarding.sql",root),"utf8")
 ]);
 assert.match(html,/id="registrationForm"[\s\S]*id="heroLoginBtn"[^>]*type="submit"/);
 assert.ok(html.indexOf('id="registrationNameInput"')<html.indexOf('id="heroLoginBtn"'));
