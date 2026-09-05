@@ -1713,3 +1713,33 @@ contexto competitivo.
 O gestor conclui a decisão em uma única etapa, sem criar antecipadamente uma
 identidade competitiva. O participante não pode assumir designações de outro
 cadastro, e palpites, jogos, resultados e pontuação permanecem inalterados.
+
+## DEC-2026-047 — Jornada única para convite e cadastro manual
+
+- Data: 2026-09-05
+- Status: aceita
+- Responsáveis: responsável pelo produto
+- Impacto: alto
+
+### Contexto
+
+O cadastro por convite já permitia designar ligas na aprovação, mas o cadastro
+manual autorizava a conta sem definir seu contexto competitivo. A entrada por
+convite também apresentava a ação Google antes dos campos e confundia falha de
+ativação com ausência intencional de liga.
+
+### Decisão
+
+- exigir ligas ou confirmação sem liga nos dois caminhos de entrada;
+- gravar autorização manual e designações em uma única transação;
+- derivar a situação administrativa de autorização, perfil, designações e membros;
+- permitir inclusão rápida aditiva em ligas;
+- acompanhar automaticamente aprovações pendentes;
+- interromper o acesso com orientação própria quando o perfil não puder ser consolidado.
+
+### Consequências
+
+O gestor passa a concluir o contexto competitivo no mesmo fluxo em que autoriza
+a pessoa. A interface apresenta uma única ação de cadastro e falhas técnicas não
+se passam por decisões administrativas válidas. As estruturas competitivas e os
+palpites compartilhados permanecem preservados.

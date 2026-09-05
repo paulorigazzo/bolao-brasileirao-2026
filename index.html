@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.29.0">
-  <link rel="stylesheet" href="./css/styles.css?v=6.29.0">
-  <link rel="stylesheet" href="./css/components.css?v=6.29.0">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.29.0">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.29.0">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.29.0">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.30.0">
+  <link rel="stylesheet" href="./css/styles.css?v=6.30.0">
+  <link rel="stylesheet" href="./css/components.css?v=6.30.0">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.30.0">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.30.0">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.30.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.29.0</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.30.0</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -69,30 +69,34 @@
         <p>Registre seus placares, acompanhe os resultados e dispute a liderança rodada a rodada.</p>
         <div id="registrationInviteHint" class="registration-invite-hint hidden">
           <strong>Você recebeu um convite para participar.</strong>
-          <span>Complete seus dados e entre com sua conta Google para enviar o cadastro à aprovação.</span>
+          <span>Preencha seus dados, confirme sua conta Google e aguarde a aprovação do administrador. As ligas serão definidas durante a aprovação.</span>
         </div>
-        <button id="heroLoginBtn" class="primary big" type="button">Entrar com Google</button>
         <form id="registrationForm" class="registration-form hidden" novalidate>
           <div class="registration-form-heading">
             <span class="eyebrow">SEU CADASTRO</span>
             <h3>Complete seu perfil</h3>
-            <p>O nome é obrigatório. Telefone e time favorito podem ser informados agora ou adicionados depois em Meu Perfil.</p>
+            <ol class="registration-steps"><li>Informe seus dados.</li><li>Confirme sua conta Google.</li><li>Aguarde a aprovação e a inclusão nas ligas.</li></ol>
           </div>
           <label>Nome de exibição
-            <input id="registrationNameInput" type="text" maxlength="80" autocomplete="name" required placeholder="Como você quer aparecer no bolão">
+            <input id="registrationNameInput" type="text" maxlength="80" autocomplete="name" required aria-describedby="registrationNameError" placeholder="Como você quer aparecer no bolão">
+            <small id="registrationNameError" class="field-error" aria-live="polite"></small>
           </label>
           <label>Celular com WhatsApp <span class="optional-label">opcional</span>
-            <input id="registrationPhoneInput" type="tel" inputmode="tel" maxlength="16" autocomplete="tel" placeholder="(16) 99999-9999">
+            <input id="registrationPhoneInput" type="tel" inputmode="tel" maxlength="16" autocomplete="tel" aria-describedby="registrationPhoneError" placeholder="(16) 99999-9999">
+            <small id="registrationPhoneError" class="field-error" aria-live="polite"></small>
           </label>
-          <fieldset class="registration-favorite-team">
+          <button id="registrationTeamToggle" class="secondary registration-team-toggle" type="button" aria-expanded="false" aria-controls="registrationFavoriteTeamFieldset">⚽ Escolher time favorito <span class="optional-label">opcional</span></button>
+          <fieldset id="registrationFavoriteTeamFieldset" class="registration-favorite-team hidden">
             <legend>Time favorito <span class="optional-label">opcional</span></legend>
             <p>Escolha na lista oficial para evitar diferenças de grafia.</p>
             <div id="registrationFavoriteTeamGrid" class="favorite-team-grid registration-team-grid" role="radiogroup" aria-label="Escolha seu time favorito">
               <p class="muted-note">Carregando clubes…</p>
             </div>
-            <button id="clearRegistrationTeamBtn" class="secondary registration-clear-team" type="button">Sem time favorito</button>
+            <button id="clearRegistrationTeamBtn" class="secondary registration-clear-team" type="button">Continuar sem time favorito</button>
           </fieldset>
+          <p class="registration-google-note">Usaremos o e-mail da sua conta Google para identificar seu acesso. Seus palpites serão únicos, mesmo se você participar de várias ligas.</p>
           <small id="registrationFormStatus" class="profile-form-status" aria-live="polite"></small>
+          <button id="heroLoginBtn" class="primary big registration-submit" type="submit">Continuar com Google e enviar cadastro</button>
         </form>
       </div>
       <div class="hero-brand"><img src="./assets/brand/jarvis-approved.png" alt="Identidade oficial do Bolão Brasileirão 2026"></div>
@@ -104,6 +108,7 @@
       <h2 id="membershipStatusTitle">Cadastro aguardando aprovação</h2>
       <p id="membershipStatusText"></p>
       <div class="membership-status-account"><span>Conta utilizada</span><strong id="membershipStatusEmail"></strong></div>
+      <button id="membershipRetryBtn" class="primary hidden" type="button">Verificar aprovação agora</button>
       <button id="membershipLogoutBtn" class="secondary" type="button">Sair desta conta</button>
     </section>
 
@@ -114,6 +119,15 @@
       <p>Seu cadastro está ativo, mas ainda não há uma liga disponível para você. O administrador poderá concluir essa inclusão sem afetar seus dados.</p>
       <div class="membership-status-account"><span>Conta utilizada</span><strong id="noLeagueStatusEmail"></strong></div>
       <button id="noLeagueLogoutBtn" class="secondary" type="button">Sair desta conta</button>
+    </section>
+
+    <section id="activationFailureStatus" class="membership-status card hidden" aria-live="assertive">
+      <span class="membership-status-icon" aria-hidden="true">⚠️</span>
+      <span class="eyebrow">ATIVAÇÃO INCOMPLETA</span>
+      <h2>Não foi possível concluir seu acesso</h2>
+      <p id="activationFailureText">Seu cadastro e suas ligas permanecem preservados. Tente novamente.</p>
+      <button id="activationRetryBtn" class="primary" type="button">Tentar novamente</button>
+      <button id="activationLogoutBtn" class="secondary" type="button">Sair desta conta</button>
     </section>
 
     <section id="app" class="hidden">
@@ -786,7 +800,8 @@
       <form id="adminParticipantForm" class="admin-participant-form">
         <label>Nome<input id="newParticipantName" name="nome" type="text" maxlength="80" autocomplete="name" required placeholder="Ex.: Mariana"></label>
         <label>E-mail Google<input id="newParticipantEmail" name="email" type="email" maxlength="160" autocomplete="email" required placeholder="nome@gmail.com"></label>
-        <label class="admin-checkbox"><input id="newParticipantAdmin" name="administrador" type="checkbox"><span>Conceder acesso de administrador</span></label>
+        <fieldset class="participant-league-options"><legend>Em quais ligas esta pessoa participará?</legend><p>A Liga Standard é apenas uma sugestão.</p><div id="newParticipantLeagueOptions" class="league-selector-options"></div></fieldset>
+        <label class="participant-no-league-option"><input id="newParticipantWithoutLeague" type="checkbox"><span><strong>Aprovar sem liga</strong><small>A pessoa verá uma tela de espera até receber uma liga.</small></span></label>
         <small id="adminParticipantFormStatus" class="admin-form-status"></small>
         <div class="admin-form-actions"><button id="cancelParticipantBtn" class="secondary" type="button">Cancelar</button><button id="saveParticipantBtn" class="primary" type="submit">Salvar participante</button></div>
       </form>
@@ -833,6 +848,6 @@
       if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.29.0"></script>
+  <script type="module" src="./js/app.js?v=6.30.0"></script>
 </body>
 </html>
