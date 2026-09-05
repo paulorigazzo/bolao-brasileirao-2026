@@ -11,6 +11,8 @@ select (select count(*) from public.palpites) palpites,
   (select md5(coalesce(string_agg(concat_ws('|',id,id_jogo,user_id,gols_casa,gols_fora),'§' order by id),'')) from public.palpites) palpites_hash,
   (select count(*) from public.jogos) jogos;
 
+grant select on l09_contexto,l09_hashes to authenticated;
+
 insert into public.participantes_autorizados(id,nome,email,ativo,administrador,status,solicitado_em)
 select autorizado_id,'Participante L09',email,false,false,'pending',now() from l09_contexto;
 
@@ -31,8 +33,8 @@ do $$ begin
 end $$;
 reset role;
 
-insert into public.participantes(user_id,nome,email,ativo)
-select participante_id,'Participante L09',email,true from l09_contexto;
+insert into auth.users(id,aud,role,email,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)
+select participante_id,'authenticated','authenticated',email,now(),'{}'::jsonb,'{}'::jsonb,now(),now() from l09_contexto;
 select set_config('request.jwt.claims',(select json_build_object('sub',participante_id,'email',email,'role','authenticated')::text from l09_contexto),true);
 set local role authenticated;
 do $$ declare v_result record; begin

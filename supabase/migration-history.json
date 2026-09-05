@@ -16,6 +16,7 @@
     { "version": "20260904185813", "name": "add_league_member_management", "status": "applied" },
     { "version": "20260904194756", "name": "centralize_league_administration", "status": "applied" },
     { "version": "20260904211158", "name": "add_league_participant_directory", "status": "applied" },
-    { "version": "20260904211445", "name": "fix_league_batch_member_validation", "status": "applied" }
+    { "version": "20260904211445", "name": "fix_league_batch_member_validation", "status": "applied" },
+    { "version": "20260905014033", "name": "add_pending_league_assignments", "status": "applied" }
   ]
 }
