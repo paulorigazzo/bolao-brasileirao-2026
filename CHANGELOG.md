@@ -1,3 +1,10 @@
+# v6.30.0 — Jornada unificada de novos participantes
+
+- Unifica o cadastro manual e a aprovação por convite com seleção explícita de ligas.
+- Reorganiza a entrada por convite com uma única ação Google após os campos, validação com foco e time favorito recolhido.
+- Exibe estados administrativos derivados de perfil, designações e associações e oferece inclusão rápida em ligas.
+- Atualiza automaticamente a espera por aprovação e separa falha de ativação da decisão válida sem liga.
+
 # v6.29.0 — Aprovação com designações pendentes de ligas
 
 - Permite escolher uma ou várias ligas durante a aprovação global de um participante, mantendo a Liga Standard apenas como sugestão.

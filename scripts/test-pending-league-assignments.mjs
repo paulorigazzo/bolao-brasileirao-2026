@@ -14,7 +14,7 @@ assert.match(migration,/create index participante_liga_designacoes_liga_idx[\s\S
 assert.match(migration,/p\.sem_liga|p_sem_liga/);
 assert.doesNotMatch(migration,/(?:insert|update|delete)[\s\S]{0,35}public\.palpites/i);
 assert.match(app,/rpc\("processar_minhas_designacoes_liga"/);
-assert.match(app,/rpc\("aprovar_participante_com_ligas"/);
+assert.match(app,/"aprovar_participante_com_ligas"/);
 assert.match(app,/Aguardando inclusão em uma liga|noLeagueStatus/);
 assert.match(html,/id="participantLeagueApprovalModal"/);
 assert.match(html,/id="participantApproveWithoutLeague"/);

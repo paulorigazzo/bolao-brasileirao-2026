@@ -3969,6 +3969,8 @@ button,.chip,.filter-chip,.bottom-nav-item,.card[role="button"]{-webkit-tap-high
 .registration-form-heading{display:grid;gap:5px}
 .registration-form-heading h3{margin:0;font-size:1.35rem}
 .registration-form-heading p{margin:0;color:var(--text-muted,#607067);line-height:1.5}
+.registration-steps{margin:4px 0 0;padding-left:22px;color:var(--text-muted,#607067);line-height:1.55}
+.registration-steps li::marker{color:var(--green,#35dc83);font-weight:900}
 .registration-form label{display:grid;gap:7px;font-weight:700}
 .registration-form input{width:100%;box-sizing:border-box;padding:13px 14px;border:1px solid var(--border,#ccd8d0);border-radius:12px;font:inherit;background:var(--surface,#fff);color:var(--text,#17231c);caret-color:var(--text,#17231c)}
 .registration-form input:focus{outline:3px solid rgba(53,220,131,.18);border-color:var(--green,#35dc83)}
@@ -3977,11 +3979,17 @@ button,.chip,.filter-chip,.bottom-nav-item,.card[role="button"]{-webkit-tap-high
 .registration-favorite-team>p{margin:0;color:var(--text-muted,#607067);font-size:.86rem}
 .registration-team-grid{max-height:300px}
 .registration-clear-team{justify-self:start}
+.registration-team-toggle{justify-self:start;width:auto}
+.registration-google-note{margin:0;padding:13px 15px;border-radius:14px;background:rgba(53,220,131,.07);color:var(--text-muted,#607067);font-size:.84rem;line-height:1.5}
+.registration-submit{width:100%}
+.field-error{min-height:1.2em;color:#ffb4a8;font-weight:700}
+.registration-form input[aria-invalid="true"]{border-color:#ef7c68;box-shadow:0 0 0 2px rgba(239,124,104,.14)}
 .registration-form .profile-form-status{min-height:1.4em}
 @media(max-width:520px){
   .registration-form{gap:14px}
   .registration-team-grid{grid-template-columns:repeat(3,minmax(0,1fr));max-height:330px}
   .registration-clear-team{width:100%}
+  .registration-team-toggle{width:100%}
 }
 .membership-status{max-width:620px;margin:48px auto;text-align:center;padding:34px;display:grid;justify-items:center;gap:12px}
 .membership-status-icon{font-size:3rem}

@@ -180,6 +180,13 @@ associações somente após a consolidação do `user_id`. Manter a Liga Standar
 como sugestão, permitir a exceção explícita sem liga e repetir o processamento
 com segurança em acessos posteriores.
 
+### L10 — Jornada unificada de novos participantes
+
+Unificar convite e cadastro manual com seleção de ligas, estados administrativos
+derivados, inclusão rápida e acompanhamento automático da aprovação. Manter a
+consolidação de `user_id` como portão da identidade competitiva e distinguir
+falha de ativação da decisão explícita sem liga.
+
 ## Retorno e interrupção
 
 Enquanto a nova camada estiver em validação, o retorno consiste em desativar as
