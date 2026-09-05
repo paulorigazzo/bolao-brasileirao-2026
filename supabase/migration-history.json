@@ -18,6 +18,7 @@
     { "version": "20260904211158", "name": "add_league_participant_directory", "status": "applied" },
     { "version": "20260904211445", "name": "fix_league_batch_member_validation", "status": "applied" },
     { "version": "20260905014033", "name": "add_pending_league_assignments", "status": "applied" },
-    { "version": "20260905024503", "name": "unify_participant_onboarding", "status": "applied" }
+    { "version": "20260905024503", "name": "unify_participant_onboarding", "status": "applied" },
+    { "version": "20260905040628", "name": "add_manual_web_push_subscriptions", "status": "applied" }
   ]
 }

@@ -1,3 +1,10 @@
+# v6.31.0 — Lembretes manuais por Web Push
+
+- Permite que cada participante ative ou desative lembretes no próprio aparelho, mediante autorização do navegador.
+- Adiciona uma tabela isolada por RLS para assinaturas Web Push, sem derivar autorização do telefone e sem alterar dados competitivos.
+- Acrescenta à Central de Atenção um disparo administrativo manual, com prévia dos destinatários e seleção recalculada no servidor.
+- Mantém o WhatsApp manual, não agenda envios, não registra histórico e não adiciona cache offline.
+
 # v6.30.0 — Jornada unificada de novos participantes
 
 - Unifica o cadastro manual e a aprovação por convite com seleção explícita de ligas.

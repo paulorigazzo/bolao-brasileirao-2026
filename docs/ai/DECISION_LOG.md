@@ -1743,3 +1743,32 @@ O gestor passa a concluir o contexto competitivo no mesmo fluxo em que autoriza
 a pessoa. A interface apresenta uma única ação de cadastro e falhas técnicas não
 se passam por decisões administrativas válidas. As estruturas competitivas e os
 palpites compartilhados permanecem preservados.
+
+## DEC-2026-048 — Lembretes Web Push opt-in com disparo manual
+
+- Data: 2026-09-05
+- Status: aceita
+- Responsáveis: responsável pelo produto
+- Impacto: alto
+
+### Contexto
+
+O Bolão já identifica participantes com palpites pendentes e prepara mensagens
+manuais por WhatsApp. O grupo familiar deseja um aviso mais direto, mas não
+necessita de agendamento, campanhas ou histórico de comunicação.
+
+### Decisão
+
+- usar Web Push somente após ativação voluntária em cada aparelho;
+- armazenar apenas endpoint e chaves técnicas em tabela aditiva com RLS;
+- manter o service worker restrito ao recebimento e abertura da notificação;
+- permitir disparo somente manual e confirmado pela Central de Atenção;
+- recalcular liga, rodada, pendências e assinaturas elegíveis no servidor;
+- não inferir autorização a partir do telefone e não registrar histórico de envios.
+
+### Consequências
+
+O administrador pode avisar os participantes que ainda não concluíram a rodada
+sem automatizar comunicações. Cada aparelho precisa ser ativado individualmente,
+assinaturas expiradas são desativadas e WhatsApp, dados competitivos e regras do
+Bolão permanecem independentes.

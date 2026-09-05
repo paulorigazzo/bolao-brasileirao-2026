@@ -4005,6 +4005,7 @@ button,.chip,.filter-chip,.bottom-nav-item,.card[role="button"]{-webkit-tap-high
 .profile-data-form label small{font-weight:400;color:var(--text-muted,#607067)}
 .optional-label{font-size:.72rem;font-weight:600;color:var(--text-muted,#607067)}
 .profile-form-status{min-height:1.2em;color:var(--color-primary,#16794b)}
+.push-preferences-card{display:grid;align-content:start;gap:10px}.push-preferences-card h2{margin:3px 0}.push-preferences-card p{margin:0;color:var(--text-muted,#607067);line-height:1.5}.push-preferences-actions,.admin-reminder-actions{display:flex;flex-wrap:wrap;gap:9px}.push-preferences-actions button{width:max-content;max-width:100%}.admin-reminder-actions{justify-content:flex-end}@media(max-width:520px){.admin-reminder-actions{width:100%;display:grid}.admin-reminder-actions button{width:100%!important;min-width:0!important}}
 .admin-participant-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .admin-pending-requests-badge{min-width:26px;height:26px;border-radius:999px;display:inline-grid;place-items:center;background:#d97706;color:white;font-size:.78rem;font-weight:800}
 .admin-member-row.status-pending{border-color:#f2c46d;background:rgba(245,158,11,.07)}

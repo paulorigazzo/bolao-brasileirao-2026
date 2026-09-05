@@ -4,7 +4,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.30.0`.
+- Versão funcional: `v6.31.0`.
 - Prioridade: **manter o Bolão 2026 estável e evoluí-lo incrementalmente para múltiplas ligas com palpites compartilhados**.
 - Próxima etapa coordenada: validar a jornada unificada de novos participantes da L10, mantendo a estabilização da API-Football como linha operacional paralela e o Rigazzo congelado como histórico e possível laboratório.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
@@ -62,10 +62,11 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - ✅ Meu Time 2.0 e personalização pelo clube favorito.
 - ✅ Gestão de perfil e participantes.
 - ✅ Comunicação individual e manual via WhatsApp na gestão de participantes e na Situação da Rodada.
+- ✅ Lembretes Web Push ativados por aparelho e enviados manualmente pelo administrador aos participantes com palpites pendentes.
 - ✅ Transparência individual dos palpites após o encerramento oficial das partidas.
 - ✅ Limite configurável de participantes ativos.
 - ✅ Cadastro consolidado com nome, telefone opcional e time favorito opcional.
-- 🟡 PWA: manifesto e ícones disponíveis; service worker e cache offline ausentes.
+- 🟡 PWA: manifesto, ícones e service worker mínimo para notificações disponíveis; cache offline ausente.
 - 🟡 Acessibilidade: base de navegação, estados e rótulos presente; a [auditoria preliminar de 3 de agosto de 2026](docs/accessibility/AUDIT_2026-08-03.md) não demonstrou falha crítica e adiou uma intervenção ampla até existir necessidade concreta.
 - 🔵 Dark mode.
 - ✅ **E02.1 — Calendário Interativo de Partidas:** visão mensal pela Home, com quantidade de jogos, destaque do time favorito e acesso direto à partida na rodada original.

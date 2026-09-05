@@ -1,6 +1,6 @@
-6.30.0
+6.31.0
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.30.0-jornada-unificada-participantes.md`](docs/releases/v6.30.0-jornada-unificada-participantes.md)
+- Nota da versão atual: [`docs/releases/v6.31.0-lembretes-web-push-manuais.md`](docs/releases/v6.31.0-lembretes-web-push-manuais.md)

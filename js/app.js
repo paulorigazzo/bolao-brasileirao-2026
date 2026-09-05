@@ -20,8 +20,9 @@ import { buildFriendlyRankingsModel } from "./friendly-rankings-engine.js";
 import { adminRoundGameIds, loadAdminPickProgress } from "./admin-pick-progress.js";
 import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js";
 import { activeLeagueName, chooseActiveLeague, createLeagueRequestGate, filterProfilesByMembers, persistActiveLeague } from "./league-context.js";
+import { createPushSubscription, currentPushSubscription, subscriptionRow, supportsWebPush } from "./web-push.js";
 
-const APP_VERSION = "6.30.0";
+const APP_VERSION = "6.31.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -29,7 +30,7 @@ installFirstVisitTips();
 const sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
 const TEMPORARY_RANKING_SYNTHETIC_PREVIEW=isTemporaryRankingSyntheticPreview(window.location);
 const TEMPORARY_RANKING_PREVIEW_FIXTURE=TEMPORARY_RANKING_SYNTHETIC_PREVIEW?buildTemporaryRankingSyntheticFixture():null;
-const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], leagueRanking:[], leagues:[], activeLeague:null, leagueContextStatus:"idle", leagueManagedMembers:[], leagueMemberAudit:[], leagueLifecycleAudit:[], leagueManager:false, administeredLeagues:[], adminTargetLeague:null, leagueDirectory:[], leagueAssignments:[], participantSituations:[], participantApprovalTarget:null, participantApprovalMode:"approve", standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{} };
+const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], leagueRanking:[], leagues:[], activeLeague:null, leagueContextStatus:"idle", leagueManagedMembers:[], leagueMemberAudit:[], leagueLifecycleAudit:[], leagueManager:false, administeredLeagues:[], adminTargetLeague:null, leagueDirectory:[], leagueAssignments:[], participantSituations:[], participantApprovalTarget:null, participantApprovalMode:"approve", standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{}, pushRegistration:null, pushSubscription:null };
 const COMPETITIVE_READ_MODE="league"; // "legacy" é mantido apenas para uma publicação de contingência.
 const leagueRequestGate=createLeagueRequestGate();
 let leagueSelectorReturnFocus=null;
@@ -741,6 +742,96 @@ async function saveOwnProfile(event){
     button.disabled=false;
     button.textContent="Salvar dados";
   }
+}
+
+function renderPushPreferences(){
+  const status=$("pushPreferenceStatus");
+  const enable=$("enablePushBtn");
+  const disable=$("disablePushBtn");
+  if(!status || !enable || !disable) return;
+  const supported=supportsWebPush(window);
+  const active=Boolean(state.pushSubscription);
+  enable.disabled=!supported || Notification.permission==="denied";
+  show("enablePushBtn",!active);
+  show("disablePushBtn",active);
+  if(!supported) status.textContent="Este navegador não oferece notificações Web Push para o Bolão.";
+  else if(active) status.textContent="Lembretes ativos neste aparelho.";
+  else if(Notification.permission==="denied") status.textContent="As notificações estão bloqueadas nas configurações deste navegador.";
+  else status.textContent="Os lembretes estão desativados neste aparelho.";
+}
+
+async function initializePushPreferences(){
+  if(!supportsWebPush(window)){ renderPushPreferences(); return; }
+  try{
+    state.pushRegistration=await navigator.serviceWorker.register("/service-worker.js?v=6.31.0");
+    const browserSubscription=await currentPushSubscription(state.pushRegistration);
+    if(browserSubscription){
+      const {data,error}=await sb.from("push_subscriptions").select("id,ativo").eq("endpoint",browserSubscription.endpoint).maybeSingle();
+      if(error) throw error;
+      state.pushSubscription=data?.ativo===true?browserSubscription:null;
+    }
+  }catch(error){
+    console.warn("Não foi possível preparar as notificações neste aparelho.",error);
+  }
+  renderPushPreferences();
+}
+
+async function sessionToken(){
+  const {data}=await sb.auth.getSession();
+  const token=data?.session?.access_token;
+  if(!token) throw new Error("Sua sessão expirou. Entre novamente.");
+  return token;
+}
+
+async function enablePushNotifications(){
+  const button=$("enablePushBtn");
+  const status=$("pushPreferenceStatus");
+  if(!supportsWebPush(window)){ renderPushPreferences(); return; }
+  button.disabled=true;
+  if(status) status.textContent="Solicitando autorização ao navegador…";
+  try{
+    const permission=Notification.permission==="default"?await Notification.requestPermission():Notification.permission;
+    if(permission!=="granted") throw new Error("A autorização não foi concedida. Você pode continuar usando o Bolão normalmente.");
+    state.pushRegistration=state.pushRegistration||await navigator.serviceWorker.register("/service-worker.js?v=6.31.0");
+    const token=await sessionToken();
+    const response=await fetch("/.netlify/functions/configuracao-web-push",{headers:{Authorization:`Bearer ${token}`,Accept:"application/json"},cache:"no-store"});
+    const config=await response.json();
+    if(!response.ok || !config?.publicKey) throw new Error(config?.error||"A configuração de notificações está indisponível.");
+    let browserSubscription=await currentPushSubscription(state.pushRegistration);
+    if(browserSubscription && !state.pushSubscription){
+      await browserSubscription.unsubscribe();
+      browserSubscription=null;
+    }
+    state.pushSubscription=browserSubscription||await createPushSubscription(state.pushRegistration,config.publicKey);
+    const row=subscriptionRow(state.pushSubscription,state.user.id);
+    const {error}=await sb.from("push_subscriptions").upsert(row,{onConflict:"endpoint"});
+    if(error) throw error;
+    if(status) status.textContent="Lembretes ativados neste aparelho.";
+    renderPushPreferences();
+  }catch(error){
+    state.pushSubscription=null;
+    if(status) status.textContent=error.message||"Não foi possível ativar os lembretes.";
+    renderPushPreferences();
+  }finally{ button.disabled=false; }
+}
+
+async function disablePushNotifications(){
+  const button=$("disablePushBtn");
+  const status=$("pushPreferenceStatus");
+  button.disabled=true;
+  if(status) status.textContent="Desativando lembretes neste aparelho…";
+  try{
+    const subscription=state.pushSubscription||await currentPushSubscription(state.pushRegistration);
+    if(subscription){
+      const {error}=await sb.from("push_subscriptions").delete().eq("endpoint",subscription.endpoint);
+      if(error) throw error;
+      await subscription.unsubscribe();
+    }
+    state.pushSubscription=null;
+    renderPushPreferences();
+  }catch(error){
+    if(status) status.textContent=error.message||"Não foi possível desativar os lembretes.";
+  }finally{ button.disabled=false; }
 }
 saveOwnProfile.busy=false;
 
@@ -3438,6 +3529,7 @@ function renderAdminAttention(){
   button.textContent=actions[view.action]||"";
   button.dataset.action=view.action;
   show("adminAttentionAction",Boolean(actions[view.action]) && !(view.action==="participants"));
+  show("adminPushReminderAction",snapshot.pending.length>0 && !snapshot.roundClosed && !snapshot.roundFinished);
   renderAdminQuickActions();
   renderAdminParticipants();
   renderAdminExecutiveDashboard();
@@ -4088,6 +4180,45 @@ async function sendAdminReminder(){
     if(navigator.share) await navigator.share({title:`Bolão • Rodada ${round}`,text});
     else { await navigator.clipboard.writeText(text); message("Lembrete copiado. Agora cole no WhatsApp."); }
   }catch(err){ if(err?.name!=="AbortError") message("Não foi possível compartilhar o lembrete.",true); }
+}
+
+async function requestAdminPush(mode){
+  const token=await sessionToken();
+  const snapshot=state.adminSnapshot||buildAdminSnapshot();
+  const response=await fetch("/.netlify/functions/enviar-lembrete-palpites",{
+    method:"POST",
+    headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json",Accept:"application/json"},
+    body:JSON.stringify({mode,round:snapshot.round,leagueId:state.activeLeague?.liga_id}),
+  });
+  const result=await response.json();
+  if(!response.ok || !result?.ok) throw new Error(result?.error||"Não foi possível preparar os lembretes.");
+  return result;
+}
+
+async function sendAdminPushReminder(){
+  const button=$("adminPushReminderAction");
+  if(!button || button.disabled) return;
+  button.disabled=true;
+  const original=button.textContent;
+  button.textContent="Verificando…";
+  try{
+    const preview=await requestAdminPush("preview");
+    if(!preview.pendingParticipants){ message("Todos os participantes já concluíram os palpites."); return; }
+    if(!preview.eligibleDevices){
+      message(`${preview.pendingParticipants} participante(s) estão pendentes, mas nenhum ativou notificações.`,true);
+      return;
+    }
+    const confirmed=confirm(`Enviar agora o lembrete da Rodada ${state.adminSnapshot.round} para ${preview.eligibleParticipants} participante(s), em ${preview.eligibleDevices} aparelho(s)?`);
+    if(!confirmed) return;
+    button.textContent="Enviando…";
+    const result=await requestAdminPush("send");
+    message(`${result.sent} notificação(ões) enviada(s). ${result.participantsWithoutNotifications} pendente(s) ainda não ativaram os lembretes.${result.expired?` ${result.expired} assinatura(s) expirada(s) foram desativadas.`:""}`,result.failed>0);
+  }catch(error){
+    message(error.message||"Não foi possível enviar os lembretes.",true);
+  }finally{
+    button.disabled=false;
+    button.textContent=original;
+  }
 }
 
 function currentAdminRoundSummary(){
@@ -4884,6 +5015,13 @@ async function initialize(session){
   show("welcome",false); show("app",true); show("loginBtn",false); show("headerUser",true);
   const isAdmin=isAdminUser(); show("adminPanel",isAdmin); show("adminMenuShortcut",isAdmin);
   renderRounds(); renderGames(); renderRanking(); renderStats(); renderHome(); renderMyTeam(); startMatchClockRefresh(); startLiveScoreRefresh(); refreshLiveScoresSilently(); if(isAdmin){ renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminDiagnostic(); renderAdminExecutiveDashboard(); renderAdminAudit(); renderAdminRecoveryProtection(); }
+  initializePushPreferences();
+  const pushRound=Number(new URLSearchParams(location.search).get("rodada"));
+  if(Number.isInteger(pushRound) && $("roundSelect")?.querySelector(`option[value="${pushRound}"]`)){
+    $("roundSelect").value=String(pushRound);
+    renderGames();
+    navigateTo("games");
+  }
 }
 
 
@@ -5059,6 +5197,8 @@ $("membershipRetryBtn")?.addEventListener("click",refreshMembershipStatus);
 $("saveFavoriteTeamBtn").onclick=saveFavoriteTeam;
 $("profileDataForm")?.addEventListener("submit",event=>{ event.preventDefault(); event.stopImmediatePropagation(); saveOwnProfile(event); });
 $("saveProfileBtn")?.addEventListener("click",saveOwnProfile);
+$("enablePushBtn")?.addEventListener("click",enablePushNotifications);
+$("disablePushBtn")?.addEventListener("click",disablePushNotifications);
 $("profilePhoneInput")?.addEventListener("input",event=>{ event.target.value=formatBrazilPhone(event.target.value); });
 $("registrationForm")?.addEventListener("submit",event=>{event.preventDefault();login();});
 $("registrationTeamToggle")?.addEventListener("click",()=>{const field=$("registrationFavoriteTeamFieldset");const opening=field.classList.contains("hidden");show("registrationFavoriteTeamFieldset",opening);$("registrationTeamToggle").setAttribute("aria-expanded",String(opening));if(opening)field.querySelector("button")?.focus();});
@@ -5080,6 +5220,7 @@ $("clearRegistrationTeamBtn")?.addEventListener("click",()=>{
 $("copyRegistrationLinkBtn")?.addEventListener("click",copyRegistrationLink);
 $("adminRefreshBtn").onclick=refreshAllAdminData;
 $("adminAttentionAction").onclick=handleAdminAction;
+$("adminPushReminderAction")?.addEventListener("click",sendAdminPushReminder);
 $("adminQuickActions")?.addEventListener("click",handleAdminQuickAction);
 $("openParticipantManagerBtn")?.addEventListener("click",openParticipantManager);
 $("adminParticipantManagerClose")?.addEventListener("click",closeParticipantManager);

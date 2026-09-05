@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.30.0">
-  <link rel="stylesheet" href="./css/styles.css?v=6.30.0">
-  <link rel="stylesheet" href="./css/components.css?v=6.30.0">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.30.0">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.30.0">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.30.0">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.31.0">
+  <link rel="stylesheet" href="./css/styles.css?v=6.31.0">
+  <link rel="stylesheet" href="./css/components.css?v=6.31.0">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.31.0">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.31.0">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.31.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.30.0</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.31.0</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -418,7 +418,10 @@
           </div>
           <div class="admin-card-footer">
             <small id="adminDataFreshness">Dados ainda não carregados.</small>
-            <button id="adminAttentionAction" class="primary hidden" type="button">📲 Enviar lembrete</button>
+            <div class="admin-reminder-actions">
+              <button id="adminPushReminderAction" class="secondary hidden" type="button">🔔 Avisar por notificação</button>
+              <button id="adminAttentionAction" class="primary hidden" type="button">📲 Enviar lembrete</button>
+            </div>
           </div>
           <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
         </article>
@@ -580,6 +583,16 @@
               <small id="profileFormStatus" class="profile-form-status" aria-live="polite"></small>
               <button id="saveProfileBtn" class="primary" type="button">Salvar dados</button>
             </form>
+          </div>
+          <div class="card push-preferences-card">
+            <span class="eyebrow">LEMBRETES</span>
+            <h2>Notificações de palpites</h2>
+            <p id="pushPreferenceDescription">Ative um aviso neste aparelho quando houver palpites pendentes antes da rodada.</p>
+            <div class="push-preferences-actions">
+              <button id="enablePushBtn" class="primary" type="button">Ativar lembretes</button>
+              <button id="disablePushBtn" class="secondary hidden" type="button">Desativar neste aparelho</button>
+            </div>
+            <small id="pushPreferenceStatus" class="profile-form-status" aria-live="polite">Verificando compatibilidade…</small>
           </div>
           <div class="card favorite-team-card">
             <span class="eyebrow">PERSONALIZAÇÃO</span>
@@ -848,6 +861,6 @@
       if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.30.0"></script>
+  <script type="module" src="./js/app.js?v=6.31.0"></script>
 </body>
 </html>

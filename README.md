@@ -4,7 +4,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 
 ## Estado atual
 
-- Versão funcional: `v6.30.0`.
+- Versão funcional: `v6.31.0`.
 - Prioridade, status e sequência atuais: [`ROADMAP.md`](ROADMAP.md).
 - Evolução para Temporadas e Ligas: conduzida incrementalmente neste aplicativo, com palpites compartilhados, contexto competitivo por liga e designações pendentes no fluxo de aprovação. O [plano vigente](docs/architecture/LIGAS_COM_PALPITES_COMPARTILHADOS.md) substitui o Rigazzo como destino exclusivo; o produto independente permanece congelado como histórico e possível laboratório em [sua documentação](docs/architecture/BOLAO_BRASILEIRAO_RIGAZZO.md).
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
@@ -28,7 +28,8 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 - snapshots competitivos internos para reconstrução de jogos encerrados, palpites e Ranking;
 - cadastro consolidado com nome, telefone opcional e time favorito opcional, seguido de aprovação administrativa;
 - preparação manual de mensagens individuais pelo WhatsApp na gestão de participantes e na Situação da Rodada;
-- manifesto web e ativos de PWA, ainda sem service worker ou cache offline.
+- lembretes Web Push opt-in por aparelho, com disparo administrativo manual para palpites pendentes;
+- manifesto web, ativos de PWA e service worker mínimo para notificações, ainda sem cache offline.
 
 Não há Copiloto, chat ou geração de texto por IA em produção. Os textos inteligentes atuais são produzidos por regras determinísticas no navegador.
 
