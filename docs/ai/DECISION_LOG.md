@@ -1848,3 +1848,41 @@ A manutenção cadastral deixa de fazer parte da preparação das próximas roda
 O encerramento da estabilização continua dependendo de evidência operacional e
 decisão própria. Nenhum componente legado, dado de auditoria, variável,
 credencial ou fornecedor é removido por este registro documental.
+
+## DEC-2026-051 — Lembretes Web Push seletivos com personalização automática
+
+- Data: 2026-09-08
+- Status: aceita
+- Responsáveis: responsável pelo produto
+- Substitui: parcialmente DEC-2026-048 quanto à prévia e ao conteúdo do lembrete
+- Impacto: alto
+
+### Contexto
+
+O disparo manual introduzido pela DEC-2026-048 apresentava somente totais,
+enviava a mesma mensagem a todos e deixava de funcionar depois do primeiro
+fechamento da rodada, mesmo quando partidas posteriores ainda aceitavam
+palpites.
+
+### Decisão
+
+- apresentar os participantes elegíveis antes do disparo e permitir seleção
+  individual;
+- iniciar a prévia com todos os elegíveis selecionados e mostrar separadamente
+  quem não ativou notificações;
+- gerar automaticamente uma mensagem por participante, sem edição livre,
+  contendo primeiro nome, quantidade de palpites ainda disponíveis, rodada e
+  próximo fechamento individual;
+- considerar somente partidas que ainda aceitam palpites;
+- recalcular toda a audiência no servidor e cancelar integralmente o envio
+  quando ela mudar entre prévia e confirmação;
+- entregar a mesma mensagem individual a todos os aparelhos ativos do
+  participante selecionado.
+
+### Consequências
+
+O administrador controla os destinatários e revisa o texto exato antes do
+envio. A operação continua manual, limitada a 100 aparelhos e dependente do
+opt-in em cada dispositivo. Não são adicionados agendamento, histórico,
+tentativas automáticas, integração com WhatsApp ou mudanças em banco, RLS,
+autenticação e dados competitivos.

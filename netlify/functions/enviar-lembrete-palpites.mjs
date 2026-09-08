@@ -1,5 +1,7 @@
 import webpush from "web-push";
+import {createHash} from "node:crypto";
 import { jsonResponse, methodNotAllowed, requireAdmin, requireEnv, safeErrorMessage } from "./_api-helpers.mjs";
+import {buildReminderParticipants,openReminderGames,publicParticipant} from "./_web-push-reminder.mjs";
 
 const UUID_PATTERN=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -23,56 +25,53 @@ async function buildAudience(supabase,{leagueId,round}){
   if(membersError) throw membersError;
   if(!games?.length) throw new Error("A rodada informada não possui jogos.");
 
-  const nextClose=Math.min(...games.map(game=>new Date(game.inicio).getTime()-30*60*1000));
-  if(!Number.isFinite(nextClose) || Date.now()>=nextClose){
-    throw new Error("O primeiro prazo de palpites desta rodada já foi encerrado.");
-  }
+  const openGames=openReminderGames(games);
+  if(!openGames.length) throw new Error("Não há jogos com palpites disponíveis nesta rodada.");
 
   const initialMemberIds=unique(members?.map(item=>item.user_id));
-  if(!initialMemberIds.length) return {league,games,pendingIds:[],subscriptions:[]};
+  if(!initialMemberIds.length) return {league,games:openGames,participants:[]};
   const {data:profiles,error:profilesError}=await supabase.from("participantes")
-    .select("user_id,email")
+    .select("user_id,nome,email")
     .in("user_id",initialMemberIds)
     .eq("ativo",true);
   if(profilesError) throw profilesError;
   const profileEmails=unique(profiles?.map(item=>String(item.email||"").trim().toLowerCase()));
-  if(!profileEmails.length) return {league,games,pendingIds:[],subscriptions:[]};
+  if(!profileEmails.length) return {league,games:openGames,participants:[]};
   const {data:authorizations,error:authorizationsError}=await supabase.from("participantes_autorizados")
     .select("email")
     .eq("ativo",true)
     .eq("status","approved");
   if(authorizationsError) throw authorizationsError;
   const authorizedEmails=new Set((authorizations||[]).map(item=>String(item.email||"").trim().toLowerCase()));
-  const memberIds=unique((profiles||[]).filter(item=>authorizedEmails.has(String(item.email||"").trim().toLowerCase())).map(item=>item.user_id));
-  if(!memberIds.length) return {league,games,pendingIds:[],subscriptions:[]};
-  const gameIds=games.map(game=>game.id_jogo);
+  const authorizedProfiles=(profiles||[]).filter(item=>authorizedEmails.has(String(item.email||"").trim().toLowerCase()));
+  const memberIds=unique(authorizedProfiles.map(item=>item.user_id));
+  if(!memberIds.length) return {league,games:openGames,participants:[]};
+  const gameIds=openGames.map(game=>game.id_jogo);
   const {data:picks,error:picksError}=await supabase.from("palpites").select("user_id,id_jogo").in("user_id",memberIds).in("id_jogo",gameIds);
   if(picksError) throw picksError;
-  const counts=new Map();
-  for(const pick of picks||[]){
-    const key=String(pick.user_id);
-    if(!counts.has(key)) counts.set(key,new Set());
-    counts.get(key).add(String(pick.id_jogo));
-  }
-  const pendingIds=memberIds.filter(userId=>(counts.get(userId)?.size||0)<gameIds.length);
-  if(!pendingIds.length) return {league,games,pendingIds,subscriptions:[]};
   const {data:subscriptions,error:subscriptionsError}=await supabase.from("push_subscriptions")
     .select("id,user_id,endpoint,p256dh,auth")
-    .in("user_id",pendingIds)
+    .in("user_id",memberIds)
     .eq("ativo",true);
   if(subscriptionsError) throw subscriptionsError;
-  if((subscriptions||[]).length>100) throw new Error("O limite seguro de 100 aparelhos por envio foi excedido.");
-  return {league,games,pendingIds,subscriptions:subscriptions||[]};
+  const participants=buildReminderParticipants({profiles:authorizedProfiles,openGames,picks:picks||[],subscriptions:subscriptions||[],round});
+  if(participants.reduce((total,item)=>total+item.eligibleDevices,0)>100) throw new Error("O limite seguro de 100 aparelhos por envio foi excedido.");
+  return {league,games:openGames,participants};
 }
 
 function audienceSummary(audience){
-  const subscribedUsers=new Set(audience.subscriptions.map(item=>String(item.user_id)));
+  const eligible=audience.participants.filter(item=>item.eligibleDevices>0);
   return {
-    pendingParticipants:audience.pendingIds.length,
-    eligibleParticipants:subscribedUsers.size,
-    eligibleDevices:audience.subscriptions.length,
-    participantsWithoutNotifications:audience.pendingIds.length-subscribedUsers.size,
+    pendingParticipants:audience.participants.length,
+    eligibleParticipants:eligible.length,
+    eligibleDevices:eligible.reduce((total,item)=>total+item.eligibleDevices,0),
+    participantsWithoutNotifications:audience.participants.length-eligible.length,
   };
+}
+
+function audienceVersion(audience){
+  const state=audience.participants.map(item=>[item.userId,item.pendingOpenPicks,item.nextCloseAt,item.subscriptions.map(subscription=>subscription.id).sort()]);
+  return createHash("sha256").update(JSON.stringify(state)).digest("hex");
 }
 
 export default async function handler(request){
@@ -91,17 +90,26 @@ export default async function handler(request){
 
     const audience=await buildAudience(admin.supabase,{leagueId,round});
     const summary=audienceSummary(audience);
-    if(mode==="preview") return jsonResponse({ok:true,mode,...summary},200,{"cache-control":"no-store"});
-    if(!audience.subscriptions.length) return jsonResponse({ok:true,mode,sent:0,expired:0,failed:0,...summary},200,{"cache-control":"no-store"});
+    const version=audienceVersion(audience);
+    if(mode==="preview") return jsonResponse({ok:true,mode,audienceVersion:version,participants:audience.participants.map(publicParticipant),...summary},200,{"cache-control":"no-store"});
+
+    const selectedUserIds=Array.isArray(body?.selectedUserIds)?unique(body.selectedUserIds):[];
+    if(!selectedUserIds.length || selectedUserIds.length>audience.participants.length || selectedUserIds.some(id=>!UUID_PATTERN.test(id))){
+      return jsonResponse({ok:false,error:"Seleção de participantes inválida."},400,{"cache-control":"no-store"});
+    }
+    if(typeof body?.audienceVersion!=="string" || body.audienceVersion!==version){
+      return jsonResponse({ok:false,code:"audience_changed",error:"A situação dos participantes mudou. Atualize a lista antes de enviar."},409,{"cache-control":"no-store"});
+    }
+    const participantById=new Map(audience.participants.filter(item=>item.eligibleDevices>0).map(item=>[item.userId,item]));
+    if(selectedUserIds.some(id=>!participantById.has(id))){
+      return jsonResponse({ok:false,error:"Um participante selecionado não está mais elegível para receber o lembrete."},400,{"cache-control":"no-store"});
+    }
+    const selectedParticipants=selectedUserIds.map(id=>participantById.get(id));
+    const selectedSubscriptions=selectedParticipants.flatMap(participant=>participant.subscriptions.map(subscription=>({subscription,participant})));
 
     webpush.setVapidDetails(pushEnv("VAPID_SUBJECT"),pushEnv("VAPID_PUBLIC_KEY"),pushEnv("VAPID_PRIVATE_KEY"));
-    const payload=JSON.stringify({
-      title:`Palpites pendentes • Rodada ${round}`,
-      body:"Complete seus palpites antes do primeiro fechamento da rodada.",
-      tag:`palpites-rodada-${round}`,
-      url:`/?rodada=${round}`,
-    });
-    const results=await Promise.all(audience.subscriptions.map(async subscription=>{
+    const results=await Promise.all(selectedSubscriptions.map(async ({subscription,participant})=>{
+      const payload=JSON.stringify({title:`Palpites pendentes • Rodada ${round}`,body:participant.message,tag:`palpites-rodada-${round}`,url:`/?rodada=${round}`});
       try{
         await webpush.sendNotification({endpoint:subscription.endpoint,keys:{p256dh:subscription.p256dh,auth:subscription.auth}},payload,{TTL:3600,urgency:"high"});
         return {status:"sent",id:subscription.id};
@@ -121,6 +129,7 @@ export default async function handler(request){
       sent:results.filter(item=>item.status==="sent").length,
       expired:expiredIds.length,
       failed:results.filter(item=>item.status==="failed").length,
+      selectedParticipants:selectedParticipants.length,
       ...summary,
     },200,{"cache-control":"no-store"});
   }catch(error){

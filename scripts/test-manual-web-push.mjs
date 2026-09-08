@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {readFile} from "node:fs/promises";
 import {base64UrlToUint8Array, subscriptionRow, supportsWebPush} from "../js/web-push.js";
+import {buildReminderParticipants,openReminderGames,reminderMessage} from "../netlify/functions/_web-push-reminder.mjs";
 
 const root=new URL("../",import.meta.url);
 const [html,app,worker,migration,rollback,sender,config]=await Promise.all([
@@ -23,8 +24,11 @@ assert.throws(()=>subscriptionRow({toJSON:()=>({})},"user-1"));
 
 assert.match(html,/id="enablePushBtn"/);
 assert.match(html,/id="adminPushReminderAction"/);
+assert.match(html,/id="adminPushReminderModal"/);
+assert.match(html,/id="adminPushSelectAll"/);
 assert.match(app,/Notification\.requestPermission\(\)/);
 assert.match(app,/requestAdminPush\("preview"\)/);
+assert.match(app,/selectedUserIds,audienceVersion/);
 assert.match(worker,/notificationclick/);
 assert.match(worker,/clients\.openWindow/);
 assert.match(migration,/alter table public\.push_subscriptions enable row level security/i);
@@ -33,11 +37,40 @@ assert.doesNotMatch(migration,/(?:alter|update|delete|insert into)\s+public\.(?:
 assert.match(rollback,/drop table if exists public\.push_subscriptions/i);
 assert.match(sender,/requireAdmin\(request\)/);
 assert.match(sender,/mode==="preview"/);
+assert.match(sender,/code:"audience_changed"/);
+assert.match(sender,/selectedUserIds/);
 assert.match(sender,/statusCode===404 \|\| error\?\.statusCode===410/);
 assert.match(sender,/\.from\("palpites"\)/);
 assert.match(sender,/\.eq\("status","ativo"\)/);
 assert.match(sender,/\.from\("participantes_autorizados"\)[\s\S]*\.eq\("status","approved"\)/);
 assert.match(config,/Participante não autorizado/);
 assert.doesNotMatch(sender,/celular|whatsapp/i);
+
+const now=Date.parse("2026-09-08T18:00:00.000Z");
+const games=[
+  {id_jogo:1,inicio:"2026-09-08T17:00:00.000Z",status:"agendado"},
+  {id_jogo:2,inicio:"2026-09-08T20:00:00.000Z",status:"agendado"},
+  {id_jogo:3,inicio:"2026-09-09T00:00:00.000Z",status:"adiado"},
+  {id_jogo:4,inicio:"2026-09-09T01:00:00.000Z",status:"agendado"},
+];
+const openGames=openReminderGames(games,now);
+assert.deepEqual(openGames.map(game=>game.id_jogo),[2,4],"jogos posteriores continuam disponíveis após o primeiro fechamento");
+const participants=buildReminderParticipants({
+  profiles:[
+    {user_id:"user-1",nome:"Gabriel Silva",email:"gabriel@example.com"},
+    {user_id:"user-2",nome:"Ana",email:"ana@example.com"},
+    {user_id:"user-3",nome:"Bia",email:"bia@example.com"},
+  ],
+  openGames,
+  picks:[{user_id:"user-1",id_jogo:2},{user_id:"user-2",id_jogo:2},{user_id:"user-2",id_jogo:4}],
+  subscriptions:[{id:"sub-1",user_id:"user-1"},{id:"sub-2",user_id:"user-1"}],
+  round:27,
+});
+assert.deepEqual(participants.map(item=>item.userId),["user-3","user-1"]);
+assert.equal(participants.find(item=>item.userId==="user-1").pendingOpenPicks,1);
+assert.equal(participants.find(item=>item.userId==="user-1").eligibleDevices,2);
+assert.match(participants.find(item=>item.userId==="user-1").message,/Olá, Gabriel! Você ainda tem 1 palpite disponível na Rodada 27\./);
+assert.equal(participants.find(item=>item.userId==="user-3").eligibleDevices,0);
+assert.match(reminderMessage({name:"Ana Souza",pendingOpenPicks:2,round:28,nextCloseAt:"2026-09-08T19:30:00.000Z"}),/2 palpites disponíveis/);
 
 console.log("Web Push manual verificado: opt-in por aparelho, RLS, seleção no servidor, expiração e preservação competitiva.");

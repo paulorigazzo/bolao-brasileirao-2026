@@ -1,3 +1,11 @@
+# v6.33.0 — Lembretes Web Push seletivos e personalizados
+
+- Apresenta na Área ADM os participantes elegíveis antes do envio e permite selecionar os destinatários.
+- Gera uma mensagem individual automática com nome, quantidade de palpites disponíveis, rodada e próximo fechamento.
+- Revalida a audiência no servidor e interrompe o envio quando a situação muda desde a prévia.
+- Mantém os lembretes disponíveis para partidas posteriores mesmo depois que o primeiro jogo da rodada fecha.
+- Preserva o opt-in por aparelho, o limite de 100 dispositivos, a remoção de assinaturas expiradas e o envio exclusivamente manual.
+
 # v6.32.1 — Mapeamento final da temporada na API-Football
 
 - Consolida em uma única migração protegida os 115 jogos ainda sem vínculo com a API-Football.

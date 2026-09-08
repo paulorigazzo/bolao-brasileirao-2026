@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.32.1">
-  <link rel="stylesheet" href="./css/styles.css?v=6.32.1">
-  <link rel="stylesheet" href="./css/components.css?v=6.32.1">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.32.1">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.32.1">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.32.1">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.33.0">
+  <link rel="stylesheet" href="./css/styles.css?v=6.33.0">
+  <link rel="stylesheet" href="./css/components.css?v=6.33.0">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.33.0">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.33.0">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.33.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-        <p class="brand-version"><span id="appVersion" class="version-pill">v6.32.1</span></p>
+        <p class="brand-version"><span id="appVersion" class="version-pill">v6.33.0</span></p>
       </div>
     </div>
     <div id="authArea" class="header-actions">
@@ -803,6 +803,22 @@
     </section>
   </div>
 
+  <div id="adminPushReminderModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="adminPushReminderTitle" aria-describedby="adminPushReminderSummary">
+    <section class="admin-push-reminder-modal card">
+      <div class="admin-detail-header">
+        <div><span class="eyebrow">LEMBRETE WEB PUSH</span><h2 id="adminPushReminderTitle">Escolher participantes</h2><p id="adminPushReminderSummary" class="muted-note"></p></div>
+        <button id="adminPushReminderClose" class="modal-close" type="button" aria-label="Fechar seleção de participantes">✕</button>
+      </div>
+      <div class="admin-push-selection-toolbar">
+        <label><input id="adminPushSelectAll" type="checkbox" checked> <span>Selecionar todos que podem receber</span></label>
+        <strong id="adminPushSelectionCount" aria-live="polite">0 selecionados</strong>
+      </div>
+      <div id="adminPushParticipantList" class="admin-push-participant-list"></div>
+      <p id="adminPushReminderNote" class="admin-push-reminder-note"></p>
+      <div class="admin-form-actions"><button id="adminPushReminderCancel" class="secondary" type="button">Cancelar</button><button id="adminPushReminderSend" class="primary" type="button">Enviar lembretes</button></div>
+    </section>
+  </div>
+
 
   <div id="adminParticipantManagerModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="adminParticipantManagerTitle">
     <section class="admin-participant-manager-modal card">
@@ -858,6 +874,6 @@
       if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-  <script type="module" src="./js/app.js?v=6.32.1"></script>
+  <script type="module" src="./js/app.js?v=6.33.0"></script>
 </body>
 </html>

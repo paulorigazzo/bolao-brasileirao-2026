@@ -22,7 +22,7 @@ import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js
 import { activeLeagueName, chooseActiveLeague, createLeagueRequestGate, filterProfilesByMembers, persistActiveLeague } from "./league-context.js";
 import { createPushSubscription, currentPushSubscription, subscriptionRow, supportsWebPush } from "./web-push.js";
 
-const APP_VERSION = "6.32.1";
+const APP_VERSION = "6.33.0";
 const API_FOOTBALL_RECONCILIATION_SESSION_KEY = "bolao:admin:api-football-reconciliation";
 installMotionTokens();
 installMotionInteractions();
@@ -764,7 +764,7 @@ function renderPushPreferences(){
 async function initializePushPreferences(){
   if(!supportsWebPush(window)){ renderPushPreferences(); return; }
   try{
-    state.pushRegistration=await navigator.serviceWorker.register("/service-worker.js?v=6.32.1");
+    state.pushRegistration=await navigator.serviceWorker.register("/service-worker.js?v=6.33.0");
     const browserSubscription=await currentPushSubscription(state.pushRegistration);
     if(browserSubscription){
       const {data,error}=await sb.from("push_subscriptions").select("id,ativo").eq("endpoint",browserSubscription.endpoint).maybeSingle();
@@ -793,7 +793,7 @@ async function enablePushNotifications(){
   try{
     const permission=Notification.permission==="default"?await Notification.requestPermission():Notification.permission;
     if(permission!=="granted") throw new Error("A autorização não foi concedida. Você pode continuar usando o Bolão normalmente.");
-    state.pushRegistration=state.pushRegistration||await navigator.serviceWorker.register("/service-worker.js?v=6.32.1");
+    state.pushRegistration=state.pushRegistration||await navigator.serviceWorker.register("/service-worker.js?v=6.33.0");
     const token=await sessionToken();
     const response=await fetch("/.netlify/functions/configuracao-web-push",{headers:{Authorization:`Bearer ${token}`,Accept:"application/json"},cache:"no-store"});
     const config=await response.json();
@@ -4183,17 +4183,75 @@ async function sendAdminReminder(){
   }catch(err){ if(err?.name!=="AbortError") message("Não foi possível compartilhar o lembrete.",true); }
 }
 
-async function requestAdminPush(mode){
+async function requestAdminPush(mode,details={}){
   const token=await sessionToken();
   const snapshot=state.adminSnapshot||buildAdminSnapshot();
   const response=await fetch("/.netlify/functions/enviar-lembrete-palpites",{
     method:"POST",
     headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json",Accept:"application/json"},
-    body:JSON.stringify({mode,round:snapshot.round,leagueId:state.activeLeague?.liga_id}),
+    body:JSON.stringify({mode,round:snapshot.round,leagueId:state.activeLeague?.liga_id,...details}),
   });
   const result=await response.json();
-  if(!response.ok || !result?.ok) throw new Error(result?.error||"Não foi possível preparar os lembretes.");
+  if(!response.ok || !result?.ok){
+    const error=new Error(result?.error||"Não foi possível preparar os lembretes.");
+    error.code=result?.code; error.status=response.status;
+    throw error;
+  }
   return result;
+}
+
+function selectedAdminPushUsers(){
+  return [...document.querySelectorAll('[data-admin-push-user]:checked')].map(input=>input.value);
+}
+
+function updateAdminPushSelection(){
+  const selectable=[...document.querySelectorAll('[data-admin-push-user]:not(:disabled)')];
+  const selected=selectedAdminPushUsers();
+  $("adminPushSelectionCount").textContent=`${selected.length} selecionado${selected.length===1?"":"s"}`;
+  $("adminPushSelectAll").checked=selectable.length>0 && selected.length===selectable.length;
+  $("adminPushSelectAll").indeterminate=selected.length>0 && selected.length<selectable.length;
+  $("adminPushReminderSend").disabled=!selected.length;
+}
+
+function closeAdminPushReminder(){
+  $("adminPushReminderModal")?.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+  $("adminPushReminderAction")?.focus();
+}
+
+function openAdminPushReminder(preview){
+  state.adminPushPreview=preview;
+  const participants=preview.participants||[];
+  $("adminPushReminderSummary").textContent=`Rodada ${state.adminSnapshot.round} • ${preview.eligibleParticipants} participante${preview.eligibleParticipants===1?"":"s"} com notificações ativas`;
+  $("adminPushParticipantList").innerHTML=participants.map(participant=>{
+    const eligible=participant.eligibleDevices>0;
+    const devices=eligible?`${participant.eligibleDevices} aparelho${participant.eligibleDevices===1?"":"s"}`:"Notificações não ativadas";
+    const pendingLabel=participant.pendingOpenPicks===1?"1 palpite disponível":`${participant.pendingOpenPicks} palpites disponíveis`;
+    return `<label class="admin-push-participant${eligible?"":" is-unavailable"}"><input type="checkbox" data-admin-push-user value="${escapeHtml(participant.userId)}" ${eligible?"checked":"disabled"}><span><strong>${escapeHtml(participant.name)}</strong><small>${pendingLabel} • ${devices}</small><em>${escapeHtml(participant.message)}</em></span></label>`;
+  }).join("");
+  $("adminPushReminderNote").textContent=preview.participantsWithoutNotifications?`${preview.participantsWithoutNotifications} participante${preview.participantsWithoutNotifications===1?"":"s"} aparece${preview.participantsWithoutNotifications===1?"":"m"} apenas para informação porque ainda não ativou notificações neste aparelho.`:"A situação será conferida novamente antes do envio.";
+  $("adminPushReminderModal").classList.remove("hidden");
+  document.body.classList.add("modal-open");
+  updateAdminPushSelection();
+  $("adminPushReminderClose")?.focus();
+}
+
+async function confirmAdminPushReminder(){
+  const preview=state.adminPushPreview;
+  const selectedUserIds=selectedAdminPushUsers();
+  if(!preview || !selectedUserIds.length) return;
+  const button=$("adminPushReminderSend");
+  button.disabled=true; button.textContent="Enviando…";
+  try{
+    const result=await requestAdminPush("send",{selectedUserIds,audienceVersion:preview.audienceVersion});
+    closeAdminPushReminder();
+    message(`${result.sent} notificação(ões) enviada(s) para ${result.selectedParticipants} participante(s).${result.expired?` ${result.expired} assinatura(s) expirada(s) foram desativadas.`:""}`,result.failed>0);
+  }catch(error){
+    message(error.message||"Não foi possível enviar os lembretes.",true);
+    if(error.code==="audience_changed") closeAdminPushReminder();
+  }finally{
+    button.disabled=false; button.textContent="Enviar lembretes";
+  }
 }
 
 async function sendAdminPushReminder(){
@@ -4204,16 +4262,12 @@ async function sendAdminPushReminder(){
   button.textContent="Verificando…";
   try{
     const preview=await requestAdminPush("preview");
-    if(!preview.pendingParticipants){ message("Todos os participantes já concluíram os palpites."); return; }
+    if(!preview.pendingParticipants){ message("Não há palpites ainda disponíveis pendentes nesta rodada."); return; }
     if(!preview.eligibleDevices){
       message(`${preview.pendingParticipants} participante(s) estão pendentes, mas nenhum ativou notificações.`,true);
       return;
     }
-    const confirmed=confirm(`Enviar agora o lembrete da Rodada ${state.adminSnapshot.round} para ${preview.eligibleParticipants} participante(s), em ${preview.eligibleDevices} aparelho(s)?`);
-    if(!confirmed) return;
-    button.textContent="Enviando…";
-    const result=await requestAdminPush("send");
-    message(`${result.sent} notificação(ões) enviada(s). ${result.participantsWithoutNotifications} pendente(s) ainda não ativaram os lembretes.${result.expired?` ${result.expired} assinatura(s) expirada(s) foram desativadas.`:""}`,result.failed>0);
+    openAdminPushReminder(preview);
   }catch(error){
     message(error.message||"Não foi possível enviar os lembretes.",true);
   }finally{
@@ -5265,6 +5319,15 @@ $("copyRegistrationLinkBtn")?.addEventListener("click",copyRegistrationLink);
 $("adminRefreshBtn").onclick=refreshAllAdminData;
 $("adminAttentionAction").onclick=handleAdminAction;
 $("adminPushReminderAction")?.addEventListener("click",sendAdminPushReminder);
+$("adminPushReminderClose")?.addEventListener("click",closeAdminPushReminder);
+$("adminPushReminderCancel")?.addEventListener("click",closeAdminPushReminder);
+$("adminPushReminderSend")?.addEventListener("click",confirmAdminPushReminder);
+$("adminPushReminderModal")?.addEventListener("click",event=>{if(event.target===$("adminPushReminderModal")) closeAdminPushReminder();});
+$("adminPushParticipantList")?.addEventListener("change",updateAdminPushSelection);
+$("adminPushSelectAll")?.addEventListener("change",event=>{
+  document.querySelectorAll('[data-admin-push-user]:not(:disabled)').forEach(input=>{input.checked=event.target.checked;});
+  updateAdminPushSelection();
+});
 $("adminQuickActions")?.addEventListener("click",handleAdminQuickAction);
 $("openParticipantManagerBtn")?.addEventListener("click",openParticipantManager);
 $("adminParticipantManagerClose")?.addEventListener("click",closeParticipantManager);
@@ -5331,6 +5394,7 @@ document.addEventListener("keydown",event=>{
   else if(!$("temporaryRankingModal")?.classList.contains("hidden")) closeTemporaryRanking();
   else if(!$("friendlyRankingsModal")?.classList.contains("hidden")) closeFriendlyRankings();
   else if(!$("adminRoundShareModal")?.classList.contains("hidden")) closeAdminRoundShare();
+  else if(!$("adminPushReminderModal")?.classList.contains("hidden")) closeAdminPushReminder();
   else if(!$("matchCalendarModal")?.classList.contains("hidden")) closeMatchCalendar();
   else if(!$("roundHighlightsModal")?.classList.contains("hidden")) closeRoundHighlights();
   else if(!$("rankingPicksModal")?.classList.contains("hidden")) closeRankingParticipantPicks();
