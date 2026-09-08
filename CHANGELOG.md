@@ -1,3 +1,10 @@
+# v6.31.2 — Reconciliação protegida da Rodada 27
+
+- Acrescenta à Área ADM uma reconciliação administrativa e somente leitura por rodada.
+- Compara identidades, mando e horários e produz dez candidatos auditáveis sem gravar mapeamentos.
+- Sinaliza diferenças superiores à tolerância padrão de 30 minutos para revisão humana.
+- Expõe cobertura, ambiguidades, cota, hashes e prova de zero escrita antes da migração incremental.
+
 # v6.31.1 — Estabilização da API-Football após a Rodada 26
 
 - Trata a manutenção sem jogos futuros mapeados como execução saudável sem chamada à API-Football.

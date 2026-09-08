@@ -1,6 +1,6 @@
-6.31.1
+6.31.2
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.31.1-estabilizacao-api-football-pos-rodada.md`](docs/releases/v6.31.1-estabilizacao-api-football-pos-rodada.md)
+- Nota da versão atual: [`docs/releases/v6.31.2-reconciliacao-protegida-rodada-27.md`](docs/releases/v6.31.2-reconciliacao-protegida-rodada-27.md)

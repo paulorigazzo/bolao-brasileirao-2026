@@ -8,6 +8,7 @@ const TEAM_ALIASES = new Map([
   ["atletico mineiro", "atletico mineiro"],
   ["paranaense", "athletico paranaense"],
   ["atletico paranaense", "athletico paranaense"],
+  ["athletico pr", "athletico paranaense"],
   ["athletico paranaense", "athletico paranaense"],
   ["bragantino", "red bull bragantino"],
   ["rb bragantino", "red bull bragantino"],
