@@ -45,7 +45,9 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - ✅ Consulta permanente do Ranking provisório da rodada atual pela Área ADM.
 - ✅ Sincronização de jogos, datas, locais, placares e classificação.
 - ✅ Sincronização ao vivo por minuto, restrita às partidas próximas e preservando a manutenção completa.
-- 🟡 Migração API-Football: rodada 27 reconciliada com dez identidades únicas; migração incremental dos vínculos preparada, aguardando aplicação remota e preflight.
+- ✅ API-Football consolidada como fonte oficial: Rodada 26 concluída, dez vínculos da Rodada 27 aplicados e três horários provisórios corrigidos pela sincronização oficial; preflight completo recorrente dispensado em favor do monitoramento normal e do rollback temporário.
+- 🔵 Mapear progressivamente as rodadas futuras antes de suas janelas operacionais, começando pela Rodada 28.
+- 🔵 Reavaliar o fechamento dos palpites de 30 para 15 ou 10 minutos em tarefa específica, com decisão explícita, atualização integral da regra e testes próprios.
 - ✅ Centro de Controle, diagnóstico, auditoria e acompanhamento da proteção de recuperação.
 - ✅ Detalhamento determinístico das ocorrências de recuperação, com classificação informativa, conferência administrativa auditável e verificação de checkpoint.
 - ✅ Ritmo visual uniforme entre os cards operacionais da Área ADM.
@@ -63,6 +65,9 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - ✅ Gestão de perfil e participantes.
 - ✅ Comunicação individual e manual via WhatsApp na gestão de participantes e na Situação da Rodada.
 - ✅ Lembretes Web Push ativados por aparelho e enviados manualmente pelo administrador aos participantes com palpites pendentes.
+- 🔵 Revisar os avisos Web Push da Área ADM, com escopo funcional a definir antes da implementação.
+- 🔵 Revisar todos os botões **Atualizar**: distinguir recarga do Supabase de sincronização externa, remover ações redundantes e renomear as necessárias conforme o efeito real e o público autorizado.
+- 🔵 Evoluir os cards da Tela de Jogos para mostrar autores e minutos dos gols a partir dos eventos da API-Football, mediante tarefa explícita que suspenda o congelamento somente nesse escopo.
 - ✅ Transparência individual dos palpites após o encerramento oficial das partidas.
 - ✅ Limite configurável de participantes ativos.
 - ✅ Cadastro consolidado com nome, telefone opcional e time favorito opcional.

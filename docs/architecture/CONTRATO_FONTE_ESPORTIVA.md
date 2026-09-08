@@ -3,11 +3,12 @@
 ## Estado
 
 - **Versão do contrato:** 1.0.
-- **Estado:** aprovado como referência para a próxima implementação.
+- **Estado:** aprovado e em uso pela integração oficial.
 - **Escopo:** jogos e classificação do Brasileirão Série A 2026.
-- **Fornecedor candidato validado:** API-Football.
-- **Fonte oficial atual:** football-data.org.
-- **Última atualização:** 2026-08-25.
+- **Fornecedor adotado:** API-Football.
+- **Fonte oficial atual:** API-Football.
+- **Fonte temporária de rollback:** football-data.org.
+- **Última atualização:** 2026-09-08.
 
 Este documento especifica a fronteira interna entre fornecedores esportivos e o
 Bolão. Ele é normativo para adaptadores futuros, mas **não autoriza** alteração
@@ -651,15 +652,16 @@ O comando `npm run test:api-football-adapter` valida esses critérios. Essa
 referência não consulta rede, não lê credenciais, não persiste dados e não
 autoriza a integração com produção.
 
-### Integração oficial inativa
+### Integração oficial em produção
 
-A Fase 6A reutiliza este contrato em
+A integração reutiliza este contrato em
 `netlify/functions/_api-football-official.mjs`. A seleção única de jogos e
-classificação ocorre por `SPORTS_DATA_OFFICIAL_PROVIDER`; ausência da variável
-mantém `football-data.org`, e qualquer valor fora da lista permitida falha sem
-consultar ou gravar. A API-Football somente produz atualizações competitivas
-depois de reconciliar fixture e equipes com os campos `api_football_*` do jogo
-canônico. O teste continua local e não autoriza ativação em produção.
+classificação ocorre por `SPORTS_DATA_OFFICIAL_PROVIDER`; em produção, a
+configuração seleciona `api-football`, e qualquer valor fora da lista permitida
+falha sem consultar ou gravar. A API-Football somente produz atualizações
+competitivas depois de reconciliar fixture e equipes com os campos
+`api_football_*` do jogo canônico. A football-data.org permanece disponível
+temporariamente apenas para rollback integral durante a estabilização.
 
 ### Ensaio somente leitura do corte
 

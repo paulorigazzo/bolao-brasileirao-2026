@@ -1772,3 +1772,38 @@ O administrador pode avisar os participantes que ainda não concluíram a rodada
 sem automatizar comunicações. Cada aparelho precisa ser ativado individualmente,
 assinaturas expiradas são desativadas e WhatsApp, dados competitivos e regras do
 Bolão permanecem independentes.
+
+## DEC-2026-049 — API-Football consolidada após a Rodada 26 e o mapeamento da Rodada 27
+
+- Data: 2026-09-08
+- Status: aceita
+- Responsáveis: responsável pelo produto
+- Impacto: alto, fonte esportiva oficial e operação em produção
+
+### Contexto
+
+A API-Football concluiu a Rodada 26 sem regressão material em resultados,
+placares, estados, minutagem, classificação ou sincronização. A migração
+`20260908125715_map_api_football_round_27` adicionou dez vínculos preservando o
+hash competitivo. A reconciliação posterior confirmou sete horários
+concordantes e três valores provisórios no Bolão; a sincronização oficial
+corrigiu os três e a Tela de Jogos foi conferida.
+
+### Decisão
+
+- consolidar a API-Football como fonte esportiva adotada e oficial;
+- registrar 97% como estimativa humana de confiança operacional, sem apresentá-la
+  como indicador automático do sistema;
+- dispensar um preflight completo obrigatório a cada rodada;
+- monitorar normalmente a primeira partida da Rodada 27 e manter o rollback
+  integral disponível durante essa rodada;
+- mapear progressivamente os jogos futuros, começando pela Rodada 28;
+- tratar a retirada da football-data.org, das comparações em sombra e das
+  estruturas de transição em portão posterior específico.
+
+### Consequências
+
+A operação deixa de reaplicar um portão de corte já comprovado e passa ao regime
+normal de observabilidade. A dispensa de preflight recorrente não reduz as
+validações de identidade, o comportamento fail-closed para jogos sem mapeamento
+nem a autoridade exclusiva da fonte oficial sobre os dados esportivos.
