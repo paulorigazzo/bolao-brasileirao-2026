@@ -1,3 +1,11 @@
+# v6.31.1 — Estabilização da API-Football após a Rodada 26
+
+- Trata a manutenção sem jogos futuros mapeados como execução saudável sem chamada à API-Football.
+- Preserva a última informação de cota conhecida e registra os jogos terminais e não mapeados ignorados.
+- Mantém sincronizações explícitas bloqueadas quando algum jogo solicitado não possui mapeamento completo.
+- Acrescenta recorte por rodada à reconciliação somente leitura e diagnóstico seguro de respostas recusadas pelo fornecedor.
+- Registra a conclusão íntegra da Rodada 26 e mantém o mapeamento e o preflight da Rodada 27 como portões independentes.
+
 # v6.31.0 — Lembretes manuais por Web Push
 
 - Permite que cada participante ative ou desative lembretes no próprio aparelho, mediante autorização do navegador.

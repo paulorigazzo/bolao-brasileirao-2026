@@ -975,6 +975,27 @@ sem mapeamento, não propôs reparos e manteve intactos os 50 palpites vinculado
 continua disponível para rollback durante a estabilização de uma ou duas
 rodadas.
 
+#### Evidência pós-corte da Rodada 26
+
+Em 8 de setembro, a auditoria somente leitura confirmou os dez jogos encerrados,
+dez placares completos, dez mapeamentos íntegros, origem `api-football`, escudos
+locais e dez snapshots competitivos criados na finalização. Os placares
+concordaram com a conferência externa e as janelas da rodada registraram 1.368
+sincronizações bem-sucedidas, sem falha, com média de 723,5 ms e uma chamada por
+execução.
+
+Depois do último jogo, a manutenção completa encontrou 120 jogos futuros ainda
+sem mapeamento e passou a falhar com `api_football_mapping_empty`. Como a chamada
+externa ocorria antes dessa constatação e falhas não avançavam o marco da última
+execução saudável, o agendador repetiu a tentativa e suas retentativas.
+
+A versão 6.31.1 trata a ausência de jogos não terminais mapeados como sucesso sem
+operação: não consulta o fornecedor, não grava jogos, preserva a última cota
+conhecida e registra o motivo `no_mapped_non_terminal_games`. Pedidos explícitos
+continuam falhando fechados quando o mapeamento estiver incompleto. Os dez jogos
+da rodada 27 ainda exigem reconciliação, migração incremental e preflight antes
+da próxima janela ao vivo.
+
 ## Estratégia de rollback
 
 Antes do corte, devem existir:
@@ -1079,6 +1100,7 @@ somente à identificação dos clubes e sujeitos aos direitos de seus titulares.
 | 2026-09-03 | 2.2 | Rollback da Fase 6D e escudos locais da API-Football registrados como novo portão de corte |
 | 2026-09-03 | 2.3 | Recorte reativado com escudos locais e nomes da classificação reconciliados pelo catálogo canônico dos jogos |
 | 2026-09-03 | 2.4 | Apresentação da classificação uniformizada e matriz dos vinte clubes protegida por regressão nominal e visual |
+| 2026-09-08 | 2.5 | Rodada 26 auditada; manutenção pós-rodada corrigida para zero chamadas sem jogos futuros mapeados; Rodada 27 mantida atrás de reconciliação e preflight |
 
 ## Referências internas
 

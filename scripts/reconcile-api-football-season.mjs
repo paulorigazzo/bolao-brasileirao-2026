@@ -3,9 +3,17 @@ import { normalizeApiFootballFixturesEnvelope } from "../src/sports-data/api-foo
 import { reconcileApiFootballSeason } from "../src/sports-data/api-football-reconciliation.mjs";
 
 function requiredEnvironment(name) {
-  const value = process.env[name];
+  const value = globalThis.Netlify?.env?.get?.(name) || process.env[name];
   if (!value) throw new Error(`missing_environment:${name}`);
   return value;
+}
+
+function requestedRound(argumentsList = process.argv.slice(2)) {
+  const argument = argumentsList.find((item) => String(item).startsWith("--round="));
+  if (!argument) return null;
+  const round = Number(String(argument).slice("--round=".length));
+  if (!Number.isInteger(round) || round < 1 || round > 38) throw new Error("invalid_round");
+  return round;
 }
 
 function safeReport(result, observation) {
@@ -35,6 +43,7 @@ function safeReport(result, observation) {
 }
 
 const apiKey = requiredEnvironment("API_FOOTBALL_KEY");
+const round = requestedRound();
 const supabase = createClient(requiredEnvironment("SUPABASE_URL"), requiredEnvironment("SUPABASE_SERVICE_ROLE_KEY"), {
   auth: { persistSession: false, autoRefreshToken: false },
 });
@@ -54,8 +63,27 @@ const normalized = normalizeApiFootballFixturesEnvelope(payload, {
   expectedCount: 380,
 });
 if (!normalized.observation.responseValid) {
+  console.error(JSON.stringify({
+    ok: false,
+    mode: "read_only_dry_run",
+    httpStatus: apiResponse.status,
+    errors: normalized.observation.errors,
+    providerErrors: payload?.errors || null,
+    quota: {
+      dailyLimit: normalized.observation.dailyLimit,
+      dailyRemaining: normalized.observation.dailyRemaining,
+      minuteLimit: normalized.observation.minuteLimit,
+      minuteRemaining: normalized.observation.minuteRemaining,
+    },
+  }, null, 2));
   throw new Error(`provider_normalization_failed:${normalized.observation.errors.join(",")}`);
 }
-const reconciliation = reconcileApiFootballSeason(canonicalResult.data || [], normalized.games);
+const canonicalGames = round == null
+  ? canonicalResult.data || []
+  : (canonicalResult.data || []).filter((game) => Number(game.rodada) === round);
+const providerGames = round == null
+  ? normalized.games
+  : normalized.games.filter((game) => Number(game.roundNumber) === round);
+const reconciliation = reconcileApiFootballSeason(canonicalGames, providerGames);
 console.log(JSON.stringify(safeReport(reconciliation, normalized.observation), null, 2));
 if (!reconciliation.complete) process.exitCode = 2;

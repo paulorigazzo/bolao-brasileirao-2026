@@ -4,7 +4,7 @@ import fixture from "../fixtures/api-football/fixture-1492340.sanitized.json" wi
 import standings from "../fixtures/api-football/standings-brasileirao.synthetic.json" with { type: "json" };
 import teams from "../fixtures/api-football/teams-brasileirao-2026.json" with { type: "json" };
 import { normalizeApiFootballFixtureEnvelope, normalizeApiFootballStandingsEnvelope } from "../src/sports-data/api-football-adapter.mjs";
-import { apiFootballClassificationResult, apiFootballGameForCanonical, scopeApiFootballSyncGames } from "../netlify/functions/_api-football-official.mjs";
+import { apiFootballClassificationResult, apiFootballGameForCanonical, scopeApiFootballSyncGames, syncApiFootballGames } from "../netlify/functions/_api-football-official.mjs";
 import { buildApiFootballCanonicalTeamCatalog, canonicalizeApiFootballClassificationResult, canonicalizeApiFootballStandings } from "../src/sports-data/api-football-team-catalog.mjs";
 import { officialSportsDataProvider, providerClassificationSnapshotId, SPORTS_DATA_PROVIDERS } from "../netlify/functions/_sports-data-provider.mjs";
 
@@ -109,6 +109,62 @@ assert.deepEqual(maintenanceScope.map((game) => game.id_jogo), [2, 3, 4]);
 assert.deepEqual(scopeApiFootballSyncGames([
   { id_jogo: 1, status: "encerrado" }, { id_jogo: 2, status: "agendado" },
 ], [1]).map((game) => game.id_jogo), [1]);
+
+const noOpWrites = [];
+let noOpApiCalls = 0;
+const noOpCanonical = [
+  ...Array.from({ length: 260 }, (_, index) => ({ id_jogo: index + 1, status: "encerrado" })),
+  ...Array.from({ length: 120 }, (_, index) => ({ id_jogo: index + 261, status: "agendado" })),
+];
+const noOpSupabase = {
+  from(table) {
+    if (table === "jogos") return { select: async () => ({ data: noOpCanonical, error: null }) };
+    if (table === "api_sync_log") return {
+      select: () => ({
+        eq: () => ({
+          order: () => ({
+            limit: async () => ({ data: [{ detalhes: { quota: { dailyRemaining: 7000, dailyLimit: 7500, minuteRemaining: 299, minuteLimit: 300 } } }], error: null }),
+          }),
+        }),
+      }),
+      insert: async (row) => { noOpWrites.push(row); return { error: null }; },
+    };
+    throw new Error(`Tabela inesperada no teste: ${table}`);
+  },
+};
+const noOpReport = await syncApiFootballGames({
+  trigger: "agendado:manutencao_6h",
+  supabase: noOpSupabase,
+  requestImpl: async () => { noOpApiCalls += 1; throw new Error("A API não deveria ser consultada."); },
+});
+assert.equal(noOpApiCalls, 0);
+assert.equal(noOpReport.apiCalls, 0);
+assert.equal(noOpReport.imported, 0);
+assert.equal(noOpReport.unmappedSkipped, 120);
+assert.equal(noOpReport.terminalSkipped, 260);
+assert.equal(noOpReport.skippedReason, "no_mapped_non_terminal_games");
+assert.equal(noOpReport.quota.dailyRemaining, 7000);
+assert.equal(noOpWrites.length, 1);
+assert.equal(noOpWrites[0].sucesso, true);
+assert.equal(noOpWrites[0].chamadas_api, 0);
+assert.equal(noOpWrites[0].jogos_atualizados, 0);
+
+await assert.rejects(
+  syncApiFootballGames({
+    matchIds: [261],
+    supabase: {
+      from(table) {
+        if (table === "jogos") return {
+          select: () => ({ in: async () => ({ data: [noOpCanonical[260]], error: null }) }),
+        };
+        throw new Error(`Tabela inesperada no teste explícito: ${table}`);
+      },
+    },
+    requestImpl: async () => { noOpApiCalls += 1; throw new Error("A API não deveria ser consultada."); },
+  }),
+  /api_football_mapping_incomplete/,
+);
+assert.equal(noOpApiCalls, 0);
 
 const syncSource = readFileSync(new URL("../netlify/functions/_sync-shared.mjs", import.meta.url), "utf8");
 const classificationSource = readFileSync(new URL("../netlify/functions/classificacao-brasileirao.mjs", import.meta.url), "utf8");

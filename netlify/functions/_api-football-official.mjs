@@ -98,17 +98,41 @@ export async function syncApiFootballGames(options = {}) {
   const startedAt = Date.now();
   const trigger = options.trigger || "manual";
   const requested = new Set((options.matchIds || []).map(Number).filter(Number.isInteger));
-  const supabase = serviceClient();
+  const supabase = options.supabase || serviceClient();
+  const requestImpl = options.requestImpl || request;
   let query = supabase.from("jogos").select("id_jogo,rodada,time_casa,time_fora,inicio,status,gols_casa,gols_fora,minuto_estimado,periodo_estimado,relogio_referencia_em,situacao_agendamento,fonte_agendamento,agendamento_confirmado_em,data_base,local_partida,time_casa_id,time_fora_id,time_casa_logo,time_fora_logo,api_football_id,api_football_time_casa_id,api_football_time_fora_id");
   if (requested.size) query = query.in("id_jogo", [...requested]);
   const { data: canonical, error: canonicalError } = await query;
   if (canonicalError) throw new Error(`Supabase: ${canonicalError.message}`);
   const observedAt = new Date().toISOString();
-  const { response, payload } = await request(`/fixtures?league=${API_FOOTBALL_LEAGUE_ID}&season=${SEASON_YEAR}`);
+  const scopedCanonical = scopeApiFootballSyncGames(canonical || [], [...requested]);
+  const mappedCanonical = scopedCanonical.filter((game) => game.api_football_id && game.api_football_time_casa_id && game.api_football_time_fora_id);
+  if (requested.size && mappedCanonical.length !== requested.size) throw new Error("api_football_mapping_incomplete");
+  if (!mappedCanonical.length) {
+    const { data: previousLogs, error: previousLogError } = await supabase.from("api_sync_log")
+      .select("detalhes")
+      .eq("sucesso", true)
+      .order("criado_em", { ascending: false })
+      .limit(1);
+    const quota = previousLogError ? null : previousLogs?.[0]?.detalhes?.quota || null;
+    const report = {
+      ok: true, provider: SPORTS_DATA_PROVIDERS.API_FOOTBALL, imported: 0,
+      unmappedSkipped: scopedCanonical.length, repairedCount: 0,
+      terminalSkipped: requested.size ? 0 : (canonical || []).length - scopedCanonical.length,
+      repairs: [], apiCalls: 0, syncMode: requested.size ? "live" : "full",
+      requestedMatches: requested.size, atomicUpdate: true, trigger,
+      durationMs: Date.now() - startedAt, synchronizedAt: observedAt, quota,
+      skippedReason: "no_mapped_non_terminal_games",
+    };
+    const { error: logError } = await supabase.from("api_sync_log").insert({ origem: trigger, sucesso: true,
+      duracao_ms: report.durationMs, chamadas_api: 0, jogos_atualizados: 0, detalhes: report });
+    if (logError && !isMissingTableError(logError)) console.warn("Falha ao registrar sincronização:", logError.message);
+    return report;
+  }
+  const { response, payload } = await requestImpl(`/fixtures?league=${API_FOOTBALL_LEAGUE_ID}&season=${SEASON_YEAR}`);
   const normalized = normalizeApiFootballFixturesEnvelope(payload, { observedAt, httpStatus: response.status, headers: response.headers });
   if (!normalized.observation.responseValid) throw new Error(normalized.observation.errors[0] || "fixtures_response_invalid");
   assertApiFootballQuota(normalized.observation);
-  const scopedCanonical = scopeApiFootballSyncGames(canonical || [], [...requested]);
   const plan = buildApiFootballSyncPlan({ canonicalGames: scopedCanonical, providerGames: normalized.games,
     requestedMatchIds: [...requested], observedAt });
   const merged = plan.updates;
