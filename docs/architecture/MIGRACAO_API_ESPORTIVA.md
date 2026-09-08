@@ -3,10 +3,10 @@
 ## Estado do documento
 
 - **Natureza:** plano arquitetural e operacional interno.
-- **Estado:** migração em estabilização; Fase 6D ativada com rollback preservado.
-- **Candidato em avaliação:** API-Football.
+- **Estado:** fonte consolidada em estabilização; rollback temporário preservado.
+- **Fornecedor adotado:** API-Football.
 - **Fonte oficial atual:** API-Football.
-- **Última atualização:** 2026-09-03.
+- **Última atualização:** 2026-09-08.
 
 Este documento é a referência canônica para retomar, executar e atualizar a
 migração da fonte de dados esportivos. Ele foi escrito para reduzir dependência
@@ -384,8 +384,8 @@ Regras operacionais para a implementação da Fase 5B:
 | 4. Coleta em sombra | concluída | duas provas reais isoladas, válidas e revisadas |
 | 5A. Acesso e desenho operacional | concluída | cobertura, limites e orçamento confirmados |
 | 5B. Sombra de rodada completa | concluída | rodada 25 integralmente observada, reconciliada e auditada |
-| 6. Corte controlado | em andamento | fundação inativa concluída; ensaio, preflight e ativação pendentes |
-| 7. Sombra pós-corte | não iniciada | 1–2 rodadas sem regressão material |
+| 6. Corte controlado | concluída | API-Football oficial, escudos locais e Rodada 27 mapeada e sincronizada |
+| 7. Estabilização pós-corte | em andamento | Rodada 26 concluída; monitoramento normal da Rodada 27 com rollback temporário |
 | 8. Encerramento | não iniciada | decisão sobre retirada do legado e dados sombra |
 
 Cada fase deve ser uma tarefa separada quando envolver riscos, permissões ou
@@ -993,8 +993,8 @@ A versão 6.31.1 trata a ausência de jogos não terminais mapeados como sucesso
 operação: não consulta o fornecedor, não grava jogos, preserva a última cota
 conhecida e registra o motivo `no_mapped_non_terminal_games`. Pedidos explícitos
 continuam falhando fechados quando o mapeamento estiver incompleto. Os dez jogos
-da rodada 27 ainda exigem reconciliação, migração incremental e preflight antes
-da próxima janela ao vivo.
+da rodada 27 ainda exigiam, naquele momento, reconciliação, migração incremental
+e decisão sobre preflight antes da próxima janela ao vivo.
 
 A versão 6.31.2 acrescenta uma reconciliação administrativa somente leitura por
 rodada para usar a credencial exclusivamente no ambiente publicado. O relatório
@@ -1010,9 +1010,26 @@ Bahia × Clube do Remo, Flamengo × Corinthians e Mirassol × Vitória mantêm
 diferenças entre a agenda provisória do Bolão e a API-Football. O hash aprovado
 dos dez candidatos é
 `1da24b4c152ba53ee0a5fab2025847433a78f34eb565141c78087e009dd96d4b`.
-A versão 6.31.3 prepara a migração transacional desses dez vínculos sem alterar
-horários ou qualquer campo competitivo e mantém o relatório visível durante a
-sessão administrativa. Aplicação remota e preflight permanecem portões próprios.
+A versão 6.31.3 preparou e aplicou a migração transacional desses dez vínculos
+sem alterar horários ou qualquer campo competitivo e mantém o relatório visível
+durante a sessão administrativa. A versão remota registrada é
+`20260908125715_map_api_football_round_27`.
+
+Após a aplicação, uma nova reconciliação confirmou os dez vínculos e repetiu as
+três diferenças esperadas da agenda provisória. A sincronização oficial de
+08/09/2026 corrigiu Bahia × Clube do Remo para 14/09 às 20:00, Flamengo ×
+Corinthians para 13/09 às 17:30 e Mirassol × Vitória para 13/09 às 16:00. A Tela
+de Jogos foi conferida após a sincronização e os outros sete horários
+permaneceram concordantes.
+
+Com a Rodada 26 concluída sem regressão material e a Rodada 27 integralmente
+mapeada e sincronizada, o responsável pelo produto consolidou a API-Football
+como fonte adotada. A confiança operacional foi estimada em 97%; trata-se de uma
+avaliação humana baseada nas evidências acumuladas, não de uma métrica calculada
+pelo sistema. Preflights completos recorrentes deixam de ser obrigatórios. O
+próximo portão operacional é o monitoramento normal da primeira partida da
+Rodada 27, mantendo rollback temporário, seguido do mapeamento progressivo da
+Rodada 28.
 
 ## Estratégia de rollback
 
@@ -1043,14 +1060,11 @@ não deve produzir operação híbrida.
 
 ## Decisões pendentes
 
-- limites finais do portão de corte após as evidências da Fase 5B;
-- localização e mecanismo da configuração da fonte oficial;
 - retenção e limpeza das tabelas de sombra;
 - tratamento futuro dos IDs legados de times e partidas;
 - momento de cancelar a assinatura antiga;
 - destino das tabelas de transição após estabilização.
-- estratégia de namespace do cache por fornecedor durante a sombra;
-- estratégia para os 255 mapeamentos aceitos e os 125 horários divergentes;
+- estratégia para os 115 jogos futuros ainda sem mapeamento;
 - necessidade de nova sombra somente se o contrato mudar ou a futura extensão
   de eventos exigir evidência operacional própria.
 
@@ -1122,6 +1136,7 @@ somente à identificação dos clubes e sujeitos aos direitos de seus titulares.
 | 2026-09-08 | 2.6 | Reconciliação administrativa somente leitura preparada para a Rodada 27, com horários divergentes bloqueando aprovação automática |
 | 2026-09-08 | 2.7 | Dez identidades da Rodada 27 reconciliadas; migração incremental protegida preparada e horários divergentes mantidos para o preflight |
 | 2026-09-08 | 2.8 | Migração `20260908125715` aplicada e validada; dez vínculos da Rodada 27 ativos sem alteração do estado competitivo |
+| 2026-09-08 | 2.9 | Três horários provisórios corrigidos pela sincronização oficial; API-Football consolidada e preflight recorrente substituído por monitoramento normal |
 
 ## Referências internas
 
