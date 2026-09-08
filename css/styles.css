@@ -2898,6 +2898,22 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
   font-size:.62rem!important;
   white-space:nowrap;
 }
+.premium-goal-events{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(104px,auto) minmax(0,1fr);
+  gap:12px;
+  margin-top:10px;
+  padding:10px 0 2px;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.premium-goal-list{display:grid;align-content:start;gap:7px;min-width:0;margin:0;padding:0;list-style:none}
+.premium-goal-list li{display:flex;align-items:flex-start;gap:5px;min-width:0;color:var(--text);font-size:.67rem;line-height:1.25}
+.premium-goal-list li span{display:-webkit-box;min-width:0;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.premium-goal-list li strong{flex:0 0 auto;color:var(--green2);font-size:.64rem}
+.premium-goal-list.is-home li{justify-content:flex-end;text-align:right}
+.premium-goal-list.is-home li strong{order:-1}
+.premium-goal-list.is-away li{justify-content:flex-start;text-align:left}
+.premium-goals-updating{margin-top:10px;padding:9px 10px;border-top:1px solid rgba(255,255,255,.06);color:var(--muted);font-size:.64rem;text-align:center}
 
 @media(max-width:520px){
   .premium-game-body-v2{padding:0 12px 12px!important}
@@ -2924,6 +2940,9 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
   .premium-expanded-center .premium-pick-inputs>span{font-size:.85rem!important}
   .premium-expanded-center .premium-score-display small,
   .premium-expanded-center .premium-pick-inputs small{font-size:.56rem!important}
+  .premium-goal-events{grid-template-columns:minmax(0,1fr) minmax(92px,auto) minmax(0,1fr);gap:7px;margin-top:8px;padding-top:9px}
+  .premium-goal-list li{font-size:.62rem}
+  .premium-goal-list li strong{font-size:.59rem}
 }
 @media(max-width:380px){
   .premium-game-body-v2{padding-inline:9px!important}
@@ -2940,6 +2959,7 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
   .premium-expanded-center .premium-pick-inputs input{
     width:35px!important;min-width:35px!important;height:44px!important;font-size:1rem!important;
   }
+  .premium-goal-events{grid-template-columns:minmax(0,1fr) 82px minmax(0,1fr);gap:4px}
 }
 
 /* v5.3.3 — seletor visual de rodadas no padrão do mockup */

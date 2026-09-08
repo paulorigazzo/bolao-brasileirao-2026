@@ -21,6 +21,7 @@
     { "version": "20260905024503", "name": "unify_participant_onboarding", "status": "applied" },
     { "version": "20260905040628", "name": "add_manual_web_push_subscriptions", "status": "applied" },
     { "version": "20260908125715", "name": "map_api_football_round_27", "status": "applied" },
-    { "version": "20260908160719", "name": "map_api_football_remaining_2026", "status": "applied" }
+    { "version": "20260908160719", "name": "map_api_football_remaining_2026", "status": "applied" },
+    { "version": "20260908193143", "name": "add_game_event_projection", "status": "applied" }
   ]
 }

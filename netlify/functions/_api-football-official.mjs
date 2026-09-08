@@ -6,6 +6,7 @@ import { API_FOOTBALL_LEAGUE_ID, CLASSIFICATION_SNAPSHOT_ID, SEASON_YEAR } from 
 import { providerClassificationSnapshotId, SPORTS_DATA_PROVIDERS } from "./_sports-data-provider.mjs";
 import { apiFootballLocalCrestUrl } from "../../src/sports-data/api-football-local-crests.mjs";
 import { canonicalizeApiFootballStandings } from "../../src/sports-data/api-football-team-catalog.mjs";
+import { buildApiFootballEventProjection } from "../../src/sports-data/api-football-event-projection.mjs";
 
 const API_BASE = "https://v3.football.api-sports.io";
 const DAILY_RESERVE_RATIO = 0.2;
@@ -138,12 +139,25 @@ export async function syncApiFootballGames(options = {}) {
   const merged = plan.updates;
   const { error: writeError } = await supabase.from("jogos").upsert(merged, { onConflict: "id_jogo" });
   if (writeError) throw new Error(`Supabase: ${writeError.message}`);
+  const providersByFixture = new Map(normalized.games.map((game) => [Number(game.providerFixtureId), game]));
+  const eventCandidates = mappedCanonical.map((canonicalGame) => buildApiFootballEventProjection(
+    providersByFixture.get(Number(canonicalGame.api_football_id)), canonicalGame, observedAt,
+  ));
+  const eventRows = eventCandidates.filter((candidate) => candidate.eligible).map((candidate) => candidate.row);
+  const eventSkipped = eventCandidates.filter((candidate) => !candidate.eligible).map((candidate) => candidate.reason);
+  let eventProjectionError = null;
+  if (eventRows.length) {
+    const { error } = await supabase.from("eventos_partida_cache").upsert(eventRows, { onConflict: "id_jogo" });
+    if (error) eventProjectionError = isMissingTableError(error) ? "projection_unavailable" : "projection_write_failed";
+  }
   const report = {
     ok: true, provider: SPORTS_DATA_PROVIDERS.API_FOOTBALL, imported: merged.length,
     unmappedSkipped: plan.unmappedCount, repairedCount: plan.repairs.length,
     terminalSkipped: requested.size ? 0 : (canonical || []).length - scopedCanonical.length,
     repairs: plan.repairs.slice(0, 50), apiCalls: 1, syncMode: requested.size ? "live" : "full",
     requestedMatches: requested.size, atomicUpdate: true, trigger, durationMs: Date.now() - startedAt, synchronizedAt: observedAt,
+    eventProjection: { updated: eventProjectionError ? 0 : eventRows.length, skipped: eventSkipped.length,
+      skippedReasons: [...new Set(eventSkipped)], warning: eventProjectionError },
     quota: { dailyLimit: normalized.observation.dailyLimit, dailyRemaining: normalized.observation.dailyRemaining,
       minuteLimit: normalized.observation.minuteLimit, minuteRemaining: normalized.observation.minuteRemaining },
   };
