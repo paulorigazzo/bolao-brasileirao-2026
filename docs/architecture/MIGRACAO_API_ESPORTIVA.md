@@ -996,6 +996,14 @@ continuam falhando fechados quando o mapeamento estiver incompleto. Os dez jogos
 da rodada 27 ainda exigem reconciliação, migração incremental e preflight antes
 da próxima janela ao vivo.
 
+A versão 6.31.2 acrescenta uma reconciliação administrativa somente leitura por
+rodada para usar a credencial exclusivamente no ambiente publicado. O relatório
+expõe candidatos por identidade inequívoca, horários das duas origens, aliases,
+bloqueios, cota e hashes antes e depois. Diferenças superiores a 30 minutos não
+são aprovadas automaticamente; a tolerância ampliada serve apenas para mostrar
+o candidato à revisão humana. A execução não grava mapeamentos e permanece como
+portão anterior à migração incremental da rodada 27.
+
 ## Estratégia de rollback
 
 Antes do corte, devem existir:
@@ -1101,6 +1109,7 @@ somente à identificação dos clubes e sujeitos aos direitos de seus titulares.
 | 2026-09-03 | 2.3 | Recorte reativado com escudos locais e nomes da classificação reconciliados pelo catálogo canônico dos jogos |
 | 2026-09-03 | 2.4 | Apresentação da classificação uniformizada e matriz dos vinte clubes protegida por regressão nominal e visual |
 | 2026-09-08 | 2.5 | Rodada 26 auditada; manutenção pós-rodada corrigida para zero chamadas sem jogos futuros mapeados; Rodada 27 mantida atrás de reconciliação e preflight |
+| 2026-09-08 | 2.6 | Reconciliação administrativa somente leitura preparada para a Rodada 27, com horários divergentes bloqueando aprovação automática |
 
 ## Referências internas
 

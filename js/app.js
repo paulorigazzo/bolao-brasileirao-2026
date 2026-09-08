@@ -22,7 +22,7 @@ import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js
 import { activeLeagueName, chooseActiveLeague, createLeagueRequestGate, filterProfilesByMembers, persistActiveLeague } from "./league-context.js";
 import { createPushSubscription, currentPushSubscription, subscriptionRow, supportsWebPush } from "./web-push.js";
 
-const APP_VERSION = "6.31.1";
+const APP_VERSION = "6.31.2";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -763,7 +763,7 @@ function renderPushPreferences(){
 async function initializePushPreferences(){
   if(!supportsWebPush(window)){ renderPushPreferences(); return; }
   try{
-    state.pushRegistration=await navigator.serviceWorker.register("/service-worker.js?v=6.31.1");
+    state.pushRegistration=await navigator.serviceWorker.register("/service-worker.js?v=6.31.2");
     const browserSubscription=await currentPushSubscription(state.pushRegistration);
     if(browserSubscription){
       const {data,error}=await sb.from("push_subscriptions").select("id,ativo").eq("endpoint",browserSubscription.endpoint).maybeSingle();
@@ -792,7 +792,7 @@ async function enablePushNotifications(){
   try{
     const permission=Notification.permission==="default"?await Notification.requestPermission():Notification.permission;
     if(permission!=="granted") throw new Error("A autorização não foi concedida. Você pode continuar usando o Bolão normalmente.");
-    state.pushRegistration=state.pushRegistration||await navigator.serviceWorker.register("/service-worker.js?v=6.31.1");
+    state.pushRegistration=state.pushRegistration||await navigator.serviceWorker.register("/service-worker.js?v=6.31.2");
     const token=await sessionToken();
     const response=await fetch("/.netlify/functions/configuracao-web-push",{headers:{Authorization:`Bearer ${token}`,Accept:"application/json"},cache:"no-store"});
     const config=await response.json();
@@ -4458,6 +4458,39 @@ async function runAdminApiFootballCutoverRehearsal(event){
     if(feedback){feedback.textContent=error.message||"O ensaio 6B não pôde ser concluído.";feedback.className="admin-shadow-feedback is-error";}
   }finally{if(button){button.disabled=false;button.textContent=originalText;}}
 }
+function renderApiFootballRoundReconciliation(result){
+  const hashes=result?.hashes||{},identityComplete=result?.identityComplete===true&&Number(result?.candidateMappings)===10;
+  const preserved=Number(result?.writes)===0&&hashes.mappingsBefore===hashes.mappingsAfter;
+  const candidates=Array.isArray(result?.candidates)?result.candidates:[];
+  return `<div class="admin-cutover-verdict ${identityComplete&&preserved?"is-success":"is-error"}"><strong>${identityComplete&&preserved?"✅ Candidatos prontos para revisão":"⛔ Reconciliação incompleta"}</strong><span>Rodada ${Number(result?.round)||"—"} • ${Number(result?.writes)||0} escrita(s)</span></div>
+    <div class="diagnostic-metrics admin-cutover-metrics"><div><span>Jogos canônicos</span><strong>${Number(result?.canonicalGames)||0}/10</strong></div><div><span>Jogos na API-Football</span><strong>${Number(result?.providerGames)||0}/10</strong></div><div><span>Candidatos únicos</span><strong>${Number(result?.candidateMappings)||0}/10</strong></div><div><span>Revisão de horários</span><strong>${result?.scheduleReviewRequired?"Obrigatória":"Dentro da tolerância"}</strong></div><div><span>Cota diária</span><strong>${result?.quota?.dailyRemaining??"—"} / ${result?.quota?.dailyLimit??"—"}</strong></div><div><span>Cota por minuto</span><strong>${result?.quota?.minuteRemaining??"—"} / ${result?.quota?.minuteLimit??"—"}</strong></div></div>
+    <div class="diagnostic-log-list">${candidates.map(item=>`<div><span>Jogo ${Number(item.canonicalGameId)||"—"} • fixture ${Number(item.providerFixtureId)||"—"}</span><strong>${escapeHtml(item.canonicalHome||"—")} × ${escapeHtml(item.canonicalAway||"—")}</strong><small>Bolão: ${diagnosticDate(item.canonicalKickoffAt)} • API: ${diagnosticDate(item.providerKickoffAt)} • diferença: ${Number(item.kickoffDeltaMinutes)||0} min ${item.withinStandardTolerance?"✅":"⚠"}</small></div>`).join("")||'<p class="muted-note">Nenhum candidato inequívoco.</p>'}</div>
+    <ul class="admin-cutover-checks"><li>${identityComplete?"✅":"⛔"} Dez identidades únicas</li><li>${preserved?"✅":"⛔"} Mapeamentos preservados e zero escrita</li><li>${result?.automaticApproval?"✅ Horários dentro da tolerância":"⚠ Aprovação automática bloqueada; revisar horários"}</li></ul>
+    <small>Hash da reconciliação</small><code class="admin-cutover-hash">${escapeHtml(result?.reconciliationHash||"indisponível")}</code><small>Hash do relatório</small><code class="admin-cutover-hash">${escapeHtml(result?.reportHash||"indisponível")}</code>`;
+}
+async function runAdminApiFootballRoundReconciliation(event){
+  event?.preventDefault();
+  if(!isAdminUser()) return;
+  const round=Number($("adminReconciliationRound")?.value),feedback=$("adminReconciliationFeedback"),report=$("adminReconciliationReport"),button=$("adminReconciliationSubmit");
+  if(!Number.isInteger(round)||round<1||round>38){if(feedback) feedback.textContent="Informe uma rodada entre 1 e 38.";return;}
+  if(!window.confirm(`Reconciliar somente em leitura os candidatos da API-Football para a rodada ${round}? Será consumida uma chamada e nenhum mapeamento será gravado.`)) return;
+  const originalText=button?.textContent||"Reconciliar rodada";
+  try{
+    if(button){button.disabled=true;button.textContent="Reconciliando…";}
+    if(feedback){feedback.textContent="Comparando identidades e horários sem gravar dados…";feedback.className="admin-shadow-feedback";}
+    if(report) report.innerHTML="";
+    const {data:{session}}=await sb.auth.getSession();
+    if(!session?.access_token) throw new Error("Sessão administrativa expirada.");
+    const response=await fetch("/.netlify/functions/reconciliar-api-football-rodada",{method:"POST",headers:{Authorization:`Bearer ${session.access_token}`,"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({rodada:round,confirmacao:"RECONCILE_API_FOOTBALL_ROUND"})});
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok||!result.ok) throw new Error(result.error||"A reconciliação não foi concluída.");
+    if(report) report.innerHTML=renderApiFootballRoundReconciliation(result);
+    const ready=result.identityComplete===true&&Number(result.candidateMappings)===10&&Number(result.writes)===0&&result.hashes?.mappingsBefore===result.hashes?.mappingsAfter;
+    if(feedback){feedback.textContent=ready?"Relatório concluído sem escrita. Revise os dez candidatos antes de preparar a migração.":"O relatório encontrou bloqueios; nenhum mapeamento foi gravado.";feedback.className=`admin-shadow-feedback ${ready?"is-success":"is-error"}`;}
+  }catch(error){
+    if(feedback){feedback.textContent=error.message||"A reconciliação não pôde ser concluída.";feedback.className="admin-shadow-feedback is-error";}
+  }finally{if(button){button.disabled=false;button.textContent=originalText;}}
+}
 async function renderAdminDiagnostic(){
   if(!isAdminUser()) return;
   const content=$("adminDiagnosticContent"), badge=$("adminDiagnosticBadge");
@@ -4491,6 +4524,7 @@ async function renderAdminDiagnostic(){
       <div class="diagnostic-section"><div class="diagnostic-autotest-head"><h3>Autoteste detalhado</h3><strong>${d.autotest.score}/100</strong></div><div class="diagnostic-checks">${d.autotest.checks.map(c=>`<div class="${c.ok?"ok":"fail"}"><span>${c.ok?"✔":"✕"}</span><span>${escapeHtml(c.label)}${diagnosticCheckDetail(c)}</span></div>`).join("")}</div></div>
       <div class="diagnostic-section"><h3>Logs recentes</h3><div class="diagnostic-log-list">${d.logs.slice(0,8).map(log=>`<div><span>${diagnosticDate(log.criado_em)}</span><strong>${log.sucesso?"🟢":"🔴"} ${escapeHtml(log.origem||"sincronização")}</strong><small>${escapeHtml(diagnosticProviderName(log?.detalhes?.provider))} • ${log.sucesso?`${log.jogos_atualizados??0} jogos • ${diagnosticDuration(log.duracao_ms)}`:escapeHtml(log.erro||"Falha sem detalhes")}</small></div>`).join("")||'<p class="muted-note">Nenhum log disponível.</p>'}</div></div>
       <div class="diagnostic-section admin-shadow-section"><div class="admin-shadow-heading"><div><span>TRANSIÇÃO · AVANÇADO</span><h3>Coleta histórica em sombra</h3></div><strong>Sem efeito competitivo</strong></div><p>Ferramenta preservada para auditoria técnica. Executa uma observação informada manualmente e grava somente fotografias nas tabelas de transição.</p><form id="adminShadowForm" class="admin-shadow-form"><label>ID do jogo no Bolão<input id="adminShadowGameId" name="id_jogo" type="number" min="1" step="1" value="554970" required></label><label>Fixture da API-Football<input id="adminShadowFixtureId" name="fixture_id" type="number" min="1" step="1" value="1492340" required></label><button id="adminShadowSubmit" class="secondary" type="submit">Executar coleta avançada</button></form><p id="adminShadowFeedback" class="admin-shadow-feedback" role="status" aria-live="polite"></p></div>
+      <div class="diagnostic-section admin-shadow-section admin-cutover-section"><div class="admin-shadow-heading"><div><span>API-FOOTBALL · PRÓXIMA RODADA</span><h3>Reconciliação de mapeamentos</h3></div><strong>Somente leitura</strong></div><p>Compara rodada, mando, clubes e horários para produzir candidatos auditáveis. Não grava IDs nem altera jogos.</p><form id="adminReconciliationForm" class="admin-shadow-form admin-cutover-form"><label>Rodada para reconciliar<input id="adminReconciliationRound" name="rodada" type="number" min="1" max="38" step="1" value="27" required></label><button id="adminReconciliationSubmit" class="secondary" type="submit">Reconciliar rodada</button></form><p id="adminReconciliationFeedback" class="admin-shadow-feedback" role="status" aria-live="polite"></p><div id="adminReconciliationReport" class="admin-cutover-report" aria-live="polite"></div></div>
       <div class="diagnostic-section admin-shadow-section admin-cutover-section"><div class="admin-shadow-heading"><div><span>FASE 6B · HISTÓRICO</span><h3>Ensaio de corte e rollback</h3></div><strong>Somente leitura</strong></div><p>Ferramenta preservada para revalidação excepcional. Compara rodada e classificação nas duas fontes, valida cota e prova por hashes que jogos e palpites permanecem intactos.</p><form id="adminCutoverForm" class="admin-shadow-form admin-cutover-form"><label>Rodada do ensaio<input id="adminCutoverRound" name="rodada" type="number" min="1" max="38" step="1" value="25" required></label><button id="adminCutoverSubmit" class="secondary" type="submit">Executar ensaio histórico</button></form><p id="adminCutoverFeedback" class="admin-shadow-feedback" role="status" aria-live="polite"></p><div id="adminCutoverReport" class="admin-cutover-report" aria-live="polite"></div></div>
       <div class="diagnostic-actions"><button id="diagnosticRefreshBtn" class="secondary" type="button">🔄 Atualizar diagnóstico</button><button id="diagnosticSyncBtn" class="primary" type="button">⚽ Sincronizar agora</button><button id="diagnosticExportBtn" class="secondary" type="button">📥 Exportar logs</button></div>
       <small class="diagnostic-note">A disponibilidade da fonte oficial é inferida apenas por seus próprios logs para não consumir cota; a atualidade do conteúdo é verificada separadamente nos jogos armazenados.</small>`;
@@ -4501,6 +4535,7 @@ async function renderAdminDiagnostic(){
     $("diagnosticRefreshBtn")?.addEventListener("click",renderAdminDiagnostic);
     $("diagnosticSyncBtn")?.addEventListener("click",async e=>{await syncGames(e.currentTarget); await renderAdminDiagnostic();});
     $("adminShadowForm")?.addEventListener("submit",runAdminShadowCollection);
+    $("adminReconciliationForm")?.addEventListener("submit",runAdminApiFootballRoundReconciliation);
     $("adminCutoverForm")?.addEventListener("submit",runAdminApiFootballCutoverRehearsal);
     $("diagnosticExportBtn")?.addEventListener("click",()=>{
       const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),diagnostic:d},null,2)],{type:"application/json"});
