@@ -1,3 +1,10 @@
+# v6.32.0 — Ações de atualização mais claras
+
+- Distingue recarga de dados do Supabase, consulta da classificação oficial, diagnóstico e sincronização esportiva.
+- Renomeia as ações conforme o efeito real e informa no painel administrativo que a recarga não consulta a fonte esportiva.
+- Remove da Área ADM a ação redundante de atualização do Ranking.
+- Preserva as operações existentes, a sincronização automática e as regras competitivas.
+
 # v6.31.3 — Mapeamento da API-Football para a Rodada 27
 
 - Prepara a migração incremental dos dez vínculos aprovados pelo relatório de reconciliação.
