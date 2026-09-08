@@ -1028,8 +1028,7 @@ como fonte adotada. A confiança operacional foi estimada em 97%; trata-se de um
 avaliação humana baseada nas evidências acumuladas, não de uma métrica calculada
 pelo sistema. Preflights completos recorrentes deixam de ser obrigatórios. O
 próximo portão operacional é o monitoramento normal da primeira partida da
-Rodada 27, mantendo rollback temporário, seguido do mapeamento progressivo da
-Rodada 28.
+Rodada 27, mantendo rollback temporário durante esse ciclo.
 
 ### Mapeamento final da temporada 2026
 
@@ -1049,6 +1048,31 @@ Ela exige a transição exata de 265 para 380 jogos vinculados, não altera camp
 competitivos e mantém rollback específico. A versão remota registrada é
 `20260908160719_map_api_football_remaining_2026`; o arquivo versionado e o
 histórico canônico local coincidem com esse registro.
+
+### Regime operacional após o mapeamento final
+
+Não há novo cadastro, reconciliação, migração ou preflight obrigatório por
+rodada em 2026. Antes das próximas janelas, a operação normal deve conferir no
+diagnóstico a API-Football como fonte oficial, a ausência de falhas persistentes
+de sincronização, mapeamento ou cota e a coerência de datas e horários,
+especialmente para partidas adiadas ou remarcadas. Durante a janela ao vivo,
+devem ser observados estado, relógio e placar; depois dela, resultados,
+classificação e snapshots competitivos.
+
+A Rodada 27 é o último ciclo recomendado de estabilização. Sua auditoria será
+considerada saudável se não identificar regressão material em identidade,
+agenda, estado, relógio, placar, classificação, escudos, palpites, pontuação ou
+sincronização, nem falha recorrente ou consumo anormal de cota. Atendidos esses
+critérios, poderá ser proposta em tarefa própria a conclusão da Fase 7. A Rodada
+28 permanece como margem operacional opcional e não constitui novo portão de
+mapeamento ou preflight.
+
+A Fase 8 deve permanecer separada e decidir, com escopo, risco e rollback
+próprios, a desativação definitiva da campanha e do agendamento de sombra, a
+retirada dos ensaios e reconciliações de transição, a retenção das tabelas de
+auditoria, o destino dos caches e IDs legados e, por último, a remoção da
+football-data.org e de sua credencial. Este registro não autoriza nenhuma dessas
+ações.
 
 ## Estratégia de rollback
 
@@ -1082,8 +1106,7 @@ não deve produzir operação híbrida.
 - retenção e limpeza das tabelas de sombra;
 - tratamento futuro dos IDs legados de times e partidas;
 - momento de cancelar a assinatura antiga;
-- destino das tabelas de transição após estabilização.
-- estratégia para os 115 jogos futuros ainda sem mapeamento;
+- destino das tabelas de transição após estabilização;
 - necessidade de nova sombra somente se o contrato mudar ou a futura extensão
   de eventos exigir evidência operacional própria.
 
@@ -1157,6 +1180,7 @@ somente à identificação dos clubes e sujeitos aos direitos de seus titulares.
 | 2026-09-08 | 2.8 | Migração `20260908125715` aplicada e validada; dez vínculos da Rodada 27 ativos sem alteração do estado competitivo |
 | 2026-09-08 | 2.9 | Três horários provisórios corrigidos pela sincronização oficial; API-Football consolidada e preflight recorrente substituído por monitoramento normal |
 | 2026-09-08 | 3.0 | Reconciliação final dos 115 jogos aplicada em uma única migração protegida; os 380 jogos ficaram vinculados sem alteração competitiva |
+| 2026-09-08 | 3.1 | Operação pós-mapeamento definida sem novos preflights por rodada; Rodada 27 adotada como último ciclo recomendado de estabilização e Fase 8 mantida separada |
 
 ## Referências internas
 

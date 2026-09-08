@@ -1807,3 +1807,44 @@ A operação deixa de reaplicar um portão de corte já comprovado e passa ao re
 normal de observabilidade. A dispensa de preflight recorrente não reduz as
 validações de identidade, o comportamento fail-closed para jogos sem mapeamento
 nem a autoridade exclusiva da fonte oficial sobre os dados esportivos.
+
+## DEC-2026-050 — Mapeamento integral substitui manutenção por rodada e delimita a estabilização
+
+- Data: 2026-09-08
+- Status: aceita
+- Responsáveis: responsável pelo produto
+- Impacto: operacional e documental; nenhuma mudança funcional nesta decisão
+
+### Contexto
+
+Após a DEC-2026-049, a estratégia progressiva foi substituída por uma única
+reconciliação dos 115 vínculos restantes. A migração
+`20260908160719_map_api_football_remaining_2026` concluiu 380 de 380 jogos,
+incluindo as Rodadas 28–38 e as pendências históricas das Rodadas 15 e 21, sem
+alterar o estado competitivo. A exigência de mapear progressivamente a partir
+da Rodada 28 deixou de existir.
+
+### Decisão
+
+- não executar novos cadastros, reconciliações, migrações ou preflights
+  obrigatórios por rodada na temporada 2026;
+- operar as próximas rodadas pelo agendamento e pelo monitoramento normal do
+  diagnóstico, horários, estados, relógio, placares, classificação e cotas;
+- adotar a Rodada 27 como último ciclo recomendado de estabilização, mantendo o
+  rollback integral disponível durante ela;
+- considerar a estabilização apta a encerramento após auditoria da Rodada 27 sem
+  regressão material, falha recorrente ou consumo anormal de cota;
+- tratar a Rodada 28 somente como margem opcional, não como portão obrigatório;
+- reservar para uma Fase 8 independente qualquer retirada de sombra,
+  football-data.org, caches, credenciais, acionadores ou estruturas de
+  transição.
+
+Esta decisão substitui somente o item de mapeamento progressivo da
+DEC-2026-049; preserva suas demais decisões e o histórico que levou ao corte.
+
+### Consequências
+
+A manutenção cadastral deixa de fazer parte da preparação das próximas rodadas.
+O encerramento da estabilização continua dependendo de evidência operacional e
+decisão própria. Nenhum componente legado, dado de auditoria, variável,
+credencial ou fornecedor é removido por este registro documental.
