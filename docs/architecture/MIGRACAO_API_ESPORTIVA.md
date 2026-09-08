@@ -1031,6 +1031,25 @@ próximo portão operacional é o monitoramento normal da primeira partida da
 Rodada 27, mantendo rollback temporário, seguido do mapeamento progressivo da
 Rodada 28.
 
+### Mapeamento final da temporada 2026
+
+Em 08/09/2026, a estratégia progressiva foi substituída por uma reconciliação
+única dos 115 jogos ainda sem vínculo. O conjunto é formado por um jogo da
+Rodada 15, quatro adiados da Rodada 21 e todos os 110 jogos das Rodadas 28–38.
+
+As Rodadas 28–38 apresentaram dez identidades únicas cada. A Rodada 15 também
+confirmou a identidade pendente. Na Rodada 21, Botafogo × Grêmio ultrapassou a
+janela temporal de sete dias por ter sido adiado de julho para setembro; rodada,
+mando e clubes permanecem como a identidade do confronto. O horário é tratado
+como dado sincronizável e não como componente definitivo do vínculo.
+
+A versão 6.32.1 aplica a migração transacional dos 115 vínculos restantes com
+hash `90fc90cd14e73e3654acef3f3ca2318ecd679436d76be762d9e6d46dc4da2b67`.
+Ela exige a transição exata de 265 para 380 jogos vinculados, não altera campos
+competitivos e mantém rollback específico. A versão remota registrada é
+`20260908160719_map_api_football_remaining_2026`; o arquivo versionado e o
+histórico canônico local coincidem com esse registro.
+
 ## Estratégia de rollback
 
 Antes do corte, devem existir:
@@ -1137,6 +1156,7 @@ somente à identificação dos clubes e sujeitos aos direitos de seus titulares.
 | 2026-09-08 | 2.7 | Dez identidades da Rodada 27 reconciliadas; migração incremental protegida preparada e horários divergentes mantidos para o preflight |
 | 2026-09-08 | 2.8 | Migração `20260908125715` aplicada e validada; dez vínculos da Rodada 27 ativos sem alteração do estado competitivo |
 | 2026-09-08 | 2.9 | Três horários provisórios corrigidos pela sincronização oficial; API-Football consolidada e preflight recorrente substituído por monitoramento normal |
+| 2026-09-08 | 3.0 | Reconciliação final dos 115 jogos aplicada em uma única migração protegida; os 380 jogos ficaram vinculados sem alteração competitiva |
 
 ## Referências internas
 
