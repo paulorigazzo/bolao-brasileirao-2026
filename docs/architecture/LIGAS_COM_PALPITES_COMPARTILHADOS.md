@@ -187,12 +187,19 @@ derivados, inclusão rápida e acompanhamento automático da aprovação. Manter
 consolidação de `user_id` como portão da identidade competitiva e distinguir
 falha de ativação da decisão explícita sem liga.
 
+**Status:** concluída e validada operacionalmente. Em 8 de setembro de 2026,
+foi confirmada a entrada bem-sucedida de um novo participante pela jornada real
+entregue na `v6.30.0`, abrangendo cadastro, autenticação, aprovação,
+consolidação da identidade competitiva e acesso ao bolão. A evidência é
+registrada sem nome, e-mail, telefone ou outro dado pessoal. Os cenários
+automatizados de idempotência, autorização e designações pendentes permanecem
+cobertos pela suíte do projeto.
+
 ## Retorno e interrupção
 
-Enquanto a nova camada estiver em validação, o retorno consiste em desativar as
-leituras por liga e continuar usando o modelo global existente. As novas
-estruturas podem permanecer isoladas para diagnóstico; o retorno não depende da
-exclusão de dados.
+Em caso de regressão, o retorno consiste em desativar as leituras por liga e
+continuar usando o modelo global existente. As novas estruturas podem permanecer
+isoladas para diagnóstico; o retorno não depende da exclusão de dados.
 
 Interromper o avanço diante de:
 
