@@ -1004,6 +1004,16 @@ são aprovadas automaticamente; a tolerância ampliada serve apenas para mostrar
 o candidato à revisão humana. A execução não grava mapeamentos e permanece como
 portão anterior à migração incremental da rodada 27.
 
+O relatório real da rodada 27 confirmou dez jogos canônicos, dez fixtures e dez
+identidades únicas, zero escrita e hashes preservados. Sete horários coincidem;
+Bahia × Clube do Remo, Flamengo × Corinthians e Mirassol × Vitória mantêm
+diferenças entre a agenda provisória do Bolão e a API-Football. O hash aprovado
+dos dez candidatos é
+`1da24b4c152ba53ee0a5fab2025847433a78f34eb565141c78087e009dd96d4b`.
+A versão 6.31.3 prepara a migração transacional desses dez vínculos sem alterar
+horários ou qualquer campo competitivo e mantém o relatório visível durante a
+sessão administrativa. Aplicação remota e preflight permanecem portões próprios.
+
 ## Estratégia de rollback
 
 Antes do corte, devem existir:
@@ -1110,6 +1120,8 @@ somente à identificação dos clubes e sujeitos aos direitos de seus titulares.
 | 2026-09-03 | 2.4 | Apresentação da classificação uniformizada e matriz dos vinte clubes protegida por regressão nominal e visual |
 | 2026-09-08 | 2.5 | Rodada 26 auditada; manutenção pós-rodada corrigida para zero chamadas sem jogos futuros mapeados; Rodada 27 mantida atrás de reconciliação e preflight |
 | 2026-09-08 | 2.6 | Reconciliação administrativa somente leitura preparada para a Rodada 27, com horários divergentes bloqueando aprovação automática |
+| 2026-09-08 | 2.7 | Dez identidades da Rodada 27 reconciliadas; migração incremental protegida preparada e horários divergentes mantidos para o preflight |
+| 2026-09-08 | 2.8 | Migração `20260908125715` aplicada e validada; dez vínculos da Rodada 27 ativos sem alteração do estado competitivo |
 
 ## Referências internas
 

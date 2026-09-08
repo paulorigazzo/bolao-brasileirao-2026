@@ -4,7 +4,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.31.2`.
+- Versão funcional: `v6.31.3`.
 - Prioridade: **manter o Bolão 2026 estável e evoluí-lo incrementalmente para múltiplas ligas com palpites compartilhados**.
 - Próxima etapa coordenada: validar a jornada unificada de novos participantes da L10, mantendo a estabilização da API-Football como linha operacional paralela e o Rigazzo congelado como histórico e possível laboratório.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
@@ -45,7 +45,7 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - ✅ Consulta permanente do Ranking provisório da rodada atual pela Área ADM.
 - ✅ Sincronização de jogos, datas, locais, placares e classificação.
 - ✅ Sincronização ao vivo por minuto, restrita às partidas próximas e preservando a manutenção completa.
-- 🟡 Migração API-Football: rodada 26 concluída; manutenção pós-rodada estabilizada; reconciliação administrativa somente leitura da rodada 27 preparada como próximo portão, antes da migração incremental e do preflight.
+- 🟡 Migração API-Football: rodada 27 reconciliada com dez identidades únicas; migração incremental dos vínculos preparada, aguardando aplicação remota e preflight.
 - ✅ Centro de Controle, diagnóstico, auditoria e acompanhamento da proteção de recuperação.
 - ✅ Detalhamento determinístico das ocorrências de recuperação, com classificação informativa, conferência administrativa auditável e verificação de checkpoint.
 - ✅ Ritmo visual uniforme entre os cards operacionais da Área ADM.

@@ -22,7 +22,8 @@ import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js
 import { activeLeagueName, chooseActiveLeague, createLeagueRequestGate, filterProfilesByMembers, persistActiveLeague } from "./league-context.js";
 import { createPushSubscription, currentPushSubscription, subscriptionRow, supportsWebPush } from "./web-push.js";
 
-const APP_VERSION = "6.31.2";
+const APP_VERSION = "6.31.3";
+const API_FOOTBALL_RECONCILIATION_SESSION_KEY = "bolao:admin:api-football-reconciliation";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -763,7 +764,7 @@ function renderPushPreferences(){
 async function initializePushPreferences(){
   if(!supportsWebPush(window)){ renderPushPreferences(); return; }
   try{
-    state.pushRegistration=await navigator.serviceWorker.register("/service-worker.js?v=6.31.2");
+    state.pushRegistration=await navigator.serviceWorker.register("/service-worker.js?v=6.31.3");
     const browserSubscription=await currentPushSubscription(state.pushRegistration);
     if(browserSubscription){
       const {data,error}=await sb.from("push_subscriptions").select("id,ativo").eq("endpoint",browserSubscription.endpoint).maybeSingle();
@@ -792,7 +793,7 @@ async function enablePushNotifications(){
   try{
     const permission=Notification.permission==="default"?await Notification.requestPermission():Notification.permission;
     if(permission!=="granted") throw new Error("A autorização não foi concedida. Você pode continuar usando o Bolão normalmente.");
-    state.pushRegistration=state.pushRegistration||await navigator.serviceWorker.register("/service-worker.js?v=6.31.2");
+    state.pushRegistration=state.pushRegistration||await navigator.serviceWorker.register("/service-worker.js?v=6.31.3");
     const token=await sessionToken();
     const response=await fetch("/.netlify/functions/configuracao-web-push",{headers:{Authorization:`Bearer ${token}`,Accept:"application/json"},cache:"no-store"});
     const config=await response.json();
@@ -4468,6 +4469,9 @@ function renderApiFootballRoundReconciliation(result){
     <ul class="admin-cutover-checks"><li>${identityComplete?"✅":"⛔"} Dez identidades únicas</li><li>${preserved?"✅":"⛔"} Mapeamentos preservados e zero escrita</li><li>${result?.automaticApproval?"✅ Horários dentro da tolerância":"⚠ Aprovação automática bloqueada; revisar horários"}</li></ul>
     <small>Hash da reconciliação</small><code class="admin-cutover-hash">${escapeHtml(result?.reconciliationHash||"indisponível")}</code><small>Hash do relatório</small><code class="admin-cutover-hash">${escapeHtml(result?.reportHash||"indisponível")}</code>`;
 }
+function storedApiFootballRoundReconciliation(){
+  try{return JSON.parse(sessionStorage.getItem(API_FOOTBALL_RECONCILIATION_SESSION_KEY)||"null");}catch{return null;}
+}
 async function runAdminApiFootballRoundReconciliation(event){
   event?.preventDefault();
   if(!isAdminUser()) return;
@@ -4484,6 +4488,7 @@ async function runAdminApiFootballRoundReconciliation(event){
     const response=await fetch("/.netlify/functions/reconciliar-api-football-rodada",{method:"POST",headers:{Authorization:`Bearer ${session.access_token}`,"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({rodada:round,confirmacao:"RECONCILE_API_FOOTBALL_ROUND"})});
     const result=await response.json().catch(()=>({}));
     if(!response.ok||!result.ok) throw new Error(result.error||"A reconciliação não foi concluída.");
+    sessionStorage.setItem(API_FOOTBALL_RECONCILIATION_SESSION_KEY,JSON.stringify(result));
     if(report) report.innerHTML=renderApiFootballRoundReconciliation(result);
     const ready=result.identityComplete===true&&Number(result.candidateMappings)===10&&Number(result.writes)===0&&result.hashes?.mappingsBefore===result.hashes?.mappingsAfter;
     if(feedback){feedback.textContent=ready?"Relatório concluído sem escrita. Revise os dez candidatos antes de preparar a migração.":"O relatório encontrou bloqueios; nenhum mapeamento foi gravado.";feedback.className=`admin-shadow-feedback ${ready?"is-success":"is-error"}`;}
@@ -4536,6 +4541,11 @@ async function renderAdminDiagnostic(){
     $("diagnosticSyncBtn")?.addEventListener("click",async e=>{await syncGames(e.currentTarget); await renderAdminDiagnostic();});
     $("adminShadowForm")?.addEventListener("submit",runAdminShadowCollection);
     $("adminReconciliationForm")?.addEventListener("submit",runAdminApiFootballRoundReconciliation);
+    const storedReconciliation=storedApiFootballRoundReconciliation();
+    if(storedReconciliation?.ok&&$("adminReconciliationReport")){
+      $("adminReconciliationReport").innerHTML=renderApiFootballRoundReconciliation(storedReconciliation);
+      if($("adminReconciliationFeedback")){ $("adminReconciliationFeedback").textContent="Último relatório desta sessão restaurado."; $("adminReconciliationFeedback").className="admin-shadow-feedback is-success"; }
+    }
     $("adminCutoverForm")?.addEventListener("submit",runAdminApiFootballCutoverRehearsal);
     $("diagnosticExportBtn")?.addEventListener("click",()=>{
       const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),diagnostic:d},null,2)],{type:"application/json"});

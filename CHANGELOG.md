@@ -1,3 +1,10 @@
+# v6.31.3 — Mapeamento da API-Football para a Rodada 27
+
+- Prepara a migração incremental dos dez vínculos aprovados pelo relatório de reconciliação.
+- Protege a escrita com hash, contagens, bloqueio transacional, auditoria e hash competitivo.
+- Inclui rollback específico e preserva agenda, resultados, palpites e pontuação.
+- Mantém o último relatório de reconciliação visível durante a sessão administrativa.
+
 # v6.31.2 — Reconciliação protegida da Rodada 27
 
 - Acrescenta à Área ADM uma reconciliação administrativa e somente leitura por rodada.

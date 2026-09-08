@@ -1,6 +1,6 @@
-6.31.2
+6.31.3
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.31.2-reconciliacao-protegida-rodada-27.md`](docs/releases/v6.31.2-reconciliacao-protegida-rodada-27.md)
+- Nota da versão atual: [`docs/releases/v6.31.3-mapeamento-api-football-rodada-27.md`](docs/releases/v6.31.3-mapeamento-api-football-rodada-27.md)
