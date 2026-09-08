@@ -22,7 +22,7 @@ import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js
 import { activeLeagueName, chooseActiveLeague, createLeagueRequestGate, filterProfilesByMembers, persistActiveLeague } from "./league-context.js";
 import { createPushSubscription, currentPushSubscription, subscriptionRow, supportsWebPush } from "./web-push.js";
 
-const APP_VERSION = "6.31.3";
+const APP_VERSION = "6.32.0";
 const API_FOOTBALL_RECONCILIATION_SESSION_KEY = "bolao:admin:api-football-reconciliation";
 installMotionTokens();
 installMotionInteractions();
@@ -764,7 +764,7 @@ function renderPushPreferences(){
 async function initializePushPreferences(){
   if(!supportsWebPush(window)){ renderPushPreferences(); return; }
   try{
-    state.pushRegistration=await navigator.serviceWorker.register("/service-worker.js?v=6.31.3");
+    state.pushRegistration=await navigator.serviceWorker.register("/service-worker.js?v=6.32.0");
     const browserSubscription=await currentPushSubscription(state.pushRegistration);
     if(browserSubscription){
       const {data,error}=await sb.from("push_subscriptions").select("id,ativo").eq("endpoint",browserSubscription.endpoint).maybeSingle();
@@ -793,7 +793,7 @@ async function enablePushNotifications(){
   try{
     const permission=Notification.permission==="default"?await Notification.requestPermission():Notification.permission;
     if(permission!=="granted") throw new Error("A autorização não foi concedida. Você pode continuar usando o Bolão normalmente.");
-    state.pushRegistration=state.pushRegistration||await navigator.serviceWorker.register("/service-worker.js?v=6.31.3");
+    state.pushRegistration=state.pushRegistration||await navigator.serviceWorker.register("/service-worker.js?v=6.32.0");
     const token=await sessionToken();
     const response=await fetch("/.netlify/functions/configuracao-web-push",{headers:{Authorization:`Bearer ${token}`,Accept:"application/json"},cache:"no-store"});
     const config=await response.json();
@@ -3324,7 +3324,7 @@ async function loadStandings(force=false){
   }
 
   const button = $("refreshStandingsBtn");
-  if(button){ button.disabled = true; button.textContent = "Atualizando…"; }
+  if(button){ button.disabled = true; button.textContent = "Buscando…"; }
   show("standingsLoading", true);
   show("standingsError", false);
   show("standingsTableWrap", false);
@@ -3344,7 +3344,7 @@ async function loadStandings(force=false){
     show("standingsLoading", false);
     show("standingsError", true);
   }finally{
-    if(button){ button.disabled = false; button.textContent = "Atualizar"; }
+    if(button){ button.disabled = false; button.textContent = "Buscar classificação oficial"; }
   }
 }
 
@@ -3526,7 +3526,7 @@ function renderAdminAttention(){
   }
   $("adminDataFreshness").textContent=`Atualizado agora • ${new Date(snapshot.updatedAt).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}`;
   const button=$("adminAttentionAction");
-  const actions={reminder:"📲 Enviar lembrete",ranking:"🏆 Ver Ranking Completo",games:"⚽ Ver jogos",participants:"👥 Ver participantes",refresh:"🔄 Atualizar agora"};
+  const actions={reminder:"📲 Enviar lembrete",ranking:"🏆 Ver Ranking Completo",games:"⚽ Ver jogos",participants:"👥 Ver participantes",refresh:"🔄 Recarregar dados"};
   button.textContent=actions[view.action]||"";
   button.dataset.action=view.action;
   show("adminAttentionAction",Boolean(actions[view.action]) && !(view.action==="participants"));
@@ -4531,7 +4531,7 @@ async function renderAdminDiagnostic(){
       <div class="diagnostic-section admin-shadow-section"><div class="admin-shadow-heading"><div><span>TRANSIÇÃO · AVANÇADO</span><h3>Coleta histórica em sombra</h3></div><strong>Sem efeito competitivo</strong></div><p>Ferramenta preservada para auditoria técnica. Executa uma observação informada manualmente e grava somente fotografias nas tabelas de transição.</p><form id="adminShadowForm" class="admin-shadow-form"><label>ID do jogo no Bolão<input id="adminShadowGameId" name="id_jogo" type="number" min="1" step="1" value="554970" required></label><label>Fixture da API-Football<input id="adminShadowFixtureId" name="fixture_id" type="number" min="1" step="1" value="1492340" required></label><button id="adminShadowSubmit" class="secondary" type="submit">Executar coleta avançada</button></form><p id="adminShadowFeedback" class="admin-shadow-feedback" role="status" aria-live="polite"></p></div>
       <div class="diagnostic-section admin-shadow-section admin-cutover-section"><div class="admin-shadow-heading"><div><span>API-FOOTBALL · PRÓXIMA RODADA</span><h3>Reconciliação de mapeamentos</h3></div><strong>Somente leitura</strong></div><p>Compara rodada, mando, clubes e horários para produzir candidatos auditáveis. Não grava IDs nem altera jogos.</p><form id="adminReconciliationForm" class="admin-shadow-form admin-cutover-form"><label>Rodada para reconciliar<input id="adminReconciliationRound" name="rodada" type="number" min="1" max="38" step="1" value="27" required></label><button id="adminReconciliationSubmit" class="secondary" type="submit">Reconciliar rodada</button></form><p id="adminReconciliationFeedback" class="admin-shadow-feedback" role="status" aria-live="polite"></p><div id="adminReconciliationReport" class="admin-cutover-report" aria-live="polite"></div></div>
       <div class="diagnostic-section admin-shadow-section admin-cutover-section"><div class="admin-shadow-heading"><div><span>FASE 6B · HISTÓRICO</span><h3>Ensaio de corte e rollback</h3></div><strong>Somente leitura</strong></div><p>Ferramenta preservada para revalidação excepcional. Compara rodada e classificação nas duas fontes, valida cota e prova por hashes que jogos e palpites permanecem intactos.</p><form id="adminCutoverForm" class="admin-shadow-form admin-cutover-form"><label>Rodada do ensaio<input id="adminCutoverRound" name="rodada" type="number" min="1" max="38" step="1" value="25" required></label><button id="adminCutoverSubmit" class="secondary" type="submit">Executar ensaio histórico</button></form><p id="adminCutoverFeedback" class="admin-shadow-feedback" role="status" aria-live="polite"></p><div id="adminCutoverReport" class="admin-cutover-report" aria-live="polite"></div></div>
-      <div class="diagnostic-actions"><button id="diagnosticRefreshBtn" class="secondary" type="button">🔄 Atualizar diagnóstico</button><button id="diagnosticSyncBtn" class="primary" type="button">⚽ Sincronizar agora</button><button id="diagnosticExportBtn" class="secondary" type="button">📥 Exportar logs</button></div>
+      <div class="diagnostic-actions"><button id="diagnosticRefreshBtn" class="secondary" type="button">🔄 Refazer diagnóstico</button><button id="diagnosticSyncBtn" class="primary" type="button">⚽ Sincronizar jogos</button><button id="diagnosticExportBtn" class="secondary" type="button">📥 Exportar logs</button></div>
       <small class="diagnostic-note">A disponibilidade da fonte oficial é inferida apenas por seus próprios logs para não consumir cota; a atualidade do conteúdo é verificada separadamente nos jogos armazenados.</small>`;
     const sportsDelayed=d.sportsData?.status==="delayed";
     state.adminDiagnosticSummary={score:Number(d.autotest.score)||0,label:sportsDelayed?"Dados atrasados":d.autotest.score>=90?"Saudável":d.autotest.score>=70?"Atenção":"Problemas"};
@@ -4570,7 +4570,6 @@ async function handleAdminQuickAction(event){
     button.disabled=true;
     if(status) status.textContent="Executando ação…";
     if(action==="sync") await syncGames(button);
-    else if(action==="ranking"){ await refresh(); renderRanking(); message("Ranking atualizado com os dados mais recentes."); }
     else if(action==="temporary-ranking") openTemporaryRanking(button,{allowUnavailable:true});
     else if(action==="share-round") openAdminRoundShare(button);
     else if(action==="next-round") goToNextAdminRound();
@@ -4596,17 +4595,17 @@ async function handleAdminAction(){
 
 async function refresh(){
   const button=$("refreshBtn");
-  if(button){ button.disabled=true; button.textContent="Atualizando…"; }
+  if(button){ button.disabled=true; button.textContent="Recarregando…"; }
   try{
     await loadData();
     renderGames(); renderRanking(); renderStats(); renderHome();
     renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminDiagnostic(); renderAdminExecutiveDashboard(); renderAdminAudit(); renderAdminRecoveryProtection();
-    message("Dados atualizados.");
+    message("Dados recarregados.");
   }catch(err){
-    message(err.message||"Não foi possível atualizar.",true);
+    message(err.message||"Não foi possível recarregar os dados.",true);
     throw err;
   }finally{
-    if(button){ button.disabled=false; button.textContent="Atualizar"; }
+    if(button){ button.disabled=false; button.textContent="↻ Recarregar ranking"; }
   }
 }
 
@@ -4618,7 +4617,7 @@ async function refreshAllAdminData(){
 
   button.disabled=true;
   button.classList.add("is-refreshing");
-  if(label) label.textContent="Atualizando…";
+  if(label) label.textContent="Recarregando…";
   if(feedback) feedback.textContent="Consultando jogos, palpites, ranking, estatísticas e participantes…";
 
   const modules=[];
@@ -4651,7 +4650,7 @@ async function refreshAllAdminData(){
       message(warning,true);
     }else{
       if(feedback) feedback.textContent=`✅ Todos os dados atualizados às ${time}`;
-      message("Todos os dados do bolão foram atualizados.");
+      message("Os dados do painel foram recarregados.");
     }
   }catch(err){
     if(feedback) feedback.textContent=`⚠️ ${err.message||"Não foi possível atualizar os dados."}`;
@@ -4659,7 +4658,7 @@ async function refreshAllAdminData(){
   }finally{
     button.disabled=false;
     button.classList.remove("is-refreshing");
-    if(label) label.textContent="Atualizar tudo";
+    if(label) label.textContent="Recarregar painel";
   }
 }
 

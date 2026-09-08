@@ -4,7 +4,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.31.3`.
+- Versão funcional: `v6.32.0`.
 - Prioridade: **manter o Bolão 2026 estável e evoluí-lo incrementalmente para múltiplas ligas com palpites compartilhados**.
 - Próxima etapa coordenada: validar a jornada unificada de novos participantes da L10, mantendo a estabilização da API-Football como linha operacional paralela e o Rigazzo congelado como histórico e possível laboratório.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
@@ -66,7 +66,7 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - ✅ Comunicação individual e manual via WhatsApp na gestão de participantes e na Situação da Rodada.
 - ✅ Lembretes Web Push ativados por aparelho e enviados manualmente pelo administrador aos participantes com palpites pendentes.
 - 🔵 Revisar os avisos Web Push da Área ADM, com escopo funcional a definir antes da implementação.
-- 🔵 Revisar todos os botões **Atualizar**: distinguir recarga do Supabase de sincronização externa, remover ações redundantes e renomear as necessárias conforme o efeito real e o público autorizado.
+- ✅ Botões de atualização revisados: recarga do Supabase, consulta da classificação, diagnóstico e sincronização externa usam verbos distintos; a ação administrativa redundante do Ranking foi removida.
 - 🔵 Evoluir os cards da Tela de Jogos para mostrar autores e minutos dos gols a partir dos eventos da API-Football, mediante tarefa explícita que suspenda o congelamento somente nesse escopo.
 - ✅ Transparência individual dos palpites após o encerramento oficial das partidas.
 - ✅ Limite configurável de participantes ativos.
