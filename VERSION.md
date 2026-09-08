@@ -1,6 +1,6 @@
-6.34.0
+6.34.1
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.34.0-autores-dos-gols.md`](docs/releases/v6.34.0-autores-dos-gols.md)
+- Nota da versão atual: [`docs/releases/v6.34.1-backfill-gols-rodada-26.md`](docs/releases/v6.34.1-backfill-gols-rodada-26.md)

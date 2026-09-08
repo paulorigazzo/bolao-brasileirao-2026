@@ -11,13 +11,14 @@ const events = [
   { providerEventKey: "b", elapsed: 45, extra: 3, teamProviderId: 20, playerName: "Visitante com Nome Muito Longo", typeRaw: "Goal", detailRaw: "Penalty" },
   { providerEventKey: "c", elapsed: 77, extra: null, teamProviderId: 10, playerName: "Atacante da Casa", typeRaw: "Goal", detailRaw: "Own Goal" },
   { providerEventKey: "d", elapsed: 80, extra: null, teamProviderId: 20, playerName: "Cartão não exibido", typeRaw: "Card", detailRaw: "Yellow Card" },
+  { providerEventKey: "e", elapsed: 90, extra: 1, teamProviderId: 10, playerName: "Pênalti perdido", typeRaw: "Goal", detailRaw: "Missed Penalty" },
 ];
 const provider = { providerFixtureId: 9001, score: { home: 2, away: 1 }, status: { isLive: false, isFinal: true },
   eventObservation: { available: true, valid: true }, events };
 
 const projection = buildApiFootballEventProjection(provider, canonical, observedAt);
 assert.equal(projection.eligible, true);
-assert.equal(projection.row.eventos.length, 4);
+assert.equal(projection.row.eventos.length, 5);
 assert.match(projection.row.hash_eventos, /^[0-9a-f]{64}$/);
 const model = buildGameGoalEventsModel({ ...canonical, gols_casa: 2, gols_fora: 1 }, projection.row);
 assert.equal(model.status, "ready");
@@ -25,6 +26,7 @@ assert.deepEqual(model.home.map((goal) => [goal.player, goal.minute, goal.marker
   ["Atacante da Casa", "12'", ""], ["Atacante da Casa", "77'", " (GC)"],
 ]);
 assert.deepEqual(model.away.map((goal) => [goal.minute, goal.marker]), [["45+3'", " (P)"]]);
+assert.equal(model.home.some((goal) => goal.player === "Pênalti perdido"), false);
 assert.equal(buildGameGoalEventsModel({ ...canonical, gols_casa: 0, gols_fora: 0 }, null).status, "hidden");
 assert.equal(buildGameGoalEventsModel({ ...canonical, gols_casa: 1, gols_fora: 0 }, null).status, "updating");
 assert.equal(buildApiFootballEventProjection({ ...provider, score: { home: 3, away: 1 } }, canonical, observedAt).reason, "goal_count_mismatch");

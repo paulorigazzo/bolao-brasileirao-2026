@@ -1917,3 +1917,38 @@ minutos sem depender desse legado e sem criar consumo adicional de cota.
 O sincronismo continua usando uma única chamada à API-Football e a atualização
 do placar não é bloqueada por indisponibilidade da projeção. Rodadas passadas só
 receberão detalhes depois de um backfill aprovado em tarefa própria.
+
+## DEC-2026-053 — Cobertura histórica dos gols inicia na Rodada 26
+
+- Data: 2026-09-08
+- Status: aceita
+- Responsáveis: responsável pelo produto
+- Impacto: alto
+
+### Contexto
+
+Depois da aprovação visual dos autores e minutos dos gols, foi avaliado um
+backfill das rodadas encerradas. Carregar toda a temporada exigiria centenas de
+consultas históricas e não é necessário para explicar uma funcionalidade
+introduzida durante o campeonato.
+
+### Decisão
+
+- adotar a Rodada 26 como início explícito da cobertura histórica;
+- não tratar as Rodadas 1–25 como pendência obrigatória;
+- limitar o primeiro backfill aos dez jogos encerrados e mapeados da Rodada 26;
+- executar primeiro uma simulação somente leitura, com uma consulta individual
+  por partida e manifesto local contendo contagens, fotografias cadastrais e
+  hashes;
+- exigir aprovação do hash e confirmação literal em uma etapa separada para a
+  aplicação;
+- bloquear a aplicação se o cadastro mudar, o artefato for alterado ou já
+  existir projeção divergente;
+- restringir a escrita a `eventos_partida_cache`.
+
+### Consequências
+
+Os cards anteriores à Rodada 26 podem continuar sem autores e minutos, o que é
+um limite deliberado da funcionalidade. Placar, status, palpites, fechamento,
+pontuação e Ranking permanecem fora da autoridade do backfill. Ampliar a
+cobertura histórica exigirá uma nova decisão e novos portões operacionais.
