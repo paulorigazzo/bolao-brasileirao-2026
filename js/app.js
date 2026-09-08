@@ -22,7 +22,7 @@ import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js
 import { activeLeagueName, chooseActiveLeague, createLeagueRequestGate, filterProfilesByMembers, persistActiveLeague } from "./league-context.js";
 import { createPushSubscription, currentPushSubscription, subscriptionRow, supportsWebPush } from "./web-push.js";
 import { buildGameGoalEventsModel } from "./game-goal-events.js";
-import { buildGameGoalEventsPreview, isGameGoalEventsPreview } from "./game-goal-events-preview.js";
+import { buildGameGoalEventsRoundPreview, isGameGoalEventsPreview } from "./game-goal-events-preview.js";
 
 const APP_VERSION = "6.34.0";
 const API_FOOTBALL_RECONCILIATION_SESSION_KEY = "bolao:admin:api-football-reconciliation";
@@ -999,9 +999,9 @@ async function loadData(){
   if(participantSituationsErr) console.warn("As situações de ligas dos participantes não puderam ser carregadas.",participantSituationsErr);
   state.games=games||[]; state.gameEventProjections=eventProjections||[]; state.ownPicks=picks||[]; state.leagues=leagues||[]; state.adminPickProgress=adminProgress||[]; state.authorizedParticipants=authorized||[]; state.participantLimit=Math.max(1,Number(participantLimit)||10); state.leagueManager=leagueManager===true; state.leagueAssignments=leagueAssignments||[]; state.participantSituations=participantSituations||[];
   if(GAME_GOAL_EVENTS_PREVIEW){
-    const previewGame=[...state.games].reverse().find(game=>Number(game.gols_casa)+Number(game.gols_fora)>0&&game.api_football_id);
-    const preview=buildGameGoalEventsPreview(previewGame);
-    if(preview) state.gameEventProjections=[...state.gameEventProjections.filter(item=>Number(item.id_jogo)!==Number(preview.id_jogo)),preview];
+    const previews=buildGameGoalEventsRoundPreview(state.games,26);
+    const previewIds=new Set(previews.map(item=>Number(item.id_jogo)));
+    state.gameEventProjections=[...state.gameEventProjections.filter(item=>!previewIds.has(Number(item.id_jogo))),...previews];
   }
   const league=chooseActiveLeague(state.leagues,{userId:state.user?.id,storage:localStorage});
   if(!league){ if(state.leagueManager) await refreshAdminLeagues(); return false; }

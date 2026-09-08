@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { buildGameGoalEventsModel } from "../js/game-goal-events.js";
 import { buildApiFootballEventProjection } from "../src/sports-data/api-football-event-projection.mjs";
-import { isGameGoalEventsPreview } from "../js/game-goal-events-preview.js";
+import { buildGameGoalEventsRoundPreview, isGameGoalEventsPreview } from "../js/game-goal-events-preview.js";
 
 const observedAt = "2026-09-08T19:30:00.000Z";
 const canonical = { id_jogo: 1, api_football_id: 9001, api_football_time_casa_id: 10, api_football_time_fora_id: 20 };
@@ -31,6 +31,14 @@ assert.equal(buildApiFootballEventProjection({ ...provider, score: { home: 3, aw
 assert.equal(buildApiFootballEventProjection({ ...provider, eventObservation: { available: false, valid: false } }, canonical, observedAt).reason, "events_unavailable");
 assert.equal(isGameGoalEventsPreview({ hostname: "deploy-preview-211--example.netlify.app", search: "?goalEventsPreview=1" }), true);
 assert.equal(isGameGoalEventsPreview({ hostname: "bolaorigazzo2026.netlify.app", search: "?goalEventsPreview=1" }), false);
+const roundPreviews=buildGameGoalEventsRoundPreview([
+  { ...canonical, id_jogo: 1, rodada: 26, gols_casa: 2, gols_fora: 1 },
+  { ...canonical, id_jogo: 2, rodada: 26, gols_casa: 0, gols_fora: 0 },
+  { ...canonical, id_jogo: 3, rodada: 26, gols_casa: 1, gols_fora: 1 },
+  { ...canonical, id_jogo: 4, rodada: 25, gols_casa: 3, gols_fora: 0 },
+]);
+assert.deepEqual(roundPreviews.map((item) => item.id_jogo), [1, 3]);
+assert.deepEqual(roundPreviews.map((item) => item.eventos.length), [3, 2]);
 
 const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
 const matchup = app.indexOf('<div class="premium-expanded-matchup">');

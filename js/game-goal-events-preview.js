@@ -15,5 +15,12 @@ export function buildGameGoalEventsPreview(game) {
     if (index < away) events.push({ typeRaw: "Goal", detailRaw: index === 0 && away > 1 ? "Own Goal" : "Normal Goal",
       teamProviderId: Number(game.api_football_time_fora_id), playerName: index ? "Meia Visitante" : "Camisa 9 Visitante", elapsed: 27 + index * 34, extra: null });
   }
-  return { id_jogo: game.id_jogo, id_externo: game.api_football_id, eventos };
+  return { id_jogo: game.id_jogo, id_externo: game.api_football_id, eventos: events };
+}
+
+export function buildGameGoalEventsRoundPreview(games, round = 26) {
+  return (games || [])
+    .filter((game) => Number(game?.rodada) === Number(round) && game?.api_football_id)
+    .map(buildGameGoalEventsPreview)
+    .filter(Boolean);
 }
