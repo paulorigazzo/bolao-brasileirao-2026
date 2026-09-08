@@ -1,3 +1,10 @@
+# v6.32.1 — Mapeamento final da temporada na API-Football
+
+- Consolida em uma única migração protegida os 115 jogos ainda sem vínculo com a API-Football.
+- Usa rodada, mando e clubes como identidade; diferenças de horários provisórios permanecem fora da gravação cadastral.
+- Exige a transição exata de 265 para 380 vínculos, unicidade das fixtures e preservação integral do estado competitivo.
+- Inclui auditoria, rollback específico e teste executável do conjunto reconciliado.
+
 # v6.32.0 — Ações de atualização mais claras
 
 - Distingue recarga de dados do Supabase, consulta da classificação oficial, diagnóstico e sincronização esportiva.

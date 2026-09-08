@@ -4,9 +4,9 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.32.0`.
+- Versão funcional: `v6.32.1`.
 - Prioridade: **manter o Bolão 2026 estável e evoluí-lo incrementalmente para múltiplas ligas com palpites compartilhados**.
-- Próxima etapa coordenada: manter a operação estável após a validação da L10 e selecionar a próxima melhoria funcional, com o mapeamento progressivo da API-Football como linha operacional paralela e o Rigazzo congelado como histórico e possível laboratório.
+- Próxima etapa coordenada: manter a operação estável após a validação da L10 e concluir o mapeamento final da temporada pela API-Football, com o Rigazzo congelado como histórico e possível laboratório.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -46,7 +46,7 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - ✅ Sincronização de jogos, datas, locais, placares e classificação.
 - ✅ Sincronização ao vivo por minuto, restrita às partidas próximas e preservando a manutenção completa.
 - ✅ API-Football consolidada como fonte oficial: Rodada 26 concluída, dez vínculos da Rodada 27 aplicados e três horários provisórios corrigidos pela sincronização oficial; preflight completo recorrente dispensado em favor do monitoramento normal e do rollback temporário.
-- 🔵 Mapear progressivamente as rodadas futuras antes de suas janelas operacionais, começando pela Rodada 28.
+- ✅ Os 115 vínculos restantes da API-Football foram aplicados em uma única migração protegida; os 380 jogos da temporada estão integralmente vinculados, incluindo as Rodadas 28–38 e as cinco pendências históricas das Rodadas 15 e 21.
 - 🔵 Reavaliar o fechamento dos palpites de 30 para 15 ou 10 minutos em tarefa específica, com decisão explícita, atualização integral da regra e testes próprios.
 - ✅ Centro de Controle, diagnóstico, auditoria e acompanhamento da proteção de recuperação.
 - ✅ Detalhamento determinístico das ocorrências de recuperação, com classificação informativa, conferência administrativa auditável e verificação de checkpoint.

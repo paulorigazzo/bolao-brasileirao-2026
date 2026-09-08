@@ -1,6 +1,6 @@
-6.32.0
+6.32.1
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.32.0-revisao-acoes-atualizacao.md`](docs/releases/v6.32.0-revisao-acoes-atualizacao.md)
+- Nota da versão atual: [`docs/releases/v6.32.1-mapeamento-final-api-football.md`](docs/releases/v6.32.1-mapeamento-final-api-football.md)
