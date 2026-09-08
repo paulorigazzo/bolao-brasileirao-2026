@@ -1,3 +1,11 @@
+# v6.34.0 — Autores e minutos dos gols nos cards
+
+- Exibe os gols abaixo do placar no card expandido, em colunas alinhadas aos respectivos clubes.
+- Identifica pênaltis e gols contra, preserva a ordem cronológica e mantém nomes longos legíveis no celular.
+- Grava uma projeção normalizada dos eventos já recebidos pelo sincronismo oficial, sem nova consulta à API-Football.
+- Mantém a última projeção válida quando os eventos vierem ausentes ou incoerentes e nunca usa eventos para definir placar, status ou pontuação.
+- Mantém o backfill das rodadas passadas fora desta entrega, para execução posterior à aprovação do formato visual.
+
 # v6.33.0 — Lembretes Web Push seletivos e personalizados
 
 - Apresenta na Área ADM os participantes elegíveis antes do envio e permite selecionar os destinatários.

@@ -21,8 +21,10 @@ import { adminRoundGameIds, loadAdminPickProgress } from "./admin-pick-progress.
 import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js";
 import { activeLeagueName, chooseActiveLeague, createLeagueRequestGate, filterProfilesByMembers, persistActiveLeague } from "./league-context.js";
 import { createPushSubscription, currentPushSubscription, subscriptionRow, supportsWebPush } from "./web-push.js";
+import { buildGameGoalEventsModel } from "./game-goal-events.js";
+import { buildGameGoalEventsRoundPreview, isGameGoalEventsPreview } from "./game-goal-events-preview.js";
 
-const APP_VERSION = "6.33.0";
+const APP_VERSION = "6.34.0";
 const API_FOOTBALL_RECONCILIATION_SESSION_KEY = "bolao:admin:api-football-reconciliation";
 installMotionTokens();
 installMotionInteractions();
@@ -31,7 +33,8 @@ installFirstVisitTips();
 const sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
 const TEMPORARY_RANKING_SYNTHETIC_PREVIEW=isTemporaryRankingSyntheticPreview(window.location);
 const TEMPORARY_RANKING_PREVIEW_FIXTURE=TEMPORARY_RANKING_SYNTHETIC_PREVIEW?buildTemporaryRankingSyntheticFixture():null;
-const state = { user:null, participant:null, participants:[], games:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], leagueRanking:[], leagues:[], activeLeague:null, leagueContextStatus:"idle", leagueManagedMembers:[], leagueMemberAudit:[], leagueLifecycleAudit:[], leagueManager:false, administeredLeagues:[], adminTargetLeague:null, leagueDirectory:[], leagueAssignments:[], participantSituations:[], participantApprovalTarget:null, participantApprovalMode:"approve", standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{}, pushRegistration:null, pushSubscription:null };
+const GAME_GOAL_EVENTS_PREVIEW=isGameGoalEventsPreview(window.location);
+const state = { user:null, participant:null, participants:[], games:[], gameEventProjections:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], leagueRanking:[], leagues:[], activeLeague:null, leagueContextStatus:"idle", leagueManagedMembers:[], leagueMemberAudit:[], leagueLifecycleAudit:[], leagueManager:false, administeredLeagues:[], adminTargetLeague:null, leagueDirectory:[], leagueAssignments:[], participantSituations:[], participantApprovalTarget:null, participantApprovalMode:"approve", standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{}, pushRegistration:null, pushSubscription:null };
 const COMPETITIVE_READ_MODE="league"; // "legacy" é mantido apenas para uma publicação de contingência.
 const leagueRequestGate=createLeagueRequestGate();
 let leagueSelectorReturnFocus=null;
@@ -764,7 +767,7 @@ function renderPushPreferences(){
 async function initializePushPreferences(){
   if(!supportsWebPush(window)){ renderPushPreferences(); return; }
   try{
-    state.pushRegistration=await navigator.serviceWorker.register("/service-worker.js?v=6.33.0");
+    state.pushRegistration=await navigator.serviceWorker.register("/service-worker.js?v=6.34.0");
     const browserSubscription=await currentPushSubscription(state.pushRegistration);
     if(browserSubscription){
       const {data,error}=await sb.from("push_subscriptions").select("id,ativo").eq("endpoint",browserSubscription.endpoint).maybeSingle();
@@ -793,7 +796,7 @@ async function enablePushNotifications(){
   try{
     const permission=Notification.permission==="default"?await Notification.requestPermission():Notification.permission;
     if(permission!=="granted") throw new Error("A autorização não foi concedida. Você pode continuar usando o Bolão normalmente.");
-    state.pushRegistration=state.pushRegistration||await navigator.serviceWorker.register("/service-worker.js?v=6.33.0");
+    state.pushRegistration=state.pushRegistration||await navigator.serviceWorker.register("/service-worker.js?v=6.34.0");
     const token=await sessionToken();
     const response=await fetch("/.netlify/functions/configuracao-web-push",{headers:{Authorization:`Bearer ${token}`,Accept:"application/json"},cache:"no-store"});
     const config=await response.json();
@@ -970,6 +973,11 @@ async function loadLegacyCompetitiveContext(league){
 async function loadData(){
   const {data:games,error:gErr}=await sb.from("jogos").select("*").order("rodada").order("inicio");
   if(gErr) throw gErr;
+  const gameIds=(games||[]).map(game=>game.id_jogo);
+  const {data:eventProjections,error:eventProjectionsErr}=gameIds.length
+    ? await sb.from("eventos_partida_cache").select("id_jogo,id_externo,eventos,observado_em").in("id_jogo",gameIds)
+    : {data:[],error:null};
+  if(eventProjectionsErr) console.warn("Os detalhes dos gols não puderam ser carregados.",eventProjectionsErr);
   const adminGameIds=adminRoundGameIds(games,currentRoundNumber(games));
   const [{data:picks,error:pErr},{data:leagues,error:leaguesErr},{data:adminProgress,error:adminProgressErr},{data:authorized,error:authorizedErr},{data:participantLimit,error:participantLimitErr},{data:leagueManager,error:leagueManagerErr},{data:leagueAssignments,error:leagueAssignmentsErr},{data:participantSituations,error:participantSituationsErr}] = await Promise.all([
     sb.from("palpites").select("*").eq("user_id",state.user.id),
@@ -989,7 +997,12 @@ async function loadData(){
   if(leagueManagerErr) console.warn("A gestão central de ligas não pôde ser confirmada.",leagueManagerErr);
   if(leagueAssignmentsErr) console.warn("As designações pendentes não puderam ser carregadas.",leagueAssignmentsErr);
   if(participantSituationsErr) console.warn("As situações de ligas dos participantes não puderam ser carregadas.",participantSituationsErr);
-  state.games=games||[]; state.ownPicks=picks||[]; state.leagues=leagues||[]; state.adminPickProgress=adminProgress||[]; state.authorizedParticipants=authorized||[]; state.participantLimit=Math.max(1,Number(participantLimit)||10); state.leagueManager=leagueManager===true; state.leagueAssignments=leagueAssignments||[]; state.participantSituations=participantSituations||[];
+  state.games=games||[]; state.gameEventProjections=eventProjections||[]; state.ownPicks=picks||[]; state.leagues=leagues||[]; state.adminPickProgress=adminProgress||[]; state.authorizedParticipants=authorized||[]; state.participantLimit=Math.max(1,Number(participantLimit)||10); state.leagueManager=leagueManager===true; state.leagueAssignments=leagueAssignments||[]; state.participantSituations=participantSituations||[];
+  if(GAME_GOAL_EVENTS_PREVIEW){
+    const previews=buildGameGoalEventsRoundPreview(state.games,26);
+    const previewIds=new Set(previews.map(item=>Number(item.id_jogo)));
+    state.gameEventProjections=[...state.gameEventProjections.filter(item=>!previewIds.has(Number(item.id_jogo))),...previews];
+  }
   const league=chooseActiveLeague(state.leagues,{userId:state.user?.id,storage:localStorage});
   if(!league){ if(state.leagueManager) await refreshAdminLeagues(); return false; }
   if(COMPETITIVE_READ_MODE==="legacy") await loadLegacyCompetitiveContext(league);
@@ -1446,6 +1459,18 @@ function premiumDayLabel(value){
 function premiumTime(value){
   const d=new Date(value); return Number.isNaN(d.getTime())?"--:--":d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
 }
+function premiumGoalEvents(g){
+  const projection=state.gameEventProjections.find(item=>Number(item.id_jogo)===Number(g.id_jogo));
+  const model=buildGameGoalEventsModel(g,projection);
+  if(model.status==="hidden") return "";
+  if(model.status==="updating") return '<div class="premium-goals-updating" role="status">Detalhes dos gols em atualização</div>';
+  const list=goals=>goals.map(goal=>`<li><span>${escapeHtml(goal.player)}${escapeHtml(goal.marker)}</span><strong>${escapeHtml(goal.minute)}</strong></li>`).join("");
+  return `<div class="premium-goal-events" aria-label="Autores dos gols">
+    <ul class="premium-goal-list is-home">${list(model.home)}</ul>
+    <span class="premium-goal-events-spacer" aria-hidden="true"></span>
+    <ul class="premium-goal-list is-away">${list(model.away)}</ul>
+  </div>`;
+}
 function premiumMatchCard(g){
   const favorite=favoriteTeamMatchData(g);
   const favoriteTeamName=favorite.homeFavorite?g.time_casa:favorite.awayFavorite?g.time_fora:"";
@@ -1495,6 +1520,7 @@ function premiumMatchCard(g){
           <div class="premium-expanded-center">${center}</div>
           <div class="premium-team premium-team-away ${favorite.awayFavorite?"is-favorite-team":""}"><span class="team-badge">${teamLogo(g.time_fora_logo,g.time_fora)}</span><b>${escapeHtml(teamDisplayName(g.time_fora))}${favorite.awayFavorite?`<span class="favorite-team-name-heart" aria-hidden="true">♥</span>`:""}</b></div>
         </div>
+        ${premiumGoalEvents(g)}
         ${!isLocked&&!finished?`<div class="premium-game-actions"><button class="primary premium-save-pick" type="button" ${validPickDraft(g.id_jogo)?"":"disabled"}>${draft?"Salvar palpite":pick?"✓ Palpite salvo":"Salvar palpite"}</button></div>`:""}
         ${resultComparison}
       </div>

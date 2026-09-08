@@ -1886,3 +1886,34 @@ envio. A operação continua manual, limitada a 100 aparelhos e dependente do
 opt-in em cada dispositivo. Não são adicionados agendamento, histórico,
 tentativas automáticas, integração com WhatsApp ou mudanças em banco, RLS,
 autenticação e dados competitivos.
+
+## DEC-2026-052 — Projeção canônica dos eventos para os cards de jogos
+
+- Data: 2026-09-08
+- Status: aceita
+- Responsáveis: responsável pelo produto
+- Impacto: alto
+
+### Contexto
+
+O adaptador da API-Football já normalizava os eventos recebidos no mesmo pedido
+usado pelo sincronismo oficial, mas esses dados permaneciam restritos às
+estruturas temporárias da transição. A Tela de Jogos precisava exibir autores e
+minutos sem depender desse legado e sem criar consumo adicional de cota.
+
+### Decisão
+
+- manter uma projeção canônica por jogo com a lista normalizada de eventos;
+- substituir a projeção somente quando os eventos estiverem disponíveis,
+  completos e coerentes com o placar oficial;
+- preservar a última projeção válida diante de respostas incompletas;
+- tratar eventos exclusivamente como detalhe de apresentação, sem autoridade
+  sobre placar, status, fechamento, pontuação ou Ranking;
+- exibir no card expandido somente os gols, em duas colunas alinhadas aos clubes;
+- separar o backfill histórico até que o formato visual esteja aprovado.
+
+### Consequências
+
+O sincronismo continua usando uma única chamada à API-Football e a atualização
+do placar não é bloqueada por indisponibilidade da projeção. Rodadas passadas só
+receberão detalhes depois de um backfill aprovado em tarefa própria.
