@@ -2913,6 +2913,9 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
 .premium-goal-list.is-home li{justify-content:flex-end;text-align:right}
 .premium-goal-list.is-home li strong{order:-1}
 .premium-goal-list.is-away li{justify-content:flex-start;text-align:left}
+.premium-goal-events-divider{display:grid;place-items:center;align-self:stretch;color:var(--green2);opacity:.72}
+.premium-goal-events-divider svg{width:23px;height:23px;overflow:visible;fill:none;stroke:currentColor;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round}
+.premium-goal-events-divider svg path:first-of-type{fill:currentColor;stroke:none}
 .premium-goals-updating{margin-top:10px;padding:9px 10px;border-top:1px solid rgba(255,255,255,.06);color:var(--muted);font-size:.64rem;text-align:center}
 
 @media(max-width:520px){
@@ -2943,6 +2946,7 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
   .premium-goal-events{grid-template-columns:minmax(0,1fr) minmax(92px,auto) minmax(0,1fr);gap:7px;margin-top:8px;padding-top:9px}
   .premium-goal-list li{font-size:.62rem}
   .premium-goal-list li strong{font-size:.59rem}
+  .premium-goal-events-divider svg{width:21px;height:21px}
 }
 @media(max-width:380px){
   .premium-game-body-v2{padding-inline:9px!important}
