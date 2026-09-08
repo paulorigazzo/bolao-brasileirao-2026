@@ -329,3 +329,25 @@
   .admin-round-share-actions button{width:100%}
 }
 @media(max-width:380px){.admin-round-share-actions{grid-template-columns:1fr}}
+
+/* v6.33.0 — seleção e personalização dos lembretes Web Push. */
+.admin-push-reminder-modal{width:min(680px,calc(100vw - 24px));max-height:calc(100vh - 28px);overflow:auto;padding:24px;display:grid;gap:16px}
+.admin-push-selection-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px solid var(--admin-line);border-radius:14px;background:rgba(100,217,148,.055)}
+.admin-push-selection-toolbar label{display:flex;align-items:center;gap:9px;color:#edf8f1;font-size:.86rem;font-weight:800;cursor:pointer}
+.admin-push-selection-toolbar input,.admin-push-participant input{width:19px;height:19px;accent-color:#64d994;flex:0 0 auto}
+.admin-push-selection-toolbar strong{color:#9ce9b9;font-size:.76rem;white-space:nowrap}
+.admin-push-participant-list{display:grid;gap:9px}
+.admin-push-participant{display:flex;align-items:flex-start;gap:12px;padding:14px;border:1px solid rgba(100,217,148,.18);border-radius:14px;background:rgba(255,255,255,.028);cursor:pointer}
+.admin-push-participant:has(input:checked){border-color:rgba(100,217,148,.42);background:rgba(100,217,148,.075)}
+.admin-push-participant.is-unavailable{opacity:.62;cursor:not-allowed;border-color:var(--admin-line)}
+.admin-push-participant>span{display:grid;gap:4px;min-width:0}
+.admin-push-participant strong{color:#edf8f1}
+.admin-push-participant small{color:var(--admin-muted);font-size:.73rem}
+.admin-push-participant em{margin-top:4px;color:#c9d8cf;font-size:.78rem;line-height:1.45;font-style:normal}
+.admin-push-reminder-note{margin:0;color:var(--admin-muted);font-size:.76rem;line-height:1.45}
+@media(max-width:600px){
+  .admin-push-reminder-modal{padding:18px;gap:13px}
+  .admin-push-selection-toolbar{align-items:flex-start;flex-direction:column}
+  .admin-push-participant{padding:12px}
+  .admin-push-reminder-modal .admin-form-actions{display:grid;grid-template-columns:1fr 1fr}
+}
