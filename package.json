@@ -1,6 +1,6 @@
 {
   "name": "bolao-br-2026",
-  "version": "6.31.2",
+  "version": "6.31.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -18,7 +18,7 @@
     "test:pending-league-assignments": "node scripts/test-pending-league-assignments.mjs && npm run test:unified-participant-onboarding",
     "test:unified-participant-onboarding": "node scripts/test-unified-participant-onboarding.mjs",
     "snapshot:export": "node scripts/export-snapshot.mjs",
-    "test:api-football-adapter": "node scripts/test-api-football-adapter.mjs && node scripts/test-api-football-official-cutover.mjs && node scripts/test-api-football-cutover-rehearsal.mjs && node scripts/test-api-football-cutover-admin.mjs && node scripts/test-api-football-round-reconciliation.mjs",
+    "test:api-football-adapter": "node scripts/test-api-football-adapter.mjs && node scripts/test-api-football-official-cutover.mjs && node scripts/test-api-football-cutover-rehearsal.mjs && node scripts/test-api-football-cutover-admin.mjs && node scripts/test-api-football-round-reconciliation.mjs && node scripts/test-api-football-round-27-mapping.mjs",
     "test:diagnostic-provider-status": "node scripts/test-diagnostic-provider-status.mjs",
     "test:api-football-crests": "node scripts/test-api-football-crest-audit.mjs",
     "test:api-football-local-crests": "node scripts/test-api-football-local-crests.mjs",
