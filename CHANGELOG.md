@@ -1,3 +1,12 @@
+# v6.34.1 — Backfill protegido dos gols da Rodada 26
+
+- Delimita a cobertura histórica dos autores e minutos dos gols à Rodada 26, sem criar pendência para as Rodadas 1–25.
+- Prepara uma simulação somente leitura com dez consultas individuais e manifesto local verificável antes de qualquer escrita.
+- Mantém a aplicação separada e protegida por hash aprovado, confirmação explícita, revalidação cadastral e bloqueio de conflitos.
+- Restringe qualquer gravação à projeção de eventos, preservando jogos, placares, palpites, pontuação e Ranking.
+- Distingue cobranças de pênalti perdidas dos gols efetivos na validação e na apresentação dos cards.
+- Aplica no cache canônico os 187 eventos dos dez jogos da Rodada 26, com 25 gols efetivos e hashes integralmente conferidos.
+
 # v6.34.0 — Autores e minutos dos gols nos cards
 
 - Exibe os gols abaixo do placar no card expandido, em colunas alinhadas aos respectivos clubes.

@@ -823,6 +823,39 @@ nos dez jogos. A operação cria uma execução por data, usa a RPC atômica por
 jogo, interrompe na primeira falha e não contém escrita para `jogos`,
 fotografias ou classificações.
 
+#### Backfill canônico dos gols da Rodada 26
+
+Após a aprovação da apresentação dos gols nos cards, a cobertura histórica foi
+delimitada à Rodada 26. As Rodadas 1–25 não constituem pendência: a ausência de
+detalhes nelas comunica que a funcionalidade foi introduzida a partir desse
+ponto da temporada.
+
+O utilitário canônico opera em modo seco por padrão e consulta individualmente
+as dez fixtures encerradas e mapeadas da Rodada 26. Ele rejeita competição,
+temporada, rodada, estado, placar ou detalhes dos gols incoerentes e preserva em
+`.artifacts/` um manifesto local não versionado. A aplicação não repete chamadas
+ao fornecedor: ela exige o artefato revisado, seu hash exato, a confirmação
+`APPLY_GOAL_EVENTS_ROUND_26` e uma nova conferência do cadastro canônico.
+
+A escrita é restrita a `eventos_partida_cache`, bloqueia projeções divergentes
+já existentes e é idempotente para hashes iguais. Jogos, placares, status,
+palpites, fechamento, pontuação, Ranking e tabelas de sombra permanecem
+inalterados. Simulação e aplicação continuam sendo dois portões operacionais
+separados.
+
+Em 2026-09-08, a simulação real pelo executor autenticado da API-Football leu
+as dez fixtures e identificou que `Missed Penalty` é publicado com o tipo
+genérico `Goal`. A projeção passou a preservar a cobrança perdida no histórico,
+mas excluí-la da contagem e da apresentação dos gols. Depois da correção, o
+manifesto reuniu 187 eventos e 25 gols efetivos, exatamente a soma dos placares
+canônicos, com o hash
+`812f4a8b320dcff69a82823c5f87a5a52849099d871d9d507b4b68ba2cc53d5b`.
+Nenhuma escrita foi realizada nessa simulação. Depois da aprovação específica,
+o lote foi aplicado no mesmo dia: dez projeções, 187 eventos, 25 gols efetivos,
+dez fixtures distintas e dez hashes concordantes com o manifesto. A auditoria
+pós-aplicação encontrou zero divergência e confirmou os dez jogos canônicos
+preservados como encerrados.
+
 Após o merge do PR #176 e um novo preflight somente leitura, a aplicação foi
 autorizada e concluída no Supabase em 2026-09-01. A transação criou três
 execuções bem-sucedidas, dez lotes válidos e 177 eventos: 54 em 29 de agosto,
@@ -1181,6 +1214,7 @@ somente à identificação dos clubes e sujeitos aos direitos de seus titulares.
 | 2026-09-08 | 2.9 | Três horários provisórios corrigidos pela sincronização oficial; API-Football consolidada e preflight recorrente substituído por monitoramento normal |
 | 2026-09-08 | 3.0 | Reconciliação final dos 115 jogos aplicada em uma única migração protegida; os 380 jogos ficaram vinculados sem alteração competitiva |
 | 2026-09-08 | 3.1 | Operação pós-mapeamento definida sem novos preflights por rodada; Rodada 27 adotada como último ciclo recomendado de estabilização e Fase 8 mantida separada |
+| 2026-09-08 | 3.2 | Backfill canônico delimitado à Rodada 26, com simulação, manifesto e aplicação protegida em portões separados |
 
 ## Referências internas
 

@@ -17,6 +17,12 @@ function goalMinute(event) {
   return `${elapsed}${extra > 0 ? `+${extra}` : ""}'`;
 }
 
+function isScoringGoal(event) {
+  const type = String(event?.typeRaw || "").trim().toLowerCase();
+  const detail = String(event?.detailRaw || "").trim().toLowerCase();
+  return type === "goal" && detail !== "missed penalty";
+}
+
 export function buildGameGoalEventsModel(game, projection) {
   const homeScore = integer(game?.gols_casa);
   const awayScore = integer(game?.gols_fora);
@@ -28,7 +34,7 @@ export function buildGameGoalEventsModel(game, projection) {
   const homeId = Number(game.api_football_time_casa_id);
   const awayId = Number(game.api_football_time_fora_id);
   const goals = projection.eventos
-    .filter((event) => String(event?.typeRaw || "").trim().toLowerCase() === "goal")
+    .filter(isScoringGoal)
     .map((event, index) => ({
       side: Number(event.teamProviderId) === homeId ? "home" : Number(event.teamProviderId) === awayId ? "away" : null,
       player: String(event.playerName || "").trim(),

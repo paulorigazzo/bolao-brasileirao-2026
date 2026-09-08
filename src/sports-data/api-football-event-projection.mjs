@@ -18,7 +18,9 @@ function normalizedEvent(event) {
 }
 
 function isGoal(event) {
-  return String(event?.typeRaw || "").trim().toLowerCase() === "goal";
+  const type = String(event?.typeRaw || "").trim().toLowerCase();
+  const detail = String(event?.detailRaw || "").trim().toLowerCase();
+  return type === "goal" && detail !== "missed penalty";
 }
 
 export function buildApiFootballEventProjection(providerGame, canonicalGame, observedAt = new Date().toISOString()) {
