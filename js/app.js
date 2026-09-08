@@ -1467,7 +1467,13 @@ function premiumGoalEvents(g){
   const list=goals=>goals.map(goal=>`<li><span>${escapeHtml(goal.player)}${escapeHtml(goal.marker)}</span><strong>${escapeHtml(goal.minute)}</strong></li>`).join("");
   return `<div class="premium-goal-events" aria-label="Autores dos gols">
     <ul class="premium-goal-list is-home">${list(model.home)}</ul>
-    <span class="premium-goal-events-spacer" aria-hidden="true"></span>
+    <span class="premium-goal-events-divider" aria-hidden="true">
+      <svg viewBox="0 0 24 24" focusable="false">
+        <circle cx="12" cy="12" r="9.25"></circle>
+        <path d="m12 7.2 3.05 2.22-1.17 3.58h-3.76L8.95 9.42 12 7.2Z"></path>
+        <path d="M12 2.75v4.45M3.2 9.14l5.75.28m-3.9 8.15 5.07-4.57m8.83 4.57L13.88 13m6.92-3.86-5.75.28M8.35 21.27l1.77-8.27m5.53 8.27L13.88 13"></path>
+      </svg>
+    </span>
     <ul class="premium-goal-list is-away">${list(model.away)}</ul>
   </div>`;
 }
