@@ -1952,3 +1952,34 @@ Os cards anteriores à Rodada 26 podem continuar sem autores e minutos, o que é
 um limite deliberado da funcionalidade. Placar, status, palpites, fechamento,
 pontuação e Ranking permanecem fora da autoridade do backfill. Ampliar a
 cobertura histórica exigirá uma nova decisão e novos portões operacionais.
+
+## DEC-2026-054 — Convite contextual preserva o opt-in do Web Push
+
+- Data: 2026-09-09
+- Status: aceita
+- Responsáveis: responsável pelo produto
+- Impacto: médio
+
+### Contexto
+
+A ativação de notificações estava disponível apenas em Meu Perfil. Participantes
+que não visitassem essa tela poderiam desconhecer o recurso, embora o envio
+continuasse dependendo de consentimento voluntário por aparelho.
+
+### Decisão
+
+- apresentar na Home uma janela flutuante central somente quando não houver
+  aparelho ativo confirmado para o participante;
+- não apresentar o convite em navegador incompatível, permissão bloqueada ou
+  quando a consulta das assinaturas falhar;
+- solicitar a permissão nativa somente após clique humano na ação principal;
+- limitar a apresentação a uma vez por sessão e adiar por sete dias neste
+  aparelho quando o participante fechar ou escolher **Agora não**;
+- reutilizar a ativação existente e preservar o envio manual.
+
+### Consequências
+
+O opt-in ganha visibilidade sem criar assinatura implícita, notificação
+automática, nova estrutura de banco ou mudança nos destinatários administrativos.
+Meu Perfil continua sendo a área permanente para ativar ou desativar cada
+aparelho.
