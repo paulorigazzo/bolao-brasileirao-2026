@@ -21,10 +21,11 @@ import { adminRoundGameIds, loadAdminPickProgress } from "./admin-pick-progress.
 import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js";
 import { activeLeagueName, chooseActiveLeague, createLeagueRequestGate, filterProfilesByMembers, persistActiveLeague } from "./league-context.js";
 import { createPushSubscription, currentPushSubscription, subscriptionRow, supportsWebPush } from "./web-push.js";
+import { isPushActivationPromptPreview, nextPushActivationPromptDate, PUSH_ACTIVATION_PROMPT_DELAY_MS, shouldOfferPushActivation } from "./push-activation-prompt.js";
 import { buildGameGoalEventsModel } from "./game-goal-events.js";
 import { buildGameGoalEventsRoundPreview, isGameGoalEventsPreview } from "./game-goal-events-preview.js";
 
-const APP_VERSION = "6.34.1";
+const APP_VERSION = "6.35.0";
 const API_FOOTBALL_RECONCILIATION_SESSION_KEY = "bolao:admin:api-football-reconciliation";
 installMotionTokens();
 installMotionInteractions();
@@ -34,7 +35,7 @@ const sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonK
 const TEMPORARY_RANKING_SYNTHETIC_PREVIEW=isTemporaryRankingSyntheticPreview(window.location);
 const TEMPORARY_RANKING_PREVIEW_FIXTURE=TEMPORARY_RANKING_SYNTHETIC_PREVIEW?buildTemporaryRankingSyntheticFixture():null;
 const GAME_GOAL_EVENTS_PREVIEW=isGameGoalEventsPreview(window.location);
-const state = { user:null, participant:null, participants:[], games:[], gameEventProjections:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], leagueRanking:[], leagues:[], activeLeague:null, leagueContextStatus:"idle", leagueManagedMembers:[], leagueMemberAudit:[], leagueLifecycleAudit:[], leagueManager:false, administeredLeagues:[], adminTargetLeague:null, leagueDirectory:[], leagueAssignments:[], participantSituations:[], participantApprovalTarget:null, participantApprovalMode:"approve", standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{}, pushRegistration:null, pushSubscription:null };
+const state = { user:null, participant:null, participants:[], games:[], gameEventProjections:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], leagueRanking:[], leagues:[], activeLeague:null, leagueContextStatus:"idle", leagueManagedMembers:[], leagueMemberAudit:[], leagueLifecycleAudit:[], leagueManager:false, administeredLeagues:[], adminTargetLeague:null, leagueDirectory:[], leagueAssignments:[], participantSituations:[], participantApprovalTarget:null, participantApprovalMode:"approve", standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{}, pushRegistration:null, pushSubscription:null, pushActiveDeviceCount:0, pushSubscriptionStatusKnown:false };
 const COMPETITIVE_READ_MODE="league"; // "legacy" é mantido apenas para uma publicação de contingência.
 const leagueRequestGate=createLeagueRequestGate();
 let leagueSelectorReturnFocus=null;
@@ -66,6 +67,10 @@ let temporaryRankingAllowUnavailable=false;
 const $ = id => document.getElementById(id);
 const show = (id, visible=true) => $(id)?.classList.toggle("hidden", !visible);
 const REGISTRATION_DRAFT_KEY="bolaoRegistrationDraft";
+const PUSH_PROMPT_STORAGE_PREFIX="bolao:push-activation-prompt:";
+let pushPromptShownThisSession=false;
+let pushPromptTimer=null;
+let pushPromptReturnFocus=null;
 if ($("appVersion")) $("appVersion").textContent = `v${APP_VERSION}`;
 const initials = name => String(name||"?").split(/\s+/).map(x=>x[0]).join("").slice(0,3).toUpperCase();
 const escapeHtml = value => String(value ?? "").replace(/[&<>'"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
@@ -764,20 +769,72 @@ function renderPushPreferences(){
   else status.textContent="Os lembretes estão desativados neste aparelho.";
 }
 
+function pushPromptStorageKey(){return `${PUSH_PROMPT_STORAGE_PREFIX}${state.user?.id||"anonymous"}`;}
+function pushPromptDismissedUntil(){
+  try{return Number(localStorage.getItem(pushPromptStorageKey()))||0;}catch(_error){return 0;}
+}
+function closePushActivationPrompt({restoreFocus=true}={}){
+  show("pushActivationPrompt",false);
+  document.body.classList.remove("modal-open");
+  if(restoreFocus) pushPromptReturnFocus?.focus?.();
+  pushPromptReturnFocus=null;
+}
+function dismissPushActivationPrompt(){
+  try{localStorage.setItem(pushPromptStorageKey(),String(nextPushActivationPromptDate()));}catch(_error){}
+  closePushActivationPrompt();
+}
+function maybeOpenPushActivationPrompt(){
+  const home=$("homeTab");
+  const preview=isPushActivationPromptPreview(window.location);
+  const eligible=preview||shouldOfferPushActivation({
+    supported:supportsWebPush(window)&&state.pushSubscriptionStatusKnown,permission:window.Notification?.permission,
+    activeDeviceCount:state.pushActiveDeviceCount,dismissedUntil:pushPromptDismissedUntil(),
+    homeVisible:Boolean(home&&!home.classList.contains("hidden")),shownThisSession:pushPromptShownThisSession,
+  });
+  if(!eligible) return false;
+  pushPromptShownThisSession=true;
+  pushPromptReturnFocus=document.activeElement;
+  show("pushActivationPrompt",true);
+  document.body.classList.add("modal-open");
+  if(preview) $("pushActivationStatus").textContent="Prévia visual: nenhuma permissão será solicitada.";
+  setTimeout(()=>$("pushActivationEnable")?.focus(),30);
+  return true;
+}
+function schedulePushActivationPrompt(){
+  clearTimeout(pushPromptTimer);
+  pushPromptTimer=setTimeout(maybeOpenPushActivationPrompt,PUSH_ACTIVATION_PROMPT_DELAY_MS);
+}
+async function enablePushFromPrompt(){
+  const button=$("pushActivationEnable");
+  const status=$("pushActivationStatus");
+  if(isPushActivationPromptPreview(window.location)){closePushActivationPrompt();return;}
+  if(button){button.disabled=true;button.textContent="Ativando…";}
+  if(status) status.textContent="O navegador solicitará sua autorização.";
+  await enablePushNotifications();
+  if(state.pushSubscription){
+    state.pushActiveDeviceCount=Math.max(1,state.pushActiveDeviceCount);
+    closePushActivationPrompt({restoreFocus:false});
+    message("Notificações ativadas neste aparelho.");
+  }else dismissPushActivationPrompt();
+  if(button){button.disabled=false;button.textContent="Ativar notificações";}
+}
+
 async function initializePushPreferences(){
   if(!supportsWebPush(window)){ renderPushPreferences(); return; }
   try{
-    state.pushRegistration=await navigator.serviceWorker.register("/service-worker.js?v=6.34.1");
+    state.pushRegistration=await navigator.serviceWorker.register(`/service-worker.js?v=${APP_VERSION}`);
     const browserSubscription=await currentPushSubscription(state.pushRegistration);
-    if(browserSubscription){
-      const {data,error}=await sb.from("push_subscriptions").select("id,ativo").eq("endpoint",browserSubscription.endpoint).maybeSingle();
-      if(error) throw error;
-      state.pushSubscription=data?.ativo===true?browserSubscription:null;
-    }
+    const {data,error}=await sb.from("push_subscriptions").select("endpoint,ativo").eq("user_id",state.user.id).eq("ativo",true);
+    if(error) throw error;
+    const activeSubscriptions=data||[];
+    state.pushActiveDeviceCount=activeSubscriptions.length;
+    state.pushSubscriptionStatusKnown=true;
+    state.pushSubscription=browserSubscription&&activeSubscriptions.some(item=>item.endpoint===browserSubscription.endpoint)?browserSubscription:null;
   }catch(error){
     console.warn("Não foi possível preparar as notificações neste aparelho.",error);
   }
   renderPushPreferences();
+  schedulePushActivationPrompt();
 }
 
 async function sessionToken(){
@@ -796,7 +853,7 @@ async function enablePushNotifications(){
   try{
     const permission=Notification.permission==="default"?await Notification.requestPermission():Notification.permission;
     if(permission!=="granted") throw new Error("A autorização não foi concedida. Você pode continuar usando o Bolão normalmente.");
-    state.pushRegistration=state.pushRegistration||await navigator.serviceWorker.register("/service-worker.js?v=6.34.1");
+    state.pushRegistration=state.pushRegistration||await navigator.serviceWorker.register(`/service-worker.js?v=${APP_VERSION}`);
     const token=await sessionToken();
     const response=await fetch("/.netlify/functions/configuracao-web-push",{headers:{Authorization:`Bearer ${token}`,Accept:"application/json"},cache:"no-store"});
     const config=await response.json();
@@ -810,10 +867,12 @@ async function enablePushNotifications(){
     const row=subscriptionRow(state.pushSubscription,state.user.id);
     const {error}=await sb.from("push_subscriptions").upsert(row,{onConflict:"endpoint"});
     if(error) throw error;
+    state.pushActiveDeviceCount=Math.max(1,state.pushActiveDeviceCount);
     if(status) status.textContent="Lembretes ativados neste aparelho.";
     renderPushPreferences();
   }catch(error){
     state.pushSubscription=null;
+    state.pushActiveDeviceCount=Math.max(0,state.pushActiveDeviceCount-1);
     if(status) status.textContent=error.message||"Não foi possível ativar os lembretes.";
     renderPushPreferences();
   }finally{ button.disabled=false; }
@@ -5033,6 +5092,7 @@ function applyNavigationState(tabName){
   if(!primaryTabs.includes(tabName)) document.querySelectorAll(".bottom-nav-item").forEach(item=>item.classList.remove("active"));
   updateBottomNavigationMotion(tabName);
   window.dispatchEvent(new CustomEvent("bolao:tabchange",{detail:{tabName}}));
+  if(tabName==="home"&&state.user) schedulePushActivationPrompt();
 }
 
 function navigateTo(tabName){
@@ -5329,6 +5389,18 @@ $("profileDataForm")?.addEventListener("submit",event=>{ event.preventDefault();
 $("saveProfileBtn")?.addEventListener("click",saveOwnProfile);
 $("enablePushBtn")?.addEventListener("click",enablePushNotifications);
 $("disablePushBtn")?.addEventListener("click",disablePushNotifications);
+$("pushActivationEnable")?.addEventListener("click",enablePushFromPrompt);
+$("pushActivationLater")?.addEventListener("click",dismissPushActivationPrompt);
+$("pushActivationClose")?.addEventListener("click",dismissPushActivationPrompt);
+$("pushActivationPrompt")?.addEventListener("click",event=>{if(event.target===$("pushActivationPrompt")) dismissPushActivationPrompt();});
+$("pushActivationPrompt")?.addEventListener("keydown",event=>{
+  if(event.key!=="Tab") return;
+  const focusable=[$("pushActivationClose"),$("pushActivationEnable"),$("pushActivationLater")].filter(item=>item&&!item.disabled);
+  if(!focusable.length) return;
+  const first=focusable[0],last=focusable.at(-1);
+  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+  else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+});
 $("profilePhoneInput")?.addEventListener("input",event=>{ event.target.value=formatBrazilPhone(event.target.value); });
 $("registrationForm")?.addEventListener("submit",event=>{event.preventDefault();login();});
 $("registrationTeamToggle")?.addEventListener("click",()=>{const field=$("registrationFavoriteTeamFieldset");const opening=field.classList.contains("hidden");show("registrationFavoriteTeamFieldset",opening);$("registrationTeamToggle").setAttribute("aria-expanded",String(opening));if(opening)field.querySelector("button")?.focus();});
@@ -5427,6 +5499,7 @@ document.addEventListener("keydown",event=>{
   else if(!$("friendlyRankingsModal")?.classList.contains("hidden")) closeFriendlyRankings();
   else if(!$("adminRoundShareModal")?.classList.contains("hidden")) closeAdminRoundShare();
   else if(!$("adminPushReminderModal")?.classList.contains("hidden")) closeAdminPushReminder();
+  else if(!$("pushActivationPrompt")?.classList.contains("hidden")) dismissPushActivationPrompt();
   else if(!$("matchCalendarModal")?.classList.contains("hidden")) closeMatchCalendar();
   else if(!$("roundHighlightsModal")?.classList.contains("hidden")) closeRoundHighlights();
   else if(!$("rankingPicksModal")?.classList.contains("hidden")) closeRankingParticipantPicks();

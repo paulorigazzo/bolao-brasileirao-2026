@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {readFile} from "node:fs/promises";
 import {base64UrlToUint8Array, subscriptionRow, supportsWebPush} from "../js/web-push.js";
+import {isPushActivationPromptPreview,nextPushActivationPromptDate,PUSH_ACTIVATION_PROMPT_SNOOZE_MS,shouldOfferPushActivation} from "../js/push-activation-prompt.js";
 import {buildReminderParticipants,openReminderGames,reminderMessage} from "../netlify/functions/_web-push-reminder.mjs";
 
 const root=new URL("../",import.meta.url);
@@ -23,10 +24,14 @@ assert.equal(row.ativo,true);
 assert.throws(()=>subscriptionRow({toJSON:()=>({})},"user-1"));
 
 assert.match(html,/id="enablePushBtn"/);
+assert.match(html,/id="pushActivationPrompt"[\s\S]*id="pushActivationEnable"[\s\S]*id="pushActivationLater"/);
 assert.match(html,/id="adminPushReminderAction"/);
 assert.match(html,/id="adminPushReminderModal"/);
 assert.match(html,/id="adminPushSelectAll"/);
 assert.match(app,/Notification\.requestPermission\(\)/);
+assert.match(app,/pushSubscriptionStatusKnown/);
+assert.match(app,/schedulePushActivationPrompt\(\)/);
+assert.match(app,/pushActivationPrompt[\s\S]*dismissPushActivationPrompt/);
 assert.match(app,/requestAdminPush\("preview"\)/);
 assert.match(app,/selectedUserIds,audienceVersion/);
 assert.match(worker,/notificationclick/);
@@ -45,6 +50,19 @@ assert.match(sender,/\.eq\("status","ativo"\)/);
 assert.match(sender,/\.from\("participantes_autorizados"\)[\s\S]*\.eq\("status","approved"\)/);
 assert.match(config,/Participante não autorizado/);
 assert.doesNotMatch(sender,/celular|whatsapp/i);
+
+const promptBase={supported:true,permission:"default",activeDeviceCount:0,dismissedUntil:0,now:1000,homeVisible:true,shownThisSession:false};
+assert.equal(shouldOfferPushActivation(promptBase),true);
+assert.equal(shouldOfferPushActivation({...promptBase,permission:"granted"}),true,"permissão sem assinatura pode ser reparada pelo convite");
+assert.equal(shouldOfferPushActivation({...promptBase,permission:"denied"}),false);
+assert.equal(shouldOfferPushActivation({...promptBase,activeDeviceCount:1}),false);
+assert.equal(shouldOfferPushActivation({...promptBase,dismissedUntil:1001}),false);
+assert.equal(shouldOfferPushActivation({...promptBase,homeVisible:false}),false);
+assert.equal(shouldOfferPushActivation({...promptBase,shownThisSession:true}),false);
+assert.equal(nextPushActivationPromptDate(1000),1000+PUSH_ACTIVATION_PROMPT_SNOOZE_MS);
+assert.equal(isPushActivationPromptPreview({hostname:"deploy-preview-214--bolaorigazzo2026.netlify.app",search:"?pushActivationPreview=1"}),true);
+assert.equal(isPushActivationPromptPreview({hostname:"localhost",search:"?pushActivationPreview=1"}),true);
+assert.equal(isPushActivationPromptPreview({hostname:"bolaorigazzo2026.netlify.app",search:"?pushActivationPreview=1"}),false);
 
 const now=Date.parse("2026-09-08T18:00:00.000Z");
 const games=[

@@ -1,3 +1,11 @@
+# v6.35.0 — Convite contextual para notificações
+
+- Apresenta na Home uma janela central de ativação somente para participantes sem aparelhos habilitados.
+- Solicita a permissão nativa exclusivamente após o clique em “Ativar notificações”.
+- Permite adiar o convite por sete dias neste aparelho e limita sua abertura a uma vez por sessão.
+- Oculta o convite em navegadores incompatíveis, com permissão bloqueada ou quando o estado das assinaturas não pôde ser confirmado.
+- Reutiliza o opt-in existente sem alterar banco, disparos administrativos ou regras competitivas.
+
 # v6.34.1 — Backfill protegido dos gols da Rodada 26
 
 - Delimita a cobertura histórica dos autores e minutos dos gols à Rodada 26, sem criar pendência para as Rodadas 1–25.
