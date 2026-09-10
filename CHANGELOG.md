@@ -1,3 +1,10 @@
+# v6.39.1 — Liga ativa no cabeçalho
+
+- Exibe o nome da liga ativa logo abaixo da versão no cabeçalho global.
+- Atualiza o identificador imediatamente após a troca de liga.
+- Mantém o nome oculto antes da confirmação de um contexto de liga válido.
+- Preserva o seletor no menu do usuário como único ponto de troca e não altera dados competitivos.
+
 # v6.39.0 — Cartões, banco e substituições nas escalações
 
 - Mantém os titulares originais nas visualizações Lista e Campo durante toda a partida.

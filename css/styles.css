@@ -961,7 +961,8 @@ footer{text-align:center;color:var(--muted);padding:22px}
 /* ===== Versão 4.0.6 — indicador de versão restaurado ===== */
 .brand-version{display:block;margin:3px 0 0;line-height:1}
 .brand-version .version-pill{margin-left:0;padding:0;border:0;border-radius:0;background:none;font-size:.68rem;font-weight:700;letter-spacing:.04em;color:var(--muted);opacity:.78}
-@media(max-width:520px){.brand-version{display:block!important;margin-top:3px}.brand-version .version-pill{font-size:.64rem}}
+.brand-league{display:block;max-width:min(42vw,320px);margin:4px 0 0;overflow:hidden;color:var(--green2);font-size:.68rem;font-weight:800;line-height:1.15;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:520px){.brand-version{display:block!important;margin-top:3px}.brand-version .version-pill{font-size:.64rem}.brand-league{max-width:42vw;margin-top:3px;font-size:.62rem}}
 
 /* ===== Versão 4.1.0 — Navegação Premium ===== */
 body{padding-bottom:92px}
