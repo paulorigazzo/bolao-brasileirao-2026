@@ -26,8 +26,9 @@ import { buildGameGoalEventsModel } from "./game-goal-events.js";
 import { buildGameGoalEventsRoundPreview, isGameGoalEventsPreview } from "./game-goal-events-preview.js";
 import { buildGameDetailsModel } from "./game-details.js";
 import { buildLineupPitchModel } from "./lineup-pitch.js";
+import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 
-const APP_VERSION = "6.37.0";
+const APP_VERSION = "6.38.0";
 const API_FOOTBALL_RECONCILIATION_SESSION_KEY = "bolao:admin:api-football-reconciliation";
 installMotionTokens();
 installMotionInteractions();
@@ -1566,13 +1567,13 @@ function premiumGameDetails(g){
     }).join("");
     return `<div class="premium-lineup-side"><header><span class="premium-lineup-crest">${teamLogo(logo,label)}</span><span class="premium-lineup-heading"><b>${escapeHtml(teamDisplayName(label))}</b><strong>${escapeHtml(side.formation||"Formação não informada")}</strong>${side.coach?`<small>Técnico: ${escapeHtml(side.coach)}</small>`:""}</span></header><div class="premium-lineup-groups">${players}</div></div>`;
   };
-  const pitchPlayer=(player,side)=>`<span class="premium-pitch-player is-${side}" style="--x:${player.x.toFixed(2)}%;--y:${player.y.toFixed(2)}%" title="${escapeHtml(player.name)}"><span class="premium-pitch-shirt" aria-hidden="true"><svg viewBox="0 0 44 40" focusable="false"><path d="M14 3 8 6 2 14l7 5v18h26V19l7-5-6-8-6-3c-2 4-12 4-16 0Z"></path></svg><b>${player.number??"—"}</b></span><small>${escapeHtml(player.name)}</small></span>`;
+  const pitchPlayer=(player,side,teamName)=>{const shirt=lineupShirtTheme(teamName);return `<span class="premium-pitch-player is-${side}" style="--x:${player.x.toFixed(2)}%;--y:${player.y.toFixed(2)}%;--shirt-pattern:${shirt.pattern};--shirt-number:${shirt.number};--shirt-number-shadow:${shirt.numberShadow}" title="${escapeHtml(player.name)}"><span class="premium-pitch-shirt" aria-hidden="true"><svg viewBox="0 0 44 40" focusable="false"><path d="M14 3 8 6 2 14l7 5v18h26V19l7-5-6-8-6-3c-2 4-12 4-16 0Z"></path></svg><b>${player.number??"—"}</b></span><small>${escapeHtml(player.name)}</small></span>`;};
   const pitchTeam=(side,label,logo,position)=>`<div class="premium-pitch-team is-${position}"><span class="premium-pitch-team-crest">${teamLogo(logo,label)}</span><span><b>${escapeHtml(teamDisplayName(label))}</b>${side.coach?`<small>Técnico: ${escapeHtml(side.coach)}</small>`:""}</span><strong>${escapeHtml(side.formation||"—")}</strong></div>`;
   const lineupContent=()=>{
     const pitch=buildLineupPitchModel(model.lineups);
     const gameId=Number(g.id_jogo),listId=`game-${gameId}-lineup-list`,pitchId=`game-${gameId}-lineup-pitch`;
     const list=`<div class="premium-lineups-grid">${lineupSide(model.lineups.home,g.time_casa,g.time_casa_logo)}${lineupSide(model.lineups.away,g.time_fora,g.time_fora_logo)}</div>`;
-    const field=pitch.available?`<div class="premium-lineup-pitch">${pitchTeam(pitch.home,g.time_casa,g.time_casa_logo,"home")}<div class="premium-pitch-surface" aria-label="Posicionamento inicial de ${escapeHtml(teamDisplayName(g.time_casa))} e ${escapeHtml(teamDisplayName(g.time_fora))}"><span class="premium-pitch-halfway" aria-hidden="true"></span><span class="premium-pitch-center" aria-hidden="true"></span><span class="premium-pitch-box is-top" aria-hidden="true"></span><span class="premium-pitch-box is-bottom" aria-hidden="true"></span>${pitch.home.players.map(player=>pitchPlayer(player,"home")).join("")}${pitch.away.players.map(player=>pitchPlayer(player,"away")).join("")}</div>${pitchTeam(pitch.away,g.time_fora,g.time_fora_logo,"away")}</div>`:"";
+    const field=pitch.available?`<div class="premium-lineup-pitch">${pitchTeam(pitch.home,g.time_casa,g.time_casa_logo,"home")}<div class="premium-pitch-surface" aria-label="Posicionamento inicial de ${escapeHtml(teamDisplayName(g.time_casa))} e ${escapeHtml(teamDisplayName(g.time_fora))}"><span class="premium-pitch-halfway" aria-hidden="true"></span><span class="premium-pitch-center" aria-hidden="true"></span><span class="premium-pitch-box is-top" aria-hidden="true"></span><span class="premium-pitch-box is-bottom" aria-hidden="true"></span>${pitch.home.players.map(player=>pitchPlayer(player,"home",g.time_casa)).join("")}${pitch.away.players.map(player=>pitchPlayer(player,"away",g.time_fora)).join("")}</div>${pitchTeam(pitch.away,g.time_fora,g.time_fora_logo,"away")}</div>`:"";
     return `<div class="premium-lineup-view-switch" role="tablist" aria-label="Visualização das escalações"><button class="active" type="button" role="tab" aria-selected="true" aria-controls="${listId}" data-lineup-view="list">Lista</button><button type="button" role="tab" aria-selected="false" aria-controls="${pitchId}" data-lineup-view="pitch" ${pitch.available?"":"disabled"}>Campo</button></div><div id="${listId}" class="premium-lineup-view" role="tabpanel" data-lineup-panel="list">${list}</div><div id="${pitchId}" class="premium-lineup-view" role="tabpanel" data-lineup-panel="pitch" hidden>${field}</div>`;
   };
   const lineups=model.lineups?section("lineups","Escalações",lineupContent(),model.lineups.observedAt):"";
