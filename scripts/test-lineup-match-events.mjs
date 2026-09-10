@@ -29,4 +29,7 @@ const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
 assert.match(app, /Banco e substituições/);
 assert.match(app, /eventos_partida_cache[\s\S]*detailIds/);
 assert.match(app, /benchToggle\?\.setAttribute\("aria-expanded","false"\)/);
+assert.match(app, /compact&&card\.minute/);
+assert.match(app, /lineup-player-events\$\{compact\?" is-compact":""\}/);
+assert.doesNotMatch(app, /\$\{compact\?"":events\.substitution\.minute\}/);
 console.log("Cartões, substituições e banco das escalações verificados com sucesso.");
