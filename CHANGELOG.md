@@ -1,3 +1,11 @@
+# v6.36.0 — Estatísticas e escalações nos cards
+
+- Adiciona seções expansíveis e mutuamente exclusivas de Estatísticas e Escalações abaixo dos gols.
+- Normaliza posse, finalizações, chutes no gol, escanteios, impedimentos, faltas e cartões, além de formação, treinador e titulares.
+- Prepara coleta detalhada agrupada para jogos próximos e ao vivo, preservando a última projeção válida.
+- Cria carga protegida da Rodada 26 com manifesto e hash antes de qualquer escrita.
+- Mantém os novos dados isolados de placar, status, palpites, pontuação e Ranking.
+
 # v6.35.0 — Convite contextual para notificações
 
 - Apresenta na Home uma janela central de ativação somente para participantes sem aparelhos habilitados.

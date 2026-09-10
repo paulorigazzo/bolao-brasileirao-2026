@@ -1983,3 +1983,33 @@ O opt-in ganha visibilidade sem criar assinatura implícita, notificação
 automática, nova estrutura de banco ou mudança nos destinatários administrativos.
 Meu Perfil continua sendo a área permanente para ativar ou desativar cada
 aparelho.
+
+## DEC-2026-055 — Detalhes esportivos permanecem auxiliares e sob demanda
+
+- Data: 2026-09-09
+- Status: aceita
+- Responsáveis: responsável pelo produto
+- Impacto: alto
+
+### Contexto
+
+Estatísticas e escalações enriquecem a leitura dos jogos, mas têm cobertura e
+frequência diferentes do placar e podem tornar o card excessivamente longo no
+celular.
+
+### Decisão
+
+- apresentar Estatísticas e Escalações em seções recolhidas e mutuamente
+  exclusivas abaixo dos gols;
+- persistir os grupos em projeção auxiliar com hashes e momentos de observação
+  independentes;
+- consultar detalhes agrupados somente para jogos próximos ou ao vivo;
+- preservar a última projeção válida diante de resposta ausente ou parcial;
+- adotar a Rodada 26 como piloto histórico, mediante manifesto e aplicação
+  protegida por aprovação própria.
+
+### Consequências
+
+Os detalhes podem faltar sem comprometer o card nem a sincronização. Eles nunca
+definem placar, status, fechamento, palpites, pontuação ou Ranking. Rodadas 1–25
+não se tornam pendência e qualquer ampliação exige nova decisão.
