@@ -1,3 +1,11 @@
+# v6.39.0 — Cartões, banco e substituições nas escalações
+
+- Mantém os titulares originais nas visualizações Lista e Campo durante toda a partida.
+- Exibe cartões amarelos, vermelhos e segundos amarelos junto aos jogadores identificados pela API-Football.
+- Acrescenta um banco recolhível com os reservas dos dois times lado a lado e indica entradas e saídas com seus minutos.
+- Atualiza eventos e detalhes durante jogos ao vivo, sem usar nomes para inferir associações ausentes.
+- Preserva placares, palpites, pontuação, Ranking e estrutura do Supabase.
+
 # v6.38.0 — Camisas dos clubes no campo tático
 
 - Aplica às camisas vetoriais cores e padrões simplificados de cada clube.
