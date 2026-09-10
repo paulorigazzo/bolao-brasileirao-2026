@@ -46,7 +46,8 @@ const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
 const matchup = app.indexOf('<div class="premium-expanded-matchup">');
 const goalBlock = app.indexOf("${premiumGoalEvents(g)}", matchup);
 const comparison = app.indexOf("${resultComparison}", matchup);
-assert.ok(matchup >= 0 && goalBlock > matchup && comparison > goalBlock);
+const details = app.indexOf("${premiumGameDetails(g)}", matchup);
+assert.ok(matchup >= 0 && comparison > matchup && goalBlock > comparison && details > goalBlock);
 assert.match(app, /eventos_partida_cache[\s\S]*Os detalhes dos gols não puderam ser carregados/);
 
 const migration = readFileSync(new URL("../supabase/migrations/20260908193143_add_game_event_projection.sql", import.meta.url), "utf8");
