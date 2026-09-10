@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { buildLineupPitchModel } from "../js/lineup-pitch.js";
+import { lineupShirtTheme, LINEUP_SHIRT_THEME_KEYS } from "../js/lineup-shirt-themes.js";
 
 const side = (formation, rows) => ({
   formation,
@@ -40,5 +41,13 @@ assert.match(app, /pitch\.available\?"":"disabled"/);
 assert.match(app, /ArrowLeft.*ArrowRight/);
 assert.match(styles, /premium-pitch-surface/);
 assert.match(styles, /premium-pitch-shirt/);
+assert.ok(LINEUP_SHIRT_THEME_KEYS.length >= 20);
+for (const club of ["Fluminense", "São Paulo", "Grêmio", "Bahia", "Fortaleza"]) {
+  assert.match(lineupShirtTheme(club).pattern, /gradient/);
+}
+assert.notEqual(lineupShirtTheme("Fluminense").pattern, lineupShirtTheme("São Paulo").pattern);
+assert.equal(lineupShirtTheme("Clube do Remo").pattern, lineupShirtTheme("Remo").pattern);
+assert.match(lineupShirtTheme("Clube futuro").pattern, /linear-gradient/);
+assert.match(app, /lineupShirtTheme\(teamName\)/);
 
 console.log("Campo tático das escalações verificado com sucesso.");

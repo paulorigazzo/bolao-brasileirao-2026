@@ -1,3 +1,10 @@
+# v6.38.0 — Camisas dos clubes no campo tático
+
+- Aplica às camisas vetoriais cores e padrões simplificados de cada clube.
+- Representa clubes tricolores com combinações de três cores em listras ou faixas.
+- Completa a cobertura visual dos 20 participantes atuais e mantém fallback neutro para clubes futuros.
+- Preserva escalações, coordenadas, dados esportivos, placares, palpites e pontuação.
+
 # v6.37.0 — Campo tático das escalações
 
 - Adiciona o seletor `Lista | Campo` dentro da seção expansível de Escalações, mantendo a lista como visualização inicial.
