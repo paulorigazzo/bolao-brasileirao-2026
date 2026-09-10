@@ -7,6 +7,7 @@ import { providerClassificationSnapshotId, SPORTS_DATA_PROVIDERS } from "./_spor
 import { apiFootballLocalCrestUrl } from "../../src/sports-data/api-football-local-crests.mjs";
 import { canonicalizeApiFootballStandings } from "../../src/sports-data/api-football-team-catalog.mjs";
 import { buildApiFootballEventProjection } from "../../src/sports-data/api-football-event-projection.mjs";
+import { buildApiFootballGameDetailsProjection, gameDetailsFixtureIds, mergeGameDetailsProjection } from "../../src/sports-data/api-football-game-details.mjs";
 
 const API_BASE = "https://v3.football.api-sports.io";
 const DAILY_RESERVE_RATIO = 0.2;
@@ -150,14 +151,47 @@ export async function syncApiFootballGames(options = {}) {
     const { error } = await supabase.from("eventos_partida_cache").upsert(eventRows, { onConflict: "id_jogo" });
     if (error) eventProjectionError = isMissingTableError(error) ? "projection_unavailable" : "projection_write_failed";
   }
+  const detailFixtureIds = gameDetailsFixtureIds(mappedCanonical, new Date(observedAt));
+  let detailProjection = { updated: 0, skipped: 0, skippedReasons: [], warning: null };
+  let detailCalls = 0;
+  if (detailFixtureIds.length) {
+    try {
+      const detailRequest = await requestImpl(`/fixtures?ids=${detailFixtureIds.join("-")}`);
+      detailCalls = 1;
+      const detailPayload = detailRequest.payload;
+      if (!detailRequest.response?.ok || !detailPayload || !Array.isArray(detailPayload.response)) throw new Error("details_response_invalid");
+      const rawByFixture = new Map(detailPayload.response.map((item) => [Number(item?.fixture?.id), item]));
+      const detailCanonical = mappedCanonical.filter((game) => detailFixtureIds.includes(Number(game.api_football_id)));
+      const candidates = detailCanonical.map((game) => buildApiFootballGameDetailsProjection(rawByFixture.get(Number(game.api_football_id)), game, observedAt));
+      const eligible = candidates.filter((candidate) => candidate.eligible).map((candidate) => candidate.row);
+      detailProjection.skipped = candidates.length - eligible.length;
+      detailProjection.skippedReasons = [...new Set(candidates.filter((candidate) => !candidate.eligible).map((candidate) => candidate.reason))];
+      if (eligible.length) {
+        const ids = eligible.map((row) => row.id_jogo);
+        const existing = await supabase.from("detalhes_partida_cache").select("*").in("id_jogo", ids);
+        if (existing.error && !isMissingTableError(existing.error)) throw new Error("details_projection_read_failed");
+        if (isMissingTableError(existing.error)) detailProjection.warning = "projection_unavailable";
+        else {
+          const existingById = new Map((existing.data || []).map((row) => [Number(row.id_jogo), row]));
+          const rows = eligible.map((row) => mergeGameDetailsProjection(existingById.get(Number(row.id_jogo)), row));
+          const write = await supabase.from("detalhes_partida_cache").upsert(rows, { onConflict: "id_jogo" });
+          if (write.error) throw new Error(isMissingTableError(write.error) ? "projection_unavailable" : "details_projection_write_failed");
+          detailProjection.updated = rows.length;
+        }
+      }
+    } catch (error) {
+      detailProjection.warning = error?.message || "details_projection_failed";
+    }
+  }
   const report = {
     ok: true, provider: SPORTS_DATA_PROVIDERS.API_FOOTBALL, imported: merged.length,
     unmappedSkipped: plan.unmappedCount, repairedCount: plan.repairs.length,
     terminalSkipped: requested.size ? 0 : (canonical || []).length - scopedCanonical.length,
-    repairs: plan.repairs.slice(0, 50), apiCalls: 1, syncMode: requested.size ? "live" : "full",
+    repairs: plan.repairs.slice(0, 50), apiCalls: 1 + detailCalls, syncMode: requested.size ? "live" : "full",
     requestedMatches: requested.size, atomicUpdate: true, trigger, durationMs: Date.now() - startedAt, synchronizedAt: observedAt,
     eventProjection: { updated: eventProjectionError ? 0 : eventRows.length, skipped: eventSkipped.length,
       skippedReasons: [...new Set(eventSkipped)], warning: eventProjectionError },
+    detailProjection,
     quota: { dailyLimit: normalized.observation.dailyLimit, dailyRemaining: normalized.observation.dailyRemaining,
       minuteLimit: normalized.observation.minuteLimit, minuteRemaining: normalized.observation.minuteRemaining },
   };

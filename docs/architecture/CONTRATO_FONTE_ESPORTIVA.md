@@ -268,8 +268,9 @@ Regras obrigatórias:
   do fornecedor não produza uma divergência falsa;
 - tipos conhecidos normalizam para `gol`, `cartao`, `substituicao` ou `var`;
   qualquer outro tipo permanece integralmente preservado como `desconhecido`;
-- payload completo de escalações, atletas ou estatísticas não integra este
-  contrato e não deve ser persistido sem novo escopo.
+- o payload bruto completo de atletas não integra este contrato; escalações e
+  estatísticas só podem ser persistidas na projeção auxiliar normalizada
+  definida no escopo da versão 6.36.0.
 
 ## Registro de capacidades futuras da API-Football
 
@@ -370,6 +371,19 @@ escalações.
 Cada atleta de escalação pode oferecer ID, nome, número, posição e posição no
 grid. Uso potencial: pré-jogo e detalhe da partida. Escalação ausente ou tardia
 é legítima e nunca invalida agenda, placar ou relógio.
+
+Na versão 6.36.0, formação, treinador e onze titulares passam a integrar uma
+projeção auxiliar opcional. A identidade da fixture e dos dois times é validada
+antes da gravação; uma resposta ausente ou incompleta não apaga a última
+escalação válida.
+
+### Estatísticas da partida
+
+A projeção auxiliar normaliza, por time, posse de bola, finalizações,
+finalizações no gol, escanteios, impedimentos, faltas e cartões amarelos e
+vermelhos. Campos nulos são omitidos e zero permanece um valor válido. Durante
+o jogo, a projeção acompanha o ciclo ao vivo; falhas nunca bloqueiam nem
+revertem o estado competitivo.
 
 ### Jogadores e estatísticas na partida
 
