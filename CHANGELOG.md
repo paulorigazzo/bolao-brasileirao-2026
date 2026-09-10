@@ -1,3 +1,11 @@
+# v6.37.0 — Campo tático das escalações
+
+- Adiciona o seletor `Lista | Campo` dentro da seção expansível de Escalações, mantendo a lista como visualização inicial.
+- Posiciona os 22 titulares em um campo vertical a partir das coordenadas táticas oficiais da API-Football.
+- Representa os jogadores com camisas vetoriais numeradas e nomes compactos, sem depender de fotografias.
+- Mantém a visualização em lista quando as coordenadas estiverem ausentes, duplicadas ou inválidas.
+- Preserva estatísticas, gols, placares, palpites, pontuação, sincronização e estrutura do Supabase.
+
 # v6.36.0 — Estatísticas e escalações nos cards
 
 - Adiciona seções expansíveis e mutuamente exclusivas de Estatísticas e Escalações abaixo dos gols.

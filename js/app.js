@@ -25,8 +25,9 @@ import { isPushActivationPromptPreview, nextPushActivationPromptDate, PUSH_ACTIV
 import { buildGameGoalEventsModel } from "./game-goal-events.js";
 import { buildGameGoalEventsRoundPreview, isGameGoalEventsPreview } from "./game-goal-events-preview.js";
 import { buildGameDetailsModel } from "./game-details.js";
+import { buildLineupPitchModel } from "./lineup-pitch.js";
 
-const APP_VERSION = "6.36.0";
+const APP_VERSION = "6.37.0";
 const API_FOOTBALL_RECONCILIATION_SESSION_KEY = "bolao:admin:api-football-reconciliation";
 installMotionTokens();
 installMotionInteractions();
@@ -1565,7 +1566,16 @@ function premiumGameDetails(g){
     }).join("");
     return `<div class="premium-lineup-side"><header><span class="premium-lineup-crest">${teamLogo(logo,label)}</span><span class="premium-lineup-heading"><b>${escapeHtml(teamDisplayName(label))}</b><strong>${escapeHtml(side.formation||"Formação não informada")}</strong>${side.coach?`<small>Técnico: ${escapeHtml(side.coach)}</small>`:""}</span></header><div class="premium-lineup-groups">${players}</div></div>`;
   };
-  const lineups=model.lineups?section("lineups","Escalações",`<div class="premium-lineups-grid">${lineupSide(model.lineups.home,g.time_casa,g.time_casa_logo)}${lineupSide(model.lineups.away,g.time_fora,g.time_fora_logo)}</div>`,model.lineups.observedAt):"";
+  const pitchPlayer=(player,side)=>`<span class="premium-pitch-player is-${side}" style="--x:${player.x.toFixed(2)}%;--y:${player.y.toFixed(2)}%" title="${escapeHtml(player.name)}"><span class="premium-pitch-shirt" aria-hidden="true"><svg viewBox="0 0 44 40" focusable="false"><path d="M14 3 8 6 2 14l7 5v18h26V19l7-5-6-8-6-3c-2 4-12 4-16 0Z"></path></svg><b>${player.number??"—"}</b></span><small>${escapeHtml(player.name)}</small></span>`;
+  const pitchTeam=(side,label,logo,position)=>`<div class="premium-pitch-team is-${position}"><span class="premium-pitch-team-crest">${teamLogo(logo,label)}</span><span><b>${escapeHtml(teamDisplayName(label))}</b>${side.coach?`<small>Técnico: ${escapeHtml(side.coach)}</small>`:""}</span><strong>${escapeHtml(side.formation||"—")}</strong></div>`;
+  const lineupContent=()=>{
+    const pitch=buildLineupPitchModel(model.lineups);
+    const gameId=Number(g.id_jogo),listId=`game-${gameId}-lineup-list`,pitchId=`game-${gameId}-lineup-pitch`;
+    const list=`<div class="premium-lineups-grid">${lineupSide(model.lineups.home,g.time_casa,g.time_casa_logo)}${lineupSide(model.lineups.away,g.time_fora,g.time_fora_logo)}</div>`;
+    const field=pitch.available?`<div class="premium-lineup-pitch">${pitchTeam(pitch.home,g.time_casa,g.time_casa_logo,"home")}<div class="premium-pitch-surface" aria-label="Posicionamento inicial de ${escapeHtml(teamDisplayName(g.time_casa))} e ${escapeHtml(teamDisplayName(g.time_fora))}"><span class="premium-pitch-halfway" aria-hidden="true"></span><span class="premium-pitch-center" aria-hidden="true"></span><span class="premium-pitch-box is-top" aria-hidden="true"></span><span class="premium-pitch-box is-bottom" aria-hidden="true"></span>${pitch.home.players.map(player=>pitchPlayer(player,"home")).join("")}${pitch.away.players.map(player=>pitchPlayer(player,"away")).join("")}</div>${pitchTeam(pitch.away,g.time_fora,g.time_fora_logo,"away")}</div>`:"";
+    return `<div class="premium-lineup-view-switch" role="tablist" aria-label="Visualização das escalações"><button class="active" type="button" role="tab" aria-selected="true" aria-controls="${listId}" data-lineup-view="list">Lista</button><button type="button" role="tab" aria-selected="false" aria-controls="${pitchId}" data-lineup-view="pitch" ${pitch.available?"":"disabled"}>Campo</button></div><div id="${listId}" class="premium-lineup-view" role="tabpanel" data-lineup-panel="list">${list}</div><div id="${pitchId}" class="premium-lineup-view" role="tabpanel" data-lineup-panel="pitch" hidden>${field}</div>`;
+  };
+  const lineups=model.lineups?section("lineups","Escalações",lineupContent(),model.lineups.observedAt):"";
   return `<div class="premium-game-details">${statistics}${lineups}</div>`;
 }
 function premiumMatchCard(g){
@@ -1730,6 +1740,25 @@ function renderGames(){
       });
       const collapsible=card.querySelector(".game-collapsible");
       requestAnimationFrame(()=>{if(collapsible) collapsible.style.maxHeight=`${collapsible.scrollHeight}px`;});
+    }));
+    card.querySelectorAll("[data-lineup-view]").forEach(button=>button.addEventListener("click",()=>{
+      if(button.disabled) return;
+      const section=button.closest('[data-game-detail-section="lineups"]');
+      if(!section) return;
+      const view=button.dataset.lineupView;
+      section.querySelectorAll("[data-lineup-view]").forEach(item=>{const active=item===button;item.classList.toggle("active",active);item.setAttribute("aria-selected",String(active));});
+      section.querySelectorAll("[data-lineup-panel]").forEach(panel=>{panel.hidden=panel.dataset.lineupPanel!==view;});
+      const collapsible=card.querySelector(".game-collapsible");
+      requestAnimationFrame(()=>{if(collapsible) collapsible.style.maxHeight=`${collapsible.scrollHeight}px`;});
+    }));
+    card.querySelectorAll("[data-lineup-view]").forEach(button=>button.addEventListener("keydown",event=>{
+      if(!["ArrowLeft","ArrowRight"].includes(event.key)) return;
+      const options=[...(button.closest('[role="tablist"]')?.querySelectorAll('[data-lineup-view]:not(:disabled)')||[])];
+      if(options.length<2) return;
+      event.preventDefault();
+      const step=event.key==="ArrowRight"?1:-1,index=options.indexOf(button);
+      const next=options[(index+step+options.length)%options.length];
+      next.focus();next.click();
     }));
     setGameCardExpanded(card,false,false);
   });
