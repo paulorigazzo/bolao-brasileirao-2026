@@ -29,7 +29,7 @@ import { buildLineupPitchModel } from "./lineup-pitch.js";
 import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 
-const APP_VERSION = "6.39.0";
+const APP_VERSION = "6.39.1";
 const API_FOOTBALL_RECONCILIATION_SESSION_KEY = "bolao:admin:api-football-reconciliation";
 installMotionTokens();
 installMotionInteractions();
@@ -1089,6 +1089,11 @@ function renderSyncStatus(){
 function renderLeagueContext(){
   const name=activeLeagueName(state.activeLeague);
   if($("leagueShortcutName")) $("leagueShortcutName").textContent=name;
+  if($("headerLeagueName")){
+    $("headerLeagueName").textContent=state.activeLeague?name:"";
+    $("headerLeagueName").title=state.activeLeague?name:"";
+    show("headerLeagueName",Boolean(state.activeLeague));
+  }
   show("adminLeaguesCard",state.leagueManager);
   const options=$("leagueSelectorOptions");
   if(!options) return;

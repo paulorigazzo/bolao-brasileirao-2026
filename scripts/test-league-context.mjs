@@ -24,6 +24,7 @@ memory.set(leaguePreferenceKey("u1"),"removed");
 assert.equal(chooseActiveLeague(leagues,{userId:"u1",storage}).liga_id,"standard");
 assert.equal(chooseActiveLeague([],{userId:"u1",storage}),null);
 assert.equal(activeLeagueName(leagues[1]),"Brasileirão 2026");
+assert.equal(activeLeagueName({liga_nome:"Liga com um nome especialmente longo"}),"Liga com um nome especialmente longo");
 
 const gate=createLeagueRequestGate();
 const first=gate.issue(),second=gate.issue();
@@ -48,6 +49,10 @@ assert.doesNotMatch(app,/state\.leagueContextStatus="error"/);
 assert.match(app,/const COMPETITIVE_READ_MODE="league"/);
 assert.match(app,/loadLegacyCompetitiveContext/);
 assert.match(html,/id="leagueShortcut"[^>]+role="menuitem"/);
+assert.match(html,/id="headerLeagueName"[^>]+brand-league hidden[^>]+aria-live="polite"/);
+assert.match(app,/\$\("headerLeagueName"\)\.textContent=state\.activeLeague\?name:""/);
+assert.match(app,/\$\("headerLeagueName"\)\.title=state\.activeLeague\?name:""/);
+assert.match(app,/show\("headerLeagueName",Boolean\(state\.activeLeague\)\)/);
 assert.match(html,/id="leagueSelectorModal"[^>]+role="dialog"/);
 assert.doesNotMatch(html,/id="leagueAdminButton"/);
 assert.doesNotMatch(html,/id="leagueCreateButton"/);
