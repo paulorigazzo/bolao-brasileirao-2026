@@ -51,7 +51,8 @@ function normalizeLineups(raw, homeId, awayId) {
     const item = byTeam.get(teamId);
     const starters = (item?.startXI || []).map(normalizePlayer).filter(Boolean);
     if (starters.length !== 11) return null;
-    return { formation: text(item?.formation), coach: text(item?.coach?.name), starters };
+    const substitutes = (item?.substitutes || []).map(normalizePlayer).filter(Boolean);
+    return { formation: text(item?.formation), coach: text(item?.coach?.name), starters, substitutes };
   };
   const home = side(homeId), away = side(awayId);
   return home && away ? { home, away } : null;

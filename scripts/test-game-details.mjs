@@ -5,12 +5,13 @@ import { buildGameDetailsModel } from "../js/game-details.js";
 
 const canonical={id_jogo:1,api_football_id:9001,api_football_time_casa_id:10,api_football_time_fora_id:20};
 const starters=(prefix)=>Array.from({length:11},(_,index)=>({player:{id:index+1,name:`${prefix} ${index+1}`,number:index+1,pos:index?"M":"G",grid:`${index+1}:1`}}));
+const substitutes=(prefix,offset)=>Array.from({length:7},(_,index)=>({player:{id:offset+index,name:`${prefix} reserva ${index+1}`,number:20+index,pos:"M",grid:null}}));
 const raw={fixture:{id:9001},teams:{home:{id:10},away:{id:20}},statistics:[
   {team:{id:10},statistics:[{type:"Ball Possession",value:"48%"},{type:"Total Shots",value:12},{type:"Shots on Goal",value:5},{type:"Corner Kicks",value:7},{type:"Offsides",value:2},{type:"Fouls",value:14},{type:"Yellow Cards",value:3},{type:"Red Cards",value:null}]},
   {team:{id:20},statistics:[{type:"Ball Possession",value:"52%"},{type:"Total Shots",value:15},{type:"Shots on Goal",value:7},{type:"Corner Kicks",value:4},{type:"Offsides",value:1},{type:"Fouls",value:10},{type:"Yellow Cards",value:2},{type:"Red Cards",value:1}]},
-],lineups:[{team:{id:10},formation:"4-3-3",coach:{name:"Técnico Casa"},startXI:starters("Casa")},{team:{id:20},formation:"4-2-3-1",coach:{name:"Técnico Fora"},startXI:starters("Fora")} ]};
+],lineups:[{team:{id:10},formation:"4-3-3",coach:{name:"Técnico Casa"},startXI:starters("Casa"),substitutes:substitutes("Casa",101)},{team:{id:20},formation:"4-2-3-1",coach:{name:"Técnico Fora"},startXI:starters("Fora"),substitutes:substitutes("Fora",201)} ]};
 const result=buildApiFootballGameDetailsProjection(raw,canonical,"2026-09-09T21:00:00Z");
-assert.equal(result.eligible,true);assert.equal(result.row.estatisticas.home.possession,48);assert.equal(result.row.estatisticas.away.redCards,1);assert.equal(result.row.escalacoes.home.starters.length,11);assert.match(result.row.hash_estatisticas,/^[0-9a-f]{64}$/);
+assert.equal(result.eligible,true);assert.equal(result.row.estatisticas.home.possession,48);assert.equal(result.row.estatisticas.away.redCards,1);assert.equal(result.row.escalacoes.home.starters.length,11);assert.equal(result.row.escalacoes.away.substitutes.length,7);assert.match(result.row.hash_estatisticas,/^[0-9a-f]{64}$/);
 assert.equal(buildApiFootballGameDetailsProjection({...raw,teams:{home:{id:20},away:{id:10}}},canonical).reason,"team_identity_mismatch");
 assert.equal(buildApiFootballGameDetailsProjection({...raw,statistics:null,lineups:null},canonical).reason,"details_unavailable");
 const merged=mergeGameDetailsProjection({escalacoes:{home:{formation:"old"}},hash_escalacoes:"old",escalacoes_observadas_em:"old"},{...result.row,escalacoes:null,hash_escalacoes:null,escalacoes_observadas_em:null});
