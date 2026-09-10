@@ -1562,9 +1562,9 @@ function premiumGameDetails(g){
   const lineupEvents=buildLineupMatchEventsModel(g,model.lineups,eventProjection);
   const playerEvents=(player,side)=>lineupEvents[side]?.get(Number(player?.id))||{cards:[],substitution:null};
   const eventBadges=(player,side,compact=false)=>{
-    const events=playerEvents(player,side), cards=events.cards.map(card=>`<span class="lineup-event-card is-${card.kind}" title="${card.kind==="red"?"Cartão vermelho":card.kind==="second-yellow"?"Segundo amarelo":"Cartão amarelo"}${card.minute?` aos ${card.minute}`:""}" aria-label="${card.kind==="red"?"Cartão vermelho":card.kind==="second-yellow"?"Segundo cartão amarelo":"Cartão amarelo"}${card.minute?` aos ${card.minute}`:""}"></span>`).join("");
-    const substitution=events.substitution?`<span class="lineup-substitution is-${events.substitution.direction}" title="${events.substitution.direction==="out"?"Saiu":"Entrou"}${events.substitution.minute?` aos ${events.substitution.minute}`:""}">${events.substitution.direction==="out"?"↓":"↑"}${compact?"":events.substitution.minute}</span>`:"";
-    return cards||substitution?`<span class="lineup-player-events">${cards}${substitution}</span>`:"";
+    const events=playerEvents(player,side), cards=events.cards.map(card=>{const label=`${card.kind==="red"?"Cartão vermelho":card.kind==="second-yellow"?"Segundo cartão amarelo":"Cartão amarelo"}${card.minute?` aos ${card.minute}`:""}`;return `<span class="lineup-event-card-badge" title="${label}" aria-label="${label}"><span class="lineup-event-card is-${card.kind}" aria-hidden="true"></span>${compact&&card.minute?`<small>${card.minute}</small>`:""}</span>`;}).join("");
+    const substitution=events.substitution?`<span class="lineup-substitution is-${events.substitution.direction}" title="${events.substitution.direction==="out"?"Saiu":"Entrou"}${events.substitution.minute?` aos ${events.substitution.minute}`:""}">${events.substitution.direction==="out"?"↓":"↑"}${events.substitution.minute}</span>`:"";
+    return cards||substitution?`<span class="lineup-player-events${compact?" is-compact":""}">${cards}${substitution}</span>`:"";
   };
   const lineupSide=(side,label,logo,position)=>{
     const groups=[["G","Goleiro"],["D","Defesa"],["M","Meio-campo"],["F","Ataque"],["","Jogadores"]];
