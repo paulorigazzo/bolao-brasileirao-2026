@@ -1640,10 +1640,10 @@ function premiumMatchCard(g){
           <div class="premium-expanded-center">${center}</div>
           <div class="premium-team premium-team-away ${favorite.awayFavorite?"is-favorite-team":""}"><span class="team-badge">${teamLogo(g.time_fora_logo,g.time_fora)}</span><b>${escapeHtml(teamDisplayName(g.time_fora))}${favorite.awayFavorite?`<span class="favorite-team-name-heart" aria-hidden="true">♥</span>`:""}</b></div>
         </div>
+        ${resultComparison}
         ${premiumGoalEvents(g)}
         ${premiumGameDetails(g)}
         ${!isLocked&&!finished?`<div class="premium-game-actions"><button class="primary premium-save-pick" type="button" ${validPickDraft(g.id_jogo)?"":"disabled"}>${draft?"Salvar palpite":pick?"✓ Palpite salvo":"Salvar palpite"}</button></div>`:""}
-        ${resultComparison}
       </div>
     </div>
   </article>`;
