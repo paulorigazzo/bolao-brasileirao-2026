@@ -1610,7 +1610,6 @@ function premiumMatchCard(g){
         </div>
         ${premiumGoalEvents(g)}
         ${premiumGameDetails(g)}
-        ${premiumGameDetails(g)}
         ${!isLocked&&!finished?`<div class="premium-game-actions"><button class="primary premium-save-pick" type="button" ${validPickDraft(g.id_jogo)?"":"disabled"}>${draft?"Salvar palpite":pick?"✓ Palpite salvo":"Salvar palpite"}</button></div>`:""}
         ${resultComparison}
       </div>
