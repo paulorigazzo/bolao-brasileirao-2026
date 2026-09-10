@@ -1555,8 +1555,17 @@ function premiumGameDetails(g){
     <div id="${panelId}" class="premium-detail-panel" hidden>${content}${updatedAt?`<p class="premium-detail-updated">${live?"Atualizado":"Dados observados"} às ${gameDetailTimestamp(updatedAt)}</p>`:""}</div>
   </section>`;};
   const statistics=model.statistics?section("statistics","Estatísticas",`<div class="premium-statistics-grid">${model.statistics.rows.map(row=>`<div class="premium-statistic-row"><b>${row.home??"—"}${row.home!==undefined?row.suffix:""}</b><span>${escapeHtml(row.label)}</span><b>${row.away??"—"}${row.away!==undefined?row.suffix:""}</b></div>`).join("")}</div>`,model.statistics.observedAt,model.statistics.live):"";
-  const lineupSide=(side,label)=>`<div class="premium-lineup-side"><header><span>${escapeHtml(label)}</span><strong>${escapeHtml(side.formation||"Formação não informada")}</strong>${side.coach?`<small>Técnico: ${escapeHtml(side.coach)}</small>`:""}</header><ol>${side.starters.map(player=>`<li><b>${player.number??"—"}</b><span>${escapeHtml(player.name)}</span>${player.position?`<small>${escapeHtml(player.position)}</small>`:""}</li>`).join("")}</ol></div>`;
-  const lineups=model.lineups?section("lineups","Escalações",`<div class="premium-lineups-grid">${lineupSide(model.lineups.home,g.time_casa)}${lineupSide(model.lineups.away,g.time_fora)}</div>`,model.lineups.observedAt):"";
+  const lineupSide=(side,label,logo)=>{
+    const groups=[["G","Goleiro"],["D","Defesa"],["M","Meio-campo"],["F","Ataque"],["","Jogadores"]];
+    const starters=Array.isArray(side.starters)?side.starters:[];
+    const players=groups.map(([position,title])=>{
+      const grouped=starters.filter(player=>position?player.position===position:!groups.slice(0,4).some(([known])=>known===player.position));
+      if(!grouped.length) return "";
+      return `<section class="premium-lineup-group"><strong>${title}</strong><ol>${grouped.map(player=>`<li><b>${player.number??"—"}</b><span title="${escapeHtml(player.name)}">${escapeHtml(player.name)}</span></li>`).join("")}</ol></section>`;
+    }).join("");
+    return `<div class="premium-lineup-side"><header><span class="premium-lineup-crest">${teamLogo(logo,label)}</span><span class="premium-lineup-heading"><b>${escapeHtml(teamDisplayName(label))}</b><strong>${escapeHtml(side.formation||"Formação não informada")}</strong>${side.coach?`<small>Técnico: ${escapeHtml(side.coach)}</small>`:""}</span></header><div class="premium-lineup-groups">${players}</div></div>`;
+  };
+  const lineups=model.lineups?section("lineups","Escalações",`<div class="premium-lineups-grid">${lineupSide(model.lineups.home,g.time_casa,g.time_casa_logo)}${lineupSide(model.lineups.away,g.time_fora,g.time_fora_logo)}</div>`,model.lineups.observedAt):"";
   return `<div class="premium-game-details">${statistics}${lineups}</div>`;
 }
 function premiumMatchCard(g){
