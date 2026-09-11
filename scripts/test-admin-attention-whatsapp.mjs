@@ -27,7 +27,9 @@ assert.match(app,/resolveAttentionWhatsAppParticipant\(item,state\.authorizedPar
 assert.match(app,/data-admin-participant-detail=/);
 assert.match(app,/adminAttentionContent[\s\S]*data-participant-whatsapp/);
 assert.match(app,/admin-pending-actions[^`]*admin-attention-whatsapp[^`]*admin-person-detail-hint/);
+assert.match(app,/class="secondary admin-attention-push"[^`]*data-attention-push-user/);
+assert.match(app,/admin-pending-actions[^`]*admin-attention-whatsapp[^`]*\$\{pushButton\}[^`]*admin-person-detail-hint/);
 assert.match(styles,/#adminAttentionCard button\.admin-pending-detail\{[\s\S]*?min-height:0;[\s\S]*?overflow:visible;[\s\S]*?border-radius:0;[\s\S]*?transform:none;[\s\S]*?\}/);
-assert.match(styles,/\.admin-pending-actions\{[^}]*display:flex;[^}]*justify-content:space-between;/);
+assert.match(styles,/\.admin-pending-actions\{[^}]*display:grid;[^}]*grid-template-columns:[^;}]*1fr[^;}]*1\.12fr[^;}]*\.82fr/);
 
 console.log("WhatsApp, ações alinhadas e frame de detalhes na Situação da Rodada verificados com sucesso.");

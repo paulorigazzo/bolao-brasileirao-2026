@@ -4,7 +4,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 
 ## Estado atual
 
-- Versão funcional: `v6.39.2`.
+- Versão funcional: `v6.39.3`.
 - Prioridade, status e sequência atuais: [`ROADMAP.md`](ROADMAP.md).
 - Evolução para Temporadas e Ligas: conduzida incrementalmente neste aplicativo, com palpites compartilhados, contexto competitivo por liga e designações pendentes no fluxo de aprovação. O [plano vigente](docs/architecture/LIGAS_COM_PALPITES_COMPARTILHADOS.md) substitui o Rigazzo como destino exclusivo; o produto independente permanece congelado como histórico e possível laboratório em [sua documentação](docs/architecture/BOLAO_BRASILEIRAO_RIGAZZO.md).
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
@@ -27,7 +27,7 @@ Aplicação web mobile-first para palpites do Campeonato Brasileiro, com login G
 - gestão administrativa, diagnóstico, sincronização, auditoria e acompanhamento detalhado da proteção de recuperação, distinguindo alterações registradas de pendências reais;
 - snapshots competitivos internos para reconstrução de jogos encerrados, palpites e Ranking;
 - cadastro consolidado com nome, telefone opcional e time favorito opcional, seguido de aprovação administrativa;
-- preparação manual de mensagens individuais pelo WhatsApp na gestão de participantes e na Situação da Rodada;
+- preparação manual de mensagens individuais pelo WhatsApp na gestão de participantes e ações compactas de WhatsApp, notificação e consulta dos jogos na Situação da Rodada;
 - lembretes Web Push opt-in por aparelho, com convite contextual na Home, seleção administrativa dos destinatários, mensagens individuais automáticas e revalidação antes do envio;
 - autores e minutos dos gols nos cards expandidos dos jogos, quando os eventos oficiais estiverem completos e coerentes com o placar; a cobertura histórica começa na Rodada 26;
 - estatísticas e escalações em seções compactas dos cards expandidos, com visualizações em lista e campo tático, cartões junto aos jogadores e banco recolhível com substituições; a cobertura histórica piloto começa na Rodada 26;

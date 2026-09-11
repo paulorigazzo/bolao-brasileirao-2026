@@ -1,3 +1,11 @@
+# v6.39.3 — Lembrete individual e clareza na Home
+
+- Acrescenta a ação individual de notificação ao lado de WhatsApp e Ver jogos na Situação da Rodada.
+- Reutiliza o modal seletivo existente com somente o participante acionado inicialmente marcado.
+- Mantém a ação indisponível quando o participante não possui notificações ativas ou não tem palpites pendentes.
+- Esclarece que a quantidade de placares exatos exibida na Home é acumulada no campeonato.
+- Preserva backend, Supabase, regras competitivas e o fluxo coletivo de lembretes.
+
 # v6.39.2 — Status geral de comunicação dos participantes
 
 - Exibe na gestão de participantes quem ativou notificações e quantos aparelhos estão aptos.
