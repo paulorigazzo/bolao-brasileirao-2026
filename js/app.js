@@ -7,7 +7,7 @@ import { buildParticipantDuelModel } from "./participant-duel-engine.js";
 import { buildMatchCalendarModel } from "./match-calendar-engine.js";
 import { resolveParticipantFavoriteTeam } from "./participant-team.js";
 import { buildRecoveryProtectionModel, recoveryOccurrenceModel, recoveryOriginLabel } from "./recovery-protection.js";
-import { appendPoolLinkToWhatsAppMessage, resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
+import { appendPoolLinkToWhatsAppMessage, normalizeParticipantEmail, resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
 import { hasNewlyRevealablePublicPicks, shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
 import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./access-control.js";
 import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temporary-ranking-engine.js";

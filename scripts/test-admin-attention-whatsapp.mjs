@@ -21,6 +21,7 @@ assert.equal(appendPoolLinkToWhatsAppMessage("Olá!",""),"Olá!");
 const app=readFileSync(new URL("../js/app.js",import.meta.url),"utf8");
 const styles=readFileSync(new URL("../css/styles.css",import.meta.url),"utf8");
 assert.match(app,/function adminWhatsAppButton\(/);
+assert.match(app,/import \{[^}]*normalizeParticipantEmail[^}]*\} from "\.\/admin-whatsapp\.js"/);
 assert.match(app,/return appendPoolLinkToWhatsAppMessage\(templates\[type\]\|\|"",configuredPoolUrl\(\)\)/);
 assert.match(app,/const text=appendPoolLinkToWhatsAppMessage\(`Olá! Ainda há palpites pendentes/);
 assert.match(app,/resolveAttentionWhatsAppParticipant\(item,state\.authorizedParticipants\)/);
