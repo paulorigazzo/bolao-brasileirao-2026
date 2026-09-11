@@ -4043,6 +4043,8 @@ button,.chip,.filter-chip,.bottom-nav-item,.card[role="button"]{-webkit-tap-high
 .profile-form-status{min-height:1.2em;color:var(--color-primary,#16794b)}
 .push-preferences-card{display:grid;align-content:start;gap:10px}.push-preferences-card h2{margin:3px 0}.push-preferences-card p{margin:0;color:var(--text-muted,#607067);line-height:1.5}.push-preferences-actions,.admin-reminder-actions{display:flex;flex-wrap:wrap;gap:9px}.push-preferences-actions button{width:max-content;max-width:100%}.admin-reminder-actions{justify-content:flex-end}@media(max-width:520px){.admin-reminder-actions{width:100%;display:grid}.admin-reminder-actions button{width:100%!important;min-width:0!important}}
 .admin-participant-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.admin-communication-summary{display:flex;flex-wrap:wrap;gap:8px 16px;margin:0 0 13px;padding:10px 12px;border:1px solid var(--divider);border-radius:13px;background:rgba(255,255,255,.025);color:var(--muted);font-size:.72rem}.admin-communication-summary strong{color:var(--text)}
+.admin-communication-badges{display:flex;flex-wrap:wrap;gap:5px 7px;margin-top:7px}.admin-member-copy .admin-communication-badges span{display:inline-flex;align-items:center;width:max-content;max-width:100%;margin:0;padding:4px 7px;border:1px solid var(--divider);border-radius:999px;font-size:.61rem;font-weight:800;line-height:1.15}.admin-communication-badges .is-available{border-color:rgba(53,220,131,.25);background:rgba(53,220,131,.08);color:var(--green2)}.admin-communication-badges .is-missing{color:var(--muted)}.admin-communication-badges .is-waiting{border-color:rgba(242,196,109,.25);background:rgba(242,196,109,.07);color:#f2c46d}
 .admin-pending-requests-badge{min-width:26px;height:26px;border-radius:999px;display:inline-grid;place-items:center;background:#d97706;color:white;font-size:.78rem;font-weight:800}
 .admin-member-row.status-pending{border-color:#f2c46d;background:rgba(245,158,11,.07)}
 .admin-member-row.status-rejected{opacity:.72}
@@ -4054,6 +4056,8 @@ button,.chip,.filter-chip,.bottom-nav-item,.card[role="button"]{-webkit-tap-high
   .admin-member-actions{grid-column:1/-1;width:100%}
   .admin-member-actions button{flex:1}
   .profile-summary{align-items:flex-start}
+  .admin-communication-summary,.admin-communication-badges{display:grid;grid-template-columns:1fr}
+  .admin-member-copy .admin-communication-badges span{width:100%;box-sizing:border-box;white-space:normal}
 }
 
 /* v6.5.0a — legibilidade dos campos editáveis do perfil */

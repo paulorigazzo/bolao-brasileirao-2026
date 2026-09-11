@@ -3,6 +3,8 @@ import {readFile} from "node:fs/promises";
 import {base64UrlToUint8Array, subscriptionRow, supportsWebPush} from "../js/web-push.js";
 import {isPushActivationPromptPreview,nextPushActivationPromptDate,PUSH_ACTIVATION_PROMPT_SNOOZE_MS,shouldOfferPushActivation} from "../js/push-activation-prompt.js";
 import {buildReminderParticipants,openReminderGames,reminderMessage} from "../netlify/functions/_web-push-reminder.mjs";
+import {buildParticipantCommunicationStatus} from "../netlify/functions/_participant-communication-status.mjs";
+import {createParticipantCommunicationStatusHandler} from "../netlify/functions/status-comunicacao-participantes.mjs";
 
 const root=new URL("../",import.meta.url);
 const [html,app,worker,migration,rollback,sender,config]=await Promise.all([
@@ -28,6 +30,7 @@ assert.match(html,/id="pushActivationPrompt"[\s\S]*id="pushActivationEnable"[\s\
 assert.match(html,/id="adminPushReminderAction"/);
 assert.match(html,/id="adminPushReminderModal"/);
 assert.match(html,/id="adminPushSelectAll"/);
+assert.match(html,/id="adminCommunicationSummary"/);
 assert.match(app,/Notification\.requestPermission\(\)/);
 assert.match(app,/pushSubscriptionStatusKnown/);
 assert.match(app,/schedulePushActivationPrompt\(\)/);
@@ -50,6 +53,34 @@ assert.match(sender,/\.eq\("status","ativo"\)/);
 assert.match(sender,/\.from\("participantes_autorizados"\)[\s\S]*\.eq\("status","approved"\)/);
 assert.match(config,/Participante não autorizado/);
 assert.doesNotMatch(sender,/celular|whatsapp/i);
+
+const communicationStatus=buildParticipantCommunicationStatus({
+  authorizations:[
+    {id:"participant-1",email:"ana@example.com",ativo:true,status:"approved"},
+    {id:"participant-2",email:"bia@example.com",ativo:true,status:"approved"},
+    {id:"participant-3",email:"pendente@example.com",ativo:true,status:"pending"},
+  ],
+  profiles:[{user_id:"user-1",email:"ANA@example.com"}],
+  subscriptions:[
+    {user_id:"user-1",ativo:true,endpoint:"segredo-1",p256dh:"segredo-2",auth:"segredo-3"},
+    {user_id:"user-1",ativo:true},
+    {user_id:"user-1",ativo:false},
+  ],
+});
+assert.deepEqual(communicationStatus,{participants:[{participantId:"participant-1",hasAccount:true,activeDevices:2},{participantId:"participant-2",hasAccount:false,activeDevices:0}],totalParticipants:2,enabledParticipants:1});
+assert.doesNotMatch(JSON.stringify(communicationStatus),/endpoint|p256dh|segredo/);
+
+const unauthorizedHandler=createParticipantCommunicationStatusHandler({authorize:async()=>({ok:false,status:401,error:"Autenticação obrigatória."})});
+assert.equal((await unauthorizedHandler(new Request("https://example.test",{method:"GET"}))).status,401);
+const forbiddenHandler=createParticipantCommunicationStatusHandler({authorize:async()=>({ok:false,status:403,error:"Apenas administradores."})});
+assert.equal((await forbiddenHandler(new Request("https://example.test",{method:"GET"}))).status,403);
+const adminStatusHandler=createParticipantCommunicationStatusHandler({authorize:async()=>({ok:true,supabase:{}}),loadStatus:async()=>communicationStatus});
+const adminStatusResponse=await adminStatusHandler(new Request("https://example.test",{method:"GET"}));
+assert.equal(adminStatusResponse.status,200);
+assert.deepEqual(await adminStatusResponse.json(),{ok:true,...communicationStatus});
+assert.equal((await adminStatusHandler(new Request("https://example.test",{method:"POST"}))).status,405);
+assert.match(app,/status-comunicacao-participantes/);
+assert.match(app,/admin-communication-badges/);
 
 const promptBase={supported:true,permission:"default",activeDeviceCount:0,dismissedUntil:0,now:1000,homeVisible:true,shownThisSession:false};
 assert.equal(shouldOfferPushActivation(promptBase),true);

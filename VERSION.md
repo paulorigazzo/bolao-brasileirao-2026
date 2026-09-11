@@ -1,6 +1,6 @@
-6.39.1
+6.39.2
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.39.1-liga-ativa-no-cabecalho.md`](docs/releases/v6.39.1-liga-ativa-no-cabecalho.md)
+- Nota da versão atual: [`docs/releases/v6.39.2-status-comunicacao-participantes.md`](docs/releases/v6.39.2-status-comunicacao-participantes.md)

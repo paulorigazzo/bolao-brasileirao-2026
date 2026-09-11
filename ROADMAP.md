@@ -4,7 +4,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.39.1`.
+- Versão funcional: `v6.39.2`.
 - Prioridade: **manter o Bolão 2026 estável e evoluí-lo incrementalmente para múltiplas ligas com palpites compartilhados**.
 - Próxima etapa coordenada: monitorar a Rodada 27 como último ciclo recomendado de estabilização da API-Football e, se não houver regressão material, planejar em tarefa própria a retirada gradual do legado; o Rigazzo permanece congelado como histórico e possível laboratório.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
@@ -64,6 +64,7 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - ✅ Tabela do campeonato responsiva.
 - ✅ Meu Time 2.0 e personalização pelo clube favorito.
 - ✅ Gestão de perfil e participantes.
+- ✅ Visão administrativa geral de comunicação, com contagem de notificações ativas por aparelho e indicação de telefone informado, independente das pendências da rodada.
 - ✅ Comunicação individual e manual via WhatsApp na gestão de participantes e na Situação da Rodada.
 - ✅ Lembretes Web Push ativados por aparelho, com convite contextual e não invasivo na Home, seleção dos destinatários, mensagens individuais automáticas e nova conferência das pendências antes do envio manual.
 - ✅ Botões de atualização revisados: recarga do Supabase, consulta da classificação, diagnóstico e sincronização externa usam verbos distintos; a ação administrativa redundante do Ranking foi removida.
