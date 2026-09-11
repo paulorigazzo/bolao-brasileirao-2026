@@ -29,7 +29,7 @@ import { buildLineupPitchModel } from "./lineup-pitch.js";
 import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 
-const APP_VERSION = "6.39.1";
+const APP_VERSION = "6.39.2";
 const API_FOOTBALL_RECONCILIATION_SESSION_KEY = "bolao:admin:api-football-reconciliation";
 installMotionTokens();
 installMotionInteractions();
@@ -39,7 +39,7 @@ const sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonK
 const TEMPORARY_RANKING_SYNTHETIC_PREVIEW=isTemporaryRankingSyntheticPreview(window.location);
 const TEMPORARY_RANKING_PREVIEW_FIXTURE=TEMPORARY_RANKING_SYNTHETIC_PREVIEW?buildTemporaryRankingSyntheticFixture():null;
 const GAME_GOAL_EVENTS_PREVIEW=isGameGoalEventsPreview(window.location);
-const state = { user:null, participant:null, participants:[], games:[], gameEventProjections:[], gameDetailProjections:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], leagueRanking:[], leagues:[], activeLeague:null, leagueContextStatus:"idle", leagueManagedMembers:[], leagueMemberAudit:[], leagueLifecycleAudit:[], leagueManager:false, administeredLeagues:[], adminTargetLeague:null, leagueDirectory:[], leagueAssignments:[], participantSituations:[], participantApprovalTarget:null, participantApprovalMode:"approve", standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{}, pushRegistration:null, pushSubscription:null, pushActiveDeviceCount:0, pushSubscriptionStatusKnown:false };
+const state = { user:null, participant:null, participants:[], games:[], gameEventProjections:[], gameDetailProjections:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], leagueRanking:[], leagues:[], activeLeague:null, leagueContextStatus:"idle", leagueManagedMembers:[], leagueMemberAudit:[], leagueLifecycleAudit:[], leagueManager:false, administeredLeagues:[], adminTargetLeague:null, leagueDirectory:[], leagueAssignments:[], participantSituations:[], participantApprovalTarget:null, participantApprovalMode:"approve", standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], adminCommunicationStatus:null, participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{}, pushRegistration:null, pushSubscription:null, pushActiveDeviceCount:0, pushSubscriptionStatusKnown:false };
 const COMPETITIVE_READ_MODE="league"; // "legacy" é mantido apenas para uma publicação de contingência.
 const leagueRequestGate=createLeagueRequestGate();
 let leagueSelectorReturnFocus=null;
@@ -848,6 +848,15 @@ async function sessionToken(){
   return token;
 }
 
+async function loadAdminCommunicationStatus(){
+  if(!isAdminUser()) return null;
+  const token=await sessionToken();
+  const response=await fetch("/.netlify/functions/status-comunicacao-participantes",{headers:{Authorization:`Bearer ${token}`,Accept:"application/json"},cache:"no-store"});
+  const payload=await response.json().catch(()=>({}));
+  if(!response.ok || payload?.ok!==true) throw new Error(payload?.error||"Não foi possível consultar o status de comunicação.");
+  return payload;
+}
+
 async function enablePushNotifications(){
   const button=$("enablePushBtn");
   const status=$("pushPreferenceStatus");
@@ -1046,7 +1055,7 @@ async function loadData(){
   if(eventProjectionsErr) console.warn("Os detalhes dos gols não puderam ser carregados.",eventProjectionsErr);
   if(detailProjectionsErr) console.warn("As estatísticas e escalações não puderam ser carregadas.",detailProjectionsErr);
   const adminGameIds=adminRoundGameIds(games,currentRoundNumber(games));
-  const [{data:picks,error:pErr},{data:leagues,error:leaguesErr},{data:adminProgress,error:adminProgressErr},{data:authorized,error:authorizedErr},{data:participantLimit,error:participantLimitErr},{data:leagueManager,error:leagueManagerErr},{data:leagueAssignments,error:leagueAssignmentsErr},{data:participantSituations,error:participantSituationsErr}] = await Promise.all([
+  const [{data:picks,error:pErr},{data:leagues,error:leaguesErr},{data:adminProgress,error:adminProgressErr},{data:authorized,error:authorizedErr},{data:participantLimit,error:participantLimitErr},{data:leagueManager,error:leagueManagerErr},{data:leagueAssignments,error:leagueAssignmentsErr},{data:participantSituations,error:participantSituationsErr},communicationResult] = await Promise.all([
     sb.from("palpites").select("*").eq("user_id",state.user.id),
     sb.rpc("listar_minhas_ligas"),
     loadAdminPickProgress({supabase:sb,isAdmin:isAdminUser(),gameIds:adminGameIds}),
@@ -1054,7 +1063,8 @@ async function loadData(){
     isAdminUser() ? sb.rpc("obter_limite_participantes_ativos") : Promise.resolve({data:10,error:null}),
     isAdminUser() ? sb.rpc("sou_gestor_central_ligas") : Promise.resolve({data:false,error:null}),
     isAdminUser() ? sb.rpc("listar_designacoes_participantes") : Promise.resolve({data:[],error:null}),
-    isAdminUser() ? sb.rpc("listar_situacao_participantes_ligas") : Promise.resolve({data:[],error:null})
+    isAdminUser() ? sb.rpc("listar_situacao_participantes_ligas") : Promise.resolve({data:[],error:null}),
+    loadAdminCommunicationStatus().then(data=>({data,error:null})).catch(error=>({data:null,error}))
   ]);
   if(pErr) throw pErr;
   if(leaguesErr) throw new Error("Não foi possível carregar suas ligas.");
@@ -1064,7 +1074,8 @@ async function loadData(){
   if(leagueManagerErr) console.warn("A gestão central de ligas não pôde ser confirmada.",leagueManagerErr);
   if(leagueAssignmentsErr) console.warn("As designações pendentes não puderam ser carregadas.",leagueAssignmentsErr);
   if(participantSituationsErr) console.warn("As situações de ligas dos participantes não puderam ser carregadas.",participantSituationsErr);
-  state.games=games||[]; state.gameEventProjections=eventProjections||[]; state.gameDetailProjections=detailProjections||[]; state.ownPicks=picks||[]; state.leagues=leagues||[]; state.adminPickProgress=adminProgress||[]; state.authorizedParticipants=authorized||[]; state.participantLimit=Math.max(1,Number(participantLimit)||10); state.leagueManager=leagueManager===true; state.leagueAssignments=leagueAssignments||[]; state.participantSituations=participantSituations||[];
+  if(communicationResult.error) console.warn("O status de comunicação dos participantes não pôde ser carregado.",communicationResult.error);
+  state.games=games||[]; state.gameEventProjections=eventProjections||[]; state.gameDetailProjections=detailProjections||[]; state.ownPicks=picks||[]; state.leagues=leagues||[]; state.adminPickProgress=adminProgress||[]; state.authorizedParticipants=authorized||[]; state.adminCommunicationStatus=communicationResult.data; state.participantLimit=Math.max(1,Number(participantLimit)||10); state.leagueManager=leagueManager===true; state.leagueAssignments=leagueAssignments||[]; state.participantSituations=participantSituations||[];
   if(GAME_GOAL_EVENTS_PREVIEW){
     const previews=buildGameGoalEventsRoundPreview(state.games,26);
     const previewIds=new Set(previews.map(item=>Number(item.id_jogo)));
@@ -3794,14 +3805,22 @@ function renderAdminParticipants(){
   const pending=items.filter(item=>item.status==="pending").length;
   const limit=Math.max(1,Number(state.participantLimit)||10);
   const atLimit=approved>=limit;
+  const communicationByParticipant=new Map((state.adminCommunicationStatus?.participants||[]).map(item=>[String(item.participantId),item]));
+  const approvedItems=items.filter(item=>(!item.status || item.status==="approved") && item.ativo!==false);
+  const phonesAvailable=approvedItems.filter(item=>Boolean(normalizeBrazilPhone(item.celular))).length;
   $("adminParticipantsCount").textContent=pending?`${approved}/${limit} ativos • ${pending} pendente${pending===1?"":"s"}`:`${approved}/${limit} participante${approved===1?"":"s"} ativo${approved===1?"":"s"}`;
   if($("adminParticipantLimitInput")) $("adminParticipantLimitInput").value=String(limit);
   if($("adminParticipantLimitStatus")) $("adminParticipantLimitStatus").textContent=atLimit?`${approved} de ${limit} ativos — limite atingido`:`${approved} de ${limit} ativos — ${limit-approved} vaga${limit-approved===1?"":"s"} disponível${limit-approved===1?"":"is"}`;
   $("adminPendingRequestsBadge").textContent=String(pending);
   show("adminPendingRequestsBadge",pending>0);
+  if($("adminCommunicationSummary")) $("adminCommunicationSummary").innerHTML=state.adminCommunicationStatus
+    ? `<span>🔔 Notificações: <strong>${Number(state.adminCommunicationStatus.enabledParticipants)||0} de ${approved}</strong></span><span>📱 Celular: <strong>${phonesAvailable} de ${approved}</strong></span>`
+    : '<span>⚠️ Status de notificações indisponível</span><span>📱 Celular: <strong>'+phonesAvailable+' de '+approved+'</strong></span>';
   $("adminParticipantsList").innerHTML=items.length?items.map(item=>{
     const status=item.status || (item.ativo===false?"inactive":"approved");
     const phone=item.celular?formatBrazilPhone(item.celular):"Celular não informado";
+    const communication=communicationByParticipant.get(String(item.id));
+    const activeDevices=Number(communication?.activeDevices)||0;
     const requested=item.solicitado_em?new Date(item.solicitado_em).toLocaleDateString("pt-BR"):"";
     const team=participantTeam({name:item.nome,email:item.email});
     const teamLabel=team?.name || "Time do coração não escolhido";
@@ -3813,12 +3832,15 @@ function renderAdminParticipants(){
     const activeLeagues=Number(situation?.ligas_ativas)||0,pendingLeagues=Number(situation?.designacoes_pendentes)||assignments.length,archivedPending=Number(situation?.pendencias_arquivadas)||0;
     const journeyLabel=status==="pending"?"Aguardando aprovação":activeLeagues?`Ativo em ${activeLeagues} liga${activeLeagues===1?'':'s'}`:situation?.sem_liga?"Aprovado sem liga":pendingLeagues?(archivedPending?"Liga arquivada — designação pendente":situation?.perfil_consolidado?"Ativação pendente":"Aprovado — aguardando primeiro acesso"):status==="approved"?"Aprovado — aguardando primeiro acesso":"";
     const assignmentLabel=assignments.some(row=>row.sem_liga)?"Editar designação sem liga":assignments.length?`Editar ${assignments.length} liga${assignments.length===1?'':'s'} pendente${assignments.length===1?'':'s'}`:"";
+    const notificationLabel=status!=="approved"||item.ativo===false?"Notificações não aplicáveis":communication?.hasAccount===false?"Aguardando primeiro acesso":activeDevices?`Ativas · ${activeDevices} aparelho${activeDevices===1?'':'s'}`:"Notificações não ativadas";
+    const notificationClass=activeDevices?"is-available":communication?.hasAccount===false?"is-waiting":"is-missing";
+    const phoneClass=item.celular?"is-available":"is-missing";
     const addLeagueButton=status==="approved"&&item.ativo!==false&&!item.administrador?`<button type="button" class="secondary" data-participant-add-leagues="${escapeHtml(item.id)}">Adicionar a ligas</button>`:"";
     const pendingActions=status==="pending"?`<div class="admin-member-actions">${whatsappButton}<button type="button" class="primary" data-participant-league-approval="${escapeHtml(item.id)}" ${atLimit?'disabled title="Aumente o limite ou desative um participante ativo para aprovar"':''}>${atLimit?"Limite atingido":"Aprovar"}</button><button type="button" class="secondary" data-membership-decision="reject" data-participant-id="${escapeHtml(item.id)}">Recusar</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`:
       `<div class="admin-member-actions">${whatsappButton}${assignments.length?`<button type="button" class="secondary" data-participant-league-approval="${escapeHtml(item.id)}">${escapeHtml(assignmentLabel)}</button>`:addLeagueButton}<button type="button" class="secondary admin-member-toggle" data-participant-id="${escapeHtml(item.id)}" data-participant-active="${item.ativo!==false}">${item.ativo===false?"Reativar":"Desativar"}</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`;
     return `<div class="admin-member-row status-${escapeHtml(status)}">
       ${participantAvatar(item.nome,team,"admin-member-avatar")}
-      <div class="admin-member-copy"><strong>${escapeHtml(item.nome)}</strong><span class="admin-member-team${team?"":" is-unset"}">${escapeHtml(teamLabel)}</span><span>${escapeHtml(item.email)}</span><small>${escapeHtml(phone)}${requested&&status==="pending"?` • solicitado em ${escapeHtml(requested)}`:""}</small><small>${escapeHtml(journeyLabel||membershipStatusLabel(item))}</small></div>
+      <div class="admin-member-copy"><strong>${escapeHtml(item.nome)}</strong><span class="admin-member-team${team?"":" is-unset"}">${escapeHtml(teamLabel)}</span><span>${escapeHtml(item.email)}</span><div class="admin-communication-badges"><span class="${notificationClass}">${activeDevices?'🔔':'🔕'} ${escapeHtml(notificationLabel)}</span><span class="${phoneClass}">${item.celular?'📱':'📵'} ${escapeHtml(phone)}</span></div>${requested&&status==="pending"?`<small>Solicitado em ${escapeHtml(requested)}</small>`:""}<small>${escapeHtml(journeyLabel||membershipStatusLabel(item))}</small></div>
       ${pendingActions}
     </div>`;
   }).join(""):`<p class="muted-note">Nenhum participante cadastrado.</p>`;

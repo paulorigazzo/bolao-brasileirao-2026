@@ -1,3 +1,11 @@
+# v6.39.2 — Status geral de comunicação dos participantes
+
+- Exibe na gestão de participantes quem ativou notificações e quantos aparelhos estão aptos.
+- Distingue telefones informados e ausentes sem depender das pendências da rodada.
+- Resume a cobertura de Web Push e celular entre os participantes ativos e aprovados.
+- Protege a consulta por autorização administrativa e nunca envia endpoints ou chaves das assinaturas ao navegador.
+- Preserva o fluxo seletivo de lembretes e não altera banco, RLS ou regras competitivas.
+
 # v6.39.1 — Liga ativa no cabeçalho
 
 - Exibe o nome da liga ativa logo abaixo da versão no cabeçalho global.
