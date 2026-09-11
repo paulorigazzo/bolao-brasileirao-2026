@@ -27,7 +27,6 @@ assert.doesNotMatch(migration, /\b(?:inicio|status|gols_casa|gols_fora|time_casa
 assert.match(rollback, /rollback_state_diverged/);
 assert.match(rollback, /rollback_count_mismatch/);
 assert.match(rollback, /set api_football_id = null/);
-assert.match(app, /API_FOOTBALL_RECONCILIATION_SESSION_KEY/);
-assert.match(app, /sessionStorage\.setItem/);
-assert.match(app, /sessionStorage\.getItem/);
-console.log("Mapeamento incremental da Rodada 27 verificado: hash, dez vínculos, integridade, rollback e relatório de sessão.");
+assert.doesNotMatch(app, /API_FOOTBALL_RECONCILIATION_SESSION_KEY/);
+assert.doesNotMatch(app, /id="adminReconciliationForm"/);
+console.log("Mapeamento incremental da Rodada 27 preservado: hash, dez vínculos, integridade e rollback; controle transitório removido da ADM.");
