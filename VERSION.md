@@ -1,6 +1,6 @@
-6.39.3
+6.39.4
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.39.3-lembrete-individual-home.md`](docs/releases/v6.39.3-lembrete-individual-home.md)
+- Nota da versão atual: [`docs/releases/v6.39.4-limpeza-parcial-transicao-api-adm.md`](docs/releases/v6.39.4-limpeza-parcial-transicao-api-adm.md)

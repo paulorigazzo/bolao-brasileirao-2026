@@ -80,8 +80,7 @@ for (const source of [helperSource, endpointSource]) {
 }
 assert.match(endpointSource, /requireAdmin/);
 assert.match(endpointSource, /RECONCILE_API_FOOTBALL_ROUND|reconcileApiFootballRound/);
-assert.match(appSource, /id="adminReconciliationForm"/);
-assert.match(appSource, /reconciliar-api-football-rodada/);
-assert.match(appSource, /RECONCILE_API_FOOTBALL_ROUND/);
-assert.match(appSource, /hashes\?\.mappingsBefore===result\.hashes\?\.mappingsAfter/);
-console.log("Reconciliação protegida de rodada verificada: dez identidades, horários sinalizados, cota e zero escrita.");
+assert.doesNotMatch(appSource, /id="adminReconciliationForm"/);
+assert.doesNotMatch(appSource, /API_FOOTBALL_RECONCILIATION_SESSION_KEY/);
+assert.doesNotMatch(appSource, /reconciliar-api-football-rodada/);
+console.log("Reconciliação protegida preservada no backend e removida da ADM: dez identidades, horários sinalizados, cota e zero escrita.");

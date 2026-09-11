@@ -1,3 +1,10 @@
+# v6.39.4 — Limpeza parcial da transição na Área ADM
+
+- Remove da interface administrativa a reconciliação de mapeamentos, dispensada após o vínculo integral dos 380 jogos de 2026.
+- Retira da visualização cotidiana a coleta histórica em sombra e o ensaio de corte e rollback.
+- Preserva diagnóstico, sincronização, cache, cota e exportação de logs.
+- Mantém intactos Functions, tabelas, evidências e mecanismos temporários de rollback até o encerramento formal da estabilização.
+
 # v6.39.3 — Lembrete individual e clareza na Home
 
 - Acrescenta a ação individual de notificação ao lado de WhatsApp e Ver jogos na Situação da Rodada.

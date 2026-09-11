@@ -32,7 +32,7 @@ assert.match(app, /fonte oficial/);
 assert.match(app, /d\.cache\.expectedId/);
 assert.match(app, /Cota diária restante/);
 assert.match(app, /Cota por minuto restante/);
-assert.match(app, /TRANSIÇÃO · AVANÇADO/);
+assert.doesNotMatch(app, /TRANSIÇÃO · AVANÇADO/);
 assert.doesNotMatch(app, /"Football Data API":d\.services\.footballData/);
 
-console.log("Diagnóstico por fonte oficial verificado: status, cache, cotas, escudos e rollback.");
+console.log("Diagnóstico por fonte oficial verificado: status, cache, cotas e escudos; ferramentas transitórias ocultas e rollback preservado.");
