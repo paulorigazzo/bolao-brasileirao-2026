@@ -7,7 +7,7 @@ import { buildParticipantDuelModel } from "./participant-duel-engine.js";
 import { buildMatchCalendarModel } from "./match-calendar-engine.js";
 import { resolveParticipantFavoriteTeam } from "./participant-team.js";
 import { buildRecoveryProtectionModel, recoveryOccurrenceModel, recoveryOriginLabel } from "./recovery-protection.js";
-import { appendPoolLinkToWhatsAppMessage, resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
+import { appendPoolLinkToWhatsAppMessage, normalizeParticipantEmail, resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
 import { hasNewlyRevealablePublicPicks, shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
 import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./access-control.js";
 import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temporary-ranking-engine.js";
@@ -29,7 +29,7 @@ import { buildLineupPitchModel } from "./lineup-pitch.js";
 import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 
-const APP_VERSION = "6.39.2";
+const APP_VERSION = "6.39.3";
 const API_FOOTBALL_RECONCILIATION_SESSION_KEY = "bolao:admin:api-football-reconciliation";
 installMotionTokens();
 installMotionInteractions();
@@ -68,6 +68,7 @@ let friendlyRankingsView="efficiency";
 let matchCalendarMonthKey=null;
 let temporaryRankingReturnFocus=null;
 let temporaryRankingAllowUnavailable=false;
+let adminPushReminderReturnFocus=null;
 const $ = id => document.getElementById(id);
 const show = (id, visible=true) => $(id)?.classList.toggle("hidden", !visible);
 const REGISTRATION_DRAFT_KEY="bolaoRegistrationDraft";
@@ -2681,7 +2682,7 @@ function renderHome(){
   $("homeOverview").innerHTML=`
     <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="games" aria-label="Abrir jogos da rodada"><span class="mini-card-icon">📅</span><span>Rodada atual</span><b aria-hidden="true">›</b><strong>${round||"—"}</strong><small>${finished.length}/${roundGames.length} jogos finalizados</small></article>
     <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="games" aria-label="Abrir seus palpites"><span class="mini-card-icon">🎯</span><span>Seus palpites</span><b aria-hidden="true">›</b><strong>${completedPicks}/${roundGames.length}</strong><small>${pending.length?`${pending.length} pendente${pending.length===1?"":"s"}`:"Tudo preenchido"}</small></article>
-    <article class="home-mini-card card mini-tone-gold home-navigable-card" role="button" tabindex="0" data-home-action="stats" aria-label="Abrir estatísticas"><span class="mini-card-icon">⭐</span><span>Pontos na rodada</span><b aria-hidden="true">›</b><strong>${roundPoints}</strong><small>${me.exact} placar${me.exact===1?"":"es"} exato${me.exact===1?"":"s"} no total</small></article>`;
+    <article class="home-mini-card card mini-tone-gold home-navigable-card" role="button" tabindex="0" data-home-action="stats" aria-label="Abrir estatísticas"><span class="mini-card-icon">⭐</span><span>Pontos na rodada</span><b aria-hidden="true">›</b><strong>${roundPoints}</strong><small>${me.exact} placar${me.exact===1?"":"es"} exato${me.exact===1?"":"s"} no campeonato</small></article>`;
 
   if(displayedLive.length){
     $("homeLiveSection").innerHTML=`<article class="premium-feature-card premium-live-card" aria-label="Partidas ao vivo"><header class="premium-card-header"><div><span class="premium-kicker"><i>●</i> AO VIVO</span><h2>Partidas em andamento</h2></div><button class="premium-inline-action" type="button" data-home-action="games">Ver jogos <b aria-hidden="true">›</b></button></header><div class="home-live-list">${displayedLive.slice(0,3).map(game=>{const estimated=isScheduledLiveEstimate(game,now);const minute=estimated?"":liveMatchMinute(game);const title=estimated?' title="Início e minuto estimados pelo horário programado; aguardando confirmação da fonte"':minute.startsWith("~")?' title="Minuto estimado; a fonte não informou o relógio oficial"':"";const score=!estimated&&hasValidScore(game)?[Number(game.gols_casa),Number(game.gols_fora)]:["–","–"];const label=estimated?scheduledLiveLabel(game,now):`AO VIVO${minute?` • ${minute}'`:""}`;return `<button class="home-live-card${estimated?" is-estimated":""}" type="button" data-home-live-game="${Number(game.id_jogo)}" aria-label="Abrir ${escapeHtml(teamDisplayName(game.time_casa))} × ${escapeHtml(teamDisplayName(game.time_fora))} na Rodada ${Number(game.rodada)}"><span class="live-dot"></span><span class="home-live-match"><strong>${escapeHtml(teamAbbreviation(game.time_casa))} ${score[0]} × ${score[1]} ${escapeHtml(teamAbbreviation(game.time_fora))}</strong><small>${escapeHtml(teamDisplayName(game.time_casa))} × ${escapeHtml(teamDisplayName(game.time_fora))}</small></span><b${title}>${label}</b></button>`;}).join("")}</div></article>`;
@@ -3703,7 +3704,12 @@ function renderAdminAttention(){
     const icon=isComplete?"✅":item.status==="not-started"?"🔴":"🟡";
     const updated=item.lastUpdate?new Date(item.lastUpdate).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"Sem registro";
     const participant=resolveAttentionWhatsAppParticipant(item,state.authorizedParticipants);
-    return `<article class="admin-pending-person status-${item.status}"><button class="admin-pending-detail" type="button" data-admin-participant-detail="${escapeHtml(item.email)}" aria-label="Ver detalhes dos palpites de ${escapeHtml(item.name)}"><div class="admin-person-row"><strong>${icon} ${escapeHtml(item.name)}</strong><span>${item.count}/${item.total}</span></div><div class="admin-progress-track"><i style="width:${pct}%"></i></div><small>${status} • última atualização: ${updated}</small></button><div class="admin-pending-actions">${adminWhatsAppButton(participant,"admin-attention-whatsapp")}<button class="admin-person-detail-hint" type="button" data-admin-participant-detail="${escapeHtml(item.email)}">Toque para ver os jogos <span aria-hidden="true">›</span></button></div></article>`;
+    const communication=(state.adminCommunicationStatus?.participants||[]).find(entry=>String(entry.participantId)===String(participant?.id));
+    const pushUser=state.participants.find(entry=>normalizeParticipantEmail(entry.email)===normalizeParticipantEmail(item.email));
+    const pushEnabled=!isComplete && Number(communication?.activeDevices)>0 && Boolean(pushUser?.user_id);
+    const pushTitle=isComplete?"Participante sem palpites pendentes":pushEnabled?"Enviar notificação individual":"Participante sem notificações ativas";
+    const pushButton=`<button type="button" class="secondary admin-attention-push" data-attention-push-user="${escapeHtml(pushUser?.user_id||"")}" ${pushEnabled?"":"disabled"} title="${pushTitle}" aria-label="${pushTitle}">🔔 <span>Notificação</span></button>`;
+    return `<article class="admin-pending-person status-${item.status}"><button class="admin-pending-detail" type="button" data-admin-participant-detail="${escapeHtml(item.email)}" aria-label="Ver detalhes dos palpites de ${escapeHtml(item.name)}"><div class="admin-person-row"><strong>${icon} ${escapeHtml(item.name)}</strong><span>${item.count}/${item.total}</span></div><div class="admin-progress-track"><i style="width:${pct}%"></i></div><small>${status} • última atualização: ${updated}</small></button><div class="admin-pending-actions">${adminWhatsAppButton(participant,"admin-attention-whatsapp")}${pushButton}<button class="admin-person-detail-hint" type="button" data-admin-participant-detail="${escapeHtml(item.email)}" aria-label="Ver jogos e palpites de ${escapeHtml(item.name)}">Ver jogos <span aria-hidden="true">›</span></button></div></article>`;
   };
   const showComplete=adminPendingFilter==="all" || adminPendingFilter==="complete";
   const showPending=adminPendingFilter==="all" || adminPendingFilter==="pending";
@@ -4434,10 +4440,11 @@ function updateAdminPushSelection(){
 function closeAdminPushReminder(){
   $("adminPushReminderModal")?.classList.add("hidden");
   document.body.classList.remove("modal-open");
-  $("adminPushReminderAction")?.focus();
+  (adminPushReminderReturnFocus||$("adminPushReminderAction"))?.focus();
+  adminPushReminderReturnFocus=null;
 }
 
-function openAdminPushReminder(preview){
+function openAdminPushReminder(preview,selectedUserId=""){
   state.adminPushPreview=preview;
   const participants=preview.participants||[];
   $("adminPushReminderSummary").textContent=`Rodada ${state.adminSnapshot.round} • ${preview.eligibleParticipants} participante${preview.eligibleParticipants===1?"":"s"} com notificações ativas`;
@@ -4445,7 +4452,8 @@ function openAdminPushReminder(preview){
     const eligible=participant.eligibleDevices>0;
     const devices=eligible?`${participant.eligibleDevices} aparelho${participant.eligibleDevices===1?"":"s"}`:"Notificações não ativadas";
     const pendingLabel=participant.pendingOpenPicks===1?"1 palpite disponível":`${participant.pendingOpenPicks} palpites disponíveis`;
-    return `<label class="admin-push-participant${eligible?"":" is-unavailable"}"><input type="checkbox" data-admin-push-user value="${escapeHtml(participant.userId)}" ${eligible?"checked":"disabled"}><span><strong>${escapeHtml(participant.name)}</strong><small>${pendingLabel} • ${devices}</small><em>${escapeHtml(participant.message)}</em></span></label>`;
+    const selected=eligible && (!selectedUserId || String(participant.userId)===String(selectedUserId));
+    return `<label class="admin-push-participant${eligible?"":" is-unavailable"}"><input type="checkbox" data-admin-push-user value="${escapeHtml(participant.userId)}" ${selected?"checked":""} ${eligible?"":"disabled"}><span><strong>${escapeHtml(participant.name)}</strong><small>${pendingLabel} • ${devices}</small><em>${escapeHtml(participant.message)}</em></span></label>`;
   }).join("");
   $("adminPushReminderNote").textContent=preview.participantsWithoutNotifications?`${preview.participantsWithoutNotifications} participante${preview.participantsWithoutNotifications===1?"":"s"} aparece${preview.participantsWithoutNotifications===1?"":"m"} apenas para informação porque ainda não ativou notificações neste aparelho.`:"A situação será conferida novamente antes do envio.";
   $("adminPushReminderModal").classList.remove("hidden");
@@ -4477,6 +4485,7 @@ async function sendAdminPushReminder(){
   if(!button || button.disabled) return;
   button.disabled=true;
   const original=button.textContent;
+  adminPushReminderReturnFocus=button;
   button.textContent="Verificando…";
   try{
     const preview=await requestAdminPush("preview");
@@ -4491,6 +4500,26 @@ async function sendAdminPushReminder(){
   }finally{
     button.disabled=false;
     button.textContent=original;
+  }
+}
+
+async function sendAdminPushReminderForParticipant(userId,button){
+  if(!userId || !button || button.disabled) return;
+  button.disabled=true;
+  const original=button.innerHTML;
+  adminPushReminderReturnFocus=button;
+  button.textContent="Verificando…";
+  try{
+    const preview=await requestAdminPush("preview");
+    const participant=(preview.participants||[]).find(item=>String(item.userId)===String(userId));
+    if(!participant){ message("Este participante não possui palpites disponíveis pendentes."); return; }
+    if(!participant.eligibleDevices){ message("Este participante não possui notificações ativas.",true); return; }
+    openAdminPushReminder(preview,userId);
+  }catch(error){
+    message(error.message||"Não foi possível preparar a notificação.",true);
+  }finally{
+    button.disabled=false;
+    button.innerHTML=original;
   }
 }
 
@@ -5623,6 +5652,8 @@ $("adminRoundShareModal")?.addEventListener("click",event=>{if(event.target===$(
 $("adminAttentionContent").onclick=event=>{
   const whatsapp=event.target.closest("[data-participant-whatsapp]");
   if(whatsapp){ openParticipantWhatsApp(whatsapp.dataset.participantWhatsapp); return; }
+  const push=event.target.closest("[data-attention-push-user]");
+  if(push){ sendAdminPushReminderForParticipant(push.dataset.attentionPushUser,push); return; }
   const detail=event.target.closest("[data-admin-participant-detail]");
   if(detail) openAdminParticipantDetail(detail.dataset.adminParticipantDetail);
 };

@@ -21,13 +21,16 @@ assert.equal(appendPoolLinkToWhatsAppMessage("Olá!",""),"Olá!");
 const app=readFileSync(new URL("../js/app.js",import.meta.url),"utf8");
 const styles=readFileSync(new URL("../css/styles.css",import.meta.url),"utf8");
 assert.match(app,/function adminWhatsAppButton\(/);
+assert.match(app,/import \{[^}]*normalizeParticipantEmail[^}]*\} from "\.\/admin-whatsapp\.js"/);
 assert.match(app,/return appendPoolLinkToWhatsAppMessage\(templates\[type\]\|\|"",configuredPoolUrl\(\)\)/);
 assert.match(app,/const text=appendPoolLinkToWhatsAppMessage\(`Olá! Ainda há palpites pendentes/);
 assert.match(app,/resolveAttentionWhatsAppParticipant\(item,state\.authorizedParticipants\)/);
 assert.match(app,/data-admin-participant-detail=/);
 assert.match(app,/adminAttentionContent[\s\S]*data-participant-whatsapp/);
 assert.match(app,/admin-pending-actions[^`]*admin-attention-whatsapp[^`]*admin-person-detail-hint/);
+assert.match(app,/class="secondary admin-attention-push"[^`]*data-attention-push-user/);
+assert.match(app,/admin-pending-actions[^`]*admin-attention-whatsapp[^`]*\$\{pushButton\}[^`]*admin-person-detail-hint/);
 assert.match(styles,/#adminAttentionCard button\.admin-pending-detail\{[\s\S]*?min-height:0;[\s\S]*?overflow:visible;[\s\S]*?border-radius:0;[\s\S]*?transform:none;[\s\S]*?\}/);
-assert.match(styles,/\.admin-pending-actions\{[^}]*display:flex;[^}]*justify-content:space-between;/);
+assert.match(styles,/\.admin-pending-actions\{[^}]*display:grid;[^}]*grid-template-columns:[^;}]*1fr[^;}]*1\.12fr[^;}]*\.82fr/);
 
 console.log("WhatsApp, ações alinhadas e frame de detalhes na Situação da Rodada verificados com sucesso.");
