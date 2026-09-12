@@ -78,5 +78,6 @@ assert.match(app, /premium-pitch-arc is-top/);
 assert.match(app, /premium-pitch-arc is-bottom/);
 assert.match(styles, /premium-pitch-small-box/);
 assert.match(styles, /premium-pitch-arc\.is-top/);
+assert.match(styles, /premium-pitch-player-details \.lineup-event-card\{[^}]*background-color:#ffd43b/);
 
 console.log("Campo tático das escalações verificado com sucesso.");
