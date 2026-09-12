@@ -96,6 +96,17 @@ export function scopeApiFootballSyncGames(canonicalGames = [], requestedMatchIds
   return canonicalGames.filter((game) => !TERMINAL_STATUSES.has(String(game?.status || "").toLowerCase()));
 }
 
+export function buildApiFootballEventProjectionCandidates(
+  canonicalGames = [], providersByFixture = new Map(), detailedProvidersByFixture = new Map(), observedAt = new Date().toISOString(),
+) {
+  return canonicalGames.map((canonicalGame) => buildApiFootballEventProjection(
+    detailedProvidersByFixture.get(Number(canonicalGame.api_football_id))
+      || providersByFixture.get(Number(canonicalGame.api_football_id)),
+    canonicalGame,
+    observedAt,
+  ));
+}
+
 export async function syncApiFootballGames(options = {}) {
   const startedAt = Date.now();
   const trigger = options.trigger || "manual";
@@ -141,25 +152,21 @@ export async function syncApiFootballGames(options = {}) {
   const { error: writeError } = await supabase.from("jogos").upsert(merged, { onConflict: "id_jogo" });
   if (writeError) throw new Error(`Supabase: ${writeError.message}`);
   const providersByFixture = new Map(normalized.games.map((game) => [Number(game.providerFixtureId), game]));
-  const eventCandidates = mappedCanonical.map((canonicalGame) => buildApiFootballEventProjection(
-    providersByFixture.get(Number(canonicalGame.api_football_id)), canonicalGame, observedAt,
-  ));
-  const eventRows = eventCandidates.filter((candidate) => candidate.eligible).map((candidate) => candidate.row);
-  const eventSkipped = eventCandidates.filter((candidate) => !candidate.eligible).map((candidate) => candidate.reason);
-  let eventProjectionError = null;
-  if (eventRows.length) {
-    const { error } = await supabase.from("eventos_partida_cache").upsert(eventRows, { onConflict: "id_jogo" });
-    if (error) eventProjectionError = isMissingTableError(error) ? "projection_unavailable" : "projection_write_failed";
-  }
   const detailFixtureIds = gameDetailsFixtureIds(mappedCanonical, new Date(observedAt));
   let detailProjection = { updated: 0, skipped: 0, skippedReasons: [], warning: null };
   let detailCalls = 0;
+  let detailedProvidersByFixture = new Map();
   if (detailFixtureIds.length) {
     try {
       const detailRequest = await requestImpl(`/fixtures?ids=${detailFixtureIds.join("-")}`);
       detailCalls = 1;
       const detailPayload = detailRequest.payload;
       if (!detailRequest.response?.ok || !detailPayload || !Array.isArray(detailPayload.response)) throw new Error("details_response_invalid");
+      const detailed = normalizeApiFootballFixturesEnvelope(detailPayload, {
+        observedAt, httpStatus: detailRequest.response.status, headers: detailRequest.response.headers,
+      });
+      if (!detailed.observation.responseValid) throw new Error(detailed.observation.errors[0] || "details_response_invalid");
+      detailedProvidersByFixture = new Map(detailed.games.map((game) => [Number(game.providerFixtureId), game]));
       const rawByFixture = new Map(detailPayload.response.map((item) => [Number(item?.fixture?.id), item]));
       const detailCanonical = mappedCanonical.filter((game) => detailFixtureIds.includes(Number(game.api_football_id)));
       const candidates = detailCanonical.map((game) => buildApiFootballGameDetailsProjection(rawByFixture.get(Number(game.api_football_id)), game, observedAt));
@@ -182,6 +189,16 @@ export async function syncApiFootballGames(options = {}) {
     } catch (error) {
       detailProjection.warning = error?.message || "details_projection_failed";
     }
+  }
+  const eventCandidates = buildApiFootballEventProjectionCandidates(
+    mappedCanonical, providersByFixture, detailedProvidersByFixture, observedAt,
+  );
+  const eventRows = eventCandidates.filter((candidate) => candidate.eligible).map((candidate) => candidate.row);
+  const eventSkipped = eventCandidates.filter((candidate) => !candidate.eligible).map((candidate) => candidate.reason);
+  let eventProjectionError = null;
+  if (eventRows.length) {
+    const { error } = await supabase.from("eventos_partida_cache").upsert(eventRows, { onConflict: "id_jogo" });
+    if (error) eventProjectionError = isMissingTableError(error) ? "projection_unavailable" : "projection_write_failed";
   }
   const report = {
     ok: true, provider: SPORTS_DATA_PROVIDERS.API_FOOTBALL, imported: merged.length,
