@@ -7,7 +7,7 @@ import { buildGameGoalEventsRoundPreview, isGameGoalEventsPreview } from "../js/
 const observedAt = "2026-09-08T19:30:00.000Z";
 const canonical = { id_jogo: 1, api_football_id: 9001, api_football_time_casa_id: 10, api_football_time_fora_id: 20 };
 const events = [
-  { providerEventKey: "a", elapsed: 12, extra: null, teamProviderId: 10, playerName: "Atacante da Casa", typeRaw: "Goal", detailRaw: "Normal Goal" },
+  { providerEventKey: "a", elapsed: 12, extra: null, teamProviderId: 10, playerName: "JoÃ£o da Casa", typeRaw: "Goal", detailRaw: "Normal Goal" },
   { providerEventKey: "b", elapsed: 45, extra: 3, teamProviderId: 20, playerName: "Visitante com Nome Muito Longo", typeRaw: "Goal", detailRaw: "Penalty" },
   { providerEventKey: "c", elapsed: 77, extra: null, teamProviderId: 10, playerName: "Atacante da Casa", typeRaw: "Goal", detailRaw: "Own Goal" },
   { providerEventKey: "d", elapsed: 80, extra: null, teamProviderId: 20, playerName: "Cartão não exibido", typeRaw: "Card", detailRaw: "Yellow Card" },
@@ -23,7 +23,7 @@ assert.match(projection.row.hash_eventos, /^[0-9a-f]{64}$/);
 const model = buildGameGoalEventsModel({ ...canonical, gols_casa: 2, gols_fora: 1 }, projection.row);
 assert.equal(model.status, "ready");
 assert.deepEqual(model.home.map((goal) => [goal.player, goal.minute, goal.marker]), [
-  ["Atacante da Casa", "12'", ""], ["Atacante da Casa", "77'", " (GC)"],
+  ["João da Casa", "12'", ""], ["Atacante da Casa", "77'", " (GC)"],
 ]);
 assert.deepEqual(model.away.map((goal) => [goal.minute, goal.marker]), [["45+3'", " (P)"]]);
 assert.equal(model.home.some((goal) => goal.player === "Pênalti perdido"), false);
