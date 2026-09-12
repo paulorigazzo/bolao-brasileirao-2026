@@ -9,6 +9,10 @@ const lineups = {
 };
 const game = { api_football_id: 9001, api_football_time_casa_id: 10, api_football_time_fora_id: 20 };
 const projection = { id_externo: 9001, eventos: [
+  { elapsed: 12, teamProviderId: 10, playerProviderId: 1, typeRaw: "Goal", detailRaw: "Normal Goal" },
+  { elapsed: 45, extra: 3, teamProviderId: 10, playerProviderId: 1, typeRaw: "Goal", detailRaw: "Penalty" },
+  { elapsed: 52, teamProviderId: 10, playerProviderId: 3, typeRaw: "Goal", detailRaw: "Own Goal" },
+  { elapsed: 70, teamProviderId: 20, playerProviderId: 3, typeRaw: "Goal", detailRaw: "Missed Penalty" },
   { elapsed: 34, teamProviderId: 10, playerProviderId: 1, typeRaw: "Card", detailRaw: "Yellow Card" },
   { elapsed: 68, extra: 2, teamProviderId: 10, playerProviderId: 1, relatedPlayerProviderId: 2, typeRaw: "subst" },
   { elapsed: 45, extra: 1, teamProviderId: 20, playerProviderId: 4, typeRaw: "Card", detailRaw: "Red Card" },
@@ -16,6 +20,8 @@ const projection = { id_externo: 9001, eventos: [
 ] };
 
 const model = buildLineupMatchEventsModel(game, lineups, projection);
+assert.deepEqual(model.home.get(1).goals, [{ kind: "goal", minute: "12'" }, { kind: "penalty", minute: "45+3'" }]);
+assert.deepEqual(model.away.get(3).goals, [{ kind: "own-goal", minute: "52'" }], "gol contra deve acompanhar o jogador identificado, não o time beneficiado");
 assert.deepEqual(model.home.get(1).cards, [{ kind: "yellow", minute: "34'" }]);
 assert.deepEqual(model.home.get(1).substitution, { direction: "out", minute: "68+2'" });
 assert.deepEqual(model.home.get(2).substitution, { direction: "in", minute: "68+2'" });
@@ -26,13 +32,16 @@ const withoutIds = buildLineupMatchEventsModel(game, { home: { starters: [player
 assert.equal(withoutIds.home.size, 0, "jogador sem identificador não pode entrar no índice");
 
 const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+const styles = readFileSync(new URL("../css/styles.css", import.meta.url), "utf8");
 assert.match(app, /Banco e substituições/);
 assert.match(app, /eventos_partida_cache[\s\S]*detailIds/);
 assert.match(app, /benchToggle\?\.setAttribute\("aria-expanded","false"\)/);
 assert.match(app, /compact&&card\.minute/);
 assert.match(app, /lineup-player-main/);
 assert.match(app, /eventBadges\(player,position,true\)/);
+assert.match(app, /lineup-goal-badge/);
+assert.match(styles, /premium-pitch-player>\.lineup-player-events\{background:rgba\(4,25,16,\.56\)\}/);
 assert.match(app, /benchSide[\s\S]*lineup-player-main[\s\S]*eventBadges\(player,position,true\)/);
 assert.match(app, /lineup-player-events\$\{compact\?" is-compact":""\}/);
 assert.doesNotMatch(app, /\$\{compact\?"":events\.substitution\.minute\}/);
-console.log("Cartões, substituições e banco das escalações verificados com sucesso.");
+console.log("Gols, cartões, substituições e banco das escalações verificados com sucesso.");

@@ -1,3 +1,10 @@
+# v6.39.8 — Gols nas escalações
+
+- Identifica os autores dos gols ao lado dos nomes nas visualizações Lista e Campo e no banco de reservas.
+- Exibe minuto, acréscimos e marcações compactas de pênalti e gol contra.
+- Torna mais transparente o fundo dos eventos sobre o campo, preservando a leitura dos indicadores.
+- Reutiliza os eventos já carregados da API-Football, sem novas consultas ou alterações no Supabase.
+
 # v6.39.7 — Refinamentos de ranking e escalações
 
 - Exibe o Ranking provisório aos participantes somente enquanto houver jogo oficialmente ao vivo com placar disponível.

@@ -29,7 +29,7 @@ import { buildLineupPitchModel } from "./lineup-pitch.js";
 import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 
-const APP_VERSION = "6.39.7";
+const APP_VERSION = "6.39.8";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1576,11 +1576,11 @@ function premiumGameDetails(g){
   const statistics=model.statistics?section("statistics","Estatísticas",`<div class="premium-statistics-grid">${model.statistics.rows.map(row=>`<div class="premium-statistic-row"><b>${row.home??"—"}${row.home!==undefined?row.suffix:""}</b><span>${escapeHtml(row.label)}</span><b>${row.away??"—"}${row.away!==undefined?row.suffix:""}</b></div>`).join("")}</div>`,model.statistics.observedAt,model.statistics.live):"";
   const eventProjection=state.gameEventProjections.find(item=>Number(item.id_jogo)===Number(g.id_jogo));
   const lineupEvents=buildLineupMatchEventsModel(g,model.lineups,eventProjection);
-  const playerEvents=(player,side)=>lineupEvents[side]?.get(Number(player?.id))||{cards:[],substitution:null};
+  const playerEvents=(player,side)=>lineupEvents[side]?.get(Number(player?.id))||{goals:[],cards:[],substitution:null};
   const eventBadges=(player,side,compact=false)=>{
-    const events=playerEvents(player,side), cards=events.cards.map(card=>{const label=`${card.kind==="red"?"Cartão vermelho":card.kind==="second-yellow"?"Segundo cartão amarelo":"Cartão amarelo"}${card.minute?` aos ${card.minute}`:""}`;return `<span class="lineup-event-card-badge" title="${label}" aria-label="${label}"><span class="lineup-event-card is-${card.kind}" aria-hidden="true"></span>${compact&&card.minute?`<small>${card.minute}</small>`:""}</span>`;}).join("");
+    const events=playerEvents(player,side), goals=events.goals.map(goal=>{const marker=goal.kind==="penalty"?" (P)":goal.kind==="own-goal"?" (GC)":"",label=`Gol${marker}${goal.minute?` aos ${goal.minute}`:""}`;return `<span class="lineup-goal-badge" title="${label}" aria-label="${label}"><span aria-hidden="true">⚽</span>${goal.minute?`<small>${goal.minute}${marker}</small>`:""}</span>`;}).join(""), cards=events.cards.map(card=>{const label=`${card.kind==="red"?"Cartão vermelho":card.kind==="second-yellow"?"Segundo cartão amarelo":"Cartão amarelo"}${card.minute?` aos ${card.minute}`:""}`;return `<span class="lineup-event-card-badge" title="${label}" aria-label="${label}"><span class="lineup-event-card is-${card.kind}" aria-hidden="true"></span>${compact&&card.minute?`<small>${card.minute}</small>`:""}</span>`;}).join("");
     const substitution=events.substitution?`<span class="lineup-substitution is-${events.substitution.direction}" title="${events.substitution.direction==="out"?"Saiu":"Entrou"}${events.substitution.minute?` aos ${events.substitution.minute}`:""}">${events.substitution.direction==="out"?"↓":"↑"}${events.substitution.minute}</span>`:"";
-    return cards||substitution?`<span class="lineup-player-events${compact?" is-compact":""}">${cards}${substitution}</span>`:"";
+    return goals||cards||substitution?`<span class="lineup-player-events${compact?" is-compact":""}">${goals}${cards}${substitution}</span>`:"";
   };
   const lineupSide=(side,label,logo,position)=>{
     const groups=[["G","Goleiro"],["D","Defesa"],["M","Meio-campo"],["F","Ataque"],["","Jogadores"]];

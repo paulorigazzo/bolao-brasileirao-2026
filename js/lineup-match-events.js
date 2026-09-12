@@ -13,7 +13,7 @@ function playerIndex(side) {
   for (const group of [side?.starters, side?.substitutes]) {
     for (const player of Array.isArray(group) ? group : []) {
       const id = number(player?.id);
-      if (id !== null) index.set(id, { cards: [], substitution: null });
+      if (id !== null) index.set(id, { goals: [], cards: [], substitution: null });
     }
   }
   return index;
@@ -27,6 +27,14 @@ function cardKind(detail) {
   return null;
 }
 
+function goalKind(detail) {
+  const value = normalized(detail);
+  if (value === "missed penalty") return null;
+  if (value.includes("own goal")) return "own-goal";
+  if (value.includes("penalty")) return "penalty";
+  return "goal";
+}
+
 export function buildLineupMatchEventsModel(game, lineups, projection) {
   const empty = { home: new Map(), away: new Map() };
   if (!lineups || !projection || Number(projection.id_externo) !== Number(game?.api_football_id)) return empty;
@@ -35,9 +43,16 @@ export function buildLineupMatchEventsModel(game, lineups, projection) {
     away: { teamId: number(game?.api_football_time_fora_id), players: playerIndex(lineups.away) },
   };
   for (const event of Array.isArray(projection.eventos) ? projection.eventos : []) {
+    const type = normalized(event?.typeRaw);
+    if (type === "goal") {
+      const playerId = number(event?.playerProviderId);
+      const player = sides.home.players.get(playerId) || sides.away.players.get(playerId);
+      const kind = goalKind(event?.detailRaw);
+      if (player && kind) player.goals.push({ kind, minute: minute(event) });
+      continue;
+    }
     const side = Object.values(sides).find((item) => item.teamId !== null && item.teamId === number(event?.teamProviderId));
     if (!side) continue;
-    const type = normalized(event?.typeRaw);
     if (type === "card") {
       const player = side.players.get(number(event?.playerProviderId));
       const kind = cardKind(event?.detailRaw);
