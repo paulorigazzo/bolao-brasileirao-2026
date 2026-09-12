@@ -56,6 +56,7 @@ assert.doesNotMatch(lineupShirtTheme("Athletico-PR").pattern, /#f5fff8/);
 assert.match(lineupShirtTheme("Atlético-MG").pattern, /#111111/);
 assert.match(lineupShirtTheme("Atlético-MG").pattern, /#f5fff8/);
 assert.match(lineupShirtTheme("Atlético-MG").pattern, /#111111 38% 62%/);
+assert.equal(lineupShirtTheme("Mineiro").pattern, lineupShirtTheme("Atlético-MG").pattern);
 assert.match(lineupShirtTheme("Clube futuro").pattern, /linear-gradient/);
 assert.match(app, /lineupShirtTheme\(teamName\)/);
 assert.match(app, /is-edge-\$\{player\.edge\}/);
