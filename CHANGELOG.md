@@ -1,7 +1,7 @@
 # v6.39.9 — Refinamentos visuais das escalações
 
 - Reforça as camisas do Atlético-MG em preto e branco e do Athletico-PR em vermelho e preto.
-- Centraliza os eventos acima da própria camisa no Campo e elimina o fundo coletivo que favorecia colisões laterais.
+- Mantém os eventos na posição lateral validada e torna seu fundo mais transparente.
 - Corrige defensivamente nomes externos com sequências UTF-8 interpretadas incorretamente, preservando textos já válidos.
 - Mantém intactos o cache do Supabase, a API, as formações, os placares, os palpites e a pontuação.
 

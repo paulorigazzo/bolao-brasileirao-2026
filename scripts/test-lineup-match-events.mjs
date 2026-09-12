@@ -40,7 +40,7 @@ assert.match(app, /compact&&card\.minute/);
 assert.match(app, /lineup-player-main/);
 assert.match(app, /eventBadges\(player,position,true\)/);
 assert.match(app, /lineup-goal-badge/);
-assert.match(styles, /padding:0;background:transparent;transform:translateX\(-50%\)/);
+assert.match(styles, /premium-pitch-player>\.lineup-player-events\{background:rgba\(4,25,16,\.56\)\}/);
 assert.match(app, /benchSide[\s\S]*lineup-player-main[\s\S]*eventBadges\(player,position,true\)/);
 assert.match(app, /lineup-player-events\$\{compact\?" is-compact":""\}/);
 assert.doesNotMatch(app, /\$\{compact\?"":events\.substitution\.minute\}/);

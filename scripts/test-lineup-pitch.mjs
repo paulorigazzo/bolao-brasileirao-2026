@@ -55,12 +55,11 @@ assert.match(lineupShirtTheme("Athletico-PR").pattern, /#111111/);
 assert.doesNotMatch(lineupShirtTheme("Athletico-PR").pattern, /#f5fff8/);
 assert.match(lineupShirtTheme("Atlético-MG").pattern, /#111111/);
 assert.match(lineupShirtTheme("Atlético-MG").pattern, /#f5fff8/);
+assert.match(lineupShirtTheme("Atlético-MG").pattern, /#111111 38% 62%/);
 assert.match(lineupShirtTheme("Clube futuro").pattern, /linear-gradient/);
 assert.match(app, /lineupShirtTheme\(teamName\)/);
 assert.match(app, /is-edge-\$\{player\.edge\}/);
 assert.match(styles, /premium-pitch-player\.is-edge-left/);
 assert.match(styles, /premium-pitch-player\.is-edge-right/);
-assert.match(styles, /left:50%;width:max-content;max-width:104px/);
-assert.match(styles, /flex-wrap:nowrap/);
 
 console.log("Campo tático das escalações verificado com sucesso.");

@@ -71,7 +71,7 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - ✅ Botões de atualização revisados: recarga do Supabase, consulta da classificação, diagnóstico e sincronização externa usam verbos distintos; a ação administrativa redundante do Ranking foi removida.
 - ✅ Cards expandidos da Tela de Jogos mostram autores e minutos dos gols a partir dos eventos coerentes da API-Football; a cobertura histórica começa na Rodada 26, sem obrigação de carregar as Rodadas 1–25.
 - ✅ Eventos ao vivo usam a resposta detalhada já consultada para atualizar autores e minutos dos gols, sem chamada adicional e sem aceitar eventos incompatíveis com o placar.
-- ✅ Cards expandidos oferecem Estatísticas e Escalações em seções recolhíveis, com titulares estáticos em Lista e Campo, banco organizado bilateralmente, gols, cartões e substituições agrupados junto ao jogador, proteção contra colisões no Campo e correção defensiva de nomes externos com codificação corrompida; a cobertura histórica piloto parte da Rodada 26.
+- ✅ Cards expandidos oferecem Estatísticas e Escalações em seções recolhíveis, com titulares estáticos em Lista e Campo, banco organizado bilateralmente, gols, cartões e substituições agrupados junto ao jogador e correção defensiva de nomes externos com codificação corrompida; a cobertura histórica piloto parte da Rodada 26.
 - ✅ Transparência individual dos palpites após o encerramento oficial das partidas.
 - ✅ Limite configurável de participantes ativos.
 - ✅ Cadastro consolidado com nome, telefone opcional e time favorito opcional.
