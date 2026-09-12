@@ -29,7 +29,7 @@ import { buildLineupPitchModel } from "./lineup-pitch.js";
 import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 
-const APP_VERSION = "6.39.9";
+const APP_VERSION = "6.40.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1565,6 +1565,16 @@ function gameDetailTimestamp(value){
   const date=new Date(value); return Number.isNaN(date.getTime())?"":date.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
 }
 
+function closePitchPlayerDetails(except=null){
+  document.querySelectorAll(".premium-pitch-player-toggle[aria-expanded='true']").forEach(button=>{
+    if(button===except) return;
+    button.setAttribute("aria-expanded","false");
+    const panel=document.getElementById(button.getAttribute("aria-controls"));
+    if(panel) panel.hidden=true;
+    button.closest(".premium-pitch-player")?.classList.remove("is-open");
+  });
+}
+
 function premiumGameDetails(g){
   const projection=state.gameDetailProjections.find(item=>Number(item.id_jogo)===Number(g.id_jogo));
   const model=buildGameDetailsModel(g,projection);
@@ -1582,6 +1592,24 @@ function premiumGameDetails(g){
     const substitution=events.substitution?`<span class="lineup-substitution is-${events.substitution.direction}" title="${events.substitution.direction==="out"?"Saiu":"Entrou"}${events.substitution.minute?` aos ${events.substitution.minute}`:""}">${events.substitution.direction==="out"?"↓":"↑"}${events.substitution.minute}</span>`:"";
     return goals||cards||substitution?`<span class="lineup-player-events${compact?" is-compact":""}">${goals}${cards}${substitution}</span>`:"";
   };
+  const pitchPlayerEvents=(player,side)=>{
+    const events=playerEvents(player,side);
+    const hasEvents=events.goals.length||events.cards.length||events.substitution;
+    if(!hasEvents) return {summary:"",details:""};
+    const goalLabel=goal=>`Gol${goal.kind==="penalty"?" de pênalti":goal.kind==="own-goal"?" contra":""}`;
+    const cardLabel=card=>card.kind==="red"?"Cartão vermelho":card.kind==="second-yellow"?"Segundo cartão amarelo":"Cartão amarelo";
+    const summary=[
+      ...events.goals.map(goal=>`<span aria-hidden="true">⚽</span>`),
+      ...events.cards.map(card=>`<span class="lineup-event-card is-${card.kind}" aria-hidden="true"></span>`),
+      ...(events.substitution?[`<span class="lineup-substitution is-${events.substitution.direction}" aria-hidden="true">${events.substitution.direction==="out"?"↓":"↑"}</span>`]:[]),
+    ].join("");
+    const rows=[
+      ...events.goals.map(goal=>`<li><span>⚽ ${goalLabel(goal)}</span><strong>${escapeHtml(goal.minute||"—")}</strong></li>`),
+      ...events.cards.map(card=>`<li><span><i class="lineup-event-card is-${card.kind}" aria-hidden="true"></i>${cardLabel(card)}</span><strong>${escapeHtml(card.minute||"—")}</strong></li>`),
+      ...(events.substitution?[`<li><span class="lineup-substitution is-${events.substitution.direction}">${events.substitution.direction==="out"?"↓ Saiu":"↑ Entrou"}</span><strong>${escapeHtml(events.substitution.minute||"—")}</strong></li>`]:[]),
+    ].join("");
+    return {summary:`<span class="lineup-player-events is-pitch-summary" aria-hidden="true">${summary}</span>`,details:rows};
+  };
   const lineupSide=(side,label,logo,position)=>{
     const groups=[["G","Goleiro"],["D","Defesa"],["M","Meio-campo"],["F","Ataque"],["","Jogadores"]];
     const starters=Array.isArray(side.starters)?side.starters:[];
@@ -1592,13 +1620,13 @@ function premiumGameDetails(g){
     }).join("");
     return `<div class="premium-lineup-side"><header><span class="premium-lineup-crest">${teamLogo(logo,label)}</span><span class="premium-lineup-heading"><b>${escapeHtml(teamDisplayName(label))}</b><strong>${escapeHtml(side.formation||"Formação não informada")}</strong>${side.coach?`<small>Técnico: ${escapeHtml(side.coach)}</small>`:""}</span></header><div class="premium-lineup-groups">${players}</div></div>`;
   };
-  const pitchPlayer=(player,side,teamName)=>{const shirt=lineupShirtTheme(teamName),edge=player.edge?` is-edge-${player.edge}`:"";return `<span class="premium-pitch-player is-${side}${edge}" style="--x:${player.x.toFixed(2)}%;--y:${player.y.toFixed(2)}%;--shirt-pattern:${shirt.pattern};--shirt-number:${shirt.number};--shirt-number-shadow:${shirt.numberShadow}" title="${escapeHtml(player.name)}"><span class="premium-pitch-shirt" aria-hidden="true"><svg viewBox="0 0 44 40" focusable="false"><path d="M14 3 8 6 2 14l7 5v18h26V19l7-5-6-8-6-3c-2 4-12 4-16 0Z"></path></svg><b>${player.number??"—"}</b></span>${eventBadges(player,side,true)}<small>${escapeHtml(player.name)}</small></span>`;};
+  const pitchPlayer=(player,side,teamName,gameId)=>{const shirt=lineupShirtTheme(teamName),edge=player.edge?` is-edge-${player.edge}`:"",events=pitchPlayerEvents(player,side),detailId=`game-${gameId}-player-${side}-${Number(player.id)}-details`,shirtMarkup=`<span class="premium-pitch-shirt" aria-hidden="true"><svg viewBox="0 0 44 40" focusable="false"><path d="M14 3 8 6 2 14l7 5v18h26V19l7-5-6-8-6-3c-2 4-12 4-16 0Z"></path></svg><b>${player.number??"—"}</b></span>`;return `<span class="premium-pitch-player is-${side}${edge}${events.details?" has-details":""}" style="--x:${player.x.toFixed(2)}%;--y:${player.y.toFixed(2)}%;--shirt-pattern:${shirt.pattern};--shirt-number:${shirt.number};--shirt-number-shadow:${shirt.numberShadow}" title="${escapeHtml(player.name)}">${events.details?`<button class="premium-pitch-player-toggle" type="button" aria-expanded="false" aria-controls="${detailId}" aria-label="Ver eventos de ${escapeHtml(player.name)}">${shirtMarkup}</button>`:shirtMarkup}${events.summary}<small>${escapeHtml(player.name)}</small>${events.details?`<section id="${detailId}" class="premium-pitch-player-details" aria-label="Resumo de ${escapeHtml(player.name)}" hidden><header><strong>${escapeHtml(player.name)}</strong><small>Camisa ${player.number??"—"}</small></header><div><b>Eventos</b><ul>${events.details}</ul></div></section>`:""}</span>`;};
   const pitchTeam=(side,label,logo,position)=>`<div class="premium-pitch-team is-${position}"><span class="premium-pitch-team-crest">${teamLogo(logo,label)}</span><span><b>${escapeHtml(teamDisplayName(label))}</b>${side.coach?`<small>Técnico: ${escapeHtml(side.coach)}</small>`:""}</span><strong>${escapeHtml(side.formation||"—")}</strong></div>`;
   const lineupContent=()=>{
     const pitch=buildLineupPitchModel(model.lineups);
     const gameId=Number(g.id_jogo),listId=`game-${gameId}-lineup-list`,pitchId=`game-${gameId}-lineup-pitch`;
     const list=`<div class="premium-lineups-grid">${lineupSide(model.lineups.home,g.time_casa,g.time_casa_logo,"home")}${lineupSide(model.lineups.away,g.time_fora,g.time_fora_logo,"away")}</div>`;
-    const field=pitch.available?`<div class="premium-lineup-pitch">${pitchTeam(pitch.home,g.time_casa,g.time_casa_logo,"home")}<div class="premium-pitch-surface" aria-label="Posicionamento inicial de ${escapeHtml(teamDisplayName(g.time_casa))} e ${escapeHtml(teamDisplayName(g.time_fora))}"><span class="premium-pitch-halfway" aria-hidden="true"></span><span class="premium-pitch-center" aria-hidden="true"></span><span class="premium-pitch-box is-top" aria-hidden="true"></span><span class="premium-pitch-box is-bottom" aria-hidden="true"></span>${pitch.home.players.map(player=>pitchPlayer(player,"home",g.time_casa)).join("")}${pitch.away.players.map(player=>pitchPlayer(player,"away",g.time_fora)).join("")}</div>${pitchTeam(pitch.away,g.time_fora,g.time_fora_logo,"away")}</div>`:"";
+    const field=pitch.available?`<div class="premium-lineup-pitch">${pitchTeam(pitch.home,g.time_casa,g.time_casa_logo,"home")}<div class="premium-pitch-surface" aria-label="Posicionamento inicial de ${escapeHtml(teamDisplayName(g.time_casa))} e ${escapeHtml(teamDisplayName(g.time_fora))}"><span class="premium-pitch-halfway" aria-hidden="true"></span><span class="premium-pitch-center" aria-hidden="true"></span><span class="premium-pitch-box is-top" aria-hidden="true"></span><span class="premium-pitch-box is-bottom" aria-hidden="true"></span><span class="premium-pitch-small-box is-top" aria-hidden="true"></span><span class="premium-pitch-small-box is-bottom" aria-hidden="true"></span><span class="premium-pitch-arc is-top" aria-hidden="true"></span><span class="premium-pitch-arc is-bottom" aria-hidden="true"></span>${pitch.home.players.map(player=>pitchPlayer(player,"home",g.time_casa,gameId)).join("")}${pitch.away.players.map(player=>pitchPlayer(player,"away",g.time_fora,gameId)).join("")}</div>${pitchTeam(pitch.away,g.time_fora,g.time_fora_logo,"away")}</div>`:"";
     const benchSide=(side,position)=>`<ol>${(Array.isArray(side?.substitutes)?side.substitutes:[]).map(player=>`<li><b>${player.number??"—"}</b><span class="lineup-player-main"><span class="lineup-player-name" title="${escapeHtml(player.name)}">${escapeHtml(player.name)}</span>${eventBadges(player,position,true)}</span></li>`).join("")||"<li class=\"is-empty\">Banco não informado</li>"}</ol>`;
     const benchId=`game-${gameId}-lineup-bench`;
     const bench=`<section class="premium-lineup-bench"><button type="button" class="premium-lineup-bench-toggle" aria-expanded="false" aria-controls="${benchId}"><strong>Banco e substituições</strong><i aria-hidden="true">⌄</i></button><div id="${benchId}" class="premium-lineup-bench-panel" hidden><div class="premium-lineup-bench-grid">${benchSide(model.lineups.home,"home")}${benchSide(model.lineups.away,"away")}</div></div></section>`;
@@ -1772,6 +1800,7 @@ function renderGames(){
     }));
     card.querySelectorAll("[data-lineup-view]").forEach(button=>button.addEventListener("click",()=>{
       if(button.disabled) return;
+      closePitchPlayerDetails();
       const section=button.closest('[data-game-detail-section="lineups"]');
       if(!section) return;
       const view=button.dataset.lineupView;
@@ -1800,6 +1829,15 @@ function renderGames(){
       const collapsible=card.querySelector(".game-collapsible");
       requestAnimationFrame(()=>{if(collapsible) collapsible.style.maxHeight=`${collapsible.scrollHeight}px`;});
     });
+    card.querySelectorAll(".premium-pitch-player-toggle").forEach(button=>button.addEventListener("click",event=>{
+      event.stopPropagation();
+      const opening=button.getAttribute("aria-expanded")!=="true";
+      closePitchPlayerDetails(opening?button:null);
+      button.setAttribute("aria-expanded",String(opening));
+      const panel=document.getElementById(button.getAttribute("aria-controls"));
+      if(panel) panel.hidden=!opening;
+      button.closest(".premium-pitch-player")?.classList.toggle("is-open",opening);
+    }));
     setGameCardExpanded(card,false,false);
   });
 
@@ -5679,6 +5717,8 @@ document.addEventListener("click",event=>{
 });
 
 document.addEventListener("click",event=>{ if(!$("headerUser")?.contains(event.target)){ show("userMenu",false); $("userMenuBtn")?.setAttribute("aria-expanded","false"); } });
+document.addEventListener("click",event=>{if(!event.target.closest?.(".premium-pitch-player.has-details")) closePitchPlayerDetails();});
+document.addEventListener("keydown",event=>{if(event.key==="Escape") closePitchPlayerDetails();});
 $("homeTab")?.addEventListener("click",async event=>{
   const liveGame=event.target.closest("[data-home-live-game]");
   if(liveGame){ openLiveGameFromHome(liveGame.dataset.homeLiveGame); return; }
