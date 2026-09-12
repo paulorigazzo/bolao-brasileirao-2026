@@ -2013,3 +2013,23 @@ celular.
 Os detalhes podem faltar sem comprometer o card nem a sincronização. Eles nunca
 definem placar, status, fechamento, palpites, pontuação ou Ranking. Rodadas 1–25
 não se tornam pendência e qualquer ampliação exige nova decisão.
+## DEC-2026-064 — Detalhes pré-jogo acompanham a janela operacional
+
+- Data: 2026-09-12
+- Status: aceita
+- Responsáveis: responsável pelo produto
+- Impacto: alto
+
+### Contexto
+
+A API-Football pode publicar escalações antes de mudar o estado da partida de `NS` para ao vivo. A elegibilidade anterior encerrava exatamente no horário previsto e podia perder detalhes publicados durante um atraso de status. Reconstruções automáticas dos cards também fechavam áreas que o participante estava consultando.
+
+### Decisão
+
+- manter partidas agendadas elegíveis para detalhes entre 90 minutos antes e quatro horas depois do início previsto;
+- preservar card, seção, modo de escalação, banco e resumo de jogador durante reconstruções automáticas;
+- manter os detalhes auxiliares incapazes de alterar o estado competitivo da partida.
+
+### Consequências
+
+Escalações já disponíveis podem aparecer mesmo enquanto o provedor ainda informa `NS`. A coleta continua limitada à janela operacional existente e estados visuais sem correspondência nos novos dados são descartados.

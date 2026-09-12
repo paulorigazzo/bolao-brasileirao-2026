@@ -8,7 +8,7 @@ import { buildMatchCalendarModel } from "./match-calendar-engine.js";
 import { resolveParticipantFavoriteTeam } from "./participant-team.js";
 import { buildRecoveryProtectionModel, recoveryOccurrenceModel, recoveryOriginLabel } from "./recovery-protection.js";
 import { appendPoolLinkToWhatsAppMessage, normalizeParticipantEmail, resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
-import { hasNewlyRevealablePublicPicks, shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
+import { hasNewlyRevealablePublicPicks, shouldRefreshGameDetails, shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
 import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./access-control.js";
 import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temporary-ranking-engine.js";
 import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
@@ -29,7 +29,7 @@ import { buildLineupPitchModel } from "./lineup-pitch.js";
 import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 
-const APP_VERSION = "6.40.0";
+const APP_VERSION = "6.41.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1756,7 +1756,51 @@ function refreshVisibleGameClocks(){
   });
 }
 
+function captureGameDetailsUiState(){
+  return new Map([...document.querySelectorAll(".premium-match-card[data-id]")].map(card=>{
+    const activeSection=card.querySelector(".premium-detail-toggle[aria-expanded='true']")?.closest("[data-game-detail-section]")?.dataset.gameDetailSection||null;
+    const lineupView=card.querySelector("[data-lineup-view][aria-selected='true']")?.dataset.lineupView||"list";
+    const benchOpen=card.querySelector(".premium-lineup-bench-toggle")?.getAttribute("aria-expanded")==="true";
+    const playerDetailsId=card.querySelector(".premium-pitch-player-toggle[aria-expanded='true']")?.getAttribute("aria-controls")||null;
+    return [Number(card.dataset.id),{activeSection,lineupView,benchOpen,playerDetailsId}];
+  }));
+}
+
+function restoreGameDetailsUiState(cards,uiState){
+  cards.forEach(card=>{
+    const saved=uiState.get(Number(card.dataset.id));
+    if(!saved) return;
+    card.querySelectorAll(".premium-detail-section").forEach(section=>{
+      const active=section.dataset.gameDetailSection===saved.activeSection;
+      section.querySelector(".premium-detail-toggle")?.setAttribute("aria-expanded",String(active));
+      const panel=section.querySelector(".premium-detail-panel");
+      if(panel) panel.hidden=!active;
+    });
+    const selectedView=card.querySelector(`[data-lineup-view="${saved.lineupView}"]:not(:disabled)`)
+      ||card.querySelector('[data-lineup-view="list"]');
+    card.querySelectorAll("[data-lineup-view]").forEach(button=>{
+      const active=button===selectedView;
+      button.classList.toggle("active",active);
+      button.setAttribute("aria-selected",String(active));
+    });
+    card.querySelectorAll("[data-lineup-panel]").forEach(panel=>{panel.hidden=panel.dataset.lineupPanel!==selectedView?.dataset.lineupView;});
+    const benchToggle=card.querySelector(".premium-lineup-bench-toggle"),benchPanel=card.querySelector(".premium-lineup-bench-panel");
+    if(benchToggle) benchToggle.setAttribute("aria-expanded",String(Boolean(saved.benchOpen)));
+    if(benchPanel) benchPanel.hidden=!saved.benchOpen;
+    if(saved.playerDetailsId){
+      const playerPanel=card.querySelector(`#${CSS.escape(saved.playerDetailsId)}`);
+      const playerToggle=playerPanel&&card.querySelector(`[aria-controls="${CSS.escape(saved.playerDetailsId)}"]`);
+      if(playerPanel&&playerToggle){
+        playerPanel.hidden=false;
+        playerToggle.setAttribute("aria-expanded","true");
+        playerToggle.closest(".premium-pitch-player")?.classList.add("is-open");
+      }
+    }
+  });
+}
+
 function renderGames(){
+  const detailsUiState=captureGameDetailsUiState();
   const round=Number($("roundSelect").value); updateCurrentRoundButton(); renderRoundNumberStrip();
   const roundGames=state.games.filter(g=>Number(g.rodada)===round).sort((a,b)=>new Date(a.inicio)-new Date(b.inicio));
   if(roundGames.length && roundGames.length<10){
@@ -1860,6 +1904,8 @@ function renderGames(){
 
   state.gameAutoOpenContext=renderContext;
   state.gameRenderSignature=currentGamesStructuralSignature();
+  if(preferred) setGameCardExpanded(preferred,true,false);
+  restoreGameDetailsUiState(cards,detailsUiState);
   if(preferred) setGameCardExpanded(preferred,true,false);
 }
 
@@ -5290,7 +5336,7 @@ async function refreshLiveScoresSilently(){
     const {data,error}=await sb.from("jogos").select("*").order("rodada").order("inicio");
     if(error) throw error;
     if(Array.isArray(data)){
-      const detailIds=data.filter(game=>["em_andamento","intervalo"].includes(String(game?.status||"").toLowerCase())).map(game=>game.id_jogo);
+      const detailIds=data.filter(game=>shouldRefreshGameDetails(game)).map(game=>game.id_jogo);
       if(detailIds.length){
         const [{data:details,error:detailsError},{data:events,error:eventsError}]=await Promise.all([
           sb.from("detalhes_partida_cache").select("id_jogo,id_externo,estatisticas,escalacoes,estatisticas_observadas_em,escalacoes_observadas_em").in("id_jogo",detailIds),

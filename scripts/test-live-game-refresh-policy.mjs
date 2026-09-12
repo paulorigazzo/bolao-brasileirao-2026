@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   hasNewlyRevealablePublicPicks,
   hasOfficialLiveStatus,
+  shouldRefreshGameDetails,
   shouldRefreshGamesFromSupabase,
 } from "../js/live-game-refresh-policy.js";
 
@@ -21,6 +22,13 @@ assert.equal(shouldRefreshGamesFromSupabase([game("adiado", 0)], now), false);
 assert.equal(shouldRefreshGamesFromSupabase([game("cancelado", 0)], now), false);
 assert.equal(shouldRefreshGamesFromSupabase([{ status: "agendado", inicio: "inválido" }], now), false);
 assert.equal(shouldRefreshGamesFromSupabase([], now), false);
+
+assert.equal(shouldRefreshGameDetails(game("agendado", 90 * minute), now), true);
+assert.equal(shouldRefreshGameDetails(game("agendado", -30 * minute), now), true);
+assert.equal(shouldRefreshGameDetails(game("agendado", -4 * hour), now), true);
+assert.equal(shouldRefreshGameDetails(game("agendado", -4 * hour - minute), now), false);
+assert.equal(shouldRefreshGameDetails(game("encerrado", 0), now), false);
+assert.equal(shouldRefreshGameDetails(game("adiado", 0), now), false);
 
 assert.equal(hasOfficialLiveStatus(game("em_andamento", 0)), true);
 assert.equal(hasOfficialLiveStatus(game("IN_PLAY", 0)), true);

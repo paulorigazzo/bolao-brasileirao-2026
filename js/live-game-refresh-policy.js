@@ -19,20 +19,20 @@ export function hasOfficialLiveStatus(game) {
     .some((term) => status.includes(term));
 }
 
+export function shouldRefreshGameDetails(game, now = Date.now()) {
+  if (hasOfficialLiveStatus(game)) return true;
+
+  const status = normalizedStatus(game?.status);
+  if (status !== "agendado" && status !== "scheduled" && status !== "timed") return false;
+
+  const kickoff = new Date(game?.inicio).getTime();
+  if (!Number.isFinite(kickoff)) return false;
+  return kickoff >= now - LIVE_REFRESH_AFTER_KICKOFF_MS
+    && kickoff <= now + LIVE_REFRESH_BEFORE_KICKOFF_MS;
+}
+
 export function shouldRefreshGamesFromSupabase(games, now = Date.now()) {
-  return (Array.isArray(games) ? games : []).some((game) => {
-    if (hasOfficialLiveStatus(game)) return true;
-
-    const status = normalizedStatus(game?.status);
-    const terminal = ["encerr", "finaliz", "awarded", "cancel", "anulad", "adiad", "postpon", "suspens"]
-      .some((term) => status.includes(term));
-    if (terminal) return false;
-
-    const kickoff = new Date(game?.inicio).getTime();
-    if (!Number.isFinite(kickoff)) return false;
-    return kickoff >= now - LIVE_REFRESH_AFTER_KICKOFF_MS
-      && kickoff <= now + LIVE_REFRESH_BEFORE_KICKOFF_MS;
-  });
+  return (Array.isArray(games) ? games : []).some((game) => shouldRefreshGameDetails(game, now));
 }
 
 function hasScoreValue(value) {
