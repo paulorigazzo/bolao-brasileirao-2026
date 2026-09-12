@@ -1,3 +1,5 @@
+import { repairMojibake } from "./text-normalization.js";
+
 function integer(value) {
   const number = Number(value);
   return Number.isInteger(number) ? number : null;
@@ -37,7 +39,7 @@ export function buildGameGoalEventsModel(game, projection) {
     .filter(isScoringGoal)
     .map((event, index) => ({
       side: Number(event.teamProviderId) === homeId ? "home" : Number(event.teamProviderId) === awayId ? "away" : null,
-      player: String(event.playerName || "").trim(),
+      player: repairMojibake(String(event.playerName || "").trim()),
       minute: goalMinute(event),
       marker: goalMarker(event.detailRaw),
       order: index,

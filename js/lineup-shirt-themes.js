@@ -15,6 +15,10 @@ function stripes(primary, secondary, tertiary, number = "#ffffff") {
   return theme(`linear-gradient(90deg,${stops})`, number);
 }
 
+function classicStripes(primary, secondary, number = "#ffffff") {
+  return theme(`linear-gradient(90deg,${primary} 0 17%,${secondary} 17% 34%,${primary} 34% 50%,${secondary} 50% 67%,${primary} 67% 83%,${secondary} 83% 100%)`, number);
+}
+
 function hoops(primary, secondary, tertiary, number = "#ffffff") {
   const stops = tertiary
     ? `${primary} 0 25%,${secondary} 25% 38%,${tertiary} 38% 63%,${primary} 63% 82%,${secondary} 82% 100%`
@@ -31,8 +35,8 @@ function bands(base, upper, lower, number = "#102318", diagonal = false) {
 }
 
 const THEMES = {
-  "athletico-pr": stripes("#c8102e", "#111111", "#ffffff"),
-  "atletico-mg": stripes("#111111", "#f5fff8", null, "#ffffff"),
+  "athletico-pr": classicStripes("#c8102e", "#111111"),
+  "atletico-mg": classicStripes("#111111", "#f5fff8"),
   bahia: stripes("#0057a8", "#f5fff8", "#d71920"),
   botafogo: stripes("#111111", "#f5fff8", null, "#ffffff"),
   bragantino: sleeves("#f5fff8", "#d71920", "#102318"),
