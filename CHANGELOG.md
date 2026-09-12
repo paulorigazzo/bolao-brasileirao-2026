@@ -1,3 +1,10 @@
+# v6.39.5 — Autores dos gols ao vivo
+
+- Corrige a projeção de eventos quando a consulta geral da API-Football não inclui autores dos gols.
+- Reaproveita a consulta detalhada já realizada durante a janela do jogo, sem aumentar o número de chamadas.
+- Mantém o cache anterior quando os eventos estiverem ausentes, incompletos ou incompatíveis com o placar.
+- Preserva placar, relógio, escalações, estatísticas e regras competitivas.
+
 # v6.39.4 — Limpeza parcial da transição na Área ADM
 
 - Remove da interface administrativa a reconciliação de mapeamentos, dispensada após o vínculo integral dos 380 jogos de 2026.

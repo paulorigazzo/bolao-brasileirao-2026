@@ -29,7 +29,7 @@ import { buildLineupPitchModel } from "./lineup-pitch.js";
 import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 
-const APP_VERSION = "6.39.4";
+const APP_VERSION = "6.39.5";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
