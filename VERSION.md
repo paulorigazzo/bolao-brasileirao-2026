@@ -1,6 +1,6 @@
-6.39.5
+6.39.6
 
 Versão funcional atual do aplicativo.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.39.5-autores-gols-ao-vivo.md`](docs/releases/v6.39.5-autores-gols-ao-vivo.md)
+- Nota da versão atual: [`docs/releases/v6.39.6-eventos-escalações-lista.md`](docs/releases/v6.39.6-eventos-escalações-lista.md)
