@@ -1,3 +1,18 @@
+# v6.39.8 — Gols nas escalações
+
+- Identifica os autores dos gols ao lado dos nomes nas visualizações Lista e Campo e no banco de reservas.
+- Exibe minuto, acréscimos e marcações compactas de pênalti e gol contra.
+- Torna mais transparente o fundo dos eventos sobre o campo, preservando a leitura dos indicadores.
+- Reutiliza os eventos já carregados da API-Football, sem novas consultas ou alterações no Supabase.
+
+# v6.39.7 — Refinamentos de ranking e escalações
+
+- Exibe o Ranking provisório aos participantes somente enquanto houver jogo oficialmente ao vivo com placar disponível.
+- Reconhece o nome canônico `Paranaense` no tema rubro-negro das camisas do Athletico-PR.
+- Organiza o banco de reservas com o mesmo padrão bilateral de nomes e eventos dos titulares.
+- Afasta jogadores das bordas do campo e direciona os eventos laterais para dentro da área visível.
+- Preserva cálculos, dados, Supabase, placares, palpites e pontuação.
+
 # v6.39.6 — Eventos próximos aos jogadores na Lista
 
 - Agrupa cartões, minutos e substituições junto ao nome do jogador na visualização em Lista.

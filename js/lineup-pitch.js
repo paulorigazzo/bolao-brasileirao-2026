@@ -21,10 +21,11 @@ function sideModel(side, direction) {
       const rowIndex = rows.indexOf(player.pitchGrid.row);
       const rowPlayers = parsed.filter((item) => item.pitchGrid.row === player.pitchGrid.row).sort((a, b) => a.pitchGrid.column - b.pitchGrid.column);
       const columnIndex = rowPlayers.findIndex((item) => item.pitchGrid.column === player.pitchGrid.column);
-      const x = rowPlayers.length === 1 ? 50 : 8 + (columnIndex * 84) / (rowPlayers.length - 1);
+      const x = rowPlayers.length === 1 ? 50 : 12 + (columnIndex * 76) / (rowPlayers.length - 1);
       const progress = rowIndex / (rows.length - 1);
       const y = direction === "home" ? 8 + progress * 36 : 92 - progress * 36;
-      return { id: player.id, name: player.name, number: player.number, position: player.position, x, y };
+      const edge = x <= 20 ? "left" : x >= 80 ? "right" : "";
+      return { id: player.id, name: player.name, number: player.number, position: player.position, x, y, edge };
     }),
   };
 }

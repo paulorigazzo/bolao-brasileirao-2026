@@ -4,7 +4,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.39.6`.
+- Versão funcional: `v6.39.8`.
 - Prioridade: **manter o Bolão 2026 estável e evoluí-lo incrementalmente para múltiplas ligas com palpites compartilhados**.
 - Próxima etapa coordenada: monitorar a Rodada 27 como último ciclo recomendado de estabilização da API-Football e, se não houver regressão material, planejar em tarefa própria a retirada gradual do legado; o Rigazzo permanece congelado como histórico e possível laboratório.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
@@ -71,7 +71,7 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - ✅ Botões de atualização revisados: recarga do Supabase, consulta da classificação, diagnóstico e sincronização externa usam verbos distintos; a ação administrativa redundante do Ranking foi removida.
 - ✅ Cards expandidos da Tela de Jogos mostram autores e minutos dos gols a partir dos eventos coerentes da API-Football; a cobertura histórica começa na Rodada 26, sem obrigação de carregar as Rodadas 1–25.
 - ✅ Eventos ao vivo usam a resposta detalhada já consultada para atualizar autores e minutos dos gols, sem chamada adicional e sem aceitar eventos incompatíveis com o placar.
-- ✅ Cards expandidos oferecem Estatísticas e Escalações em seções recolhíveis, com titulares estáticos em Lista e Campo, cartões e minutos agrupados junto ao jogador e banco interno recolhível com substituições; a cobertura histórica piloto parte da Rodada 26.
+- ✅ Cards expandidos oferecem Estatísticas e Escalações em seções recolhíveis, com titulares estáticos em Lista e Campo, banco organizado bilateralmente, cartões e minutos agrupados junto ao jogador e posições laterais protegidas contra cortes; a cobertura histórica piloto parte da Rodada 26.
 - ✅ Transparência individual dos palpites após o encerramento oficial das partidas.
 - ✅ Limite configurável de participantes ativos.
 - ✅ Cadastro consolidado com nome, telefone opcional e time favorito opcional.

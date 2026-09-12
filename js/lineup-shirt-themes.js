@@ -55,6 +55,7 @@ const THEMES = {
 };
 
 const ALIASES = {
+  paranaense: "athletico-pr",
   "athletico-paranaense": "athletico-pr",
   "atletico-paranaense": "athletico-pr",
   "atletico-mineiro": "atletico-mg",
