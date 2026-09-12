@@ -97,6 +97,8 @@ export function gameDetailsFixtureIds(games = [], now = new Date()) {
     const status = String(game?.status || "").toLowerCase();
     const kickoff = new Date(game?.inicio).getTime();
     if (["em_andamento", "intervalo"].includes(status)) return true;
-    return status === "agendado" && Number.isFinite(kickoff) && kickoff - current >= 0 && kickoff - current <= 90 * 60 * 1000;
+    return status === "agendado" && Number.isFinite(kickoff)
+      && kickoff >= current - 4 * 60 * 60 * 1000
+      && kickoff <= current + 90 * 60 * 1000;
   }).map((game) => Number(game.api_football_id)).filter(Number.isInteger).slice(0, 20);
 }

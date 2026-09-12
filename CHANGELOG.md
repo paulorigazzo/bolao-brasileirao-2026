@@ -1,3 +1,9 @@
+# v6.41.0 — Estabilidade dos detalhes dos jogos
+
+- Preserva card, seção de detalhes, modo Lista ou Campo, banco e resumo do jogador durante as atualizações automáticas.
+- Mantém partidas próximas elegíveis para coleta e releitura de escalações quando a API ainda informa `NS/agendado` após o horário previsto.
+- Mantém status, placar, relógio, palpites, pontuação e Ranking independentes dos detalhes auxiliares.
+
 # v6.40.0 — Detalhes dos jogadores no Campo
 
 - Simplifica os indicadores permanentes do Campo para mostrar somente os ícones de gols, cartões e substituições.
