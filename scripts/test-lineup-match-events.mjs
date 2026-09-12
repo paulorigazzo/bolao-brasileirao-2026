@@ -32,6 +32,7 @@ assert.match(app, /benchToggle\?\.setAttribute\("aria-expanded","false"\)/);
 assert.match(app, /compact&&card\.minute/);
 assert.match(app, /lineup-player-main/);
 assert.match(app, /eventBadges\(player,position,true\)/);
+assert.match(app, /benchSide[\s\S]*lineup-player-main[\s\S]*eventBadges\(player,position,true\)/);
 assert.match(app, /lineup-player-events\$\{compact\?" is-compact":""\}/);
 assert.doesNotMatch(app, /\$\{compact\?"":events\.substitution\.minute\}/);
 console.log("Cartões, substituições e banco das escalações verificados com sucesso.");

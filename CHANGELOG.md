@@ -1,3 +1,11 @@
+# v6.39.7 — Refinamentos de ranking e escalações
+
+- Exibe o Ranking provisório aos participantes somente enquanto houver jogo oficialmente ao vivo com placar disponível.
+- Reconhece o nome canônico `Paranaense` no tema rubro-negro das camisas do Athletico-PR.
+- Organiza o banco de reservas com o mesmo padrão bilateral de nomes e eventos dos titulares.
+- Afasta jogadores das bordas do campo e direciona os eventos laterais para dentro da área visível.
+- Preserva cálculos, dados, Supabase, placares, palpites e pontuação.
+
 # v6.39.6 — Eventos próximos aos jogadores na Lista
 
 - Agrupa cartões, minutos e substituições junto ao nome do jogador na visualização em Lista.

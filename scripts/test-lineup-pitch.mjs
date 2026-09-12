@@ -22,8 +22,10 @@ assert.equal(model.away.players.length, 11);
 assert.equal(model.home.players[0].x, 50);
 assert.equal(model.home.players[0].y, 8);
 assert.equal(model.away.players[0].y, 92);
-assert.ok(model.home.players.every((player) => player.x >= 8 && player.x <= 92 && player.y >= 8 && player.y <= 44));
-assert.ok(model.away.players.every((player) => player.x >= 8 && player.x <= 92 && player.y >= 56 && player.y <= 92));
+assert.ok(model.home.players.every((player) => player.x >= 12 && player.x <= 88 && player.y >= 8 && player.y <= 44));
+assert.ok(model.away.players.every((player) => player.x >= 12 && player.x <= 88 && player.y >= 56 && player.y <= 92));
+assert.equal(model.home.players.find((player) => player.x === 12)?.edge, "left");
+assert.equal(model.home.players.find((player) => player.x === 88)?.edge, "right");
 
 const invalid = side("4-3-3", [1, 4, 3, 3]);
 invalid.starters[2].grid = "";
@@ -47,7 +49,11 @@ for (const club of ["Fluminense", "São Paulo", "Grêmio", "Bahia", "Fortaleza"]
 }
 assert.notEqual(lineupShirtTheme("Fluminense").pattern, lineupShirtTheme("São Paulo").pattern);
 assert.equal(lineupShirtTheme("Clube do Remo").pattern, lineupShirtTheme("Remo").pattern);
+assert.equal(lineupShirtTheme("Paranaense").pattern, lineupShirtTheme("Athletico-PR").pattern);
 assert.match(lineupShirtTheme("Clube futuro").pattern, /linear-gradient/);
 assert.match(app, /lineupShirtTheme\(teamName\)/);
+assert.match(app, /is-edge-\$\{player\.edge\}/);
+assert.match(styles, /premium-pitch-player\.is-edge-left/);
+assert.match(styles, /premium-pitch-player\.is-edge-right/);
 
 console.log("Campo tático das escalações verificado com sucesso.");

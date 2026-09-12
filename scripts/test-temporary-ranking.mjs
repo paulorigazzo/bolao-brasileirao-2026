@@ -12,11 +12,11 @@ assert.equal(temporaryRankingGameState(game("FINISHED")),"finished");
 assert.equal(temporaryRankingGameState(game("CANCELLED")),"cancelled");
 
 assert.equal(temporaryRankingAvailability([game("TIMED")],24).available,false);
-assert.equal(temporaryRankingAvailability([game("FINISHED",{gols_casa:2,gols_fora:1}),game("TIMED")],24).available,true);
+assert.equal(temporaryRankingAvailability([game("FINISHED",{gols_casa:2,gols_fora:1}),game("TIMED")],24).available,false);
 assert.equal(temporaryRankingAvailability([game("FINISHED",{gols_casa:null,gols_fora:null}),game("TIMED")],24).available,false);
 assert.equal(temporaryRankingAvailability([game("IN_PLAY",{gols_casa:1,gols_fora:0}),game("TIMED")],24).available,true);
 assert.equal(temporaryRankingAvailability([game("IN_PLAY")],24).available,false);
-assert.equal(temporaryRankingAvailability([game("SUSPENDED",{gols_casa:1,gols_fora:1}),game("POSTPONED")],24).available,true);
+assert.equal(temporaryRankingAvailability([game("SUSPENDED",{gols_casa:1,gols_fora:1}),game("POSTPONED")],24).available,false);
 assert.equal(temporaryRankingAvailability([game("FINISHED",{gols_casa:2,gols_fora:1}),game("CANCELLED")],24).available,false);
 
 const official=[
@@ -25,7 +25,7 @@ const official=[
 ];
 const model=buildTemporaryRankingModel({
   officialRanking:official,
-  games:[game("FINISHED",{gols_casa:2,gols_fora:1}),game("POSTPONED")],
+  games:[game("IN_PLAY",{gols_casa:2,gols_fora:1}),game("POSTPONED")],
   round:24,
   rows:[
     {user_id:"ana",nome:"Ana",pontos_oficiais:100,pontos_provisorios:0,total_projetado:100,exatos_projetados:2},
