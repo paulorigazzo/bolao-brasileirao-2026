@@ -1,3 +1,10 @@
+# v6.39.6 — Eventos próximos aos jogadores na Lista
+
+- Agrupa cartões, minutos e substituições junto ao nome do jogador na visualização em Lista.
+- Mantém ícone e minuto como uma unidade, inclusive para cartões vermelhos em acréscimos.
+- Preserva as escalações lado a lado e permite acomodação em uma segunda linha nas telas estreitas.
+- Não altera API, Supabase, formação inicial, placares, palpites ou pontuação.
+
 # v6.39.5 — Autores dos gols ao vivo
 
 - Corrige a projeção de eventos quando a consulta geral da API-Football não inclui autores dos gols.

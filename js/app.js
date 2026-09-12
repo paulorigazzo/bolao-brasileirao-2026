@@ -29,7 +29,7 @@ import { buildLineupPitchModel } from "./lineup-pitch.js";
 import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 
-const APP_VERSION = "6.39.5";
+const APP_VERSION = "6.39.6";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1588,7 +1588,7 @@ function premiumGameDetails(g){
     const players=groups.map(([groupPosition,title])=>{
       const grouped=starters.filter(player=>groupPosition?player.position===groupPosition:!groups.slice(0,4).some(([known])=>known===player.position));
       if(!grouped.length) return "";
-      return `<section class="premium-lineup-group"><strong>${title}</strong><ol>${grouped.map(player=>`<li><b>${player.number??"—"}</b><span class="lineup-player-name" title="${escapeHtml(player.name)}">${escapeHtml(player.name)}</span>${eventBadges(player,position)}</li>`).join("")}</ol></section>`;
+      return `<section class="premium-lineup-group"><strong>${title}</strong><ol>${grouped.map(player=>`<li><b>${player.number??"—"}</b><span class="lineup-player-main"><span class="lineup-player-name" title="${escapeHtml(player.name)}">${escapeHtml(player.name)}</span>${eventBadges(player,position,true)}</span></li>`).join("")}</ol></section>`;
     }).join("");
     return `<div class="premium-lineup-side"><header><span class="premium-lineup-crest">${teamLogo(logo,label)}</span><span class="premium-lineup-heading"><b>${escapeHtml(teamDisplayName(label))}</b><strong>${escapeHtml(side.formation||"Formação não informada")}</strong>${side.coach?`<small>Técnico: ${escapeHtml(side.coach)}</small>`:""}</span></header><div class="premium-lineup-groups">${players}</div></div>`;
   };
