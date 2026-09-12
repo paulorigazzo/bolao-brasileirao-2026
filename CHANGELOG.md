@@ -1,3 +1,12 @@
+# v6.40.0 — Detalhes dos jogadores no Campo
+
+- Simplifica os indicadores permanentes do Campo para mostrar somente os ícones de gols, cartões e substituições.
+- Exibe nomes, tipos de evento e respectivos minutos em um resumo compacto ao acionar a camisa do jogador.
+- Mantém apenas um resumo aberto, com fechamento por novo toque, toque externo ou tecla Escape.
+- Prepara o resumo para receber futuramente estatísticas individuais, sem integrar novos dados nesta versão.
+- Completa as marcações do campo com as pequenas áreas e as meias-luas.
+- Preserva a visualização em Lista, o banco, as posições, os eventos esportivos e as integrações existentes.
+
 # v6.39.9 — Refinamentos visuais das escalações
 
 - Reforça as camisas do Atlético-MG em preto e branco e do Athletico-PR em vermelho e preto.
