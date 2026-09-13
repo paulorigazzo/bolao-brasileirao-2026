@@ -1,3 +1,10 @@
+# v6.41.1 — Movimentação confiável do Ranking
+
+- Calcula no Supabase a variação entre as duas rodadas mais recentes com resultados computáveis.
+- Usa o identificador único de cada participante e os mesmos critérios de pontuação e desempate do ranking oficial.
+- Elimina a dependência da lista de palpites retornada ao navegador, evitando setas incorretas quando o volume ultrapassa o limite de resposta.
+- Mantém neutra a indicação de quem permaneceu na mesma posição.
+
 # v6.41.0 — Estabilidade dos detalhes dos jogos
 
 - Preserva card, seção de detalhes, modo Lista ou Campo, banco e resumo do jogador durante as atualizações automáticas.

@@ -12,7 +12,7 @@ import { hasNewlyRevealablePublicPicks, shouldRefreshGameDetails, shouldRefreshG
 import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./access-control.js";
 import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temporary-ranking-engine.js";
 import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
-import { buildRankingMovementFromHistory, rankingMovementKey } from "./ranking-movement-engine.js";
+import { buildRankingMovementFromHistory, buildRankingMovementFromRows, rankingMovementKey } from "./ranking-movement-engine.js";
 import { buildGamesProgressModel } from "./games-progress.js";
 import { liveMatchMinute } from "./live-match-minute.js";
 import { isScheduledLiveEstimate, scheduledLiveLabel } from "./scheduled-live-estimate.js";
@@ -29,7 +29,7 @@ import { buildLineupPitchModel } from "./lineup-pitch.js";
 import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 
-const APP_VERSION = "6.41.0";
+const APP_VERSION = "6.41.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -38,7 +38,7 @@ const sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonK
 const TEMPORARY_RANKING_SYNTHETIC_PREVIEW=isTemporaryRankingSyntheticPreview(window.location);
 const TEMPORARY_RANKING_PREVIEW_FIXTURE=TEMPORARY_RANKING_SYNTHETIC_PREVIEW?buildTemporaryRankingSyntheticFixture():null;
 const GAME_GOAL_EVENTS_PREVIEW=isGameGoalEventsPreview(window.location);
-const state = { user:null, participant:null, participants:[], games:[], gameEventProjections:[], gameDetailProjections:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], leagueRanking:[], leagues:[], activeLeague:null, leagueContextStatus:"idle", leagueManagedMembers:[], leagueMemberAudit:[], leagueLifecycleAudit:[], leagueManager:false, administeredLeagues:[], adminTargetLeague:null, leagueDirectory:[], leagueAssignments:[], participantSituations:[], participantApprovalTarget:null, participantApprovalMode:"approve", standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], adminCommunicationStatus:null, participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{}, pushRegistration:null, pushSubscription:null, pushActiveDeviceCount:0, pushSubscriptionStatusKnown:false };
+const state = { user:null, participant:null, participants:[], games:[], gameEventProjections:[], gameDetailProjections:[], ownPicks:[], publicPicks:[], pickCounts:[], ranking:[], leagueRanking:[], leagueRankingMovement:[], leagues:[], activeLeague:null, leagueContextStatus:"idle", leagueManagedMembers:[], leagueMemberAudit:[], leagueLifecycleAudit:[], leagueManager:false, administeredLeagues:[], adminTargetLeague:null, leagueDirectory:[], leagueAssignments:[], participantSituations:[], participantApprovalTarget:null, participantApprovalMode:"approve", standings:null, gameFilter:"all", selectedFavoriteTeam:null, selectedRegistrationTeam:null, registrationTeams:[], rankingMovement:{}, adminSnapshot:null, adminPickProgress:[], authorizedParticipants:[], adminCommunicationStatus:null, participantLimit:10, membership:null, openGameId:null, gameAutoOpenContext:null, lastSyncReport:null, pickDrafts:{}, pushRegistration:null, pushSubscription:null, pushActiveDeviceCount:0, pushSubscriptionStatusKnown:false };
 const COMPETITIVE_READ_MODE="league"; // "legacy" é mantido apenas para uma publicação de contingência.
 const leagueRequestGate=createLeagueRequestGate();
 let leagueSelectorReturnFocus=null;
@@ -1006,15 +1006,17 @@ async function loadLeagueContext(league){
   if(!league?.liga_id) throw new Error("Nenhuma liga ativa está disponível para esta conta.");
   const requestId=leagueRequestGate.issue();
   const params={p_liga_id:league.liga_id};
-  const [{data:members,error:membersErr},{data:publicPicks,error:publicPicksErr},{data:counts,error:countsErr},{data:ranking,error:rankingErr},{data:profiles,error:profilesErr}]=await Promise.all([
+  const [{data:members,error:membersErr},{data:publicPicks,error:publicPicksErr},{data:counts,error:countsErr},{data:ranking,error:rankingErr},{data:rankingMovement,error:rankingMovementErr},{data:profiles,error:profilesErr}]=await Promise.all([
     sb.rpc("listar_membros_liga",params),
     sb.rpc("obter_palpites_encerrados_liga",params),
     sb.rpc("obter_contagem_palpites_liga",params),
     sb.rpc("obter_ranking_liga",params),
+    sb.rpc("obter_movimentacao_ranking_liga",params),
     sb.from("participantes").select("user_id,nome,email,time_favorito,ativo")
   ]);
   const error=membersErr||publicPicksErr||countsErr||rankingErr||profilesErr;
   if(error) throw error;
+  if(rankingMovementErr) console.warn("A movimentação do Ranking não pôde ser carregada.",rankingMovementErr);
   if(!leagueRequestGate.isCurrent(requestId)) return false;
   const scopedProfiles=filterProfilesByMembers(profiles||[],members||[]);
   const memberById=new Map((members||[]).map(member=>[String(member.user_id),member]));
@@ -1022,6 +1024,7 @@ async function loadLeagueContext(league){
   state.publicPicks=publicPicks||[];
   state.pickCounts=counts||[];
   state.leagueRanking=ranking||[];
+  state.leagueRankingMovement=rankingMovement||[];
   state.activeLeague=league;
   state.leagueContextStatus="ready";
   persistActiveLeague(league,{userId:state.user?.id,storage:localStorage});
@@ -1038,7 +1041,7 @@ async function loadLegacyCompetitiveContext(league){
   ]);
   const error=profilesError||picksError||countsError;
   if(error) throw error;
-  state.participants=profiles||[];state.publicPicks=publicPicks||[];state.pickCounts=counts||[];state.leagueRanking=null;
+  state.participants=profiles||[];state.publicPicks=publicPicks||[];state.pickCounts=counts||[];state.leagueRanking=null;state.leagueRankingMovement=[];
   state.activeLeague=league;state.leagueContextStatus="legacy";applyCanonicalParticipantNames();renderLeagueContext();
 }
 
@@ -2824,6 +2827,10 @@ function currentRankingHistory(selectedParticipant=""){
 }
 
 function updateRankingMovement(){
+  if(state.leagueContextStatus==="ready"){
+    state.rankingMovement=buildRankingMovementFromRows({ranking:state.ranking,rows:state.leagueRankingMovement});
+    return;
+  }
   const history=currentRankingHistory();
   state.rankingMovement=buildRankingMovementFromHistory({ranking:state.ranking,rounds:history.rounds});
 }
@@ -5361,8 +5368,13 @@ async function refreshLiveScoresSilently(){
           console.warn("Os palpites recém-encerrados ainda não puderam ser atualizados; uma nova tentativa será feita automaticamente.",publicPicksError);
         }else{
           state.publicPicks=publicPicks||[];
-          const {data:leagueRanking,error:leagueRankingError}=await sb.rpc("obter_ranking_liga",{p_liga_id:state.activeLeague?.liga_id});
+          const [{data:leagueRanking,error:leagueRankingError},{data:rankingMovement,error:rankingMovementError}]=await Promise.all([
+            sb.rpc("obter_ranking_liga",{p_liga_id:state.activeLeague?.liga_id}),
+            sb.rpc("obter_movimentacao_ranking_liga",{p_liga_id:state.activeLeague?.liga_id})
+          ]);
           if(!leagueRankingError) state.leagueRanking=leagueRanking||[];
+          if(!rankingMovementError) state.leagueRankingMovement=rankingMovement||[];
+          else console.warn("A movimentação do Ranking não pôde ser atualizada.",rankingMovementError);
           publicPicksRefreshPending=false;
           applyCanonicalParticipantNames();
         }

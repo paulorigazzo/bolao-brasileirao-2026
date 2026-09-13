@@ -2,6 +2,17 @@ export function rankingMovementKey(participant, index = 0) {
   return String(participant?.userId || participant?.key || participant?.name || `position-${index}`);
 }
 
+export function buildRankingMovementFromRows({ ranking = [], rows = [] } = {}) {
+  const movementByUserId = new Map(rows.map(item => [String(item?.user_id || ""), Number(item?.variacao)]));
+  const movement = {};
+  ranking.forEach((participant, index) => {
+    const key = rankingMovementKey(participant, index);
+    const change = movementByUserId.get(String(participant?.userId || ""));
+    movement[key] = Number.isFinite(change) ? change : 0;
+  });
+  return movement;
+}
+
 export function buildRankingMovementFromHistory({ ranking = [], rounds = [] } = {}) {
   const latestRounds = rounds.slice(-2);
   const previousByName = new Map((latestRounds[0]?.ranking || []).map(item => [String(item?.name || ""), Number(item?.position)]));
