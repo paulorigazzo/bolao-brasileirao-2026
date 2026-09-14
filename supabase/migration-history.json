@@ -26,6 +26,6 @@
     { "version": "20260909220000", "name": "add_game_details_projection", "status": "applied" },
     { "version": "20260910162957", "name": "backfill_lineup_reserves_round_26", "status": "applied" },
     { "version": "20260913013447", "name": "add_league_ranking_movement", "status": "applied" },
-    { "version": "20260914014512", "name": "add_round_live_highlights", "status": "pending" }
+    { "version": "20260914021749", "name": "add_round_live_highlights", "status": "applied" }
   ]
 }
