@@ -1,6 +1,6 @@
-6.41.1
+6.42.0
 
-Versão funcional atual do aplicativo.
+Versão funcional em preparação para revisão; aplicação remota pendente.
 
 - Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão atual: [`docs/releases/v6.41.1-movimentacao-confiavel-do-ranking.md`](docs/releases/v6.41.1-movimentacao-confiavel-do-ranking.md)
+- Nota da versão: [`docs/releases/v6.42.0-destaques-ao-vivo.md`](docs/releases/v6.42.0-destaques-ao-vivo.md)
