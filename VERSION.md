@@ -1,6 +1,6 @@
-6.42.0
+6.42.1
 
-Versão funcional em preparação para revisão; migração remota aplicada, PR em Draft.
+Ajustes visuais em revisão local.
 
-- Histórico consolidado: [`CHANGELOG.md`](CHANGELOG.md)
-- Nota da versão: [`docs/releases/v6.42.0-destaques-ao-vivo.md`](docs/releases/v6.42.0-destaques-ao-vivo.md)
+- Histórico: [CHANGELOG.md](CHANGELOG.md)
+- Nota: [v6.42.1](docs/releases/v6.42.1-avatar-ranking-rodada.md)
