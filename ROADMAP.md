@@ -4,7 +4,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.41.1`.
+- Versão funcional: `v6.42.0`.
 - Prioridade: **manter o Bolão 2026 estável e evoluí-lo incrementalmente para múltiplas ligas com palpites compartilhados**.
 - Próxima etapa coordenada: monitorar a Rodada 27 como último ciclo recomendado de estabilização da API-Football e, se não houver regressão material, planejar em tarefa própria a retirada gradual do legado; o Rigazzo permanece congelado como histórico e possível laboratório.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
@@ -98,6 +98,8 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 Esses recursos não utilizam IA generativa. Métricas e conclusões são calculadas por `js/statistics-engine.js` e `js/participant-duel-engine.js`, e apresentadas por `js/app.js`.
 
 ## E04 — Inteligência narrativa
+
+- 🟡 Destaques ao vivo e Ranking da rodada: implementação local em revisão; aplicação remota e publicação pendentes.
 
 - ✅ **E04.1:** motor rastreável concluído na E04.1A, experiência controlada na Home entregue na E04.1B e resumo coletivo administrativo entregue na E04.1C.
 - ✅ **E04.1D:** acesso histórico aos Destaques da Rodada pelas Estatísticas, reutilizando o modal e o motor existentes sem criar uma visão redundante.

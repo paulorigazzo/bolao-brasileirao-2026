@@ -2033,3 +2033,22 @@ A API-Football pode publicar escalações antes de mudar o estado da partida de 
 ### Consequências
 
 Escalações já disponíveis podem aparecer mesmo enquanto o provedor ainda informa `NS`. A coleta continua limitada à janela operacional existente e estados visuais sem correspondência nos novos dados são descartados.
+
+## DEC-2026-065 — Destaques transitórios e classificação por rodada
+
+- Data: 2026-09-13.
+- Status: plano aprovado; implementação local em revisão, aplicação remota pendente.
+- Impacto: alto.
+- Complementa: DEC-2026-014, exclusivamente para o modal de Destaques e sua faixa na Home.
+
+A projeção passa a poder alimentar os Destaques pessoais e coletivos transitórios
+e o Ranking da rodada no mesmo modal, acessível pela Home e Estatísticas. Pontos
+projetados não são gravados nem alimentam indicadores oficiais, históricos,
+compartilhamentos ou snapshots. O contrato do Ranking provisório existente é
+preservado; uma consulta específica calcula agregados por liga e rodada.
+
+Palpites individuais permanecem protegidos. Acertos exclusivos por partida ao
+vivo não são expostos. Movimento geral compara com a posição oficial atual.
+Empates da rodada usam pontos, exatos e nome; `user_id` estabiliza igualdade
+completa sem mudar o Ranking oficial. A versão e os detalhes operacionais estão
+na [nota v6.42.0](../releases/v6.42.0-destaques-ao-vivo.md).

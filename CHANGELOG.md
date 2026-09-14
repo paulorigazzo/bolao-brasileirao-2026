@@ -1,3 +1,11 @@
+# v6.42.0 — Destaques ao vivo e Ranking da rodada
+
+- Em revisão; depende de aplicação autorizada da migração.
+- Mantém os acessos pela Home e Estatísticas e acrescenta classificação por rodada no mesmo modal.
+- Apresenta fatos agregados provisórios, atualização automática, aviso de falha e transição para resultados consolidados.
+- Preserva palpites individuais, Ranking oficial, históricos e resumos administrativos.
+- Detalhes e validação: [nota da versão](docs/releases/v6.42.0-destaques-ao-vivo.md).
+
 # v6.41.1 — Movimentação confiável do Ranking
 
 - Calcula no Supabase a variação entre as duas rodadas mais recentes com resultados computáveis.

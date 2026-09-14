@@ -2,6 +2,7 @@ import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
 import { buildRoundHighlightsModel, isPostponedRoundHighlightsEligible, selectLatestRoundHighlightsCandidate } from "./round-highlights-engine.js";
+import { buildRoundLiveHighlightsModel, createRoundHighlightsLoader } from "./round-live-highlights-engine.js";
 import { buildAdminRoundSummary } from "./admin-round-share.js";
 import { buildParticipantDuelModel } from "./participant-duel-engine.js";
 import { buildMatchCalendarModel } from "./match-calendar-engine.js";
@@ -29,7 +30,7 @@ import { buildLineupPitchModel } from "./lineup-pitch.js";
 import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 
-const APP_VERSION = "6.41.1";
+const APP_VERSION = "6.42.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -57,6 +58,15 @@ let rankingPicksReturnFocus=null;
 let rankingPicksModalView="picks";
 let roundHighlightsReturnFocus=null;
 let roundHighlightsModel=null;
+let roundHighlightsSession=0;
+let roundHighlightsSelection=null;
+const roundHighlightsLoader=createRoundHighlightsLoader(async params=>{
+  const {data,error}=await sb.rpc("obter_destaques_rodada_liga",params);
+  if(error) throw error;
+  buildRoundLiveHighlightsModel(data,state.user?.id);
+  if(String(data.leagueId)!==String(params.p_liga_id)||Number(data.round)!==params.p_rodada) throw new Error("Contexto divergente.");
+  return data;
+});
 let adminRoundShareOriginalText="";
 let adminRoundShareReturnFocus=null;
 let matchCalendarReturnFocus=null;
@@ -617,7 +627,7 @@ async function login(){
   if(error) message(error.message, true);
 }
 function stopMembershipStatusPolling(){if(membershipStatusTimer){clearInterval(membershipStatusTimer);membershipStatusTimer=null;}}
-async function logout(){stopMembershipStatusPolling();await sb.auth.signOut(); location.reload(); }
+async function logout(){resetRoundHighlightsContext();stopMembershipStatusPolling();await sb.auth.signOut(); location.reload(); }
 
 async function requestMembership(email,draft=readRegistrationDraft()){
   if(!validateRegistrationDraft(draft,{showStatus:false})) throw new Error("Complete o nome antes de enviar o cadastro.");
@@ -1004,6 +1014,7 @@ function applyCanonicalParticipantNames(){
 
 async function loadLeagueContext(league){
   if(!league?.liga_id) throw new Error("Nenhuma liga ativa está disponível para esta conta.");
+  resetRoundHighlightsContext();
   const requestId=leagueRequestGate.issue();
   const params={p_liga_id:league.liga_id};
   const [{data:members,error:membersErr},{data:publicPicks,error:publicPicksErr},{data:counts,error:countsErr},{data:ranking,error:rankingErr},{data:rankingMovement,error:rankingMovementErr},{data:profiles,error:profilesErr}]=await Promise.all([
@@ -1034,6 +1045,7 @@ async function loadLeagueContext(league){
 }
 
 async function loadLegacyCompetitiveContext(league){
+  resetRoundHighlightsContext();
   const [{data:profiles,error:profilesError},{data:publicPicks,error:picksError},{data:counts,error:countsError}]=await Promise.all([
     sb.from("participantes").select("user_id,nome,email,time_favorito,ativo").eq("ativo",true),
     sb.from("palpites_encerrados_publicos").select("*"),
@@ -2159,6 +2171,95 @@ function homeDeadline(game){
   return new Date(closeAt).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
 }
 
+function resetRoundHighlightsContext(){
+  roundHighlightsLoader.clear();
+  if(roundHighlightsSelection) closeRoundHighlights();
+}
+
+function roundHighlightsAvailable(round){
+  const games=state.games.filter(game=>Number(game.rodada)===Number(round));
+  const status=temporaryRankingAvailability(games,round);
+  return games.some(isScorableGame)||status.liveWithScore>0||status.suspendedWithScore>0||(games.length>0&&games.every(game=>isScorableGame(game)||isCancelled(game)));
+}
+
+function roundHighlightsKey(round){
+  return `${state.user?.id}:${state.activeLeague?.liga_id}:${round}`;
+}
+
+function roundHighlightsNotice(model){
+  const life=model.lifecycle;
+  const stateLabel=!model.isProvisional?"Rodada concluída":life.live>0?"Rodada em andamento — Destaques provisórios":"Rodada parcialmente concluída";
+  const pending=[life.suspended?`${life.suspended} jogo(s) suspenso(s)`:"",life.postponed?`${life.postponed} jogo(s) adiado(s)`:""].filter(Boolean).join(" · ");
+  return `${stateLabel}. ${life.finished} de ${life.total} jogos encerrados.${pending?` ${pending}.`:""}`;
+}
+
+function roundHighlightsRankingHtml(model){
+  if(!model.hasResults&&model.isProvisional) return '<section><h3>Ranking da rodada</h3><p class="muted-note">Aguardando resultados válidos para apresentar a classificação.</p></section>';
+  const rows=model.ranking.map(row=>`<li class="round-dynamic-row ${row.user_id===state.user?.id?"is-me":""}"><span class="round-dynamic-position">${row.position}º</span><div><strong>${escapeHtml(row.nome)}${row.user_id===state.user?.id?' <small>(você)</small>':""}</strong><small>${row.confirmed} confirmados · ${row.provisional} provisórios · ${row.exact} exatos</small></div><b aria-label="${row.total} pontos no total">${row.total}<small>pts</small></b></li>`).join("");
+  return `<section class="round-dynamic-ranking"><div class="round-highlight-section-heading"><span>CLASSIFICAÇÃO DA RODADA</span><h3>${model.isProvisional?"Ranking dinâmico da rodada":"Ranking final da rodada"}</h3></div><p class="muted-note">${model.isProvisional?"Classificação provisória. ":""}Ordem: pontos, placares exatos e nome.</p>${rows?`<ol class="round-dynamic-list">${rows}</ol>`:'<p class="muted-note">Nenhum participante elegível nesta liga.</p>'}</section>`;
+}
+
+function renderRoundHighlightsAggregate(entry,round){
+  const content=$("roundHighlightsModalContent");
+  const scroller=$("roundHighlightsModal");
+  const panel=scroller?.querySelector(".round-highlights-modal");
+  const previousScroll=[scroller?.scrollTop,panel?.scrollTop,content.scrollTop];
+  const retryFocused=document.activeElement?.hasAttribute("data-round-highlights-retry");
+  const status=entry?.error?'<p class="round-highlights-update-error">Não foi possível atualizar. Os dados anteriores podem estar desatualizados.</p>':"";
+  if(!entry?.data){
+    content.innerHTML='<p class="muted-note">Destaques e ranking da rodada indisponíveis.</p>';
+    $("roundHighlightsModalSummary").textContent="Não foi possível consultar os resultados.";
+    $("roundHighlightsModalSource").textContent="";
+  }else{
+    const model=buildRoundLiveHighlightsModel(entry.data,state.user?.id);
+    roundHighlightsModel=model;
+    if(!model.isProvisional){
+      const consolidated=buildRoundHighlights(round);
+      if(publicPicksRefreshPending||consolidated.lifecycle.finished!==model.lifecycle.finished){
+        content.innerHTML='<p class="muted-note">Aguardando a atualização dos resultados e palpites encerrados para apresentar o resumo consolidado.</p>';
+      }else renderRoundHighlightsModal(consolidated);
+      content.insertAdjacentHTML("beforeend",roundHighlightsRankingHtml(model));
+    }else{
+      const section=(label,title,facts)=>`<section><div class="round-highlight-section-heading"><span>${label}</span><h3>${title}</h3></div><div class="round-highlight-facts">${facts.map(fact=>`<article class="round-highlight-fact"><div><strong>${escapeHtml(fact.title)}</strong><p>${escapeHtml(fact.detail)}</p></div></article>`).join("")||'<p class="muted-note">Ainda não há fatos suficientes para destacar.</p>'}</div></section>`;
+      content.innerHTML=section("VOCÊ NA RODADA","Seu desempenho",model.facts.personal)+section("NO BOLÃO","Destaques do grupo",model.facts.group)+roundHighlightsRankingHtml(model);
+      $("roundHighlightsModalTitle").textContent=`Destaques da Rodada ${round}`;
+    }
+    $("roundHighlightsModalSummary").textContent=roundHighlightsNotice(model);
+    const timestamp=model.updatedAt?new Date(model.updatedAt):null;
+    $("roundHighlightsModalSource").textContent=`Fonte: resultados e totais agregados da liga. ${model.projected?"Inclui placares provisórios disponíveis. ":""}${timestamp&&!Number.isNaN(timestamp.getTime())?`Dados atualizados em ${timestamp.toLocaleString("pt-BR")}.`:"Horário dos dados indisponível."}`;
+  }
+  content.insertAdjacentHTML("beforeend",`${entry?.data?status:""}<button type="button" class="secondary round-highlights-retry" data-round-highlights-retry>${entry?.error||!entry?.data?"Tentar novamente":"Atualizar destaques"}</button>`);
+  const announcement=$("roundHighlightsUpdateStatus");
+  if(announcement) announcement.textContent=entry?.error?"Atualização indisponível.":"Destaques e ranking da rodada atualizados.";
+  if(retryFocused) content.querySelector("[data-round-highlights-retry]")?.focus({preventScroll:true});
+  if(scroller) scroller.scrollTop=previousScroll[0];
+  if(panel) panel.scrollTop=previousScroll[1];
+  content.scrollTop=previousScroll[2];
+}
+
+async function refreshRoundHighlightsViews({force=false}={}){
+  if(document.hidden||!state.user||!state.activeLeague?.liga_id) return;
+  const candidateHome=$("homeRoundLiveFacts");
+  const home=candidateHome?.getClientRects().length?candidateHome:null;
+  const selected=roundHighlightsSelection;
+  const rounds=new Set([home?Number(home.dataset.round):null,selected?.round].filter(value=>value!=null));
+  const session=roundHighlightsSession;
+  await Promise.all([...rounds].map(async round=>{
+    const key=roundHighlightsKey(round);
+    const entry=await roundHighlightsLoader.load(key,{p_liga_id:state.activeLeague.liga_id,p_rodada:round},{force});
+    if(!entry||key!==roundHighlightsKey(round)) return;
+    const currentHome=$("homeRoundLiveFacts");
+    if(currentHome&&Number(currentHome.dataset.round)===round){
+      if(entry.data){
+        const model=buildRoundLiveHighlightsModel(entry.data,state.user.id);
+        const facts=[model.facts.personal[0],model.facts.group[0]].filter(Boolean);
+        currentHome.innerHTML=`<p class="muted-note">${escapeHtml(roundHighlightsNotice(model))}</p><div class="home-round-highlights-list">${facts.map(fact=>`<div><p><strong>${escapeHtml(fact.title)}</strong><small>${escapeHtml(fact.detail)}</small></p></div>`).join("")}</div>${entry.error?'<p class="round-highlights-update-error">Dados desatualizados. Abra os destaques para tentar novamente.</p>':""}`;
+      }else currentHome.innerHTML='<p class="muted-note">Destaques indisponíveis. Abra para tentar novamente.</p>';
+    }
+    if(session===roundHighlightsSession&&roundHighlightsSelection?.round===round) renderRoundHighlightsAggregate(entry,round);
+  }));
+}
+
 function roundHighlightsPicks(){
   const combined=[...(state.publicPicks||[])];
   for(const pick of state.ownPicks||[]){
@@ -2196,7 +2297,7 @@ function latestRoundHighlightsCandidate(beforeRound=Infinity){
 
 function homeRoundHighlightsContext({round,lifecycle,nextGame,now=Date.now()}){
   if(lifecycle.status==="FINISHED") return {round,mode:"finished"};
-  if(lifecycle.live>0) return null;
+  if(roundHighlightsAvailable(round)) return {round,mode:"live"};
   if(isPostponedRoundHighlightsEligible(lifecycle)) return {round,mode:"partial"};
   if(lifecycle.status==="PARTIAL") return null;
   const previous=latestRoundHighlightsCandidate(round);
@@ -2240,6 +2341,10 @@ function roundHighlightIcon(key){
 
 function homeRoundHighlightsHtml(context){
   if(!context) return "";
+  if(context.mode==="live"){
+    queueMicrotask(()=>refreshRoundHighlightsViews());
+    return `<section class="home-round-highlights" aria-label="Destaques da Rodada ${context.round}"><div class="home-round-highlights-heading"><span>DESTAQUES DA RODADA</span><strong>Rodada ${context.round}</strong></div><div id="homeRoundLiveFacts" data-round="${context.round}"><p class="muted-note">Carregando destaques…</p></div><button class="home-round-highlights-action" type="button" data-home-action="round-highlights" data-round-highlights-round="${context.round}">Ver todos os destaques <b aria-hidden="true">›</b></button></section>`;
+  }
   const model=buildRoundHighlights(context.round);
   const partial=context.mode==="partial" && isPostponedRoundHighlightsEligible(model.lifecycle);
   if(model.isProvisional && !partial) return "";
@@ -2275,17 +2380,24 @@ function renderRoundHighlightsModal(model){
 }
 
 function openRoundHighlights(round,trigger){
-  const model=buildRoundHighlights(Number(round));
-  if(model.isProvisional && !isPostponedRoundHighlightsEligible(model.lifecycle)) return message("Os destaques estarão disponíveis quando houver resultados válidos da rodada.",true);
-  roundHighlightsModel=model;
+  round=Number(round);
+  if(!roundHighlightsAvailable(round)) return message("Os destaques estarão disponíveis quando houver resultados válidos da rodada.",true);
+  roundHighlightsSession+=1;
+  roundHighlightsSelection={round,leagueId:state.activeLeague?.liga_id,userId:state.user?.id};
   roundHighlightsReturnFocus=trigger||document.activeElement;
-  renderRoundHighlightsModal(model);
+  $("roundHighlightsModalTitle").textContent=`Destaques da Rodada ${round}`;
+  $("roundHighlightsModalSummary").textContent="Consultando resultados disponíveis…";
+  $("roundHighlightsModalContent").innerHTML='<p class="muted-note">Carregando destaques e ranking da rodada…</p>';
+  $("roundHighlightsModalSource").textContent="";
   $("roundHighlightsModal")?.classList.remove("hidden");
+  refreshRoundHighlightsViews({force:true});
   document.body.classList.add("modal-open");
   setTimeout(()=>$('roundHighlightsModalClose')?.focus(),40);
 }
 
 function closeRoundHighlights(){
+  roundHighlightsSession+=1;
+  roundHighlightsSelection=null;
   $("roundHighlightsModal")?.classList.add("hidden");
   document.body.classList.remove("modal-open");
   roundHighlightsModel=null;
@@ -3512,6 +3624,12 @@ function renderStats(){
   }
 
   const top=Math.max(1,...rounds.map(item=>item.points));
+  const liveRound=currentRoundNumber();
+  const extraHighlightsAccess=$("statsLiveRoundHighlights");
+  if(extraHighlightsAccess){
+    extraHighlightsAccess.innerHTML=roundHighlightsAvailable(liveRound)&&!rounds.some(item=>Number(item.round)===liveRound)
+      ? `<button type="button" class="secondary" data-stats-round-highlights="${liveRound}">Ver Destaques da Rodada ${liveRound} em andamento</button>`:"";
+  }
   const biggestEvolution=rounds.reduce((best,item,index)=>{
     if(!index) return best;
     const previous=rounds[index-1];
@@ -5399,7 +5517,10 @@ async function refreshLiveScoresSilently(){
 
 function startLiveScoreRefresh(){
   if(liveScoreRefreshTimer) return;
-  liveScoreRefreshTimer=setInterval(refreshLiveScoresSilently,60*1000);
+  liveScoreRefreshTimer=setInterval(async()=>{
+    await refreshLiveScoresSilently();
+    await refreshRoundHighlightsViews({force:true});
+  },60*1000);
 }
 
 async function initialize(session){
@@ -5590,6 +5711,13 @@ $("rankingPicksModal")?.addEventListener("click",event=>{if(event.target===$("ra
 $("roundHistory")?.addEventListener("click",event=>{
   const trigger=event.target.closest("[data-stats-round-highlights]");
   if(trigger) openRoundHighlights(trigger.dataset.statsRoundHighlights,trigger);
+});
+$("statsLiveRoundHighlights")?.addEventListener("click",event=>{
+  const trigger=event.target.closest("[data-stats-round-highlights]");
+  if(trigger) openRoundHighlights(trigger.dataset.statsRoundHighlights,trigger);
+});
+$("roundHighlightsModalContent")?.addEventListener("click",event=>{
+  if(event.target.closest("[data-round-highlights-retry]")) refreshRoundHighlightsViews({force:true});
 });
 $("roundHighlightsModalClose")?.addEventListener("click",closeRoundHighlights);
 $("roundHighlightsModal")?.addEventListener("click",event=>{if(event.target===$("roundHighlightsModal")) closeRoundHighlights();});
@@ -5822,7 +5950,7 @@ setupTabs();
 prepareRegistrationForm();
 document.addEventListener("visibilitychange",()=>{
   if(document.hidden) return;
-  refreshLiveScoresSilently();
+  refreshLiveScoresSilently().then(()=>refreshRoundHighlightsViews({force:true}));
   if(!$("adminTab")?.classList.contains("hidden") && Date.now()-adminLastBackgroundRefresh>30000) refreshAdminSilently("ao retornar à aba");
 });
 if(TEMPORARY_RANKING_SYNTHETIC_PREVIEW){
