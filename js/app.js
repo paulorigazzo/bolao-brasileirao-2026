@@ -30,7 +30,7 @@ import { buildLineupPitchModel } from "./lineup-pitch.js";
 import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 
-const APP_VERSION = "6.42.0";
+const APP_VERSION = "6.42.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2195,7 +2195,8 @@ function roundHighlightsNotice(model){
 
 function roundHighlightsRankingHtml(model){
   if(!model.hasResults&&model.isProvisional) return '<section><h3>Ranking da rodada</h3><p class="muted-note">Aguardando resultados válidos para apresentar a classificação.</p></section>';
-  const rows=model.ranking.map(row=>`<li class="round-dynamic-row ${row.user_id===state.user?.id?"is-me":""}"><span class="round-dynamic-position">${row.position}º</span><div><strong>${escapeHtml(row.nome)}${row.user_id===state.user?.id?' <small>(você)</small>':""}</strong><small>${row.confirmed} confirmados · ${row.provisional} provisórios · ${row.exact} exatos</small></div><b aria-label="${row.total} pontos no total">${row.total}<small>pts</small></b></li>`).join("");
+  const avatars=new Map(state.participants.map(profile=>[String(profile.user_id),findTeam(profile.time_favorito)]));
+  const rows=model.ranking.map(row=>`<li class="round-dynamic-row ${row.user_id===state.user?.id?"is-me":""}"><span class="round-dynamic-position">${row.position}º</span><div class="round-dynamic-person">${participantAvatar(row.nome,avatars.get(String(row.user_id)),"round-dynamic-avatar")}<strong>${escapeHtml(row.nome)}${row.user_id===state.user?.id?' <small>(você)</small>':""}</strong></div><small class="round-dynamic-details">${row.confirmed} confirmados · ${row.provisional} provisórios · ${row.exact} ${row.exact===1?"exato":"exatos"}</small><b aria-label="${row.total} pontos no total">${row.total}<small>pts</small></b></li>`).join("");
   return `<section class="round-dynamic-ranking"><div class="round-highlight-section-heading"><span>CLASSIFICAÇÃO DA RODADA</span><h3>${model.isProvisional?"Ranking dinâmico da rodada":"Ranking final da rodada"}</h3></div><p class="muted-note">${model.isProvisional?"Classificação provisória. ":""}Ordem: pontos, placares exatos e nome.</p>${rows?`<ol class="round-dynamic-list">${rows}</ol>`:'<p class="muted-note">Nenhum participante elegível nesta liga.</p>'}</section>`;
 }
 
