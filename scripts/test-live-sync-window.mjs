@@ -1,8 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
-import { FOOTBALL_API_BASE, COMPETITION_CODE, SEASON_YEAR } from "../netlify/functions/_constants.mjs";
-import { matchesListUrl } from "../netlify/functions/_sync-shared.mjs";
 import { selectNearbyMatchIds } from "../netlify/functions/sincronizar-jogos-agendado.mjs";
 
 assert.deepEqual(selectNearbyMatchIds([
@@ -16,18 +14,10 @@ assert.deepEqual(selectNearbyMatchIds([
   { id_jogo: "inválido", status: "agendado" },
 ]), [101, 102, 106]);
 
-assert.equal(
-  matchesListUrl([102, 101, 102, "inválido"]),
-  `${FOOTBALL_API_BASE}/matches?ids=102,101`,
-);
-assert.equal(
-  matchesListUrl(),
-  `${FOOTBALL_API_BASE}/competitions/${COMPETITION_CODE}/matches?season=${SEASON_YEAR}`,
-);
-
 const netlifyConfig = readFileSync(new URL("../netlify.toml", import.meta.url), "utf8");
 const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
-assert.match(netlifyConfig, /schedule\s*=\s*"\* \* \* \* \*"/);
+assert.match(netlifyConfig, /\[functions\."sincronizar-jogos-agendado"\][\s\S]*schedule\s*=\s*"\* \* \* \* \*"/);
+assert.doesNotMatch(netlifyConfig, /coletar-sombra/);
 const start=app.indexOf("function startLiveScoreRefresh(){");
 const end=app.indexOf("async function initialize",start);
 assert.ok(start>=0&&end>start);

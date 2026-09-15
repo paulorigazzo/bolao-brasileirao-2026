@@ -1,7 +1,7 @@
 import { syncGames } from "./_sync-shared.mjs";
 import { jsonResponse, requireAdmin, serviceClient, isMissingTableError, methodNotAllowed, errorResponse, safeErrorMessage } from "./_api-helpers.mjs";
 import { MAX_API_CALLS_PER_SYNC } from "./_constants.mjs";
-import { officialSportsDataProvider } from "./_sports-data-provider.mjs";
+import { SPORTS_DATA_PROVIDER } from "./_sports-data-provider.mjs";
 
 export default async (request) => {
   if (request.method !== "POST") {
@@ -21,7 +21,7 @@ export default async (request) => {
         origem: `manual:${admin.email}`,
         sucesso: false,
         erro: safeErrorMessage(error),
-        detalhes: { provider: officialSportsDataProvider() },
+        detalhes: { provider: SPORTS_DATA_PROVIDER },
       });
       if (logError && !isMissingTableError(logError)) console.warn(logError.message);
     } catch (_) {}

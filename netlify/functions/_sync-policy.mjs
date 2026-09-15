@@ -73,7 +73,7 @@ export function sanitizeGameSchedule(game, previous = null, repairs = []) {
     return {
       ...game,
       situacao_agendamento: game?.status === "adiado" ? "adiado_sem_data" : "provisorio",
-      fonte_agendamento: "football-data.org",
+      fonte_agendamento: "api-football",
       agendamento_confirmado_em: null,
       data_base: utcDate(game?.inicio),
     };
@@ -93,7 +93,7 @@ export function sanitizeGameSchedule(game, previous = null, repairs = []) {
       previousKickoff: previous.inicio,
       apiKickoff: game.inicio,
       action: "agendamento_oficial_preservado",
-      reason: "divergência da football-data.org bloqueada diante de horário confirmado pela CBF",
+      reason: "divergência da API-Football bloqueada diante de horário confirmado pela CBF",
     });
     return {
       ...game,
@@ -127,7 +127,7 @@ export function sanitizeGameSchedule(game, previous = null, repairs = []) {
     return {
       ...game,
       situacao_agendamento: "provisorio",
-      fonte_agendamento: "football-data.org",
+      fonte_agendamento: "api-football",
       agendamento_confirmado_em: null,
       data_base: utcDate(game.inicio),
     };
