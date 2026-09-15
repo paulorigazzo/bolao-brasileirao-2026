@@ -6,13 +6,10 @@ import teams from "../fixtures/api-football/teams-brasileirao-2026.json" with { 
 import { normalizeApiFootballFixtureEnvelope, normalizeApiFootballStandingsEnvelope } from "../src/sports-data/api-football-adapter.mjs";
 import { apiFootballClassificationResult, apiFootballGameForCanonical, scopeApiFootballSyncGames, syncApiFootballGames } from "../netlify/functions/_api-football-official.mjs";
 import { buildApiFootballCanonicalTeamCatalog, canonicalizeApiFootballClassificationResult, canonicalizeApiFootballStandings } from "../src/sports-data/api-football-team-catalog.mjs";
-import { officialSportsDataProvider, providerClassificationSnapshotId, SPORTS_DATA_PROVIDERS } from "../netlify/functions/_sports-data-provider.mjs";
+import { providerClassificationSnapshotId, SPORTS_DATA_PROVIDER } from "../netlify/functions/_sports-data-provider.mjs";
 
-assert.equal(officialSportsDataProvider({}), SPORTS_DATA_PROVIDERS.FOOTBALL_DATA);
-assert.equal(officialSportsDataProvider({ SPORTS_DATA_OFFICIAL_PROVIDER: "api-football" }), SPORTS_DATA_PROVIDERS.API_FOOTBALL);
-assert.throws(() => officialSportsDataProvider({ SPORTS_DATA_OFFICIAL_PROVIDER: "automatic" }), /sports_data_provider_invalid/);
-assert.equal(providerClassificationSnapshotId("BSA-2026", SPORTS_DATA_PROVIDERS.FOOTBALL_DATA), "BSA-2026");
-assert.equal(providerClassificationSnapshotId("BSA-2026", SPORTS_DATA_PROVIDERS.API_FOOTBALL), "BSA-2026:api-football");
+assert.equal(SPORTS_DATA_PROVIDER, "api-football");
+assert.equal(providerClassificationSnapshotId("BSA-2026"), "BSA-2026:api-football");
 
 const normalized = normalizeApiFootballFixtureEnvelope(fixture, { requestedFixtureId: 1492340, observedAt: "2026-08-25T00:00:00Z" });
 assert.equal(normalized.observation.responseValid, true);
@@ -170,11 +167,14 @@ const syncSource = readFileSync(new URL("../netlify/functions/_sync-shared.mjs",
 const classificationSource = readFileSync(new URL("../netlify/functions/classificacao-brasileirao.mjs", import.meta.url), "utf8");
 const diagnosticSource = readFileSync(new URL("../netlify/functions/diagnostico-sistema.mjs", import.meta.url), "utf8");
 const appSource = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
-assert.match(syncSource, /officialSportsDataProvider\(\)[\s\S]*syncApiFootballGames/);
-assert.match(classificationSource, /officialSportsDataProvider\(\)[\s\S]*apiFootballClassification/);
+assert.match(syncSource, /syncApiFootballGames/);
+assert.doesNotMatch(syncSource, /football-data|SPORTS_DATA_OFFICIAL_PROVIDER/);
+assert.match(classificationSource, /apiFootballClassification/);
+assert.doesNotMatch(classificationSource, /football-data|FOOTBALL_DATA_TOKEN|SPORTS_DATA_OFFICIAL_PROVIDER/);
 assert.match(classificationSource, /api_football_time_casa_id,api_football_time_fora_id/);
 assert.match(classificationSource, /providerClassificationSnapshotId/);
 assert.match(diagnosticSource, /officialSportsDataProvider: provider/);
+assert.doesNotMatch(diagnosticSource, /footballData|SPORTS_DATA_OFFICIAL_PROVIDER/);
 assert.match(appSource, /function standingsTeamExpandedContent\(row\)\{[\s\S]*const displayName=teamDisplayName\(row\.team\)[\s\S]*Ver jogos do \$\{escapeHtml\(displayName\)\}/);
 assert.match(appSource, /function renderStandings\(\)\{[\s\S]*const displayName=teamDisplayName\(row\.team\)[\s\S]*standings-mobile-team[\s\S]*escapeHtml\(displayName\)[\s\S]*standings-team[\s\S]*escapeHtml\(displayName\)/);
 assert.match(appSource, /const canonical=\{CAM:"Atlético-MG",CAP:"Athletico-PR"\}\[teamAbbreviation\(name\)\]/);

@@ -3,10 +3,10 @@
 ## Estado do documento
 
 - **Natureza:** plano arquitetural e operacional interno.
-- **Estado:** fonte consolidada em estabilização; rollback temporário preservado.
+- **Estado:** transição encerrada; API-Football exclusiva no código.
 - **Fornecedor adotado:** API-Football.
 - **Fonte oficial atual:** API-Football.
-- **Última atualização:** 2026-09-08.
+- **Última atualização:** 2026-09-15.
 
 Este documento é a referência canônica para retomar, executar e atualizar a
 migração da fonte de dados esportivos. Ele foi escrito para reduzir dependência
@@ -1092,31 +1092,24 @@ especialmente para partidas adiadas ou remarcadas. Durante a janela ao vivo,
 devem ser observados estado, relógio e placar; depois dela, resultados,
 classificação e snapshots competitivos.
 
-A Rodada 27 é o último ciclo recomendado de estabilização. Sua auditoria será
-considerada saudável se não identificar regressão material em identidade,
-agenda, estado, relógio, placar, classificação, escudos, palpites, pontuação ou
-sincronização, nem falha recorrente ou consumo anormal de cota. Atendidos esses
-critérios, poderá ser proposta em tarefa própria a conclusão da Fase 7. A Rodada
-28 permanece como margem operacional opcional e não constitui novo portão de
-mapeamento ou preflight.
+A auditoria da Rodada 27, concluída em 15 de setembro de 2026, confirmou dez
+jogos encerrados, dez placares completos, dez mapeamentos íntegros, snapshots e
+caches auxiliares para todos os jogos. A janela registrou 1.272 sincronizações
+bem-sucedidas, nenhuma falha, reparo, alerta ou regressão e reservas mínimas de
+6.333 chamadas diárias e 296 chamadas por minuto. A Fase 7 está concluída.
 
-A Fase 8 deve permanecer separada e decidir, com escopo, risco e rollback
-próprios, a desativação definitiva da campanha e do agendamento de sombra, a
-retirada dos ensaios e reconciliações de transição, a retenção das tabelas de
-auditoria, o destino dos caches e IDs legados e, por último, a remoção da
-football-data.org e de sua credencial. Este registro não autoriza nenhuma dessas
-ações.
+A versão 6.43.0 encerra a Fase 8 no código: remove o seletor de fornecedor, o
+caminho da football-data.org, o agendamento e as Functions de sombra, ensaio e
+reconciliação. As tabelas de auditoria, migrações, snapshots, caches históricos
+e IDs permanecem retidos. A remoção das variáveis antigas da Netlify ocorre
+somente depois da validação do deploy de produção.
 
 ## Estratégia de rollback
 
-Antes do corte, devem existir:
-
-- seleção explícita da fonte oficial por configuração controlada;
-- adaptador antigo preservado e validado;
-- assinatura antiga ativa durante a estabilização;
-- IDs internos e dados históricos intactos;
-- procedimento testado para restaurar a fonte anterior;
-- observabilidade suficiente para identificar regressão rapidamente.
+Após o encerramento da transição, a recuperação preserva os IDs internos e os
+dados históricos, usa o último cache válido para a classificação, mantém os
+snapshots competitivos e permite reverter o deploy da versão 6.43.0. O retorno a
+outro fornecedor exigirá uma nova tarefa arquitetural e operacional.
 
 Motivos propostos para rollback incluem indisponibilidade recorrente, perda de
 cobertura, estados ou resultados incorretos, esgotamento inesperado de cota ou

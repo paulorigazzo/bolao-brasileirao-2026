@@ -7,8 +7,8 @@
 - **Escopo:** jogos e classificação do Brasileirão Série A 2026.
 - **Fornecedor adotado:** API-Football.
 - **Fonte oficial atual:** API-Football.
-- **Fonte temporária de rollback:** football-data.org.
-- **Última atualização:** 2026-09-08.
+- **Recuperação:** cache da classificação, snapshots competitivos e reversão do deploy.
+- **Última atualização:** 2026-09-15.
 
 Este documento especifica a fronteira interna entre fornecedores esportivos e o
 Bolão. Ele é normativo para adaptadores futuros, mas **não autoriza** alteração

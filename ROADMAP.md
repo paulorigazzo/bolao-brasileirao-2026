@@ -4,9 +4,9 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.42.1`.
+- Versão funcional: `v6.43.0`.
 - Prioridade: **manter o Bolão 2026 estável e evoluí-lo incrementalmente para múltiplas ligas com palpites compartilhados**.
-- Próxima etapa coordenada: monitorar a Rodada 27 como último ciclo recomendado de estabilização da API-Football e, se não houver regressão material, planejar em tarefa própria a retirada gradual do legado; o Rigazzo permanece congelado como histórico e possível laboratório.
+- Próxima etapa coordenada: validar em Deploy Preview o encerramento da transição para a API-Football; o Rigazzo permanece congelado como histórico e possível laboratório.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -48,7 +48,8 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - ✅ API-Football consolidada como fonte oficial: Rodada 26 concluída, dez vínculos da Rodada 27 aplicados e três horários provisórios corrigidos pela sincronização oficial; preflight completo recorrente dispensado em favor do monitoramento normal e do rollback temporário.
 - ✅ Os 115 vínculos restantes da API-Football foram aplicados em uma única migração protegida; os 380 jogos da temporada estão integralmente vinculados, incluindo as Rodadas 28–38 e as cinco pendências históricas das Rodadas 15 e 21.
 - ✅ Limpeza parcial da transição na Área ADM: reconciliação de mapeamentos removida da interface e ferramentas históricas de sombra e ensaio ocultadas, com backend e rollback temporário preservados.
-- 🟡 Estabilização da API-Football: acompanhar a Rodada 27 em regime normal e, após auditoria saudável, decidir o encerramento da transição; a Rodada 28 é margem opcional, não um novo portão de mapeamento ou preflight.
+- ✅ Estabilização da API-Football encerrada após auditoria saudável da Rodada 27: dez jogos e placares completos, 1.272 sincronizações bem-sucedidas, nenhum reparo, alerta ou regressão material.
+- 🟡 Encerramento da transição: API-Football consolidada no código como fonte exclusiva; remoção das variáveis antigas da Netlify permanece como etapa operacional posterior ao deploy validado.
 - 🔵 Reavaliar o fechamento dos palpites de 30 para 15 ou 10 minutos em tarefa específica, com decisão explícita, atualização integral da regra e testes próprios.
 - ✅ Centro de Controle, diagnóstico, auditoria e acompanhamento da proteção de recuperação.
 - ✅ Detalhamento determinístico das ocorrências de recuperação, com classificação informativa, conferência administrativa auditável e verificação de checkpoint.

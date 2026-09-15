@@ -1134,3 +1134,10 @@ O histórico detalhado das versões anteriores permanece documentado nos relató
 - Substituição da reconstrução vetorial incorreta pelo PNG oficial aprovado.
 - Aplicação direta no cabeçalho, carregamento e apresentação.
 - Derivação técnica de favicon e ícones PWA sem alteração do desenho da marca.
+# v6.43.0 — Encerramento da transição para API-Football
+
+- Consolida a API-Football como única fonte operacional de jogos e classificação.
+- Remove o fallback para football-data.org e as Functions temporárias de sombra, ensaio e reconciliação.
+- Preserva cache, snapshots, auditorias, migrações, mapeamentos e proteções contra regressão.
+- Registra a auditoria saudável da Rodada 27 e mantém a retirada das variáveis antigas da Netlify como etapa pós-deploy.
+- Detalhes: [nota da versão](docs/releases/v6.43.0-encerramento-transicao-api-football.md).

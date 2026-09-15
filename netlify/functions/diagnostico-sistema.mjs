@@ -1,7 +1,7 @@
 import { jsonResponse, requireAdmin, methodNotAllowed, errorResponse } from "./_api-helpers.mjs";
 import { APP_VERSION, CLASSIFICATION_SNAPSHOT_ID, CACHE_FRESH_MS, CACHE_STALE_MS, MAX_API_CALLS_PER_SYNC, SCHEDULE_CHECK_MINUTES, MAINTENANCE_INTERVAL_MS } from "./_constants.mjs";
 import { assessSportsDataFreshness, SPORTS_DATA_LOOKBACK_HOURS } from "./_sports-data-health.mjs";
-import { officialSportsDataProvider, providerClassificationSnapshotId, SPORTS_DATA_PROVIDERS } from "./_sports-data-provider.mjs";
+import { providerClassificationSnapshotId, SPORTS_DATA_PROVIDER } from "./_sports-data-provider.mjs";
 import { probeApiFootballLocalCrests } from "./_api-football-local-crests.mjs";
 
 const countTable = async (supabase, table) => {
@@ -24,16 +24,16 @@ export function diagnosticProviderStatus(logs = [], provider, now = new Date()) 
   return { providerLogs, last, lastSuccess, lastSuccessAgeMs, status };
 }
 
-export function diagnosticCrestCheck(provider, localCrests = {}) {
-  const required = provider === SPORTS_DATA_PROVIDERS.API_FOOTBALL;
+export function diagnosticCrestCheck(localCrests = {}) {
+  const required = true;
   const available = localCrests?.ok === true;
   return {
     required,
     ok: required ? available : true,
     label: available
-      ? `Escudos locais da API-Football disponíveis (${Number(localCrests?.clubs) || 0} clubes)${required ? "" : " para contingência"}`
-      : required ? "Escudos locais da API-Football incompletos" : "Escudos locais da API-Football indisponíveis para contingência",
-    detail: available ? (required ? "mesma origem do Bolão" : "não afeta a fonte oficial atual") : `${localCrests?.failures?.length || 0} falha(s)`,
+      ? `Escudos locais da API-Football disponíveis (${Number(localCrests?.clubs) || 0} clubes)`
+      : "Escudos locais da API-Football incompletos",
+    detail: available ? "mesma origem do Bolão" : `${localCrests?.failures?.length || 0} falha(s)`,
   };
 }
 
@@ -45,8 +45,8 @@ export default async (request) => {
   const startedAt = Date.now();
   const { supabase } = admin;
   try {
-    const provider = officialSportsDataProvider();
-    const snapshotId = providerClassificationSnapshotId(CLASSIFICATION_SNAPSHOT_ID, provider);
+    const provider = SPORTS_DATA_PROVIDER;
+    const snapshotId = providerClassificationSnapshotId(CLASSIFICATION_SNAPSHOT_ID);
     const recentGamesAfter = new Date(Date.now() - SPORTS_DATA_LOOKBACK_HOURS * 3_600_000).toISOString();
     const [logsResult, cacheResult, jogos, palpites, participantes, recentGamesResult, localCrests] = await Promise.all([
       supabase.from("api_sync_log").select("id,criado_em,origem,sucesso,duracao_ms,chamadas_api,jogos_atualizados,erro,detalhes").order("criado_em", { ascending: false }).limit(20),
@@ -87,7 +87,7 @@ export default async (request) => {
     const cacheSource = cache?.payload?.provider || cache?.payload?.source || provider;
     const providerStatus = diagnosticProviderStatus(logs, provider, now);
     const { last, lastSuccess, status: apiStatus } = providerStatus;
-    const crestCheck = diagnosticCrestCheck(provider, localCrests);
+    const crestCheck = diagnosticCrestCheck(localCrests);
     const sportsData = recentGamesResult.error
       ? { status: "unknown", delayedCount: null, thresholdMinutes: 30, delayedGames: [], error: recentGamesResult.error.message }
       : assessSportsDataFreshness(recentGamesResult.data || [], now);
@@ -112,8 +112,7 @@ export default async (request) => {
       services: {
         supabase: { status: jogos.ok && palpites.ok && participantes.ok ? "online" : "degraded" },
         netlifyFunctions: { status: "online" },
-        footballData: { status: provider === SPORTS_DATA_PROVIDERS.FOOTBALL_DATA ? apiStatus : "standby", availabilityStatus: provider === SPORTS_DATA_PROVIDERS.FOOTBALL_DATA ? apiStatus : "unknown", dataStatus: sportsData.status, inferred: true, note: "Disponibilidade inferida pelas sincronizações; atualidade conferida nos jogos armazenados." },
-        apiFootball: { status: provider === SPORTS_DATA_PROVIDERS.API_FOOTBALL ? apiStatus : "standby", availabilityStatus: provider === SPORTS_DATA_PROVIDERS.API_FOOTBALL ? apiStatus : "unknown", dataStatus: sportsData.status, inferred: true },
+        apiFootball: { status: apiStatus, availabilityStatus: apiStatus, dataStatus: sportsData.status, inferred: true },
       },
       officialSportsDataProvider: provider,
       sportsData,

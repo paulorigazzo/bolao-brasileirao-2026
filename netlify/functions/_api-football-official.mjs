@@ -3,7 +3,7 @@ import { evolveEstimatedLiveClock } from "../../js/live-match-minute.js";
 import { sanitizeGameForStatus, sanitizeGameSchedule } from "./_sync-policy.mjs";
 import { isMissingTableError, requireEnv, serviceClient } from "./_api-helpers.mjs";
 import { API_FOOTBALL_LEAGUE_ID, CLASSIFICATION_SNAPSHOT_ID, SEASON_YEAR } from "./_constants.mjs";
-import { providerClassificationSnapshotId, SPORTS_DATA_PROVIDERS } from "./_sports-data-provider.mjs";
+import { providerClassificationSnapshotId, SPORTS_DATA_PROVIDER } from "./_sports-data-provider.mjs";
 import { apiFootballLocalCrestUrl } from "../../src/sports-data/api-football-local-crests.mjs";
 import { canonicalizeApiFootballStandings } from "../../src/sports-data/api-football-team-catalog.mjs";
 import { buildApiFootballEventProjection } from "../../src/sports-data/api-football-event-projection.mjs";
@@ -59,7 +59,7 @@ export function apiFootballGameForCanonical(provider, canonical, observedAt = ne
     time_fora_id: canonical.time_fora_id,
     time_casa_logo: apiFootballLocalCrestUrl(provider.home.providerTeamId),
     time_fora_logo: apiFootballLocalCrestUrl(provider.away.providerTeamId),
-    fonte: SPORTS_DATA_PROVIDERS.API_FOOTBALL,
+    fonte: SPORTS_DATA_PROVIDER,
     sincronizado_em: observedAt,
   };
 }
@@ -86,7 +86,7 @@ export function buildApiFootballSyncPlan({ canonicalGames = [], providerGames = 
     return ["inicio", "status", "gols_casa", "gols_fora", "minuto", "acrescimos", "local_partida", "time_casa_logo", "time_fora_logo"]
       .some((field) => (update[field] ?? null) !== (current[field] ?? null));
   });
-  return { provider: SPORTS_DATA_PROVIDERS.API_FOOTBALL, scopedCount: scoped.length, mappedCount: mapped.length,
+  return { provider: SPORTS_DATA_PROVIDER, scopedCount: scoped.length, mappedCount: mapped.length,
     unmappedCount: scoped.length - mapped.length, updates, changedCount: changed.length, repairs };
 }
 
@@ -129,7 +129,7 @@ export async function syncApiFootballGames(options = {}) {
       .limit(1);
     const quota = previousLogError ? null : previousLogs?.[0]?.detalhes?.quota || null;
     const report = {
-      ok: true, provider: SPORTS_DATA_PROVIDERS.API_FOOTBALL, imported: 0,
+      ok: true, provider: SPORTS_DATA_PROVIDER, imported: 0,
       unmappedSkipped: scopedCanonical.length, repairedCount: 0,
       terminalSkipped: requested.size ? 0 : (canonical || []).length - scopedCanonical.length,
       repairs: [], apiCalls: 0, syncMode: requested.size ? "live" : "full",
@@ -201,7 +201,7 @@ export async function syncApiFootballGames(options = {}) {
     if (error) eventProjectionError = isMissingTableError(error) ? "projection_unavailable" : "projection_write_failed";
   }
   const report = {
-    ok: true, provider: SPORTS_DATA_PROVIDERS.API_FOOTBALL, imported: merged.length,
+    ok: true, provider: SPORTS_DATA_PROVIDER, imported: merged.length,
     unmappedSkipped: plan.unmappedCount, repairedCount: plan.repairs.length,
     terminalSkipped: requested.size ? 0 : (canonical || []).length - scopedCanonical.length,
     repairs: plan.repairs.slice(0, 50), apiCalls: 1 + detailCalls, syncMode: requested.size ? "live" : "full",
@@ -230,9 +230,9 @@ export async function apiFootballClassification(canonicalGames, fetchImpl = fetc
 export function apiFootballClassificationResult(standing, canonicalGames, observedAt = new Date().toISOString()) {
   const canonicalStanding = canonicalizeApiFootballStandings(standing, canonicalGames);
   return {
-    id: providerClassificationSnapshotId(CLASSIFICATION_SNAPSHOT_ID, SPORTS_DATA_PROVIDERS.API_FOOTBALL),
+    id: providerClassificationSnapshotId(CLASSIFICATION_SNAPSHOT_ID),
     result: { ok: true, competition: standing.competitionName, season: String(standing.season), currentMatchday: standing.currentRound,
-      updatedAt: observedAt, source: "api", provider: SPORTS_DATA_PROVIDERS.API_FOOTBALL,
+      updatedAt: observedAt, source: "api", provider: SPORTS_DATA_PROVIDER,
       table: canonicalStanding.table.map((row) => ({ position: row.position, teamId: row.providerTeamId, team: row.teamName,
         crest: apiFootballLocalCrestUrl(row.providerTeamId), playedGames: row.played, won: row.won, draw: row.drawn, lost: row.lost,
         points: row.points, goalsFor: row.goalsFor, goalsAgainst: row.goalsAgainst, goalDifference: row.goalDifference })) },

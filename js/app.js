@@ -30,7 +30,7 @@ import { buildLineupPitchModel } from "./lineup-pitch.js";
 import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 
-const APP_VERSION = "6.42.1";
+const APP_VERSION = "6.43.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -4841,17 +4841,13 @@ function diagnosticStatusLabel(status){
   return ["⚪","Indeterminado"];
 }
 function diagnosticProviderName(provider){
-  return provider==="api-football" ? "API-Football" : provider==="football-data.org" ? "Football Data API" : "Fonte esportiva";
+  return provider==="api-football" ? "API-Football" : "Fonte esportiva";
 }
 function diagnosticProviderPresentation(d){
-  const provider=d?.officialSportsDataProvider;
-  const apiFootball=provider==="api-football";
   return {
-    provider,
-    activeName:diagnosticProviderName(provider),
-    active:apiFootball?d?.services?.apiFootball:d?.services?.footballData,
-    standbyName:apiFootball?diagnosticProviderName("football-data.org"):diagnosticProviderName("api-football"),
-    standby:apiFootball?d?.services?.footballData:d?.services?.apiFootball,
+    provider:"api-football",
+    activeName:diagnosticProviderName("api-football"),
+    active:d?.services?.apiFootball,
   };
 }
 function diagnosticServiceLabel(item){
@@ -4885,90 +4881,6 @@ async function fetchAdminDiagnostic(){
   if(!response.ok) throw new Error(result.error||"Não foi possível obter o diagnóstico.");
   return result;
 }
-async function runAdminShadowCollection(event){
-  event?.preventDefault();
-  if(!isAdminUser()) return;
-  const gameId=Number($("adminShadowGameId")?.value);
-  const fixtureId=Number($("adminShadowFixtureId")?.value);
-  const feedback=$("adminShadowFeedback");
-  const button=$("adminShadowSubmit");
-  if(!Number.isInteger(gameId)||gameId<=0||!Number.isInteger(fixtureId)||fixtureId<=0){
-    if(feedback) feedback.textContent="Informe IDs positivos e válidos.";
-    return;
-  }
-  if(!window.confirm(`Executar uma coleta em sombra para o jogo ${gameId} e a fixture ${fixtureId}? Isso consumirá uma chamada da API-Football e gravará apenas nas tabelas de transição.`)) return;
-  const originalText=button?.textContent||"Executar ensaio";
-  try{
-    if(button){button.disabled=true;button.textContent="Coletando…";}
-    if(feedback){feedback.textContent="Executando uma chamada controlada…";feedback.className="admin-shadow-feedback";}
-    const {data:{session}}=await sb.auth.getSession();
-    if(!session?.access_token) throw new Error("Sessão administrativa expirada.");
-    const response=await fetch("/.netlify/functions/coletar-sombra-api-football",{
-      method:"POST",
-      headers:{Authorization:`Bearer ${session.access_token}`,"Content-Type":"application/json",Accept:"application/json"},
-      body:JSON.stringify({id_jogo:gameId,fixture_id:fixtureId})
-    });
-    const result=await response.json().catch(()=>({}));
-    if(!response.ok||!result.ok) throw new Error(result.error||(result.errors||[]).join(", ")||"A coleta em sombra não foi concluída.");
-    const clock=result.clock?.elapsed==null?"sem relógio":`${result.clock.elapsed}${result.clock.extra?`+${result.clock.extra}`:""}'`;
-    const score=result.score?.home==null||result.score?.away==null?"placar indisponível":`${result.score.home} × ${result.score.away}`;
-    const quota=result.quota?.dailyRemaining==null?"cota não informada":`${result.quota.dailyRemaining} chamadas restantes`;
-    if(feedback){
-      feedback.textContent=`Execução ${result.executionId} concluída • ${result.normalizedStatus} • ${score} • ${clock} • ${quota}.`;
-      feedback.className="admin-shadow-feedback is-success";
-    }
-  }catch(error){
-    if(feedback){feedback.textContent=error.message||"A coleta em sombra não pôde ser concluída.";feedback.className="admin-shadow-feedback is-error";}
-  }finally{
-    if(button){button.disabled=false;button.textContent=originalText;}
-  }
-}
-function apiFootballCutoverVerdict(result){
-  const hashes=result?.hashes||{};
-  return result?.ok===true
-    && Number(result?.canonicalGames)===10
-    && Number(result?.mappedGames)===10
-    && Number(result?.unmappedGames)===0
-    && Number(result?.apiFootballGames)===10
-    && Number(result?.footballDataGames)===10
-    && Number(result?.apiFootballStandings)===20
-    && Number(result?.footballDataStandings)===20
-    && result?.localCrests?.ok===true
-    && Number(result?.localCrests?.clubs)===20
-    && Number(result?.writes)===0
-    && hashes.gamesBefore===hashes.gamesAfter
-    && hashes.picksBefore===hashes.picksAfter
-    && result?.rollback?.restored===true;
-}
-function renderApiFootballCutoverReport(result){
-  const approved=apiFootballCutoverVerdict(result),hashes=result?.hashes||{},quota=result?.quota||{};
-  return `<div class="admin-cutover-verdict ${approved?"is-success":"is-error"}"><strong>${approved?"✅ Ensaio aprovado":"⛔ Ensaio reprovado"}</strong><span>Rodada ${Number(result?.round)||"—"} • ${Number(result?.writes)||0} escrita(s)</span></div>
-    <div class="diagnostic-metrics admin-cutover-metrics"><div><span>Jogos canônicos</span><strong>${Number(result?.canonicalGames)||0}/10</strong></div><div><span>Mapeamentos</span><strong>${Number(result?.mappedGames)||0}/10</strong></div><div><span>API-Football</span><strong>${Number(result?.apiFootballGames)||0} jogos • ${Number(result?.apiFootballStandings)||0} clubes</strong></div><div><span>football-data.org</span><strong>${Number(result?.footballDataGames)||0} jogos • ${Number(result?.footballDataStandings)||0} clubes</strong></div><div><span>Mudanças propostas</span><strong>${Number(result?.proposedChanges)||0}</strong></div><div><span>Reparos propostos</span><strong>${Number(result?.proposedRepairs)||0}</strong></div><div><span>Cota diária</span><strong>${quota.dailyRemaining??"—"} / ${quota.dailyLimit??"—"}</strong></div><div><span>Cota por minuto</span><strong>${quota.minuteRemaining??"—"} / ${quota.minuteLimit??"—"}</strong></div></div>
-    <ul class="admin-cutover-checks"><li>${hashes.gamesBefore===hashes.gamesAfter?"✅":"⛔"} Hash de jogos preservado</li><li>${hashes.picksBefore===hashes.picksAfter?"✅":"⛔"} Hash de palpites preservado</li><li>${result?.localCrests?.ok&&Number(result?.localCrests?.clubs)===20?"✅":"⛔"} 20 escudos locais disponíveis</li><li>${result?.rollback?.restored?"✅":"⛔"} Rollback integral simulado</li></ul>
-    <small>Hash do relatório</small><code class="admin-cutover-hash">${escapeHtml(result?.reportHash||"indisponível")}</code>`;
-}
-async function runAdminApiFootballCutoverRehearsal(event){
-  event?.preventDefault();
-  if(!isAdminUser()) return;
-  const round=Number($("adminCutoverRound")?.value),feedback=$("adminCutoverFeedback"),report=$("adminCutoverReport"),button=$("adminCutoverSubmit");
-  if(!Number.isInteger(round)||round<1||round>38){if(feedback) feedback.textContent="Informe uma rodada entre 1 e 38.";return;}
-  if(!window.confirm(`Executar o ensaio somente leitura da Fase 6B para a rodada ${round}? Serão consultadas as duas APIs e nenhum dado competitivo será gravado.`)) return;
-  const originalText=button?.textContent||"Executar ensaio 6B";
-  try{
-    if(button){button.disabled=true;button.textContent="Executando…";}
-    if(feedback){feedback.textContent="Comparando as duas fontes e validando os hashes…";feedback.className="admin-shadow-feedback";}
-    if(report) report.innerHTML="";
-    const {data:{session}}=await sb.auth.getSession();
-    if(!session?.access_token) throw new Error("Sessão administrativa expirada.");
-    const response=await fetch("/.netlify/functions/ensaiar-corte-api-football",{method:"POST",headers:{Authorization:`Bearer ${session.access_token}`,"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({rodada:round,confirmacao:"REHEARSE_API_FOOTBALL_CUTOVER"})});
-    const result=await response.json().catch(()=>({}));
-    if(!response.ok||!result.ok) throw new Error(result.error||"O ensaio 6B não foi concluído.");
-    if(report) report.innerHTML=renderApiFootballCutoverReport(result);
-    if(feedback){feedback.textContent=apiFootballCutoverVerdict(result)?"Ensaio concluído sem mutação competitiva.":"Ensaio concluído com portão reprovado; não avance para o corte.";feedback.className=`admin-shadow-feedback ${apiFootballCutoverVerdict(result)?"is-success":"is-error"}`;}
-  }catch(error){
-    if(feedback){feedback.textContent=error.message||"O ensaio 6B não pôde ser concluído.";feedback.className="admin-shadow-feedback is-error";}
-  }finally{if(button){button.disabled=false;button.textContent=originalText;}}
-}
 async function renderAdminDiagnostic(){
   if(!isAdminUser()) return;
   const content=$("adminDiagnosticContent"), badge=$("adminDiagnosticBadge");
@@ -4985,7 +4897,7 @@ async function renderAdminDiagnostic(){
     const [cacheIcon,cacheLabel]=diagnosticCacheStatus(d.cache);
     content.innerHTML=`
       <div class="diagnostic-health-grid">${services.map(([name,item])=>{const [icon,label]=diagnosticServiceLabel(item);return `<article><span>${escapeHtml(name)}</span><strong>${icon} ${label}</strong></article>`}).join("")}</div>
-      <small class="diagnostic-note">${escapeHtml(providerView.standbyName)} permanece ${diagnosticStatusLabel(providerView.standby?.status)[1].toLowerCase()} para rollback.</small>
+      <small class="diagnostic-note">A API-Football é a fonte esportiva oficial exclusiva.</small>
       ${d.sportsData?.status==="delayed"?`<div class="diagnostic-data-alert" role="alert"><strong>⚠ Dados esportivos aguardando atualização</strong><p>${Number(d.sportsData.delayedCount)||0} jogo(s) permanecem agendados mais de ${Number(d.sportsData.thresholdMinutes)||30} minutos após o início informado. A API pode estar online sem ter publicado o conteúdo atual.</p><ul>${(d.sportsData.delayedGames||[]).slice(0,6).map(game=>`<li>${escapeHtml(teamDisplayName(game.home))} × ${escapeHtml(teamDisplayName(game.away))} · ${diagnosticDate(game.kickoff)}</li>`).join("")}</ul></div>`:""}
       <div class="diagnostic-section"><h3>Sincronização</h3><div class="diagnostic-metrics">
         <div><span>Última execução</span><strong>${diagnosticDate(last?.criado_em)}</strong></div><div><span>Resultado</span><strong>${last?(last.sucesso?"🟢 Sucesso":"🔴 Erro"):"—"}</strong></div>
