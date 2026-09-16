@@ -1141,3 +1141,8 @@ O histórico detalhado das versões anteriores permanece documentado nos relató
 - Preserva cache, snapshots, auditorias, migrações, mapeamentos e proteções contra regressão.
 - Registra a auditoria saudável da Rodada 27 e mantém a retirada das variáveis antigas da Netlify como etapa pós-deploy.
 - Detalhes: [nota da versão](docs/releases/v6.43.0-encerramento-transicao-api-football.md).
+
+# v6.43.1 — Rodada atual no diagnóstico ADM
+
+- A Central de Diagnóstico mostra a rodada atual do Bolão calculada dos jogos carregados, sem depender do campo ausente na classificação da API-Football.
+- O roadmap registra a transição para API-Football como encerrada após a validação em produção e a remoção das variáveis antigas da Netlify.

@@ -1,6 +1,5 @@
-6.43.0
+6.43.1
 
-API-Football consolidada como fonte esportiva exclusiva após a auditoria da Rodada 27.
+Diagnóstico ADM apresenta a rodada atual do Bolão; transição para API-Football registrada como encerrada.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)
-- Nota: [v6.43.0](docs/releases/v6.43.0-encerramento-transicao-api-football.md)

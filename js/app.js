@@ -30,7 +30,7 @@ import { buildLineupPitchModel } from "./lineup-pitch.js";
 import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 
-const APP_VERSION = "6.43.0";
+const APP_VERSION = "6.43.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -4908,7 +4908,7 @@ async function renderAdminDiagnostic(){
         <div><span>Jogos cadastrados</span><strong>${d.database.jogos.count??"—"}</strong></div><div><span>Palpites registrados</span><strong>${d.database.palpites.count??"—"}</strong></div>
         <div><span>Participantes</span><strong>${d.database.participantes.count??"—"}</strong></div><div><span>Cache da tabela</span><strong>${cacheIcon} ${cacheLabel}</strong></div>
         <div><span>Atualização do cache</span><strong>${diagnosticDate(d.cache.updatedAt)}</strong></div><div><span>Idade do cache</span><strong>${diagnosticAge(d.cache.ageMs)}</strong></div>
-        <div><span>Clubes no cache</span><strong>${d.cache.clubs??"—"}</strong></div><div><span>Rodada atual</span><strong>${d.cache.currentMatchday??"—"}</strong></div>
+        <div><span>Clubes no cache</span><strong>${d.cache.clubs??"—"}</strong></div><div><span>Rodada atual do Bolão</span><strong>${state.games.length?currentRoundNumber():"—"}</strong></div>
         <div><span>Identificador</span><strong>${escapeHtml(d.cache.id||"—")}</strong></div><div><span>Origem</span><strong>${escapeHtml(d.cache.source||"—")}</strong></div>
       </div>${d.cache.lookup==="latest-fallback"?`<small class="diagnostic-cache-warning">⚠ Cache localizado pelo registro mais recente; o identificador esperado para ${escapeHtml(providerView.activeName)} é ${escapeHtml(d.cache.expectedId||"—")}.</small>`:""}</div>
       <div class="diagnostic-section"><div class="diagnostic-autotest-head"><h3>Autoteste detalhado</h3><strong>${d.autotest.score}/100</strong></div><div class="diagnostic-checks">${d.autotest.checks.map(c=>`<div class="${c.ok?"ok":"fail"}"><span>${c.ok?"✔":"✕"}</span><span>${escapeHtml(c.label)}${diagnosticCheckDetail(c)}</span></div>`).join("")}</div></div>
