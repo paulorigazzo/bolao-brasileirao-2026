@@ -4,9 +4,9 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.43.0`.
+- Versão funcional: `v6.43.1`.
 - Prioridade: **manter o Bolão 2026 estável e evoluí-lo incrementalmente para múltiplas ligas com palpites compartilhados**.
-- Próxima etapa coordenada: validar em Deploy Preview o encerramento da transição para a API-Football; o Rigazzo permanece congelado como histórico e possível laboratório.
+- Próxima etapa coordenada: monitoramento normal da API-Football nas próximas rodadas; o Rigazzo permanece congelado como histórico e possível laboratório.
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Legenda
@@ -45,11 +45,11 @@ O pipeline inicial de qualidade no GitHub Actions foi concluído como **QW1 téc
 - ✅ Consulta permanente do Ranking provisório da rodada atual pela Área ADM.
 - ✅ Sincronização de jogos, datas, locais, placares e classificação.
 - ✅ Sincronização ao vivo por minuto, restrita às partidas próximas e preservando a manutenção completa.
-- ✅ API-Football consolidada como fonte oficial: Rodada 26 concluída, dez vínculos da Rodada 27 aplicados e três horários provisórios corrigidos pela sincronização oficial; preflight completo recorrente dispensado em favor do monitoramento normal e do rollback temporário.
+- ✅ API-Football consolidada como fonte oficial: Rodada 26 concluída, dez vínculos da Rodada 27 aplicados e três horários provisórios corrigidos pela sincronização oficial; preflight completo recorrente dispensado em favor do monitoramento normal e da recuperação por cache, snapshots e reversão de deploy.
 - ✅ Os 115 vínculos restantes da API-Football foram aplicados em uma única migração protegida; os 380 jogos da temporada estão integralmente vinculados, incluindo as Rodadas 28–38 e as cinco pendências históricas das Rodadas 15 e 21.
-- ✅ Limpeza parcial da transição na Área ADM: reconciliação de mapeamentos removida da interface e ferramentas históricas de sombra e ensaio ocultadas, com backend e rollback temporário preservados.
+- ✅ Limpeza da transição na Área ADM: reconciliação de mapeamentos removida da interface e ferramentas históricas de sombra e ensaio retiradas; a recuperação usa cache, snapshots competitivos e reversão de deploy.
 - ✅ Estabilização da API-Football encerrada após auditoria saudável da Rodada 27: dez jogos e placares completos, 1.272 sincronizações bem-sucedidas, nenhum reparo, alerta ou regressão material.
-- 🟡 Encerramento da transição: API-Football consolidada no código como fonte exclusiva; remoção das variáveis antigas da Netlify permanece como etapa operacional posterior ao deploy validado.
+- ✅ Encerramento da transição: API-Football consolidada no código como fonte exclusiva, deploy validado e variáveis antigas removidas da Netlify.
 - 🔵 Reavaliar o fechamento dos palpites de 30 para 15 ou 10 minutos em tarefa específica, com decisão explícita, atualização integral da regra e testes próprios.
 - ✅ Centro de Controle, diagnóstico, auditoria e acompanhamento da proteção de recuperação.
 - ✅ Detalhamento determinístico das ocorrências de recuperação, com classificação informativa, conferência administrativa auditável e verificação de checkpoint.
