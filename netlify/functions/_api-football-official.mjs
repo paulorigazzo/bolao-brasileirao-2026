@@ -12,7 +12,7 @@ import { buildApiFootballGameDetailsProjection, gameDetailsFixtureIds, mergeGame
 const API_BASE = "https://v3.football.api-sports.io";
 const DAILY_RESERVE_RATIO = 0.2;
 const MINUTE_RESERVE_RATIO = 0.1;
-const TERMINAL_STATUSES = new Set(["encerrado", "adiado", "cancelado"]);
+const TERMINAL_STATUSES = new Set(["encerrado", "cancelado"]);
 
 export function assertApiFootballQuota(observation) {
   const pairs = [
