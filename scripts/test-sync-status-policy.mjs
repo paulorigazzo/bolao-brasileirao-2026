@@ -79,4 +79,17 @@ const rescheduled=sanitizeGameSchedule(
 assert.equal(rescheduled.situacao_agendamento,"provisorio");
 assert.equal(rescheduled.data_base,"2026-10-01");
 assert.equal(rescheduledRepairs[0].action,"nova_agenda_provisoria_observada");
+
+for(const status of ["em_andamento","intervalo","encerrado"]){
+  const repairs=[];
+  const returned=sanitizeGameSchedule(
+    {id_jogo:554941,status,inicio:"2026-09-16T22:30:00Z"},
+    postponed,
+    repairs
+  );
+  assert.equal(returned.situacao_agendamento,"provisorio",`${status} não pode permanecer como adiado sem data`);
+  assert.equal(returned.fonte_agendamento,"api-football");
+  assert.equal(returned.data_base,"2026-09-16");
+  assert.equal(repairs[0].action,"nova_agenda_provisoria_observada");
+}
 console.log("Política de status e placar verificada com sucesso.");

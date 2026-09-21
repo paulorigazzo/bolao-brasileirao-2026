@@ -1,3 +1,11 @@
+# v6.44.1 — Sincronização contínua de jogos adiados
+
+- Mantém partidas adiadas elegíveis na manutenção periódica da API-Football.
+- Reconhece nova data, retorno ao vivo ou resultado final sem preservar incorretamente `adiado_sem_data`.
+- Mantém jogos encerrados e cancelados fora da manutenção e preserva horários oficialmente confirmados pela CBF.
+- Prepara a atualização direcionada das quatro partidas pendentes da Rodada 21 após a publicação.
+- Detalhes: [nota da versão](docs/releases/v6.44.1-sincronizacao-jogos-adiados.md).
+
 # v6.44.0 — Eventos de substitutos no Campo
 
 - Mantém a formação inicial e sinaliza no Campo os gols marcados por jogadores que entraram durante a partida.

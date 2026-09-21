@@ -102,7 +102,7 @@ const maintenanceScope = scopeApiFootballSyncGames([
   { id_jogo: 3, status: "em_andamento" }, { id_jogo: 4, status: "intervalo" },
   { id_jogo: 5, status: "adiado" }, { id_jogo: 6, status: "cancelado" },
 ]);
-assert.deepEqual(maintenanceScope.map((game) => game.id_jogo), [2, 3, 4]);
+assert.deepEqual(maintenanceScope.map((game) => game.id_jogo), [2, 3, 4, 5], "partidas adiadas devem continuar na manutenção até receber nova data ou resultado");
 assert.deepEqual(scopeApiFootballSyncGames([
   { id_jogo: 1, status: "encerrado" }, { id_jogo: 2, status: "agendado" },
 ], [1]).map((game) => game.id_jogo), [1]);
@@ -112,6 +112,7 @@ let noOpApiCalls = 0;
 const noOpCanonical = [
   ...Array.from({ length: 260 }, (_, index) => ({ id_jogo: index + 1, status: "encerrado" })),
   ...Array.from({ length: 120 }, (_, index) => ({ id_jogo: index + 261, status: "agendado" })),
+  ...Array.from({ length: 4 }, (_, index) => ({ id_jogo: index + 381, status: "adiado" })),
 ];
 const noOpSupabase = {
   from(table) {
@@ -137,7 +138,7 @@ const noOpReport = await syncApiFootballGames({
 assert.equal(noOpApiCalls, 0);
 assert.equal(noOpReport.apiCalls, 0);
 assert.equal(noOpReport.imported, 0);
-assert.equal(noOpReport.unmappedSkipped, 120);
+assert.equal(noOpReport.unmappedSkipped, 124);
 assert.equal(noOpReport.terminalSkipped, 260);
 assert.equal(noOpReport.skippedReason, "no_mapped_non_terminal_games");
 assert.equal(noOpReport.quota.dailyRemaining, 7000);

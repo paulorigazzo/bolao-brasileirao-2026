@@ -1,5 +1,5 @@
-6.44.0
+6.44.1
 
-O Campo das Escalações sinaliza gols de jogadores que entraram durante a partida e identifica o autor no detalhe da posição inicial.
+Partidas adiadas continuam na manutenção da API-Football até receber nova data, resultado ou cancelamento.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

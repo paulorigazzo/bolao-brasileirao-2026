@@ -116,13 +116,14 @@ export function sanitizeGameSchedule(game, previous = null, repairs = []) {
     };
   }
 
-  if (previous?.situacao_agendamento === "adiado_sem_data" && game?.status === "agendado") {
+  if (previous?.situacao_agendamento === "adiado_sem_data"
+    && ["agendado", "em_andamento", "intervalo", "encerrado"].includes(game?.status)) {
     repairs.push({
       id_jogo: game.id_jogo,
       previousKickoff: previous.inicio,
       apiKickoff: game.inicio,
       action: "nova_agenda_provisoria_observada",
-      reason: "nova data do provedor requer confirmação antes de se tornar oficial",
+      reason: "retorno da partida adiada requer confirmação da nova agenda antes de se tornar oficial",
     });
     return {
       ...game,
