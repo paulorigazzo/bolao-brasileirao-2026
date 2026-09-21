@@ -30,7 +30,7 @@ import { buildLineupPitchModel } from "./lineup-pitch.js";
 import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 
-const APP_VERSION = "6.43.1";
+const APP_VERSION = "6.44.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1604,26 +1604,38 @@ function premiumGameDetails(g){
   const playerEvents=(player,side)=>lineupEvents[side]?.get(Number(player?.id))||{goals:[],cards:[],substitution:null};
   const eventBadges=(player,side,compact=false)=>{
     const events=playerEvents(player,side), goals=events.goals.map(goal=>{const marker=goal.kind==="penalty"?" (P)":goal.kind==="own-goal"?" (GC)":"",label=`Gol${marker}${goal.minute?` aos ${goal.minute}`:""}`;return `<span class="lineup-goal-badge" title="${label}" aria-label="${label}"><span aria-hidden="true">⚽</span>${goal.minute?`<small>${goal.minute}${marker}</small>`:""}</span>`;}).join(""), cards=events.cards.map(card=>{const label=`${card.kind==="red"?"Cartão vermelho":card.kind==="second-yellow"?"Segundo cartão amarelo":"Cartão amarelo"}${card.minute?` aos ${card.minute}`:""}`;return `<span class="lineup-event-card-badge" title="${label}" aria-label="${label}"><span class="lineup-event-card is-${card.kind}" aria-hidden="true"></span>${compact&&card.minute?`<small>${card.minute}</small>`:""}</span>`;}).join("");
-    const substitution=events.substitution?`<span class="lineup-substitution is-${events.substitution.direction}" title="${events.substitution.direction==="out"?"Saiu":"Entrou"}${events.substitution.minute?` aos ${events.substitution.minute}`:""}">${events.substitution.direction==="out"?"↓":"↑"}${events.substitution.minute}</span>`:"";
-    return goals||cards||substitution?`<span class="lineup-player-events${compact?" is-compact":""}">${goals}${cards}${substitution}</span>`:"";
+    const substitutions=(events.substitutions?.length?events.substitutions:events.substitution?[events.substitution]:[]).map(substitution=>`<span class="lineup-substitution is-${substitution.direction}" title="${substitution.direction==="out"?"Saiu":"Entrou"}${substitution.minute?` aos ${substitution.minute}`:""}">${substitution.direction==="out"?"↓":"↑"}${substitution.minute}</span>`).join("");
+    return goals||cards||substitutions?`<span class="lineup-player-events${compact?" is-compact":""}">${goals}${cards}${substitutions}</span>`:"";
   };
   const pitchPlayerEvents=(player,side)=>{
     const events=playerEvents(player,side);
-    const hasEvents=events.goals.length||events.cards.length||events.substitution;
-    if(!hasEvents) return {summary:"",details:""};
+    const replacements=Array.isArray(events.replacements)?events.replacements:[];
+    const substitutions=events.substitutions?.length?events.substitutions:events.substitution?[events.substitution]:[];
+    const hasEvents=events.goals.length||events.cards.length||substitutions.length||replacements.length;
+    if(!hasEvents) return {summary:"",details:"",ariaLabel:""};
     const goalLabel=goal=>`Gol${goal.kind==="penalty"?" de pênalti":goal.kind==="own-goal"?" contra":""}`;
     const cardLabel=card=>card.kind==="red"?"Cartão vermelho":card.kind==="second-yellow"?"Segundo cartão amarelo":"Cartão amarelo";
+    const replacementGoals=replacements.flatMap(replacement=>replacement.goals.map(goal=>({goal,player:replacement.player})));
     const summary=[
       ...events.goals.map(goal=>`<span aria-hidden="true">⚽</span>`),
       ...events.cards.map(card=>`<span class="lineup-event-card is-${card.kind}" aria-hidden="true"></span>`),
-      ...(events.substitution?[`<span class="lineup-substitution is-${events.substitution.direction}" aria-hidden="true">${events.substitution.direction==="out"?"↓":"↑"}</span>`]:[]),
+      ...substitutions.map(substitution=>`<span class="lineup-substitution is-${substitution.direction}" aria-hidden="true">${substitution.direction==="out"?"↓":"↑"}</span>`),
+      ...replacementGoals.map(()=>`<span class="lineup-replacement-goal" aria-hidden="true"><i>↑</i><b>⚽</b></span>`),
     ].join("");
     const rows=[
       ...events.goals.map(goal=>`<li><span>⚽ ${goalLabel(goal)}</span><strong>${escapeHtml(goal.minute||"—")}</strong></li>`),
       ...events.cards.map(card=>`<li><span><i class="lineup-event-card is-${card.kind}" aria-hidden="true"></i>${cardLabel(card)}</span><strong>${escapeHtml(card.minute||"—")}</strong></li>`),
-      ...(events.substitution?[`<li><span class="lineup-substitution is-${events.substitution.direction}">${events.substitution.direction==="out"?"↓ Saiu":"↑ Entrou"}</span><strong>${escapeHtml(events.substitution.minute||"—")}</strong></li>`]:[]),
+      ...substitutions.map(substitution=>`<li><span class="lineup-substitution is-${substitution.direction}">${substitution.direction==="out"?"↓ Saiu":"↑ Entrou"}</span><strong>${escapeHtml(substitution.minute||"—")}</strong></li>`),
+      ...replacements.flatMap(replacement=>[
+        `<li class="lineup-replacement-player"><span><i aria-hidden="true">↑</i>${escapeHtml(replacement.player.name||"Substituto")}</span><strong>${escapeHtml(replacement.substitutions?.find(item=>item.direction==="in")?.minute||"—")}</strong></li>`,
+        ...replacement.goals.map(goal=>`<li class="lineup-replacement-event"><span>⚽ ${goalLabel(goal)}</span><strong>${escapeHtml(goal.minute||"—")}</strong></li>`),
+        ...replacement.cards.map(card=>`<li class="lineup-replacement-event"><span><i class="lineup-event-card is-${card.kind}" aria-hidden="true"></i>${cardLabel(card)}</span><strong>${escapeHtml(card.minute||"—")}</strong></li>`),
+        ...(replacement.substitutions?.filter(item=>item.direction==="out").map(item=>`<li class="lineup-replacement-event"><span class="lineup-substitution is-out">↓ Saiu</span><strong>${escapeHtml(item.minute||"—")}</strong></li>`)||[]),
+      ]),
     ].join("");
-    return {summary:`<span class="lineup-player-events is-pitch-summary" aria-hidden="true">${summary}</span>`,details:rows};
+    const replacementNames=replacements.map(replacement=>replacement.player.name).filter(Boolean);
+    const ariaLabel=replacementNames.length?`Ver eventos da posição de ${player.name}, incluindo ${replacementNames.join(", ")}`:`Ver eventos de ${player.name}`;
+    return {summary:`<span class="lineup-player-events is-pitch-summary" aria-hidden="true">${summary}</span>`,details:rows,ariaLabel};
   };
   const lineupSide=(side,label,logo,position)=>{
     const groups=[["G","Goleiro"],["D","Defesa"],["M","Meio-campo"],["F","Ataque"],["","Jogadores"]];
@@ -1635,7 +1647,7 @@ function premiumGameDetails(g){
     }).join("");
     return `<div class="premium-lineup-side"><header><span class="premium-lineup-crest">${teamLogo(logo,label)}</span><span class="premium-lineup-heading"><b>${escapeHtml(teamDisplayName(label))}</b><strong>${escapeHtml(side.formation||"Formação não informada")}</strong>${side.coach?`<small>Técnico: ${escapeHtml(side.coach)}</small>`:""}</span></header><div class="premium-lineup-groups">${players}</div></div>`;
   };
-  const pitchPlayer=(player,side,teamName,gameId)=>{const shirt=lineupShirtTheme(teamName),edge=player.edge?` is-edge-${player.edge}`:"",events=pitchPlayerEvents(player,side),detailId=`game-${gameId}-player-${side}-${Number(player.id)}-details`,shirtMarkup=`<span class="premium-pitch-shirt" aria-hidden="true"><svg viewBox="0 0 44 40" focusable="false"><path d="M14 3 8 6 2 14l7 5v18h26V19l7-5-6-8-6-3c-2 4-12 4-16 0Z"></path></svg><b>${player.number??"—"}</b></span>`;return `<span class="premium-pitch-player is-${side}${edge}${events.details?" has-details":""}" style="--x:${player.x.toFixed(2)}%;--y:${player.y.toFixed(2)}%;--shirt-pattern:${shirt.pattern};--shirt-number:${shirt.number};--shirt-number-shadow:${shirt.numberShadow}" title="${escapeHtml(player.name)}">${events.details?`<button class="premium-pitch-player-toggle" type="button" aria-expanded="false" aria-controls="${detailId}" aria-label="Ver eventos de ${escapeHtml(player.name)}">${shirtMarkup}</button>`:shirtMarkup}${events.summary}<small>${escapeHtml(player.name)}</small>${events.details?`<section id="${detailId}" class="premium-pitch-player-details" aria-label="Resumo de ${escapeHtml(player.name)}" hidden><header><strong>${escapeHtml(player.name)}</strong><small>Camisa ${player.number??"—"}</small></header><div><b>Eventos</b><ul>${events.details}</ul></div></section>`:""}</span>`;};
+  const pitchPlayer=(player,side,teamName,gameId)=>{const shirt=lineupShirtTheme(teamName),edge=player.edge?` is-edge-${player.edge}`:"",events=pitchPlayerEvents(player,side),detailId=`game-${gameId}-player-${side}-${Number(player.id)}-details`,shirtMarkup=`<span class="premium-pitch-shirt" aria-hidden="true"><svg viewBox="0 0 44 40" focusable="false"><path d="M14 3 8 6 2 14l7 5v18h26V19l7-5-6-8-6-3c-2 4-12 4-16 0Z"></path></svg><b>${player.number??"—"}</b></span>`;return `<span class="premium-pitch-player is-${side}${edge}${events.details?" has-details":""}" style="--x:${player.x.toFixed(2)}%;--y:${player.y.toFixed(2)}%;--shirt-pattern:${shirt.pattern};--shirt-number:${shirt.number};--shirt-number-shadow:${shirt.numberShadow}" title="${escapeHtml(player.name)}">${events.details?`<button class="premium-pitch-player-toggle" type="button" aria-expanded="false" aria-controls="${detailId}" aria-label="${escapeHtml(events.ariaLabel)}">${shirtMarkup}</button>`:shirtMarkup}${events.summary}<small>${escapeHtml(player.name)}</small>${events.details?`<section id="${detailId}" class="premium-pitch-player-details" aria-label="Resumo da posição de ${escapeHtml(player.name)}" hidden><header><strong>${escapeHtml(player.name)}</strong><small>Camisa ${player.number??"—"}</small></header><div><b>Eventos</b><ul>${events.details}</ul></div></section>`:""}</span>`;};
   const pitchTeam=(side,label,logo,position)=>`<div class="premium-pitch-team is-${position}"><span class="premium-pitch-team-crest">${teamLogo(logo,label)}</span><span><b>${escapeHtml(teamDisplayName(label))}</b>${side.coach?`<small>Técnico: ${escapeHtml(side.coach)}</small>`:""}</span><strong>${escapeHtml(side.formation||"—")}</strong></div>`;
   const lineupContent=()=>{
     const pitch=buildLineupPitchModel(model.lineups);

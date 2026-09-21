@@ -1,5 +1,5 @@
-6.43.1
+6.44.0
 
-Diagnóstico ADM apresenta a rodada atual do Bolão; transição para API-Football registrada como encerrada.
+O Campo das Escalações sinaliza gols de jogadores que entraram durante a partida e identifica o autor no detalhe da posição inicial.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

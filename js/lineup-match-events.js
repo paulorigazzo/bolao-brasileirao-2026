@@ -13,10 +13,35 @@ function playerIndex(side) {
   for (const group of [side?.starters, side?.substitutes]) {
     for (const player of Array.isArray(group) ? group : []) {
       const id = number(player?.id);
-      if (id !== null) index.set(id, { goals: [], cards: [], substitution: null });
+      if (id !== null) index.set(id, {
+        player: { id, name: String(player?.name || "").trim(), number: player?.number ?? null },
+        goals: [], cards: [], substitution: null, substitutions: [], replacedBy: null, replacements: [],
+      });
     }
   }
   return index;
+}
+
+function connectPitchReplacements(side, lineupSide) {
+  for (const starter of Array.isArray(lineupSide?.starters) ? lineupSide.starters : []) {
+    const root = side.players.get(number(starter?.id));
+    if (!root) continue;
+    const visited = new Set([root.player.id]);
+    let current = root;
+    while (current.replacedBy !== null && !visited.has(current.replacedBy)) {
+      const replacement = side.players.get(current.replacedBy);
+      if (!replacement) break;
+      visited.add(replacement.player.id);
+      root.replacements.push({
+        player: replacement.player,
+        goals: replacement.goals,
+        cards: replacement.cards,
+        substitution: replacement.substitution,
+        substitutions: replacement.substitutions,
+      });
+      current = replacement;
+    }
+  }
 }
 
 function cardKind(detail) {
@@ -64,8 +89,13 @@ export function buildLineupMatchEventsModel(game, lineups, projection) {
     const incoming = side.players.get(number(event?.relatedPlayerProviderId));
     if (!outgoing || !incoming) continue;
     const at = minute(event);
-    outgoing.substitution = { direction: "out", minute: at };
-    incoming.substitution = { direction: "in", minute: at };
+    outgoing.substitution = { direction: "out", minute: at, counterpart: incoming.player };
+    incoming.substitution = { direction: "in", minute: at, counterpart: outgoing.player };
+    outgoing.substitutions.push(outgoing.substitution);
+    incoming.substitutions.push(incoming.substitution);
+    outgoing.replacedBy = incoming.player.id;
   }
+  connectPitchReplacements(sides.home, lineups.home);
+  connectPitchReplacements(sides.away, lineups.away);
   return { home: sides.home.players, away: sides.away.players };
 }

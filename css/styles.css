@@ -4404,3 +4404,11 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 .round-dynamic-position{grid-column:1;grid-row:1}
 
 .brand .brand-league{color:var(--premium-gold)}
+
+/* Eventos de quem entrou no espaço da formação inicial */
+.lineup-replacement-goal{display:inline-flex;align-items:center;gap:1px}
+.lineup-replacement-goal i{color:var(--green2);font-size:.58rem;font-style:normal;font-weight:900}
+.lineup-replacement-goal b{font-size:.55rem}
+.premium-pitch-player-details li.lineup-replacement-player{margin-top:3px;padding-top:5px;border-top:1px solid rgba(255,255,255,.1);color:var(--green2);font-weight:900}
+.premium-pitch-player-details li.lineup-replacement-player i{font-style:normal}
+.premium-pitch-player-details li.lineup-replacement-event{padding-left:10px}
