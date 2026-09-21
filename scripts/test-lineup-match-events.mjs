@@ -15,6 +15,7 @@ const projection = { id_externo: 9001, eventos: [
   { elapsed: 70, teamProviderId: 20, playerProviderId: 3, typeRaw: "Goal", detailRaw: "Missed Penalty" },
   { elapsed: 34, teamProviderId: 10, playerProviderId: 1, typeRaw: "Card", detailRaw: "Yellow Card" },
   { elapsed: 68, extra: 2, teamProviderId: 10, playerProviderId: 1, relatedPlayerProviderId: 2, typeRaw: "subst" },
+  { elapsed: 75, teamProviderId: 10, playerProviderId: 2, typeRaw: "Goal", detailRaw: "Normal Goal" },
   { elapsed: 45, extra: 1, teamProviderId: 20, playerProviderId: 4, typeRaw: "Card", detailRaw: "Red Card" },
   { elapsed: 80, teamProviderId: 20, playerProviderId: 999, relatedPlayerProviderId: 4, typeRaw: "subst" },
 ] };
@@ -23,13 +24,37 @@ const model = buildLineupMatchEventsModel(game, lineups, projection);
 assert.deepEqual(model.home.get(1).goals, [{ kind: "goal", minute: "12'" }, { kind: "penalty", minute: "45+3'" }]);
 assert.deepEqual(model.away.get(3).goals, [{ kind: "own-goal", minute: "52'" }], "gol contra deve acompanhar o jogador identificado, não o time beneficiado");
 assert.deepEqual(model.home.get(1).cards, [{ kind: "yellow", minute: "34'" }]);
-assert.deepEqual(model.home.get(1).substitution, { direction: "out", minute: "68+2'" });
-assert.deepEqual(model.home.get(2).substitution, { direction: "in", minute: "68+2'" });
+assert.deepEqual(model.home.get(1).substitution, { direction: "out", minute: "68+2'", counterpart: { id: 2, name: "Reserva casa", number: 2 } });
+assert.deepEqual(model.home.get(2).substitution, { direction: "in", minute: "68+2'", counterpart: { id: 1, name: "Titular casa", number: 1 } });
+assert.deepEqual(model.home.get(2).goals, [{ kind: "goal", minute: "75'" }], "a Lista deve manter o gol no verdadeiro autor");
+assert.deepEqual(model.home.get(1).replacements, [{
+  player: { id: 2, name: "Reserva casa", number: 2 },
+  goals: [{ kind: "goal", minute: "75'" }], cards: [],
+  substitution: { direction: "in", minute: "68+2'", counterpart: { id: 1, name: "Titular casa", number: 1 } },
+  substitutions: [{ direction: "in", minute: "68+2'", counterpart: { id: 1, name: "Titular casa", number: 1 } }],
+}], "o titular deve expor os eventos posteriores do substituto para o Campo");
 assert.deepEqual(model.away.get(4).cards, [{ kind: "red", minute: "45+1'" }]);
 assert.equal(model.away.get(4).substitution, null, "substituição parcial não pode ser projetada");
 assert.equal(buildLineupMatchEventsModel(game, lineups, { ...projection, id_externo: 8 }).home.size, 0);
 const withoutIds = buildLineupMatchEventsModel(game, { home: { starters: [player(null, "Sem ID")], substitutes: [] }, away: lineups.away }, projection);
 assert.equal(withoutIds.home.size, 0, "jogador sem identificador não pode entrar no índice");
+
+const chainedLineups = {
+  home: { starters: [player(1, "Titular casa")], substitutes: [player(2, "Primeiro reserva"), player(5, "Segundo reserva")] },
+  away: lineups.away,
+};
+const chainedProjection = { id_externo: 9001, eventos: [
+  { elapsed: 60, teamProviderId: 10, playerProviderId: 1, relatedPlayerProviderId: 2, typeRaw: "subst" },
+  { elapsed: 75, teamProviderId: 10, playerProviderId: 2, typeRaw: "Goal", detailRaw: "Normal Goal" },
+  { elapsed: 80, teamProviderId: 10, playerProviderId: 2, relatedPlayerProviderId: 5, typeRaw: "subst" },
+  { elapsed: 88, teamProviderId: 10, playerProviderId: 5, typeRaw: "Goal", detailRaw: "Normal Goal" },
+] };
+const chained = buildLineupMatchEventsModel(game, chainedLineups, chainedProjection);
+assert.deepEqual(chained.home.get(2).substitutions.map(item=>[item.direction,item.minute]), [["in","60'"],["out","80'"]], "a Lista deve preservar entrada e saída do mesmo reserva");
+assert.deepEqual(chained.home.get(1).replacements.map(item=>({ name:item.player.name, goals:item.goals, substitutions:item.substitutions.map(event=>[event.direction,event.minute]) })), [
+  { name:"Primeiro reserva", goals:[{ kind:"goal", minute:"75'" }], substitutions:[["in","60'"],["out","80'"]] },
+  { name:"Segundo reserva", goals:[{ kind:"goal", minute:"88'" }], substitutions:[["in","80'"]] },
+], "o Campo deve preservar toda a cadeia de participantes da posição inicial");
 
 const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
 const styles = readFileSync(new URL("../css/styles.css", import.meta.url), "utf8");
@@ -40,7 +65,10 @@ assert.match(app, /compact&&card\.minute/);
 assert.match(app, /lineup-player-main/);
 assert.match(app, /eventBadges\(player,position,true\)/);
 assert.match(app, /lineup-goal-badge/);
+assert.match(app, /lineup-replacement-goal/);
+assert.match(app, /incluindo \$\{replacementNames\.join\(", "\)\}/);
 assert.match(styles, /premium-pitch-player>\.lineup-player-events\{background:rgba\(4,25,16,\.56\)\}/);
+assert.match(styles, /\.lineup-replacement-goal/);
 assert.match(app, /benchSide[\s\S]*lineup-player-main[\s\S]*eventBadges\(player,position,true\)/);
 assert.match(app, /lineup-player-events\$\{compact\?" is-compact":""\}/);
 assert.doesNotMatch(app, /\$\{compact\?"":events\.substitution\.minute\}/);

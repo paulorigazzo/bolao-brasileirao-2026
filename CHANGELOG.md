@@ -1,3 +1,11 @@
+# v6.44.0 — Eventos de substitutos no Campo
+
+- Mantém a formação inicial e sinaliza no Campo os gols marcados por jogadores que entraram durante a partida.
+- Identifica o substituto, a entrada, o gol e uma eventual saída no detalhe acionado pela camisa do titular.
+- Preserva na Lista cada evento junto ao seu verdadeiro autor e suporta mais de uma troca na mesma posição inicial.
+- Mantém API-Football, Supabase, cache, placares, palpites, pontuação e Ranking inalterados.
+- Detalhes: [nota da versão](docs/releases/v6.44.0-eventos-substitutos-campo.md).
+
 # v6.42.1 — Avatar no Ranking da Rodada
 
 - Em revisão local: emblema por participante, linhas alinhadas ao Ranking oficial e liga selecionada em dourado.
