@@ -29,8 +29,9 @@ import { buildGameDetailsModel } from "./game-details.js";
 import { buildLineupPitchModel } from "./lineup-pitch.js";
 import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
+import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.44.1";
+const APP_VERSION = "6.44.2";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -406,21 +407,11 @@ async function saveFavoriteTeam(){
 }
 
 function currentRoundNumber(games=state.games){
-  const rounds=[...new Set(games.map(game=>Number(game.rodada)).filter(Number.isFinite))].sort((a,b)=>a-b);
-  if(!rounds.length) return 1;
+  return competitionRound(games,Date.now(),game=>gameStatusDisplay(game).key);
+}
 
-  const now=Date.now();
-  const liveGame=games
-    .filter(game=>gameStatusDisplay(game).key==="live")
-    .sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
-  if(liveGame) return Number(liveGame.rodada);
-
-  const nextGame=games
-    .filter(game=>!isFinished(game) && new Date(game.inicio).getTime()>now)
-    .sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
-  if(nextGame) return Number(nextGame.rodada);
-
-  return rounds.at(-1);
+function pendingEarlierRounds(){
+  return legacyPendingRounds(state.games,currentRoundNumber(),Date.now(),game=>gameStatusDisplay(game).key);
 }
 
 const message = (text, error=false) => {
@@ -484,9 +475,13 @@ function isPostponed(game){
   return gameStatusDisplay(game).key==="postponed";
 }
 
+function isUndatedPostponement(game){
+  return isPostponed(game) && game.situacao_agendamento==="adiado_sem_data";
+}
+
 function locked(game){
   const status=gameStatusDisplay(game).key;
-  // Partidas adiadas preservam o palpite original e nunca reabrem automaticamente.
+  // Sem nova data o palpite fica preservado; com novo início vale o novo prazo.
   if(["finished","cancelled","postponed"].includes(status)) return true;
   const kickoff=new Date(game.inicio).getTime();
   if(!Number.isFinite(kickoff)) return true;
@@ -1069,7 +1064,9 @@ async function loadData(){
     : [{data:[],error:null},{data:[],error:null}];
   if(eventProjectionsErr) console.warn("Os detalhes dos gols não puderam ser carregados.",eventProjectionsErr);
   if(detailProjectionsErr) console.warn("As estatísticas e escalações não puderam ser carregadas.",detailProjectionsErr);
-  const adminGameIds=adminRoundGameIds(games,currentRoundNumber(games));
+  const mainRound=currentRoundNumber(games);
+  const earlierRounds=legacyPendingRounds(games,mainRound,Date.now(),game=>gameStatusDisplay(game).key);
+  const adminGameIds=[...new Set([adminRoundGameIds(games,mainRound),...earlierRounds.map(round=>adminRoundGameIds(games,round))].flat())];
   const [{data:picks,error:pErr},{data:leagues,error:leaguesErr},{data:adminProgress,error:adminProgressErr},{data:authorized,error:authorizedErr},{data:participantLimit,error:participantLimitErr},{data:leagueManager,error:leagueManagerErr},{data:leagueAssignments,error:leagueAssignmentsErr},{data:participantSituations,error:participantSituationsErr},communicationResult] = await Promise.all([
     sb.from("palpites").select("*").eq("user_id",state.user.id),
     sb.rpc("listar_minhas_ligas"),
@@ -1084,6 +1081,7 @@ async function loadData(){
   if(pErr) throw pErr;
   if(leaguesErr) throw new Error("Não foi possível carregar suas ligas.");
   if(adminProgressErr) console.warn("O progresso administrativo não pôde ser carregado.",adminProgressErr);
+  state.adminProgressAvailable=!adminProgressErr;
   if(authorizedErr) console.warn("O cadastro dinâmico de participantes não pôde ser carregado.",authorizedErr);
   if(participantLimitErr) console.warn("O limite configurável de participantes não pôde ser carregado.",participantLimitErr);
   if(leagueManagerErr) console.warn("A gestão central de ligas não pôde ser confirmada.",leagueManagerErr);
@@ -1669,12 +1667,13 @@ function premiumMatchCard(g){
   const pick=ownPick(g.id_jogo), draft=pickDraft(g.id_jogo), isLocked=locked(g), finished=isFinished(g), status=gameStatusDisplay(g);
   const live=status.key==="live", estimatedLive=isScheduledLiveEstimate(g), hasScore=g.gols_casa!=null&&g.gols_fora!=null;
   const rawStatus=normalizeTeamKey(g?.status||"");
+  const earlierProvisional=Number(g.rodada)<currentRoundNumber() && g.situacao_agendamento==="provisorio" && status.key==="future";
   const suspended=rawStatus.includes("suspens");
   const interval=live&&(rawStatus.includes("intervalo")||rawStatus.includes("half-time")||rawStatus.includes("paused"));
   const stateClass=status.key==="cancelled"?"is-cancelled":suspended?"is-suspended":status.key==="postponed"?"is-postponed":finished?"is-finished":live?"is-live":estimatedLive?"is-estimated-live":isLocked?"is-soon":pick?"is-picked":"is-open";
   const liveMinute=live&&!interval?liveMatchMinute(g):"";
   const liveMinuteTitle=estimatedLive?' title="Início e minuto estimados pelo horário programado; aguardando confirmação da fonte"':liveMinute.startsWith("~")?' title="Minuto estimado; a fonte não informou o relógio oficial"':"";
-  const headerStatusLabel=status.key==="cancelled"?"CANCELADO":suspended?"SUSPENSO":status.key==="postponed"?"ADIADO":finished?"ENCERRADO":interval?"INTERVALO":live?`AO VIVO${liveMinute?` • ${liveMinute}'`:""}`:estimatedLive?scheduledLiveLabel(g):"";
+  const headerStatusLabel=status.key==="cancelled"?"CANCELADO":suspended?"SUSPENSO":status.key==="postponed"?"ADIADO":finished?"ENCERRADO":interval?"INTERVALO":live?`AO VIVO${liveMinute?` • ${liveMinute}'`:""}`:estimatedLive?scheduledLiveLabel(g):earlierProvisional?"DATA EM VERIFICAÇÃO":"";
   const expandedStatusLabel=headerStatusLabel|| (isLocked?"FECHADO":pick?"SALVO":"ABERTO");
   const summaryScore=finished&&hasScore?`${g.gols_casa} × ${g.gols_fora}`:live&&hasScore?`${g.gols_casa} × ${g.gols_fora}`:estimatedLive?"– × –":pick?`${pick.gols_casa} × ${pick.gols_fora}`:"Palpite pendente";
   const center=finished&&hasScore
@@ -1695,13 +1694,14 @@ function premiumMatchCard(g){
     : "";
   return `<article class="premium-match-card game-card-v2 ${stateClass} ${pick?"has-pick":"needs-pick"} ${draft?"has-unsaved":""} ${favorite.isFavoriteMatch?"is-favorite-team-match":""}" data-id="${g.id_jogo}"${favoriteStyle}>
     <button class="game-toggle premium-game-toggle" type="button" aria-expanded="false">
-      <span class="premium-toggle-time"><strong>${premiumTime(g.inicio)}</strong><small title="${escapeHtml(g.local_partida||"Local a definir")}">${escapeHtml(g.local_partida||"Local a definir")}</small></span>
+      <span class="premium-toggle-time"><strong>${isUndatedPostponement(g)?"A definir":premiumTime(g.inicio)}</strong><small title="${escapeHtml(g.local_partida||"Local a definir")}">${escapeHtml(g.local_partida||"Local a definir")}</small></span>
       <span class="premium-toggle-match">${compactTeam(g.time_casa_logo,g.time_casa).replace("game-summary-team",`game-summary-team${favorite.homeFavorite?" is-favorite-team":""}`)}<span class="premium-toggle-score">${escapeHtml(summaryScore)}</span>${compactTeam(g.time_fora_logo,g.time_fora).replace("game-summary-team",`game-summary-team${favorite.awayFavorite?" is-favorite-team":""}`)}</span>
       <span class="premium-toggle-side">${favorite.isFavoriteMatch?favoriteHeartBadge(favoriteTeamName):""}<span class="premium-toggle-status" data-game-header-status${liveMinuteTitle}>${headerStatusLabel}</span>${headerPointsLabel!==""?`<span class="premium-toggle-points" aria-label="${headerPointsLabel} pontos no jogo"><span aria-hidden="true">★</span>${headerPointsLabel}</span>`:""}<span class="game-chevron" aria-hidden="true">⌄</span></span>
     </button>
     <div class="game-collapsible" style="max-height:0;opacity:0">
       <div class="game-collapsible-inner premium-game-body premium-game-body-v2">
         ${status.key==="postponed"?`<div class="postponed-match-notice" role="status"><span aria-hidden="true">🟠</span><div><strong>Partida adiada</strong><p>Nova data ainda não definida. ${pick?"Seu palpite foi preservado e permanece bloqueado.":"O período original de palpites foi encerrado."} A pontuação será calculada quando a partida for realizada.</p></div></div>`:""}
+        ${earlierProvisional?`<div class="postponed-match-notice" role="status"><span aria-hidden="true">🟠</span><div><strong>Nova data em verificação</strong><p>O prazo dos palpites acompanha o horário exibido. Os palpites já feitos permanecem salvos.</p></div></div>`:""}
         <div class="premium-expanded-meta">
           <div class="premium-match-time"><strong>${status.key==="postponed"?"A definir":premiumTime(g.inicio)}</strong><span>${escapeHtml(g.local_partida||"Local a definir")}</span><small data-game-deadline>◷ ${deadlineText(g)}</small></div>
           <div class="premium-match-state"><span data-game-expanded-status${liveMinuteTitle}>${expandedStatusLabel}</span>${!isLocked&&!finished?`<button class="premium-edit-pick" type="button" aria-label="Editar palpite">✎</button>`:""}</div>
@@ -1835,11 +1835,11 @@ function renderGames(){
   }
   renderRoundProgress(roundGames);
   const games=filterGames(roundGames);
-  const groups=new Map(); games.forEach(g=>{const key=premiumDayKey(g.inicio)||"unknown";if(!groups.has(key))groups.set(key,[]);groups.get(key).push(g);});
+  const groups=new Map(); games.forEach(g=>{const key=isUndatedPostponement(g)?"undated":premiumDayKey(g.inicio)||"unknown";if(!groups.has(key))groups.set(key,[]);groups.get(key).push(g);});
   $("gamesList").innerHTML=games.length?[...groups.values()].map(dayGames=>{
     const first=dayGames[0], open=dayGames.find(g=>!locked(g)&&!isFinished(g));
-    const dayStatus=dayGames.some(g=>gameStatusDisplay(g).key==="live")?"AO VIVO":dayGames.every(isFinished)?"ENCERRADO":open?deadlineText(open):"FECHADO";
-    return `<section class="premium-day-group"><header><strong>▣ ${premiumDayLabel(first.inicio)}</strong><span>${dayStatus}</span></header><div>${dayGames.map(premiumMatchCard).join("")}</div></section>`;
+    const dayStatus=dayGames.every(isUndatedPostponement)?"ADIADO":dayGames.some(g=>gameStatusDisplay(g).key==="live")?"AO VIVO":dayGames.every(isFinished)?"ENCERRADO":open?deadlineText(open):"FECHADO";
+    return `<section class="premium-day-group"><header><strong>▣ ${isUndatedPostponement(first)?"Nova data a definir":premiumDayLabel(first.inicio)}</strong><span>${dayStatus}</span></header><div>${dayGames.map(premiumMatchCard).join("")}</div></section>`;
   }).join(""):`<div class="card empty-state">Nenhum jogo corresponde a este filtro.</div>`;
   updateSaveControls();
   document.querySelectorAll(".premium-match-card input").forEach(input=>input.addEventListener("input",()=>{
@@ -2054,8 +2054,9 @@ function calculateRanking(){
 
 function temporaryRankingContext(){
   if(TEMPORARY_RANKING_PREVIEW_FIXTURE) return temporaryRankingAvailability(TEMPORARY_RANKING_PREVIEW_FIXTURE.games,TEMPORARY_RANKING_PREVIEW_FIXTURE.round);
-  const round=currentRoundNumber();
-  return temporaryRankingAvailability(state.games,round);
+  const current=currentRoundNumber();
+  const liveEarlier=pendingEarlierRounds().find(round=>state.games.some(game=>Number(game.rodada)===round && gameStatusDisplay(game).key==="live"));
+  return temporaryRankingAvailability(state.games,liveEarlier||current);
 }
 
 function renderTemporaryRankingAccess(){
@@ -2309,6 +2310,12 @@ function latestRoundHighlightsCandidate(beforeRound=Infinity){
 }
 
 function homeRoundHighlightsContext({round,lifecycle,nextGame,now=Date.now()}){
+  const earlier=pendingEarlierRounds().find(candidate=>state.games.some(game=>Number(game.rodada)===candidate && gameStatusDisplay(game).key==="live")) || pendingEarlierRounds()[0];
+  if(earlier){
+    const earlierLifecycle=roundLifecycleSummary(state.games.filter(game=>Number(game.rodada)===earlier));
+    if(roundHighlightsAvailable(earlier)) return {round:earlier,mode:"live"};
+    if(isPostponedRoundHighlightsEligible(earlierLifecycle)) return {round:earlier,mode:"partial"};
+  }
   if(lifecycle.status==="FINISHED") return {round,mode:"finished"};
   if(roundHighlightsAvailable(round)) return {round,mode:"live"};
   if(isPostponedRoundHighlightsEligible(lifecycle)) return {round,mode:"partial"};
@@ -2439,7 +2446,7 @@ function renderMatchCalendar(){
       const kickoff=new Date(nextGame.inicio);
       const days=Math.max(0,Math.ceil((kickoff.getTime()-Date.now())/86400000));
       const date=kickoff.toLocaleDateString("pt-BR",{day:"2-digit",month:"long",timeZone:"America/Sao_Paulo"});
-      $("matchCalendarSummary").textContent=gameStatusDisplay(nextGame).key==="live"?"Há uma partida acontecendo agora.":`Próximo jogo em ${days} dia${days===1?"":"s"} · ${date}`;
+      $("matchCalendarSummary").textContent=gameStatusDisplay(nextGame).key==="live"?`Rodada ${Number(nextGame.rodada)}: há uma partida acontecendo agora.`:`Próximo jogo da Rodada ${Number(nextGame.rodada)} em ${days} dia${days===1?"":"s"} · ${date}`;
     }else $("matchCalendarSummary").textContent="Ainda não há novos jogos agendados.";
   }
 
@@ -2834,18 +2841,24 @@ function renderHome(){
   const lifecycleView=roundLifecyclePresentation(lifecycle);
   const live=roundGames.filter(game=>gameStatusDisplay(game).key==="live");
   const estimatedLive=roundGames.filter(game=>isScheduledLiveEstimate(game,now));
-  const displayedLive=[...live,...estimatedLive];
+  const earlierLive=state.games.filter(game=>Number(game.rodada)<round && gameStatusDisplay(game).key==="live");
+  const displayedLive=[...live,...earlierLive,...estimatedLive];
   const finished=roundGames.filter(isScorableGame);
   const futureCount=lifecycle.future;
   const nextGame=state.games.filter(game=>!isFinished(game) && !isPostponed(game) && gameStatusDisplay(game).key!=="cancelled" && new Date(game.inicio).getTime()>now).sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
   const nextPending=[...pending].sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
+  const earlierOpenGames=pendingEarlierRounds().flatMap(candidate=>state.games.filter(game=>Number(game.rodada)===candidate && !locked(game)));
+  const earlierMissing=earlierOpenGames.filter(game=>!ownPick(game.id_jogo));
   const highlightsContext=homeRoundHighlightsContext({round,lifecycle,nextGame,now});
 
   let priority;
   if(pending.length){
     priority={tone:"warning",badge:"ATENÇÃO",icon:"📋",title:`Faltam ${pending.length} ${pending.length===1?"palpite":"palpites"}`,subtitle:`para a Rodada ${round}`,meta:nextPending?`Fecha ${homeDeadline(nextPending)}`:"Complete antes do fechamento",action:"games",label:"Fazer palpites"};
+  }else if(earlierMissing.length){
+    const first=[...earlierMissing].sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
+    priority={tone:"warning",badge:"ATENÇÃO",icon:"📋",title:`Faltam ${earlierMissing.length} ${earlierMissing.length===1?"palpite":"palpites"}`,subtitle:`para a Rodada ${Number(first.rodada)} reagendada`,meta:`Fecha ${homeDeadline(first)}`,action:"legacy-games",round:Number(first.rodada),label:"Fazer palpites"};
   }else if(displayedLive.length){
-    priority={tone:"live",badge:estimatedLive.length&&!live.length?"AO VIVO • ESTIMADO":"AO VIVO",icon:"🔥",title:`${displayedLive.length} ${displayedLive.length===1?"jogo ao vivo":"jogos ao vivo"}`,subtitle:"A rodada está acontecendo",meta:estimatedLive.length?"Horário estimado; aguardando confirmação da fonte":"Acompanhe os placares em tempo real",action:"games",label:"Acompanhar jogos"};
+    priority={tone:"live",badge:estimatedLive.length&&!live.length&&!earlierLive.length?"AO VIVO • ESTIMADO":"AO VIVO",icon:"🔥",title:`${displayedLive.length} ${displayedLive.length===1?"jogo ao vivo":"jogos ao vivo"}`,subtitle:earlierLive.length&&!live.length?`Rodada ${Number(earlierLive[0].rodada)} reagendada em andamento`:"A rodada está acontecendo",meta:estimatedLive.length?"Horário estimado; aguardando confirmação da fonte":"Acompanhe os placares em tempo real",action:earlierLive.length&&!live.length?"legacy-games":"games",round:earlierLive.length&&!live.length?Number(earlierLive[0].rodada):null,label:"Acompanhar jogos"};
   }else if(roundGames.length && lifecycle.status==="FINISHED"){
     priority={tone:"gold",badge:"RODADA ENCERRADA",icon:"🏆",title:`Rodada ${round} concluída`,subtitle:`Você fez ${me.total} ${me.total===1?"ponto":"pontos"}`,meta:"Confira sua posição final na rodada",action:"ranking",label:"Ver resultado"};
   }else{
@@ -2869,7 +2882,7 @@ function renderHome(){
         <h2>${escapeHtml(priority.title)}</h2>
         <p class="premium-hero-subtitle">${escapeHtml(priority.subtitle)}</p>
         <p class="premium-hero-meta"><span aria-hidden="true">◷</span> ${escapeHtml(priority.meta)}</p>
-        <button class="primary premium-hero-action" type="button" data-home-action="${priority.action}"><span>${priority.label}</span><b aria-hidden="true">›</b></button>
+        <button class="primary premium-hero-action" type="button" data-home-action="${priority.action}"${priority.round?` data-round="${priority.round}"`:""}><span>${priority.label}</span><b aria-hidden="true">›</b></button>
       </div>
     </div>
     <div class="premium-position-panel">
@@ -2908,10 +2921,19 @@ function renderHome(){
     <div class="premium-round-stats integrity-stats"><div class="is-finished"><i>✓</i><strong>${lifecycle.finished}</strong><span>finalizados</span></div><div class="is-live"><i>◉</i><strong>${lifecycle.live}</strong><span>ao vivo</span></div><div class="is-postponed"><i>!</i><strong>${lifecycle.postponed}</strong><span>adiados</span></div><div class="is-future"><i>◷</i><strong>${lifecycle.future}</strong><span>futuros</span></div></div>
     <p class="round-integrity-note">${lifecycleView.message}${lifecycle.cancelled?` · ${lifecycle.cancelled} cancelado${lifecycle.cancelled===1?"":"s"}.`:""}</p>
     ${homeRoundHighlightsHtml(highlightsContext)}
-    ${nextGame?`<div class="premium-next-game"><span class="premium-next-label">PRÓXIMO JOGO</span><div class="premium-matchup"><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_casa_logo,nextGame.time_casa)}</span><strong>${escapeHtml(teamDisplayName(nextGame.time_casa))}</strong></div><b>×</b><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_fora_logo,nextGame.time_fora)}</span><strong>${escapeHtml(teamDisplayName(nextGame.time_fora))}</strong></div></div><div class="premium-game-meta"><span>📅 ${escapeHtml(new Date(nextGame.inicio).toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit"}))}</span><span>◷ ${escapeHtml(new Date(nextGame.inicio).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}))}</span>${nextGame.local_partida?`<span>⌖ ${escapeHtml(nextGame.local_partida)}</span>`:""}</div><button class="premium-next-games-action" type="button" data-home-action="calendar">Abrir calendário <b aria-hidden="true">›</b></button></div>`:`<div class="premium-next-game is-empty"><span class="premium-next-label">AGENDA DE JOGOS</span><p class="muted-note">Consulte as próximas datas e as partidas que aguardam reagendamento.</p><button class="premium-next-games-action" type="button" data-home-action="calendar">Abrir calendário <b aria-hidden="true">›</b></button></div>`}
+    ${nextGame?`<div class="premium-next-game"><span class="premium-next-label">PRÓXIMO JOGO · RODADA ${Number(nextGame.rodada)}</span><div class="premium-matchup"><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_casa_logo,nextGame.time_casa)}</span><strong>${escapeHtml(teamDisplayName(nextGame.time_casa))}</strong></div><b>×</b><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_fora_logo,nextGame.time_fora)}</span><strong>${escapeHtml(teamDisplayName(nextGame.time_fora))}</strong></div></div><div class="premium-game-meta"><span>📅 ${escapeHtml(new Date(nextGame.inicio).toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit"}))}</span><span>◷ ${escapeHtml(new Date(nextGame.inicio).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}))}</span>${nextGame.local_partida?`<span>⌖ ${escapeHtml(nextGame.local_partida)}</span>`:""}</div><button class="premium-next-games-action" type="button" data-home-action="calendar">Abrir calendário <b aria-hidden="true">›</b></button></div>`:`<div class="premium-next-game is-empty"><span class="premium-next-label">AGENDA DE JOGOS</span><p class="muted-note">Consulte as próximas datas e as partidas que aguardam reagendamento.</p><button class="premium-next-games-action" type="button" data-home-action="calendar">Abrir calendário <b aria-hidden="true">›</b></button></div>`}
   </article>`;
 
   const medals=["🥇","🥈","🥉"];
+  const earlierRound=pendingEarlierRounds()[0];
+  if(earlierRound){
+    const earlierGames=state.games.filter(game=>Number(game.rodada)===earlierRound);
+    const earlierOpen=earlierGames.filter(game=>!locked(game));
+    const earlierUndated=earlierGames.filter(isUndatedPostponement);
+    const missing=earlierOpen.filter(game=>!ownPick(game.id_jogo)).length;
+    $("homeRoundSection").insertAdjacentHTML("beforeend",`<div class="premium-next-game"><span class="premium-next-label">RODADA ${earlierRound} · JOGOS REAGENDADOS</span><p class="muted-note">${earlierOpen.length?`${earlierOpen.length} jogo${earlierOpen.length===1?"":"s"} com palpites abertos${missing?` · ${missing} sem seu palpite`:""}. `:""}${earlierUndated.length?`${earlierUndated.length} partida${earlierUndated.length===1?"":"s"} ainda sem nova data.`:""}</p><button class="premium-next-games-action" type="button" data-home-action="legacy-games" data-round="${earlierRound}">Ver jogos da Rodada ${earlierRound} <b aria-hidden="true">›</b></button></div>`);
+  }
+
   $("homeRankingSection").innerHTML=`<article class="premium-feature-card premium-ranking-card home-navigable-card" role="button" tabindex="0" data-home-action="ranking" aria-label="Abrir ranking completo">
     <header class="premium-card-header"><div><span class="premium-kicker">🏆 CLASSIFICAÇÃO</span><h2>Top 3 do bolão</h2></div><span class="premium-inline-action">Ver ranking completo <b>›</b></span></header>
     <div class="home-ranking-list">${state.ranking.slice(0,3).map((item,index)=>`<div class="home-ranking-row ${isCurrentRankingParticipant(item)?"is-me":""}"><span class="home-medal">${medals[index]}</span>${rankingAvatar(item.name)}<div><strong>${escapeHtml(item.name)}${isCurrentRankingParticipant(item)?' <em class="home-you-badge">VOCÊ</em>':''}</strong><small>${isCurrentRankingParticipant(item)?"Sua posição atual":"Participante"}</small></div><b>${item.total} pts</b><span class="row-chevron" aria-hidden="true">›</span></div>`).join("")||'<p class="muted-note">A classificação aparecerá após os primeiros resultados.</p>'}</div>
@@ -3640,8 +3662,8 @@ function renderStats(){
   const liveRound=currentRoundNumber();
   const extraHighlightsAccess=$("statsLiveRoundHighlights");
   if(extraHighlightsAccess){
-    extraHighlightsAccess.innerHTML=roundHighlightsAvailable(liveRound)&&!rounds.some(item=>Number(item.round)===liveRound)
-      ? `<button type="button" class="secondary" data-stats-round-highlights="${liveRound}">Ver Destaques da Rodada ${liveRound} em andamento</button>`:"";
+    const available=[liveRound,...pendingEarlierRounds()].filter((round,index,all)=>all.indexOf(round)===index && roundHighlightsAvailable(round) && !rounds.some(item=>Number(item.round)===round));
+    extraHighlightsAccess.innerHTML=available.map(round=>`<button type="button" class="secondary" data-stats-round-highlights="${round}">Ver Destaques da Rodada ${round}${round===liveRound?" em andamento":" (jogos pendentes)"}</button>`).join("");
   }
   const biggestEvolution=rounds.reduce((best,item,index)=>{
     if(!index) return best;
@@ -3852,35 +3874,39 @@ function buildAdminSnapshot(){
   });
   const completed=participants.filter(item=>item.status==="complete");
   const pending=participants.filter(item=>item.status!=="complete");
-  const closeTimes=games.filter(game=>!isFinished(game)).map(game=>new Date(game.inicio).getTime()-CONFIG.lockMinutesBefore*60000).filter(Number.isFinite).sort((a,b)=>a-b);
+  const openGames=games.filter(game=>!locked(game) && !isFinished(game));
+  const openGameIds=new Set(openGames.map(game=>Number(game.id_jogo)));
+  const actionablePending=participants.filter(item=>[...openGameIds].some(id=>!item.pickedGameIds.includes(id)));
+  const closeTimes=openGames.map(game=>new Date(game.inicio).getTime()-CONFIG.lockMinutesBefore*60000).filter(Number.isFinite).sort((a,b)=>a-b);
   const closeAt=closeTimes[0]||null;
   const now=Date.now();
   const roundFinished=games.length>0 && games.every(isFinished);
   const roundClosed=games.length>0 && games.every(game=>locked(game));
-  return {round,games,participants,completed,pending,closeAt,remaining:closeAt?closeAt-now:null,roundFinished,roundClosed,updatedAt:now};
+  return {round,games,participants,completed,pending,openGames,actionablePending,closeAt,remaining:closeAt?closeAt-now:null,roundFinished,roundClosed,updatedAt:now};
 }
 
 function adminState(snapshot){
+  const pending=snapshot.actionablePending;
   if(!snapshot.games.length) return {key:"error",label:"Sem jogos",title:"Não há jogos cadastrados para a rodada atual.",description:"Verifique a sincronização dos jogos.",action:"refresh"};
   if(snapshot.roundFinished) return {key:"finished",label:"Ranking atualizado",title:"A rodada foi finalizada.",description:"Os resultados já podem ser consultados no ranking.",action:"ranking"};
   if(snapshot.roundClosed) return {key:"closed",label:"Rodada encerrada",title:"Os palpites desta rodada estão bloqueados.",description:"Aguardando a conclusão e os resultados oficiais dos jogos.",action:"games"};
-  if(!snapshot.pending.length) return {key:"ready",label:"Tudo pronto",title:"Todos os participantes concluíram seus palpites.",description:`${snapshot.participants.length} de ${snapshot.participants.length} participantes completos.`,action:"participants"};
+  if(!pending.length) return {key:"ready",label:"Tudo pronto",title:"Todos os jogos ainda abertos têm palpites registrados.",description:`${snapshot.participants.length} participantes verificados para os jogos abertos.`,action:"participants"};
   const remaining=snapshot.remaining ?? Infinity;
-  if(remaining<=2*3600000) return {key:"urgent",label:"Urgente",title:`${snapshot.pending.length===1?snapshot.pending[0].name:`${snapshot.pending.length} participantes`} ainda ${snapshot.pending.length===1?"não concluiu":"não concluíram"} os palpites.`,description:`Faltam ${formatRemaining(remaining)} para o próximo fechamento.`,action:"reminder"};
-  if(remaining<=6*3600000) return {key:"near",label:"Prazo próximo",title:`Ainda ${snapshot.pending.length===1?"falta 1 participante":`faltam ${snapshot.pending.length} participantes`}.`,description:`O próximo jogo fecha em ${formatRemaining(remaining)}.`,action:"reminder"};
-  return {key:"attention",label:"Atenção",title:`Ainda ${snapshot.pending.length===1?"falta 1 participante":`faltam ${snapshot.pending.length} participantes`} concluir os palpites.`,description:snapshot.closeAt?`Próximo fechamento em ${formatRemaining(remaining)}.`:"Há palpites pendentes nesta rodada.",action:"reminder"};
+  if(remaining<=2*3600000) return {key:"urgent",label:"Urgente",title:`${pending.length===1?pending[0].name:`${pending.length} participantes`} ainda ${pending.length===1?"não concluiu":"não concluíram"} os jogos abertos.`,description:`Faltam ${formatRemaining(remaining)} para o próximo fechamento.`,action:"reminder"};
+  if(remaining<=6*3600000) return {key:"near",label:"Prazo próximo",title:`Ainda ${pending.length===1?"falta 1 participante":`faltam ${pending.length} participantes`} nos jogos abertos.`,description:`O próximo jogo fecha em ${formatRemaining(remaining)}.`,action:"reminder"};
+  return {key:"attention",label:"Atenção",title:`Ainda ${pending.length===1?"falta 1 participante":`faltam ${pending.length} participantes`} nos jogos abertos.`,description:snapshot.closeAt?`Próximo fechamento em ${formatRemaining(remaining)}.`:"Há palpites pendentes nos jogos abertos.",action:"reminder"};
 }
 
 function renderAdminControlCenter(snapshot=state.adminSnapshot || buildAdminSnapshot()){
   if(!isAdminUser() || !$("adminControlCenter")) return;
-  const completed=snapshot.completed.length;
+  const completed=snapshot.participants.length-snapshot.actionablePending.length;
   const totalParticipants=snapshot.participants.length;
-  const pending=snapshot.pending.length;
+  const pending=snapshot.actionablePending.length;
   const finished=snapshot.games.filter(isFinished).length;
   const totalGames=snapshot.games.length;
   const live=snapshot.games.filter(game=>adminGamePhase(game)==="live").length;
   const active=(state.authorizedParticipants||[]).filter(item=>item.ativo!==false).length || totalParticipants;
-  $("adminControlPicks").textContent=`${completed}/${totalParticipants || 0} concluíram`;
+  $("adminControlPicks").textContent=`${completed}/${totalParticipants || 0} em dia`;
   $("adminControlPicksHint").textContent=pending?`${pending} pendente${pending===1?"":"s"}`:"Nenhuma pendência";
   $("adminControlGames").textContent=`${finished}/${totalGames || 0} encerrados`;
   $("adminControlGamesHint").textContent=live?`${live} jogo${live===1?"":"s"} ao vivo`:snapshot.roundFinished?"Rodada concluída":`Rodada ${snapshot.round}`;
@@ -3916,12 +3942,12 @@ function renderAdminAttention(){
   card.className=`card admin-attention-card state-${view.key}${wasCollapsed?" is-collapsed":""}`;
   $("adminAttentionBadge").textContent=view.label;
   $("adminRoundContext").textContent=`${activeLeagueName(state.activeLeague)} • Rodada ${snapshot.round} • ${snapshot.games.length} jogo${snapshot.games.length===1?"":"s"}`;
-  const completedCount=snapshot.completed.length;
-  const participantSummary=`<div class="admin-participant-summary"><span>Participantes</span><strong>${completedCount}/${snapshot.participants.length} concluíram</strong></div>`;
+  const completedCount=snapshot.participants.length-snapshot.actionablePending.length;
+  const participantSummary=`<div class="admin-participant-summary"><span>Jogos abertos</span><strong>${completedCount}/${snapshot.participants.length} em dia</strong></div>`;
   const participantCard=item=>{
     const pct=item.total?Math.min(100,Math.round(item.count/item.total*100)):0;
-    const isComplete=item.status==="complete";
-    const status=isComplete?"Completo":item.status==="not-started"?"Nenhum palpite":"Parcial";
+    const isComplete=!snapshot.actionablePending.includes(item);
+    const status=isComplete?"Em dia nos jogos abertos":item.status==="not-started"?"Nenhum palpite":"Parcial";
     const icon=isComplete?"✅":item.status==="not-started"?"🔴":"🟡";
     const updated=item.lastUpdate?new Date(item.lastUpdate).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"Sem registro";
     const participant=resolveAttentionWhatsAppParticipant(item,state.authorizedParticipants);
@@ -3934,13 +3960,14 @@ function renderAdminAttention(){
   };
   const showComplete=adminPendingFilter==="all" || adminPendingFilter==="complete";
   const showPending=adminPendingFilter==="all" || adminPendingFilter==="pending";
-  const completedHtml=showComplete && snapshot.completed.length?`<section class="admin-progress-group admin-completed-group"><div class="admin-progress-group-title"><strong>🟢 Concluíram a rodada</strong><span>${snapshot.completed.length}</span></div><div class="admin-pending-list">${snapshot.completed.map(participantCard).join("")}</div></section>`:"";
-  const pendingHtml=showPending && snapshot.pending.length?`<section class="admin-progress-group admin-incomplete-group"><div class="admin-progress-group-title"><strong>🟡 Ainda pendentes</strong><span>${snapshot.pending.length}</span></div><div class="admin-pending-list">${snapshot.pending.map(participantCard).join("")}</div></section>`:"";
+  const inTime=snapshot.participants.filter(item=>!snapshot.actionablePending.includes(item));
+  const completedHtml=showComplete && inTime.length?`<section class="admin-progress-group admin-completed-group"><div class="admin-progress-group-title"><strong>🟢 Em dia nos jogos abertos</strong><span>${inTime.length}</span></div><div class="admin-pending-list">${inTime.map(participantCard).join("")}</div></section>`:"";
+  const pendingHtml=showPending && snapshot.actionablePending.length?`<section class="admin-progress-group admin-incomplete-group"><div class="admin-progress-group-title"><strong>🟡 Palpites ainda possíveis</strong><span>${snapshot.actionablePending.length}</span></div><div class="admin-pending-list">${snapshot.actionablePending.map(participantCard).join("")}</div></section>`:"";
   const emptyFilter=!completedHtml&&!pendingHtml?`<div class="admin-filter-empty">Nenhum participante neste filtro.</div>`:"";
   $("adminAttentionContent").innerHTML=`<h3>${escapeHtml(view.title)}</h3><p>${escapeHtml(view.description)}</p>${participantSummary}<div class="admin-participant-groups">${pendingHtml}${completedHtml}${emptyFilter}</div>`;
   setAnimatedText("adminFilterAllCount",snapshot.participants.length);
-  setAnimatedText("adminFilterPendingCount",snapshot.pending.length);
-  setAnimatedText("adminFilterCompleteCount",snapshot.completed.length);
+  setAnimatedText("adminFilterPendingCount",snapshot.actionablePending.length);
+  setAnimatedText("adminFilterCompleteCount",inTime.length);
   document.querySelectorAll("[data-admin-pending-filter]").forEach(filter=>{
     const active=filter.dataset.adminPendingFilter===adminPendingFilter;
     filter.classList.toggle("active",active);
@@ -3955,7 +3982,7 @@ function renderAdminAttention(){
     else{
       label.textContent=`${formatRemaining(snapshot.closeAt-Date.now())} • ${new Date(snapshot.closeAt).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}`;
       if(snapshot.closeAt-Date.now()<=2*3600000) deadline.classList.add("is-urgent");
-      else if(!snapshot.pending.length) deadline.classList.add("is-ready");
+      else if(!snapshot.actionablePending.length) deadline.classList.add("is-ready");
     }
   }
   $("adminDataFreshness").textContent=`Atualizado agora • ${new Date(snapshot.updatedAt).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}`;
@@ -3964,7 +3991,7 @@ function renderAdminAttention(){
   button.textContent=actions[view.action]||"";
   button.dataset.action=view.action;
   show("adminAttentionAction",Boolean(actions[view.action]) && !(view.action==="participants"));
-  show("adminPushReminderAction",snapshot.pending.length>0 && !snapshot.roundClosed && !snapshot.roundFinished);
+  show("adminPushReminderAction",snapshot.actionablePending.length>0 && !snapshot.roundClosed && !snapshot.roundFinished);
   renderAdminQuickActions();
   renderAdminParticipants();
   renderAdminExecutiveDashboard();
@@ -4137,11 +4164,11 @@ function whatsappTemplateText(type,participant){
   const round=snapshot.round || currentRoundNumber();
   const name=String(participant.nome||"Participante").trim().split(/\s+/)[0];
   const progress=snapshot.participants?.find(item=>item.email===String(participant.email||"").toLowerCase());
-  const remaining=progress?Math.max(0,(Number(progress.total)||0)-(Number(progress.count)||0)):null;
+  const remaining=progress?snapshot.openGames.filter(game=>!progress.pickedGameIds.includes(Number(game.id_jogo))).length:null;
   const close=snapshot.closeAt?new Date(snapshot.closeAt).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"em breve";
   const templates={
-    picks:`Olá, ${name}! 👋\n\nVocê ainda tem ${remaining==null?"palpites pendentes":`${remaining} palpite${remaining===1?"":"s"} pendente${remaining===1?"":"s"}`} na Rodada ${round} do Bolão Brasileirão 2026. Complete antes do prazo. Boa sorte! ⚽`,
-    closes:`Olá, ${name}! ⏰\n\nA Rodada ${round} fecha hoje. O próximo prazo é ${close}. Confira se todos os seus palpites estão preenchidos. ⚽`,
+    picks:`Olá, ${name}! 👋\n\nVocê ainda tem ${remaining==null?"palpites pendentes":`${remaining} palpite${remaining===1?"":"s"} pendente${remaining===1?"":"s"}`} nos jogos abertos da Rodada ${round} do Bolão Brasileirão 2026. Complete antes do prazo. Boa sorte! ⚽`,
+    closes:`Olá, ${name}! ⏰\n\nO próximo jogo aberto da Rodada ${round} fecha em ${close}. Confira seus palpites ainda possíveis. ⚽`,
     approved:`Olá, ${name}! ✅\n\nSua inscrição no Bolão Brasileirão 2026 foi aprovada. Você já pode entrar com sua conta Google e preencher os palpites.`,
     welcome:`Olá, ${name}! 🏆\n\nBem-vindo ao Bolão Brasileirão 2026! Faça seus palpites, acompanhe o ranking e boa sorte na disputa.`,
   };
@@ -4371,7 +4398,16 @@ function renderAdminRoundStatus(){
     const score=game.gols_casa!=null&&game.gols_fora!=null?`<strong class="admin-round-score">${game.gols_casa} × ${game.gols_fora}</strong>`:"";
     return `<article class="admin-round-game status-${phase}"><span class="admin-round-game-icon">${icon}</span><div class="admin-round-game-main"><strong>${escapeHtml(teamDisplayName(game.time_casa))} × ${escapeHtml(teamDisplayName(game.time_fora))}</strong><small>${escapeHtml(formatDate(game.inicio))} • ${label}</small></div>${score}</article>`;
   }).join("");
-  $("adminRoundContent").innerHTML=`${metrics}${progressHtml}${postponedHtml}${nextHtml}<details class="admin-round-details"><summary>Ver todos os jogos <span>${total}</span></summary><div class="admin-round-games">${gameRows||'<p class="muted-note">Nenhum jogo disponível.</p>'}</div></details>`;
+  const earlierGames=pendingEarlierRounds().flatMap(round=>state.games.filter(game=>Number(game.rodada)===round && !isFinished(game) && !isCancelled(game)));
+  const earlierOpen=earlierGames.filter(game=>!locked(game));
+  const earlierHtml=earlierGames.length?`<details class="admin-round-details"><summary>Jogos pendentes de rodadas anteriores <span>${earlierGames.length}</span></summary><div class="admin-round-games">${earlierGames.map(game=>{
+    const phase=gameStatusDisplay(game).key;
+    const schedule=isUndatedPostponement(game)?"Nova data a definir":`${formatDate(game.inicio)}${game.situacao_agendamento==="provisorio"?" · data em verificação":""}`;
+    const deadline=locked(game)?"Palpites fechados":`Palpites abertos até ${new Date(new Date(game.inicio).getTime()-CONFIG.lockMinutesBefore*60000).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}`;
+    const missing=!locked(game)&&state.adminProgressAvailable?state.participants.filter(profile=>!state.adminPickProgress.some(pick=>Number(pick.id_jogo)===Number(game.id_jogo) && String(pick.user_id)===String(profile.user_id))).length:0;
+    return `<article class="admin-round-game status-${adminGamePhase(game)}"><span class="admin-round-game-icon">${gameStatusDisplay(game).icon}</span><div class="admin-round-game-main"><strong>R${Number(game.rodada)} · ${escapeHtml(teamDisplayName(game.time_casa))} × ${escapeHtml(teamDisplayName(game.time_fora))}</strong><small>${escapeHtml(schedule)} · ${escapeHtml(deadline)}${!locked(game)&&state.adminProgressAvailable?` · ${missing} participante${missing===1?"":"s"} sem palpite`:""}</small></div></article>`;
+  }).join("")}${earlierOpen.length?`<div class="diagnostic-actions"><button type="button" class="secondary" data-admin-earlier-manual="${Number(earlierOpen[0].rodada)}">Compartilhar lembrete · R${Number(earlierOpen[0].rodada)}</button><button type="button" class="secondary" data-admin-earlier-push="${Number(earlierOpen[0].rodada)}">Prévia de notificações · R${Number(earlierOpen[0].rodada)}</button></div>`:""}</div></details>`:"";
+  $("adminRoundContent").innerHTML=`${metrics}${progressHtml}${earlierHtml}${postponedHtml}${nextHtml}<details class="admin-round-details"><summary>Ver todos os jogos <span>${total}</span></summary><div class="admin-round-games">${gameRows||'<p class="muted-note">Nenhum jogo disponível.</p>'}</div></details>`;
 }
 
 function auditGameContext(game){
@@ -4564,7 +4600,7 @@ function renderAdminExecutiveDashboard(){
     : 0;
   const leader=state.ranking?.[0] || null;
   const exactLeader=[...(state.ranking||[])].sort((a,b)=>(Number(b.exact)||0)-(Number(a.exact)||0)||(Number(b.total)||0)-(Number(a.total)||0))[0] || null;
-  const completion=snapshot.participants.length ? Math.round(snapshot.completed.length/snapshot.participants.length*100) : 0;
+  const completion=snapshot.participants.length ? Math.round((snapshot.participants.length-snapshot.actionablePending.length)/snapshot.participants.length*100) : 0;
   const roundLifecycle=roundLifecycleSummary(snapshot.games);
   const roundLifecycleView=roundLifecyclePresentation(roundLifecycle);
   const seasonProgress=Math.min(100,Math.round((snapshot.round||0)/38*100));
@@ -4573,7 +4609,7 @@ function renderAdminExecutiveDashboard(){
 
   $('adminExecutiveContent').innerHTML=`
     <div class="admin-executive-metrics">
-      <article><span class="admin-executive-icon">👥</span><div><small>Participantes</small><strong>${participants}</strong><em>${snapshot.completed.length}/${snapshot.participants.length || participants} concluíram a rodada</em></div></article>
+      <article><span class="admin-executive-icon">👥</span><div><small>Participantes</small><strong>${participants}</strong><em>${snapshot.participants.length-snapshot.actionablePending.length}/${snapshot.participants.length || participants} em dia nos jogos abertos</em></div></article>
       <article><span class="admin-executive-icon">⚽</span><div><small>Rodada atual</small><strong>${snapshot.round || '—'}<b>/38</b></strong><em>${seasonProgress}% da temporada</em></div></article>
       <article><span class="admin-executive-icon">🎯</span><div><small>Palpites registrados</small><strong>${totalPicks}</strong><em>em toda a competição</em></div></article>
       <article><span class="admin-executive-icon">🏟️</span><div><small>Jogos encerrados</small><strong>${finishedGames}<b>/${totalGames}</b></strong><em>com resultado disponível</em></div></article>
@@ -4582,9 +4618,9 @@ function renderAdminExecutiveDashboard(){
     </div>
     <div class="admin-round-integrity tone-${roundLifecycleView.tone}"><div><small>Integridade da rodada</small><strong>${roundLifecycleView.label}</strong><span>${roundLifecycle.concluded}/${roundLifecycle.total} jogos concluídos · ${roundLifecycle.completion}%</span></div><b>${roundLifecycle.isProvisional?"PONTUAÇÃO PROVISÓRIA":"STATUS CONSOLIDADO"}</b></div>
     <div class="admin-executive-health">
-      <div class="admin-executive-health-head"><span>Adesão aos palpites da rodada</span><strong>${completion}%</strong></div>
+      <div class="admin-executive-health-head"><span>Adesão aos jogos abertos</span><strong>${completion}%</strong></div>
       <div class="admin-executive-health-track"><i style="width:${completion}%"></i></div>
-      <p>${snapshot.pending.length?`${snapshot.pending.length} participante${snapshot.pending.length===1?'':'s'} ainda ${snapshot.pending.length===1?'precisa':'precisam'} concluir os palpites.`:'Todos os participantes concluíram os palpites desta rodada.'}</p>
+      <p>${snapshot.actionablePending.length?`${snapshot.actionablePending.length} participante${snapshot.actionablePending.length===1?'':'s'} ainda ${snapshot.actionablePending.length===1?'precisa':'precisam'} palpitar nos jogos abertos.`:'Todos os jogos abertos têm palpites.'}</p>
     </div>
     <div class="admin-executive-highlight"><span>🔥 Destaque de precisão</span><strong>${exactText}</strong></div>`;
 }
@@ -4616,16 +4652,32 @@ function closeAdminParticipantDetail(){
 }
 
 async function sendAdminReminder(){
-  const pending=state.adminSnapshot?.pending||[];
-  if(!pending.length){ message("Todos os participantes já concluíram os palpites."); return; }
+  const pending=state.adminSnapshot?.actionablePending||[];
+  if(!pending.length){ message("Todos os jogos ainda abertos têm palpites registrados."); return; }
   const names=pending.map(item=>item.name).join(", ");
   const round=state.adminSnapshot.round;
   const close=state.adminSnapshot.closeAt?new Date(state.adminSnapshot.closeAt).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"em breve";
-  const text=appendPoolLinkToWhatsAppMessage(`Olá! Ainda há palpites pendentes para a Rodada ${round} do Bolão Brasileirão 2026. Pendentes: ${names}. O próximo fechamento será ${close}. Por favor, concluam os palpites antes do prazo. Boa sorte!`,configuredPoolUrl());
+  const text=appendPoolLinkToWhatsAppMessage(`Olá! Ainda há palpites pendentes nos jogos abertos da Rodada ${round} do Bolão Brasileirão 2026. Pendentes: ${names}. O próximo fechamento será ${close}. Por favor, concluam os palpites antes do prazo. Boa sorte!`,configuredPoolUrl());
   try{
     if(navigator.share) await navigator.share({title:`Bolão • Rodada ${round}`,text});
     else { await navigator.clipboard.writeText(text); message("Lembrete copiado. Agora cole no WhatsApp."); }
   }catch(err){ if(err?.name!=="AbortError") message("Não foi possível compartilhar o lembrete.",true); }
+}
+
+async function sendEarlierRoundReminder(round){
+  const games=state.games.filter(game=>Number(game.rodada)===round && !locked(game));
+  if(!games.length) return message("Não há palpites abertos nesta rodada.");
+  if(!state.adminProgressAvailable) return message("O progresso dos palpites está indisponível. Atualize a ADM antes de preparar o lembrete.",true);
+  const pending=state.participants.filter(profile=>games.some(game=>!state.adminPickProgress.some(pick=>Number(pick.id_jogo)===Number(game.id_jogo) && String(pick.user_id)===String(profile.user_id))));
+  if(!pending.length) return message("Todos os jogos ainda abertos têm palpites registrados.");
+  const closeAt=Math.min(...games.map(game=>new Date(game.inicio).getTime()-CONFIG.lockMinutesBefore*60000));
+  const close=new Date(closeAt).toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+  const names=pending.map(profile=>profile.nome).join(", ");
+  const text=appendPoolLinkToWhatsAppMessage(`Olá! Ainda há palpites possíveis nos jogos reagendados da Rodada ${round}. Pendentes: ${names}. O próximo fechamento será ${close}. Confira seus palpites antes do prazo.`,configuredPoolUrl());
+  try{
+    if(navigator.share) await navigator.share({title:`Bolão • Rodada ${round}`,text});
+    else {await navigator.clipboard.writeText(text);message("Lembrete copiado. Agora cole no WhatsApp.");}
+  }catch(error){if(error?.name!=="AbortError") message("Não foi possível compartilhar o lembrete.",true);}
 }
 
 async function requestAdminPush(mode,details={}){
@@ -4668,7 +4720,7 @@ function closeAdminPushReminder(){
 function openAdminPushReminder(preview,selectedUserId=""){
   state.adminPushPreview=preview;
   const participants=preview.participants||[];
-  $("adminPushReminderSummary").textContent=`Rodada ${state.adminSnapshot.round} • ${preview.eligibleParticipants} participante${preview.eligibleParticipants===1?"":"s"} com notificações ativas`;
+  $("adminPushReminderSummary").textContent=`Rodada ${state.adminPushRound||state.adminSnapshot.round} • ${preview.eligibleParticipants} participante${preview.eligibleParticipants===1?"":"s"} com notificações ativas`;
   $("adminPushParticipantList").innerHTML=participants.map(participant=>{
     const eligible=participant.eligibleDevices>0;
     const devices=eligible?`${participant.eligibleDevices} aparelho${participant.eligibleDevices===1?"":"s"}`:"Notificações não ativadas";
@@ -4690,7 +4742,7 @@ async function confirmAdminPushReminder(){
   const button=$("adminPushReminderSend");
   button.disabled=true; button.textContent="Enviando…";
   try{
-    const result=await requestAdminPush("send",{selectedUserIds,audienceVersion:preview.audienceVersion});
+    const result=await requestAdminPush("send",{round:state.adminPushRound||state.adminSnapshot.round,selectedUserIds,audienceVersion:preview.audienceVersion});
     closeAdminPushReminder();
     message(`${result.sent} notificação(ões) enviada(s) para ${result.selectedParticipants} participante(s).${result.expired?` ${result.expired} assinatura(s) expirada(s) foram desativadas.`:""}`,result.failed>0);
   }catch(error){
@@ -4707,6 +4759,7 @@ async function sendAdminPushReminder(){
   button.disabled=true;
   const original=button.textContent;
   adminPushReminderReturnFocus=button;
+  state.adminPushRound=state.adminSnapshot?.round;
   button.textContent="Verificando…";
   try{
     const preview=await requestAdminPush("preview");
@@ -4724,11 +4777,28 @@ async function sendAdminPushReminder(){
   }
 }
 
+async function previewEarlierRoundPush(round,button){
+  if(!Number.isInteger(round) || !button || button.disabled) return;
+  button.disabled=true;
+  const original=button.textContent;
+  adminPushReminderReturnFocus=button;
+  state.adminPushRound=round;
+  button.textContent="Verificando…";
+  try{
+    const preview=await requestAdminPush("preview",{round});
+    if(!preview.pendingParticipants) return message("Não há palpites ainda disponíveis pendentes nesta rodada.");
+    if(!preview.eligibleDevices) return message(`${preview.pendingParticipants} participante(s) estão pendentes, mas nenhum ativou notificações.`,true);
+    openAdminPushReminder(preview);
+  }catch(error){message(error.message||"Não foi possível preparar os lembretes.",true);}
+  finally{button.disabled=false;button.textContent=original;}
+}
+
 async function sendAdminPushReminderForParticipant(userId,button){
   if(!userId || !button || button.disabled) return;
   button.disabled=true;
   const original=button.innerHTML;
   adminPushReminderReturnFocus=button;
+  state.adminPushRound=state.adminSnapshot?.round;
   button.textContent="Verificando…";
   try{
     const preview=await requestAdminPush("preview");
@@ -4907,9 +4977,13 @@ async function renderAdminDiagnostic(){
     const quota=d.sync.quota||{};
     const quotaHtml=providerView.provider==="api-football"?`<div><span>Cota diária restante</span><strong>${quota.dailyRemaining??"—"} / ${quota.dailyLimit??"—"}</strong></div><div><span>Cota por minuto restante</span><strong>${quota.minuteRemaining??"—"} / ${quota.minuteLimit??"—"}</strong></div>`:"";
     const [cacheIcon,cacheLabel]=diagnosticCacheStatus(d.cache);
+    const earlierSchedule=pendingEarlierRounds().flatMap(round=>state.games.filter(game=>Number(game.rodada)===round && !isFinished(game) && !isCancelled(game)));
+    const awaitingDate=earlierSchedule.filter(isUndatedPostponement).length;
+    const provisionalDates=earlierSchedule.filter(game=>game.situacao_agendamento==="provisorio").length;
     content.innerHTML=`
       <div class="diagnostic-health-grid">${services.map(([name,item])=>{const [icon,label]=diagnosticServiceLabel(item);return `<article><span>${escapeHtml(name)}</span><strong>${icon} ${label}</strong></article>`}).join("")}</div>
       <small class="diagnostic-note">A API-Football é a fonte esportiva oficial exclusiva.</small>
+      <div class="diagnostic-section"><h3>Agenda de rodadas anteriores</h3><p class="muted-note">Saúde da API e confirmação do calendário são verificações diferentes. ${earlierSchedule.length} jogo${earlierSchedule.length===1?"":"s"} pendente${earlierSchedule.length===1?"":"s"}; ${provisionalDates} data${provisionalDates===1?"":"s"} em verificação; ${awaitingDate} sem nova data.</p></div>
       ${d.sportsData?.status==="delayed"?`<div class="diagnostic-data-alert" role="alert"><strong>⚠ Dados esportivos aguardando atualização</strong><p>${Number(d.sportsData.delayedCount)||0} jogo(s) permanecem agendados mais de ${Number(d.sportsData.thresholdMinutes)||30} minutos após o início informado. A API pode estar online sem ter publicado o conteúdo atual.</p><ul>${(d.sportsData.delayedGames||[]).slice(0,6).map(game=>`<li>${escapeHtml(teamDisplayName(game.home))} × ${escapeHtml(teamDisplayName(game.away))} · ${diagnosticDate(game.kickoff)}</li>`).join("")}</ul></div>`:""}
       <div class="diagnostic-section"><h3>Sincronização</h3><div class="diagnostic-metrics">
         <div><span>Última execução</span><strong>${diagnosticDate(last?.criado_em)}</strong></div><div><span>Resultado</span><strong>${last?(last.sucesso?"🟢 Sucesso":"🔴 Erro"):"—"}</strong></div>
@@ -5103,13 +5177,13 @@ function updateAdminExperience(snapshot=state.adminSnapshot || buildAdminSnapsho
     .filter(game=>!isFinished(game) && new Date(game.inicio).getTime()>now)
     .sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
   setAnimatedText("adminSmartRound",snapshot.round || "—");
-  setAnimatedText("adminSmartPicks",`${snapshot.completed.length}/${snapshot.participants.length} concluíram`);
+  setAnimatedText("adminSmartPicks",`${snapshot.participants.length-snapshot.actionablePending.length}/${snapshot.participants.length} em dia`);
   setAnimatedText("adminSmartNext",nextGame?formatRemaining(new Date(nextGame.inicio).getTime()-now):(snapshot.roundFinished?"Rodada encerrada":"Sem jogo agendado"));
 
   const attentionBadge=$("adminNavAttentionBadge");
   if(attentionBadge){
-    attentionBadge.textContent=String(snapshot.pending.length);
-    attentionBadge.classList.toggle("hidden",snapshot.pending.length===0);
+    attentionBadge.textContent=String(snapshot.actionablePending.length);
+    attentionBadge.classList.toggle("hidden",snapshot.actionablePending.length===0);
     attentionBadge.classList.toggle("is-urgent",Boolean(snapshot.remaining!=null && snapshot.remaining<=2*3600000));
   }
   const liveCount=snapshot.games.filter(game=>adminGamePhase(game,now)==="live").length;
@@ -5696,6 +5770,12 @@ $("copyRegistrationLinkBtn")?.addEventListener("click",copyRegistrationLink);
 $("adminRefreshBtn").onclick=refreshAllAdminData;
 $("adminAttentionAction").onclick=handleAdminAction;
 $("adminPushReminderAction")?.addEventListener("click",sendAdminPushReminder);
+$("adminRoundContent")?.addEventListener("click",event=>{
+  const manual=event.target.closest("[data-admin-earlier-manual]");
+  if(manual) return sendEarlierRoundReminder(Number(manual.dataset.adminEarlierManual));
+  const push=event.target.closest("[data-admin-earlier-push]");
+  if(push) previewEarlierRoundPush(Number(push.dataset.adminEarlierPush),push);
+});
 $("adminPushReminderClose")?.addEventListener("click",closeAdminPushReminder);
 $("adminPushReminderCancel")?.addEventListener("click",closeAdminPushReminder);
 $("adminPushReminderSend")?.addEventListener("click",confirmAdminPushReminder);
@@ -5837,6 +5917,10 @@ $("homeTab")?.addEventListener("click",async event=>{
   if(!target) return;
   const action=target.dataset.homeAction;
   if(action==="temporary-ranking"){ openTemporaryRanking(target); return; }
+  if(action==="legacy-games"){
+    if($("roundSelect")) $("roundSelect").value=target.dataset.round;
+    navigateTo("games");renderGames();return;
+  }
   if(action==="calendar"){ openMatchCalendar(target); return; }
   if(action==="round-highlights"){ openRoundHighlights(target.dataset.roundHighlightsRound,target); return; }
   if(action==="refresh"){ target.disabled=true; try{ await refresh(); } finally{ target.disabled=false; } return; }

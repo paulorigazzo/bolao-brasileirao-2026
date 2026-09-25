@@ -1,3 +1,11 @@
+# v6.44.2 — Contexto das rodadas e jogos reagendados
+
+- Mantém a rodada principal do campeonato estável durante partidas reagendadas da Rodada 21.
+- Expõe os jogos antigos pendentes, seus palpites e Destaques nos acessos da Home, Estatísticas, Jogos, Calendário e ADM.
+- Separa pendências acionáveis de lacunas históricas no painel ADM e remove o horário antigo de partidas sem nova data.
+- Migração versionada de confirmação CBF aplicada no Supabase; histórico remoto e registro canônico reconciliados.
+- Detalhes: [nota da versão](docs/releases/v6.44.2-contexto-jogos-reagendados.md).
+
 # v6.44.1 — Sincronização contínua de jogos adiados
 
 - Mantém partidas adiadas elegíveis na manutenção periódica da API-Football.

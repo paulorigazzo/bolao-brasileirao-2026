@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
+import { competitionRound } from "../js/round-context.js";
 import { diagnosticCrestCheck, diagnosticLogsForProvider, diagnosticProviderStatus } from "../netlify/functions/diagnostico-sistema.mjs";
 import { SPORTS_DATA_PROVIDER, providerClassificationSnapshotId } from "../netlify/functions/_sports-data-provider.mjs";
 
@@ -33,6 +34,7 @@ const currentRoundNumber = runInNewContext(`${currentRoundSource}; currentRoundN
   state: { games: [] },
   gameStatusDisplay: (game) => ({ key: game.status === "em_andamento" ? "live" : "future" }),
   isFinished: (game) => game.status === "encerrado",
+  competitionRound,
   Date,
 });
 const renderDiagnosticRound = new Function("state", "currentRoundNumber", `return ${diagnosticRoundExpression};`);
@@ -40,6 +42,6 @@ const nextGame = { rodada: 28, status: "agendado", inicio: new Date(Date.now() +
 assert.equal(renderDiagnosticRound({ games: [] }, currentRoundNumber), "—");
 assert.equal(renderDiagnosticRound({ games: [nextGame] }, () => currentRoundNumber([nextGame])), 28);
 const liveGame = { rodada: 27, status: "em_andamento", inicio: new Date(Date.now() - 600_000).toISOString() };
-assert.equal(renderDiagnosticRound({ games: [liveGame, nextGame] }, () => currentRoundNumber([liveGame, nextGame])), 27);
+assert.equal(renderDiagnosticRound({ games: [liveGame, nextGame] }, () => currentRoundNumber([liveGame, nextGame])), 28);
 
 console.log("Diagnóstico da fonte oficial exclusiva verificado: status, cache, cotas e escudos.");
