@@ -1,5 +1,5 @@
-6.44.1
+6.44.2
 
-Partidas adiadas continuam na manutenção da API-Football até receber nova data, resultado ou cancelamento.
+Rodadas anteriores com jogos reagendados permanecem acessíveis sem substituir a rodada principal. A migração de confirmação das duas datas CBF da Rodada 21 está preparada e aguarda aplicação autorizada.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

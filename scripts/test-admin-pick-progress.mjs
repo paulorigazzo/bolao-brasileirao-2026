@@ -38,8 +38,9 @@ assert.deepEqual(await loadAdminPickProgress({supabase,isAdmin:false,gameIds:rou
 assert.deepEqual(await loadAdminPickProgress({supabase,isAdmin:true,gameIds:[]}),{data:[],error:null});
 
 const app=readFileSync(new URL("../js/app.js",import.meta.url),"utf8");
-assert.match(app,/adminRoundGameIds\(games,currentRoundNumber\(games\)\)/);
+assert.match(app,/adminRoundGameIds\(games,mainRound\)/);
+assert.match(app,/earlierRounds\.map\(round=>adminRoundGameIds\(games,round\)\)/);
 assert.match(app,/loadAdminPickProgress\(\{supabase:sb,isAdmin:isAdminUser\(\),gameIds:adminGameIds\}\)/);
 assert.doesNotMatch(app,/sb\.from\("progresso_palpites_adm"\)\.select/);
 
-console.log("Progresso ADM verificado: rodada atual filtrada antes do limite de mil linhas.");
+console.log("Progresso ADM verificado: rodada atual e rodadas anteriores pendentes filtradas antes do limite de mil linhas.");
