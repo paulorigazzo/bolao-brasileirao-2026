@@ -1,3 +1,10 @@
+# v6.44.3 — Seletor de rodadas com rolagem horizontal
+
+- Exibe todas as rodadas registradas em uma faixa horizontal rolável nas telas Jogos e Palpites do participante.
+- Mantém setas, botão Rodada Atual, seleção por teclado e o seletor nativo acessível.
+- Alinha a rodada selecionada sem deslocar verticalmente a página.
+- Detalhes: [nota da versão](docs/releases/v6.44.3-seletor-rodadas-horizontal.md).
+
 # v6.44.2 — Contexto das rodadas e jogos reagendados
 
 - Mantém a rodada principal do campeonato estável durante partidas reagendadas da Rodada 21.

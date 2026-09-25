@@ -3003,15 +3003,21 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
   white-space:nowrap!important;
 }
 .round-number-strip{
-  display:grid;
-  grid-template-columns:repeat(5,minmax(34px,1fr));
+  display:flex;
   align-items:center;
   gap:4px;
   min-width:0;
+  overflow-x:auto;
+  overflow-y:hidden;
+  overscroll-behavior-x:contain;
+  scroll-snap-type:x proximity;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(237,247,241,.35) transparent;
 }
 .round-number-button{
-  min-width:0;
+  flex:0 0 46px;
   min-height:46px;
+  scroll-snap-align:center;
   border:0;
   border-radius:17px;
   background:transparent;
@@ -3022,6 +3028,7 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
   transition:background .16s ease,transform .16s ease,box-shadow .16s ease,color .16s ease;
 }
 .round-number-button:active{transform:scale(.95)}
+.round-number-button:focus-visible{outline:2px solid #f5c65e;outline-offset:-3px}
 .round-number-button.is-selected{
   background:linear-gradient(135deg,#08b951,#19ce62);
   color:#fff;
@@ -3054,7 +3061,7 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
     padding:6px!important;
   }
   .round-number-strip{gap:2px}
-  .round-number-button{min-height:42px;border-radius:15px;font-size:.9rem}
+  .round-number-button{flex-basis:42px;min-height:42px;border-radius:15px;font-size:.9rem}
   .games-round-toolbar .current-round-button{
     width:100%!important;
     min-width:0!important;
@@ -3065,7 +3072,7 @@ linear-gradient(145deg,#0d4228,#061c12);border-color:rgba(65,220,133,.52);box-sh
 }
 @media(max-width:360px){
   .games-round-toolbar{grid-template-columns:38px minmax(0,1fr) 38px!important}
-  .round-number-button{min-height:39px;font-size:.82rem}
+  .round-number-button{flex-basis:38px;min-height:39px;font-size:.82rem}
 }
 
 /* v5.3.4 — comparação entre palpite do participante e resultado real */

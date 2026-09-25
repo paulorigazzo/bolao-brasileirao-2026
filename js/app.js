@@ -31,7 +31,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.44.2";
+const APP_VERSION = "6.44.3";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1238,22 +1238,71 @@ function updateCurrentRoundButton(){
   button.title=selected===current ? `Rodada atual: ${current}ª` : `Ir para a rodada atual (${current}ª)`;
 }
 
+function roundOptions(select){
+  return [...select.options].map(option=>Number(option.value)).filter(Number.isFinite);
+}
+
+function centerSelectedRoundInStrip(strip){
+  const selected=strip?.querySelector(".round-number-button.is-selected");
+  if(!selected || !strip.clientWidth) return;
+  const stripRect=strip.getBoundingClientRect();
+  const selectedRect=selected.getBoundingClientRect();
+  const left=strip.scrollLeft+selectedRect.left-stripRect.left-(strip.clientWidth-selectedRect.width)/2;
+  strip.scrollTo({left:Math.max(0,left),behavior:prefersReducedMotion()?"auto":"smooth"});
+  strip.dataset.needsCenter="false";
+}
+
+function renderScrollableRoundStrip(strip,select,attribute,onSelect){
+  if(!strip || !select) return [];
+  const rounds=roundOptions(select);
+  const selected=Number(select.value);
+  const roundList=rounds.join(",");
+  if(strip.dataset.roundList!==roundList){
+    strip.innerHTML=rounds.map(round=>`<button type="button" class="round-number-button" ${attribute}="${round}" aria-pressed="false" aria-label="Selecionar rodada ${round}">${round}</button>`).join("");
+    strip.dataset.roundList=roundList;
+    strip.dataset.needsCenter="true";
+  }
+  if(!strip.dataset.roundEventsBound){
+    const chooseRound=(round,focus)=>{
+      if(!roundOptions(select).includes(round)) return;
+      select.value=String(round);
+      onSelect();
+      if(focus) strip.querySelector(`[${attribute}="${round}"]`)?.focus({preventScroll:true});
+    };
+    strip.addEventListener("click",event=>{
+      const button=event.target.closest(`[${attribute}]`);
+      if(button && strip.contains(button)) chooseRound(Number(button.getAttribute(attribute)),false);
+    });
+    strip.addEventListener("keydown",event=>{
+      if(!event.target.closest(`[${attribute}]`)) return;
+      const available=roundOptions(select);
+      const index=available.indexOf(Number(select.value));
+      const next=event.key==="ArrowRight"?index+1:event.key==="ArrowLeft"?index-1:event.key==="Home"?0:event.key==="End"?available.length-1:null;
+      if(next===null) return;
+      event.preventDefault();
+      if(next>=0 && next<available.length) chooseRound(available[next],true);
+    });
+    strip.dataset.roundEventsBound="true";
+  }
+  strip.querySelectorAll(`[${attribute}]`).forEach(button=>{
+    const active=Number(button.getAttribute(attribute))===selected;
+    button.classList.toggle("is-selected",active);
+    button.setAttribute("aria-pressed",String(active));
+    button.tabIndex=active?0:-1;
+  });
+  if(strip.dataset.selectedRound!==String(selected)) strip.dataset.needsCenter="true";
+  strip.dataset.selectedRound=String(selected);
+  if(strip.dataset.needsCenter==="true") requestAnimationFrame(()=>centerSelectedRoundInStrip(strip));
+  return rounds;
+}
+
 function renderRoundNumberStrip(){
   const strip=$("roundNumberStrip");
   const select=$("roundSelect");
   if(!strip || !select) return;
-  const rounds=[...select.options].map(option=>Number(option.value)).filter(Number.isFinite);
+  const rounds=renderScrollableRoundStrip(strip,select,"data-round",renderGames);
   const selected=Number(select.value);
   const selectedIndex=Math.max(0,rounds.indexOf(selected));
-  const visibleCount=5;
-  let start=Math.max(0,selectedIndex-Math.floor(visibleCount/2));
-  start=Math.min(start,Math.max(0,rounds.length-visibleCount));
-  const visible=rounds.slice(start,start+visibleCount);
-  strip.innerHTML=visible.map(round=>`<button type="button" class="round-number-button ${round===selected?'is-selected':''}" data-round="${round}" aria-pressed="${round===selected}" aria-label="Selecionar rodada ${round}">${round}</button>`).join("");
-  strip.querySelectorAll('[data-round]').forEach(button=>button.addEventListener('click',()=>{
-    select.value=button.dataset.round;
-    renderGames();
-  }));
   const previous=$("prevRound"), next=$("nextRound");
   if(previous) previous.disabled=selectedIndex<=0;
   if(next) next.disabled=selectedIndex>=rounds.length-1;
@@ -3165,13 +3214,9 @@ function updateRankingPicksRoundControls(){
   const select=$("rankingPicksRoundSelect");
   const strip=$("rankingPicksRoundNumberStrip");
   if(!select || !strip) return;
-  const rounds=[...select.options].map(option=>Number(option.value)).filter(Number.isFinite);
+  const rounds=renderScrollableRoundStrip(strip,select,"data-ranking-picks-round",renderRankingParticipantPicks);
   const selected=Number(select.value);
   const selectedIndex=Math.max(0,rounds.indexOf(selected));
-  const visibleCount=5;
-  let start=Math.max(0,selectedIndex-Math.floor(visibleCount/2));
-  start=Math.min(start,Math.max(0,rounds.length-visibleCount));
-  strip.innerHTML=rounds.slice(start,start+visibleCount).map(round=>`<button type="button" class="round-number-button ${round===selected?"is-selected":""}" data-ranking-picks-round="${round}" aria-pressed="${round===selected}" aria-label="Selecionar rodada ${round}">${round}</button>`).join("");
   const previous=$("rankingPicksPrevRound");
   const next=$("rankingPicksNextRound");
   if(previous) previous.disabled=selectedIndex<=0;
@@ -3381,6 +3426,7 @@ function openRankingParticipantPicks(key,trigger){
   renderRankingParticipantPicks();
   setRankingPicksModalView("picks");
   $("rankingPicksModal").classList.remove("hidden");
+  requestAnimationFrame(()=>centerSelectedRoundInStrip($("rankingPicksRoundNumberStrip")));
   document.body.classList.add("modal-open");
   setTimeout(()=>$("rankingPicksModalClose")?.focus(),40);
 }
@@ -5397,6 +5443,7 @@ function applyNavigationState(tabName){
     if(active) item.setAttribute("aria-current","page"); else item.removeAttribute("aria-current");
   });
   ["home","games","myTeam","ranking","standings","stats","admin","rules","profile"].forEach(name=>show(`${name}Tab`,name===tabName));
+  if(tabName==="games") requestAnimationFrame(()=>centerSelectedRoundInStrip($("roundNumberStrip")));
   if(tabName==="home") renderHome();
   if(tabName==="myTeam") renderMyTeam();
   if(tabName==="ranking") renderRanking();
@@ -5692,12 +5739,6 @@ document.addEventListener("click",event=>{
 $("temporaryRankingModalClose")?.addEventListener("click",closeTemporaryRanking);
 $("temporaryRankingModal")?.addEventListener("click",event=>{if(event.target===$("temporaryRankingModal")) closeTemporaryRanking();});
 $("rankingPicksRoundSelect")?.addEventListener("change",renderRankingParticipantPicks);
-$("rankingPicksRoundNumberStrip")?.addEventListener("click",event=>{
-  const button=event.target.closest("[data-ranking-picks-round]");
-  if(!button) return;
-  $("rankingPicksRoundSelect").value=button.dataset.rankingPicksRound;
-  renderRankingParticipantPicks();
-});
 $("rankingPicksPrevRound")?.addEventListener("click",()=>changeRankingPicksRound(-1));
 $("rankingPicksNextRound")?.addEventListener("click",()=>changeRankingPicksRound(1));
 $("rankingPicksCurrentRoundBtn")?.addEventListener("click",goToRankingPicksCurrentRound);
