@@ -1,6 +1,6 @@
 {
   "name": "bolao-br-2026",
-  "version": "6.44.5",
+  "version": "6.44.6",
   "private": true,
   "type": "module",
   "scripts": {
@@ -39,7 +39,7 @@
     "test:snapshot-exporter": "node scripts/test-snapshot-exporter.mjs",
     "test:documentation-contracts": "node scripts/test-documentation-contracts.mjs",
     "test:stats": "node scripts/test-statistics-engine.mjs",
-    "test:round-highlights": "node scripts/test-round-highlights-engine.mjs",
+    "test:round-highlights": "node scripts/test-round-highlights-engine.mjs && node scripts/test-home-round-highlights-context.mjs",
     "test:participant-duel": "node scripts/test-participant-duel-engine.mjs",
     "test:admin-round-share": "node scripts/test-admin-round-share.mjs",
     "test:match-calendar": "node scripts/test-match-calendar-engine.mjs",
