@@ -1,3 +1,10 @@
+# v6.44.4 — Rodada atual durante partidas em andamento
+
+- Corrige o avanço prematuro para a rodada seguinte enquanto a rodada atual ainda tem jogos regulares pendentes.
+- Mantém o contexto de pendências da ADM alinhado à rodada em andamento e preserva o acompanhamento separado de partidas antigas reagendadas.
+- Adiciona testes de regressão da transição 29 → 30 e da consulta administrativa de palpites.
+- Detalhes: [nota da versão](docs/releases/v6.44.4-rodada-atual-em-andamento.md).
+
 # v6.44.3 — Seletor de rodadas com rolagem horizontal
 
 - Exibe todas as rodadas registradas em uma faixa horizontal rolável nas telas Jogos e Palpites do participante.

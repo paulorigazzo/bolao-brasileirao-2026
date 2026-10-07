@@ -1,5 +1,5 @@
-6.44.3
+6.44.4
 
-Rodadas anteriores com jogos reagendados permanecem acessíveis sem substituir a rodada principal. A migração de confirmação das duas datas CBF da Rodada 21 foi aplicada e validada no Supabase.
+A rodada atual permanece em contexto enquanto houver jogos regulares pendentes. A ADM acompanha os palpites dessa rodada sem antecipar a seguinte; partidas antigas reagendadas permanecem acessíveis em separado.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)
