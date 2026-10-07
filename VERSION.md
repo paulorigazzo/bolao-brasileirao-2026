@@ -1,5 +1,5 @@
-6.44.5
+6.44.6
 
-Os cards recolhidos dos jogos futuros da rodada atual exibem o prazo de palpites e o fechamento antes do início. Rodadas futuras, passadas, jogos encerrados e demais estados mantêm seu comportamento.
+O card de Destaques da Home prioriza a rodada atual quando há destaques disponíveis. Rodadas antigas pendentes permanecem como alternativa e acessíveis separadamente nas Estatísticas.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

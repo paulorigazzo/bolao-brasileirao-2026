@@ -31,7 +31,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.44.5";
+const APP_VERSION = "6.44.6";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2371,15 +2371,17 @@ function latestRoundHighlightsCandidate(beforeRound=Infinity){
 }
 
 function homeRoundHighlightsContext({round,lifecycle,nextGame,now=Date.now()}){
+  // A rodada atual tem prioridade; jogos antigos pendentes são uma alternativa.
+  if(lifecycle.status==="FINISHED") return {round,mode:"finished"};
+  if(roundHighlightsAvailable(round)) return {round,mode:"live"};
+  if(isPostponedRoundHighlightsEligible(lifecycle)) return {round,mode:"partial"};
+
   const earlier=pendingEarlierRounds().find(candidate=>state.games.some(game=>Number(game.rodada)===candidate && gameStatusDisplay(game).key==="live")) || pendingEarlierRounds()[0];
   if(earlier){
     const earlierLifecycle=roundLifecycleSummary(state.games.filter(game=>Number(game.rodada)===earlier));
     if(roundHighlightsAvailable(earlier)) return {round:earlier,mode:"live"};
     if(isPostponedRoundHighlightsEligible(earlierLifecycle)) return {round:earlier,mode:"partial"};
   }
-  if(lifecycle.status==="FINISHED") return {round,mode:"finished"};
-  if(roundHighlightsAvailable(round)) return {round,mode:"live"};
-  if(isPostponedRoundHighlightsEligible(lifecycle)) return {round,mode:"partial"};
   if(lifecycle.status==="PARTIAL") return null;
   const previous=latestRoundHighlightsCandidate(round);
   if(!previous) return null;

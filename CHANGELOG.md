@@ -1,3 +1,10 @@
+# v6.44.6 — Prioridade da rodada atual nos Destaques da Home
+
+- Prioriza os destaques da rodada atual no card principal da Home quando disponíveis.
+- Mantém rodadas antigas pendentes como alternativa apenas quando a atual ainda não tem destaques e preserva seu acesso separado nas Estatísticas.
+- Adiciona testes da prioridade da rodada atual e das alternativas anteriores.
+- Detalhes: [nota da versão](docs/releases/v6.44.6-destaques-home-rodada-atual.md).
+
 # v6.44.5 — Prazo de palpites no cabeçalho da rodada atual
 
 - Mostra “Fecha em…” no card recolhido dos jogos futuros da rodada atual, inclusive com palpite salvo, e “Palpites encerrados” após o fechamento.
