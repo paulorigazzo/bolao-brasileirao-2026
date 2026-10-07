@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { competitionRound } from "../js/round-context.js";
 import { adminRoundGameIds, loadAdminPickProgress } from "../js/admin-pick-progress.js";
 
 const games=Array.from({length:20},(_,index)=>({
@@ -42,5 +43,19 @@ assert.match(app,/adminRoundGameIds\(games,mainRound\)/);
 assert.match(app,/earlierRounds\.map\(round=>adminRoundGameIds\(games,round\)\)/);
 assert.match(app,/loadAdminPickProgress\(\{supabase:sb,isAdmin:isAdminUser\(\),gameIds:adminGameIds\}\)/);
 assert.doesNotMatch(app,/sb\.from\("progresso_palpites_adm"\)\.select/);
+
+
+
+const roundNow=Date.parse("2026-10-07T22:00:00Z");
+const roundGames=[
+  {id_jogo:2901,rodada:29,status:"live",inicio:"2026-10-07T21:00:00Z"},
+  {id_jogo:2902,rodada:29,status:"scheduled",inicio:"2026-10-08T21:00:00Z"},
+  {id_jogo:3001,rodada:30,status:"scheduled",inicio:"2026-10-14T21:00:00Z"}
+];
+await loadAdminPickProgress({supabase,isAdmin:true,gameIds:adminRoundGameIds(roundGames,competitionRound(roundGames,roundNow))});
+assert.deepEqual(requestedIds,[2901,2902],"ADM consulta a rodada 29 em andamento, sem antecipar a 30");
+const completedRoundGames=roundGames.map(game=>game.rodada===29?{...game,status:"finished"}:game);
+await loadAdminPickProgress({supabase,isAdmin:true,gameIds:adminRoundGameIds(completedRoundGames,competitionRound(completedRoundGames,roundNow))});
+assert.deepEqual(requestedIds,[3001],"ADM consulta a rodada 30 após a conclusão da 29");
 
 console.log("Progresso ADM verificado: rodada atual e rodadas anteriores pendentes filtradas antes do limite de mil linhas.");
