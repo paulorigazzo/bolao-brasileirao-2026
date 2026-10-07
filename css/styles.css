@@ -4419,3 +4419,17 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 .premium-pitch-player-details li.lineup-replacement-player{margin-top:3px;padding-top:5px;border-top:1px solid rgba(255,255,255,.1);color:var(--green2);font-weight:900}
 .premium-pitch-player-details li.lineup-replacement-player i{font-style:normal}
 .premium-pitch-player-details li.lineup-replacement-event{padding-left:10px}
+
+/* Prazo apenas nos cabeçalhos de jogos futuros da rodada atual. */
+.premium-match-card .premium-toggle-status.is-pick-deadline{
+  max-width:96px;
+  white-space:normal;
+  line-height:1.2;
+  font-variant-numeric:tabular-nums;
+}
+@media(max-width:520px){
+  .premium-match-card .premium-toggle-status.is-pick-deadline{max-width:82px}
+}
+@media(max-width:380px){
+  .premium-match-card .premium-toggle-status.is-pick-deadline{max-width:74px}
+}

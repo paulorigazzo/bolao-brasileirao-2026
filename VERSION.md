@@ -1,5 +1,5 @@
-6.44.4
+6.44.5
 
-A rodada atual permanece em contexto enquanto houver jogos regulares pendentes. A ADM acompanha os palpites dessa rodada sem antecipar a seguinte; partidas antigas reagendadas permanecem acessíveis em separado.
+Os cards recolhidos dos jogos futuros da rodada atual exibem o prazo de palpites e o fechamento antes do início. Rodadas futuras, passadas, jogos encerrados e demais estados mantêm seu comportamento.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

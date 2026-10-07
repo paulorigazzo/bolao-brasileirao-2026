@@ -1,6 +1,6 @@
 {
   "name": "bolao-br-2026",
-  "version": "6.44.4",
+  "version": "6.44.5",
   "private": true,
   "type": "module",
   "scripts": {
@@ -55,7 +55,7 @@
     "test:game-goal-events": "node scripts/test-game-goal-events.mjs && npm run test:game-goal-events-backfill",
     "test:game-goal-events-backfill": "node scripts/test-api-football-goal-event-backfill.mjs",
     "events:round26:dry-run": "node scripts/backfill-api-football-goal-events.mjs",
-    "test:games-score-input": "node scripts/test-games-score-input.mjs",
+    "test:games-score-input": "node scripts/test-games-score-input.mjs && node scripts/test-game-header-deadline.mjs",
     "test:home-live-card": "node scripts/test-home-live-card.mjs",
     "test:live-match-minute": "node scripts/test-live-match-minute.mjs",
     "test:scheduled-live-estimate": "node scripts/test-scheduled-live-estimate.mjs",
