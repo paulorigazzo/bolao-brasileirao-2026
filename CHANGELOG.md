@@ -1,3 +1,10 @@
+# v6.44.5 — Prazo de palpites no cabeçalho da rodada atual
+
+- Mostra “Fecha em…” no card recolhido dos jogos futuros da rodada atual, inclusive com palpite salvo, e “Palpites encerrados” após o fechamento.
+- Preserva os cards das outras rodadas, todos os estados já existentes e o conteúdo expandido.
+- Atualiza o indicador pelo relógio existente e adiciona testes da renderização, fechamento e mudança de rodada.
+- Detalhes: [nota da versão](docs/releases/v6.44.5-prazo-palpites-cabecalho.md).
+
 # v6.44.4 — Rodada atual durante partidas em andamento
 
 - Corrige o avanço prematuro para a rodada seguinte enquanto a rodada atual ainda tem jogos regulares pendentes.

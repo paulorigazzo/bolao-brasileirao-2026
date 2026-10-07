@@ -31,7 +31,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.44.4";
+const APP_VERSION = "6.44.5";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1709,6 +1709,13 @@ function premiumGameDetails(g){
   const lineups=model.lineups?section("lineups","Escalações",lineupContent(),model.lineups.observedAt):"";
   return `<div class="premium-game-details">${statistics}${lineups}</div>`;
 }
+
+function gameHeaderDeadline(game){
+  if(Number(game.rodada)!==Number(currentRoundNumber())) return "";
+  if(gameStatusDisplay(game).key!=="future" || isScheduledLiveEstimate(game)) return "";
+  return deadlineText(game);
+}
+
 function premiumMatchCard(g){
   const favorite=favoriteTeamMatchData(g);
   const favoriteTeamName=favorite.homeFavorite?g.time_casa:favorite.awayFavorite?g.time_fora:"";
@@ -1723,6 +1730,7 @@ function premiumMatchCard(g){
   const liveMinute=live&&!interval?liveMatchMinute(g):"";
   const liveMinuteTitle=estimatedLive?' title="Início e minuto estimados pelo horário programado; aguardando confirmação da fonte"':liveMinute.startsWith("~")?' title="Minuto estimado; a fonte não informou o relógio oficial"':"";
   const headerStatusLabel=status.key==="cancelled"?"CANCELADO":suspended?"SUSPENSO":status.key==="postponed"?"ADIADO":finished?"ENCERRADO":interval?"INTERVALO":live?`AO VIVO${liveMinute?` • ${liveMinute}'`:""}`:estimatedLive?scheduledLiveLabel(g):earlierProvisional?"DATA EM VERIFICAÇÃO":"";
+  const headerDeadline=headerStatusLabel?"":gameHeaderDeadline(g);
   const expandedStatusLabel=headerStatusLabel|| (isLocked?"FECHADO":pick?"SALVO":"ABERTO");
   const summaryScore=finished&&hasScore?`${g.gols_casa} × ${g.gols_fora}`:live&&hasScore?`${g.gols_casa} × ${g.gols_fora}`:estimatedLive?"– × –":pick?`${pick.gols_casa} × ${pick.gols_fora}`:"Palpite pendente";
   const center=finished&&hasScore
@@ -1745,7 +1753,7 @@ function premiumMatchCard(g){
     <button class="game-toggle premium-game-toggle" type="button" aria-expanded="false">
       <span class="premium-toggle-time"><strong>${isUndatedPostponement(g)?"A definir":premiumTime(g.inicio)}</strong><small title="${escapeHtml(g.local_partida||"Local a definir")}">${escapeHtml(g.local_partida||"Local a definir")}</small></span>
       <span class="premium-toggle-match">${compactTeam(g.time_casa_logo,g.time_casa).replace("game-summary-team",`game-summary-team${favorite.homeFavorite?" is-favorite-team":""}`)}<span class="premium-toggle-score">${escapeHtml(summaryScore)}</span>${compactTeam(g.time_fora_logo,g.time_fora).replace("game-summary-team",`game-summary-team${favorite.awayFavorite?" is-favorite-team":""}`)}</span>
-      <span class="premium-toggle-side">${favorite.isFavoriteMatch?favoriteHeartBadge(favoriteTeamName):""}<span class="premium-toggle-status" data-game-header-status${liveMinuteTitle}>${headerStatusLabel}</span>${headerPointsLabel!==""?`<span class="premium-toggle-points" aria-label="${headerPointsLabel} pontos no jogo"><span aria-hidden="true">★</span>${headerPointsLabel}</span>`:""}<span class="game-chevron" aria-hidden="true">⌄</span></span>
+      <span class="premium-toggle-side">${favorite.isFavoriteMatch?favoriteHeartBadge(favoriteTeamName):""}<span class="premium-toggle-status${headerDeadline?" is-pick-deadline":""}" data-game-header-status${liveMinuteTitle}>${headerStatusLabel||headerDeadline}</span>${headerPointsLabel!==""?`<span class="premium-toggle-points" aria-label="${headerPointsLabel} pontos no jogo"><span aria-hidden="true">★</span>${headerPointsLabel}</span>`:""}<span class="game-chevron" aria-hidden="true">⌄</span></span>
     </button>
     <div class="game-collapsible" style="max-height:0;opacity:0">
       <div class="game-collapsible-inner premium-game-body premium-game-body-v2">
@@ -1824,7 +1832,11 @@ function refreshVisibleGameClocks(){
     const header=card.querySelector("[data-game-header-status]");
     const expanded=card.querySelector("[data-game-expanded-status]");
     if(deadline) deadline.textContent=`◷ ${deadlineText(game)}`;
-    if(header) header.textContent=headerLabel;
+    if(header){
+      const headerDeadline=headerLabel?"":gameHeaderDeadline(game);
+      header.textContent=headerLabel||headerDeadline;
+      header.classList.toggle("is-pick-deadline",Boolean(headerDeadline));
+    }
     if(expanded) expanded.textContent=expandedLabel;
     const clockTitle=estimatedLive?"Início e minuto estimados pelo horário programado; aguardando confirmação da fonte":liveMinute.startsWith("~")?"Minuto estimado; a fonte não informou o relógio oficial":"";
     if(header) header.title=clockTitle;
