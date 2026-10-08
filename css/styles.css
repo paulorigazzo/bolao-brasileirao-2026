@@ -4433,3 +4433,55 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 @media(max-width:380px){
   .premium-match-card .premium-toggle-status.is-pick-deadline{max-width:74px}
 }
+
+/* Campanha do clube: consulta compartilhada por Classificação e Meu Time. */
+.team-campaign-modal{width:min(100%,700px);max-height:92vh;display:flex;flex-direction:column;gap:12px;padding:22px;overflow:auto}
+.team-campaign-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.team-campaign-header h2{margin:5px 0}
+.team-campaign-selector{display:flex;align-items:center;gap:12px;font-weight:800}
+.team-campaign-club{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.team-campaign-club img{width:38px;height:38px;object-fit:contain}
+.team-campaign-metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.team-campaign-metrics div{display:flex;flex-direction:column;align-items:center;padding:9px 3px;background:rgba(255,255,255,.05);border-radius:10px}
+.team-campaign-metrics strong{font-size:1.2rem}.team-campaign-metrics span{font-size:.65rem;color:var(--muted)}
+.team-campaign-notice{font-size:.75rem;color:#f2cc58;line-height:1.5}
+.team-campaign-rounds{min-height:130px;overflow:auto;position:relative;overscroll-behavior:contain}
+.team-campaign-table{min-width:530px}
+.team-campaign-round,.team-campaign-table-heading{display:grid;grid-template-columns:24px minmax(110px,1fr) 22px 52px 72px 50px 28px 38px;align-items:center;gap:8px;padding:9px 7px;font-size:.72rem;white-space:nowrap}
+.team-campaign-table-heading{position:sticky;top:0;z-index:1;background:var(--surface,#111c18);color:var(--muted);font-size:.65rem;font-weight:800}
+.team-campaign-round{border-bottom:1px solid var(--divider)}
+.team-campaign-round.is-current{background:rgba(53,220,131,.06);box-shadow:inset 2px 0 var(--green2)}
+.team-campaign-opponent{display:flex;align-items:center;gap:7px;min-width:0}
+.team-campaign-opponent>span:last-child{overflow:hidden;text-overflow:ellipsis}
+.team-campaign-opponent img{width:24px;height:24px;object-fit:contain;flex-shrink:0}
+.team-campaign-date,.team-campaign-position{color:var(--muted);font-size:.65rem}
+.team-campaign-game-points{color:var(--green2)}
+.my-team-campaign-action{margin-top:12px}
+@media(max-width:520px){.team-campaign-modal{padding:16px;max-height:94vh;gap:9px}.team-campaign-metrics{grid-template-columns:repeat(3,1fr)}.team-campaign-header h2{font-size:1.15rem}.my-team-campaign-action{width:100%}}
+
+.team-campaign-selector{position:relative}
+#teamCampaignSelect{display:flex;align-items:center;gap:9px;flex:1;text-align:left}
+#teamCampaignSelect>span:last-child{margin-left:auto}
+#teamCampaignSelect img,#teamCampaignOptions img{width:25px;height:25px;object-fit:contain}
+#teamCampaignOptions{position:absolute;top:100%;left:0;right:0;z-index:4;max-height:240px;overflow:auto;background:var(--surface,#15231c);border:1px solid var(--divider);border-radius:12px;padding:6px;box-shadow:0 12px 30px rgba(0,0,0,.4)}
+#teamCampaignOptions[hidden]{display:none}
+#teamCampaignOptions button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:transparent;border:0}
+#teamCampaignOptions button[aria-selected="true"]{background:rgba(53,220,131,.12)}
+.team-campaign-legend{font-size:.65rem;color:var(--muted);margin:0;line-height:1.4}
+
+.campaign-trend{margin-left:4px;font-weight:900}.campaign-trend.is-up{color:var(--green2)}.campaign-trend.is-down{color:#ef7c7c}.campaign-trend.is-flat{color:var(--muted)}
+.favorite-campaign-action{margin-top:10px;width:100%}
+.game-campaign-actions{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:12px}
+.game-campaign-actions>span{width:100%;text-align:center;font-size:.65rem;color:var(--muted)}
+.game-campaign-actions button{font-size:.7rem;padding:7px 10px}
+
+.game-campaign-actions button{display:inline-flex;align-items:center;gap:7px}
+.game-campaign-actions button img{width:22px;height:22px;object-fit:contain;flex-shrink:0}
+
+.team-campaign-favorite{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:7px;width:42px;height:42px}
+.team-campaign-favorite[hidden]{display:none}
+.team-campaign-favorite img{width:28px;height:28px;object-fit:contain}
+
+#teamCampaignSelect{min-width:0}
+#teamCampaignSelect>span:not(:last-child){white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#teamCampaignSelect img{flex-shrink:0}

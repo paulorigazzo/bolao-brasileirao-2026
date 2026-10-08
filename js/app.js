@@ -1,3 +1,4 @@
+import { buildTeamCampaign, campaignPositionTrend } from "./team-campaign.js";
 import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
@@ -31,7 +32,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.44.6";
+const APP_VERSION = "6.45.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -71,6 +72,7 @@ const roundHighlightsLoader=createRoundHighlightsLoader(async params=>{
 let adminRoundShareOriginalText="";
 let adminRoundShareReturnFocus=null;
 let matchCalendarReturnFocus=null;
+let teamCampaignReturnFocus=null;
 let matchCalendarModel=null;
 let friendlyRankingsModel=null;
 let friendlyRankingsReturnFocus=null;
@@ -1771,6 +1773,7 @@ function premiumMatchCard(g){
         ${resultComparison}
         ${premiumGoalEvents(g)}
         ${premiumGameDetails(g)}
+        <div class="game-campaign-actions"><span>Campanha no campeonato</span><button class="secondary" type="button" data-game-campaign="${escapeHtml(normalizeTeamKey(g.time_casa))}">${teamLogo(g.time_casa_logo,g.time_casa)}<span>${escapeHtml(teamDisplayName(g.time_casa))}</span></button><button class="secondary" type="button" data-game-campaign="${escapeHtml(normalizeTeamKey(g.time_fora))}">${teamLogo(g.time_fora_logo,g.time_fora)}<span>${escapeHtml(teamDisplayName(g.time_fora))}</span></button></div>
         ${!isLocked&&!finished?`<div class="premium-game-actions"><button class="primary premium-save-pick" type="button" ${validPickDraft(g.id_jogo)?"":"disabled"}>${draft?"Salvar palpite":pick?"✓ Palpite salvo":"Salvar palpite"}</button></div>`:""}
       </div>
     </div>
@@ -1916,6 +1919,7 @@ function renderGames(){
   const cards=[...document.querySelectorAll(".premium-match-card")];
   cards.forEach(card=>{
     card.querySelector(".game-toggle")?.addEventListener("click",()=>toggleGameCard(card));
+    card.querySelectorAll("[data-game-campaign]").forEach(button=>button.addEventListener("click",()=>openTeamCampaign(button.dataset.gameCampaign,button)));
     card.querySelectorAll(".premium-detail-toggle").forEach(button=>button.addEventListener("click",()=>{
       const section=button.closest(".premium-detail-section");
       const panel=section?.querySelector(".premium-detail-panel");
@@ -2797,6 +2801,7 @@ function renderMyTeam(){
           <i aria-hidden="true">›</i>
         </button>
       </div>
+      <button class="secondary my-team-campaign-action" type="button" data-my-team-action="campaign">Ver campanha do ${escapeHtml(teamName)} <span aria-hidden="true">›</span></button>
       <div class="my-team-hero-context">
         <div class="my-team-hero-form"><span>Momento recente</span>${favoriteFormMarkup(context)}<small>${formPoints} ponto${formPoints===1?'':'s'} nos últimos ${context.recent.length} jogos</small></div>
         <div class="my-team-hero-next">
@@ -2874,6 +2879,7 @@ function renderHomeFavoriteTeam(){
       ${row?`<div class="favorite-standing-main"><div class="favorite-position-link"><strong>${row.position}º <i class="favorite-standing-chevron" aria-hidden="true">›</i></strong><span>posição</span></div><div><strong>${row.points}</strong><span>pontos</span></div></div>
       <div class="favorite-standing-stats"><span><b>${row.playedGames}</b> J</span><span><b>${row.won}</b> V</span><span><b>${row.draw}</b> E</span><span><b>${row.lost}</b> D</span><span><b>${Number(row.goalDifference)>0?'+':''}${row.goalDifference}</b> SG</span></div>`:`<div class="favorite-standings-loading"><span class="favorite-loading-dot"></span><span>Carregando classificação oficial…</span><i class="favorite-standing-chevron" aria-hidden="true">›</i></div>`}
     </div>
+    <button class="secondary favorite-campaign-action" type="button" data-home-action="campaign">Ver campanha do ${escapeHtml(teamName)} <span aria-hidden="true">›</span></button>
     ${historyHtml}
     <div class="favorite-next-match">
       <div><span class="favorite-next-label">PRÓXIMA PARTIDA</span>${contextBadge}<strong>${next?`${escapeHtml(teamName)} × ${escapeHtml(opponentName)}`:'A definir'}</strong><small>${nextDate?`${escapeHtml(nextDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'}))} • ${escapeHtml(nextDate.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}))}${next.local?` • ${escapeHtml(next.local)}`:''}`:'Aguardando a tabela de jogos'}</small></div>
@@ -3754,6 +3760,87 @@ function standingsZoneLabel(zone){
   return ({libertadores:"Libertadores",prelibertadores:"Pré-Libertadores",sulamericana:"Sul-Americana",relegation:"Rebaixamento"})[zone] || "Meio da tabela";
 }
 
+function campaignClubs(){
+  const clubs=new Map(availableTeams().map(team=>[team.key,team]));
+  for(const row of state.standings?.table||[]){
+    const key=normalizeTeamKey(row.team);
+    if(!clubs.has(key)) clubs.set(key,{key,name:row.team,logo:row.crest||""});
+  }
+  return [...clubs.values()].sort((a,b)=>teamDisplayName(a.name).localeCompare(teamDisplayName(b.name),"pt-BR"));
+}
+
+function renderTeamCampaign(){
+  const team=campaignClubs().find(item=>item.key===$("teamCampaignSelect").value);
+  if(!team) return;
+  const favorite=campaignClubs().find(club=>club.key===normalizeTeamKey(state.participant?.time_favorito||""));
+  const shortcut=$("teamCampaignFavorite");
+  shortcut.hidden=!favorite||favorite.key===team.key;
+  if(favorite){
+    shortcut.innerHTML=teamLogo(favorite.logo,teamDisplayName(favorite.name));
+    shortcut.title="Ver campanha do favorito: "+teamDisplayName(favorite.name);
+    shortcut.setAttribute("aria-label",shortcut.title);
+    shortcut.dataset.club=favorite.key;
+  }
+  const official=(state.standings?.table||[]).find(row=>normalizeTeamKey(row.team)===team.key)||null;
+  const model=buildTeamCampaign({team,games:state.games,official,normalizeTeamKey,isScorableGame,gameStatusDisplay,hasValidScore});
+  const data=official||model.calculated;
+  const name=teamDisplayName(team.name);
+  $("teamCampaignTitle").textContent=`Campanha do ${name}`;
+  $("teamCampaignSummary").textContent=official?"Resumo da classificação oficial · acumulado calculado pelos resultados disponíveis":"Classificação oficial indisponível · resumo calculado pelos resultados disponíveis";
+  $("teamCampaignOverview").innerHTML=`<div class="team-campaign-club">${teamLogo(team.logo||official?.crest,name)}<strong>${escapeHtml(name)}</strong></div><div class="team-campaign-metrics">${[[official?.position==null?"—":official.position+"º","Posição"],[data.points,"Pontos"],[data.playedGames,"Jogos"],[data.won,"Vitórias"],[data.draw,"Empates"],[data.lost,"Derrotas"]].map(([value,label])=>`<div><strong>${escapeHtml(value??"—")}</strong><span>${label}</span></div>`).join("")}</div>${model.difference!=null&&model.difference!==0?`<p class="team-campaign-notice">Os resultados disponíveis somam ${model.calculated.points} pontos; a classificação oficial informa ${official.points}. Pode haver resultados ausentes ou ajustes oficiais.</p>`:""}`;
+  const current=currentRoundNumber();
+  $("teamCampaignSelect").innerHTML=teamLogo(team.logo||official?.crest,name)+"<span>"+escapeHtml(name)+'</span><span aria-hidden="true">⌄</span>';
+  const positions=new Map(favoriteTeamPositionHistory(team,model.rounds.filter(item=>item.round<=current&&item.fixtures.some(match=>match.points!=null)).map(item=>item.round)).map(item=>[item.round,item.position]));
+  const rows=model.rounds.filter(item=>item.round<=current).reverse().map(item=>{
+    const fixtures=item.fixtures.length?item.fixtures:[null];
+    return fixtures.map(match=>{
+      const position=match?.points!=null?positions.get(item.round):null;
+      const trend=campaignPositionTrend(position,positions.get(item.round-1),item.round);
+      const trendHtml=trend?`<span class="campaign-trend is-${trend.tone}" role="img" aria-label="${trend.label}" title="${trend.label}">${trend.arrow}</span>`:"";
+      const opponent=match?teamDisplayName(match.opponent):"Partida não disponível";
+      const logo=match?.opponentLogo||findTeam(match?.opponent)?.logo||"";
+      const date=match?.inicio?new Date(match.inicio).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"}):"A definir";
+      return `<div class="team-campaign-round${item.round===current?" is-current":""}" data-campaign-round="${item.round}" role="row"><span role="cell" class="team-campaign-round-number">${item.round}</span><span role="cell" class="team-campaign-opponent" title="${escapeHtml(opponent)}">${match?teamLogo(logo,opponent):""}<span>${escapeHtml(opponent)}</span></span><span role="cell" title="${match?.venue||"Mando indisponível"}">${match?match.venue==="Casa"?"M":"V":"—"}</span><span role="cell" class="team-campaign-date" title="${match?.inicio?escapeHtml(formatDate(match.inicio)):"Data a definir"}">${date}</span><span role="cell" class="team-campaign-position" title="Posição calculada pelos resultados disponíveis até esta rodada">${position?position+"º":"—"}${trendHtml}</span><strong role="cell">${match?.score||"—"}</strong><span role="cell" class="team-campaign-game-points" title="Pontos da partida">${match?.points??"—"}</span><span role="cell" title="Pontos acumulados até a rodada">${item.accumulated}</span></div>`;
+    }).join("");
+  }).join("");
+  $("teamCampaignRounds").innerHTML='<div class="team-campaign-table" role="table" aria-label="Campanha por rodada"><div class="team-campaign-table-heading" role="row"><span role="columnheader">R</span><span role="columnheader">Adversário</span><span role="columnheader" title="Mandante ou visitante">M/V</span><span role="columnheader">Data</span><span role="columnheader">Posição</span><span role="columnheader">Placar</span><span role="columnheader" title="Pontos da partida">Pts</span><span role="columnheader" title="Pontos acumulados">Acum.</span></div>'+rows+'</div>';
+  requestAnimationFrame(()=>{
+    const scroller=$("teamCampaignRounds"),row=scroller.querySelector('[data-campaign-round="'+current+'"]');
+    if(row) scroller.scrollTop=row.offsetTop;
+  });
+}
+
+function openTeamCampaign(teamName,trigger){
+  const clubs=campaignClubs();
+  teamCampaignReturnFocus=trigger||document.activeElement;
+  $("teamCampaignOptions").innerHTML=clubs.map(team=>`<button type="button" role="option" data-campaign-club="${escapeHtml(team.key)}" aria-selected="false">${teamLogo(team.logo,teamDisplayName(team.name))}<span>${escapeHtml(teamDisplayName(team.name))}</span></button>`).join("");
+  $("teamCampaignSelect").value=clubs.find(team=>team.key===normalizeTeamKey(teamName))?.key||clubs[0]?.key||"";
+  setCampaignPickerOpen(false);
+  renderTeamCampaign();
+  $("teamCampaignModal").classList.remove("hidden");
+  document.body.classList.add("modal-open");
+  $("teamCampaignSelect").focus();
+  if(!state.standings) loadStandings().then(()=>{if(!$("teamCampaignModal").classList.contains("hidden")) renderTeamCampaign();});
+}
+
+function setCampaignPickerOpen(open){
+  $("teamCampaignOptions").hidden=!open;
+  $("teamCampaignSelect").setAttribute("aria-expanded",String(open));
+  if(open){
+    const options=[...$("teamCampaignOptions").querySelectorAll("[data-campaign-club]")];
+    options.forEach(option=>option.setAttribute("aria-selected",String(option.dataset.campaignClub===$("teamCampaignSelect").value)));
+    (options.find(option=>option.dataset.campaignClub===$("teamCampaignSelect").value)||options[0])?.focus();
+  }
+}
+
+function closeTeamCampaign(){
+  setCampaignPickerOpen(false);
+  $("teamCampaignModal").classList.add("hidden");
+  document.body.classList.remove("modal-open");
+  teamCampaignReturnFocus?.focus?.();
+  teamCampaignReturnFocus=null;
+}
+
 function standingsFavoriteData(teamName){
   const favoriteKey=normalizeTeamKey(state.participant?.time_favorito || "");
   const rowKey=normalizeTeamKey(teamName);
@@ -3785,7 +3872,7 @@ function standingsTeamExpandedContent(row){
       <span><small>Gols pró</small><strong>${row.goalsFor}</strong></span><span><small>Gols contra</small><strong>${row.goalsAgainst}</strong></span><span><small>Aproveitamento</small><strong>${row.playedGames?Math.round((Number(row.points)/(Number(row.playedGames)*3))*100):0}%</strong></span>
     </div>
     ${history}
-    <button class="standings-team-games-action" type="button" data-standings-team-games="${escapeHtml(row.team)}">Ver jogos do ${escapeHtml(displayName)} <b aria-hidden="true">›</b></button>
+    <button class="standings-team-games-action" type="button" data-standings-team-games="${escapeHtml(row.team)}">Ver campanha do ${escapeHtml(displayName)} <b aria-hidden="true">›</b></button>
   </div>`;
 }
 
@@ -5696,11 +5783,7 @@ $("standingsMobileList")?.addEventListener("click",async event=>{
   }
   const gamesAction=event.target.closest("[data-standings-team-games]");
   if(gamesAction){
-    const teamName=gamesAction.dataset.standingsTeamGames;
-    const team=findTeam(teamName)||{name:teamName};
-    const next=favoriteTeamGames(team).filter(game=>!isFinished(game)).sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
-    navigateTo("games");
-    if(next && $("roundSelect")){ $("roundSelect").value=String(next.rodada); renderGames(); }
+    openTeamCampaign(gamesAction.dataset.standingsTeamGames,gamesAction);
     return;
   }
   const button=event.target.closest(".standings-card-summary"); if(!button) return;
@@ -5910,6 +5993,7 @@ document.addEventListener("keydown",event=>{
   else if(!$("adminRoundShareModal")?.classList.contains("hidden")) closeAdminRoundShare();
   else if(!$("adminPushReminderModal")?.classList.contains("hidden")) closeAdminPushReminder();
   else if(!$("pushActivationPrompt")?.classList.contains("hidden")) dismissPushActivationPrompt();
+  else if(!$("teamCampaignModal")?.classList.contains("hidden")) closeTeamCampaign();
   else if(!$("matchCalendarModal")?.classList.contains("hidden")) closeMatchCalendar();
   else if(!$("roundHighlightsModal")?.classList.contains("hidden")) closeRoundHighlights();
   else if(!$("rankingPicksModal")?.classList.contains("hidden")) closeRankingParticipantPicks();
@@ -5976,6 +6060,7 @@ $("homeTab")?.addEventListener("click",async event=>{
     if($("roundSelect")) $("roundSelect").value=target.dataset.round;
     navigateTo("games");renderGames();return;
   }
+  if(action==="campaign"){ openTeamCampaign(state.participant?.time_favorito,target); return; }
   if(action==="calendar"){ openMatchCalendar(target); return; }
   if(action==="round-highlights"){ openRoundHighlights(target.dataset.roundHighlightsRound,target); return; }
   if(action==="refresh"){ target.disabled=true; try{ await refresh(); } finally{ target.disabled=false; } return; }
@@ -5998,6 +6083,7 @@ $("myTeamTab")?.addEventListener("click",event=>{
   const target=event.target.closest("[data-my-team-action]");
   if(!target) return;
   const action=target.dataset.myTeamAction;
+  if(action==="campaign"){ openTeamCampaign(state.participant?.time_favorito,target); return; }
   if(action==="standings"){ navigateTo("standings"); setTimeout(()=>focusFavoriteTeamInStandings(),140); return; }
   navigateTo(action);
 });
@@ -6007,6 +6093,36 @@ $("myTeamTab")?.addEventListener("keydown",event=>{
   if(!target) return;
   event.preventDefault();
   target.click();
+});
+$("teamCampaignClose").addEventListener("click",closeTeamCampaign);
+$("teamCampaignFavorite").addEventListener("click",()=>{
+  $("teamCampaignSelect").value=$("teamCampaignFavorite").dataset.club;
+  renderTeamCampaign();setCampaignPickerOpen(false);$("teamCampaignSelect").focus();
+});
+$("teamCampaignSelect").addEventListener("click",()=>setCampaignPickerOpen($("teamCampaignOptions").hidden));
+$("teamCampaignOptions").addEventListener("click",event=>{
+  const option=event.target.closest("[data-campaign-club]");
+  if(!option) return;
+  $("teamCampaignSelect").value=option.dataset.campaignClub;
+  renderTeamCampaign();setCampaignPickerOpen(false);$("teamCampaignSelect").focus();
+});
+$("teamCampaignOptions").addEventListener("keydown",event=>{
+  const options=[...$("teamCampaignOptions").querySelectorAll("[data-campaign-club]")];
+  const index=options.indexOf(document.activeElement);
+  if(event.key==="Escape"){event.preventDefault();event.stopPropagation();setCampaignPickerOpen(false);$("teamCampaignSelect").focus();}
+  else if(["ArrowDown","ArrowUp","Home","End"].includes(event.key)){
+    event.preventDefault();
+    const next=event.key==="Home"?0:event.key==="End"?options.length-1:(index+(event.key==="ArrowDown"?1:-1)+options.length)%options.length;
+    options[next]?.focus();
+  }
+});
+$("teamCampaignModal").addEventListener("click",event=>{if(event.target===$("teamCampaignModal")) closeTeamCampaign();});
+$("teamCampaignModal").addEventListener("keydown",event=>{
+  if(event.key!=="Tab") return;
+  const items=[...$("teamCampaignModal").querySelectorAll("button,select,[tabindex='0']")].filter(item=>!item.closest("[hidden]"));
+  const first=items[0],last=items.at(-1);
+  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+  else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
 });
 setupAdminQuickNavigation();
 setupAdminCollapsibleCards();

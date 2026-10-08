@@ -1,3 +1,10 @@
+# v6.45.0 — Campanha dos clubes
+
+- Adiciona modal de campanha com seletor de clube, resumo oficial e as rodadas até a atual com pontos por jogo e acumulado.
+- Integra “Ver campanha” à Classificação e ao primeiro card de Meu Time, preservando o favorito do Perfil e o acesso ao próximo jogo.
+- Indica dados ausentes e diferenças entre resultados calculados e classificação oficial.
+- Detalhes: [nota da versão](docs/releases/v6.45.0-modal-campanha-clube.md).
+
 # v6.44.6 — Prioridade da rodada atual nos Destaques da Home
 
 - Prioriza os destaques da rodada atual no card principal da Home quando disponíveis.

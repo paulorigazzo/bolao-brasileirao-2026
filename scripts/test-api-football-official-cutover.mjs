@@ -176,7 +176,7 @@ assert.match(classificationSource, /api_football_time_casa_id,api_football_time_
 assert.match(classificationSource, /providerClassificationSnapshotId/);
 assert.match(diagnosticSource, /officialSportsDataProvider: provider/);
 assert.doesNotMatch(diagnosticSource, /footballData|SPORTS_DATA_OFFICIAL_PROVIDER/);
-assert.match(appSource, /function standingsTeamExpandedContent\(row\)\{[\s\S]*const displayName=teamDisplayName\(row\.team\)[\s\S]*Ver jogos do \$\{escapeHtml\(displayName\)\}/);
+assert.match(appSource, /function standingsTeamExpandedContent\(row\)\{[\s\S]*const displayName=teamDisplayName\(row\.team\)[\s\S]*Ver campanha do \$\{escapeHtml\(displayName\)\}/);
 assert.match(appSource, /function renderStandings\(\)\{[\s\S]*const displayName=teamDisplayName\(row\.team\)[\s\S]*standings-mobile-team[\s\S]*escapeHtml\(displayName\)[\s\S]*standings-team[\s\S]*escapeHtml\(displayName\)/);
 assert.match(appSource, /const canonical=\{CAM:"Atlético-MG",CAP:"Athletico-PR"\}\[teamAbbreviation\(name\)\]/);
 assert.match(appSource, /function teamNamesDisplayText\(value\)\{[\s\S]*Mineiro[\s\S]*Atlético-MG[\s\S]*Paranaense[\s\S]*Athletico-PR/);
