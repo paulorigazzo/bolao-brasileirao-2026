@@ -4495,3 +4495,7 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
   .premium-history button.round-history-item .round-change{grid-column:2/4;grid-row:3;justify-self:start;text-align:left;margin-top:3px}
   .premium-history button.round-history-item .round-history-chevron{grid-column:4;grid-row:1/4}
 }
+
+#statsMomentText{margin:0;font-size:.8rem;line-height:1.5}
+.stats-hero-footer.without-moment{grid-template-columns:1fr}
+.stats-hero-footer.without-moment .stats-current-title{border-left:0;border-top:0;padding:0}

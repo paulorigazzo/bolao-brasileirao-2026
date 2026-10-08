@@ -12,12 +12,12 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.45.1">
-  <link rel="stylesheet" href="./css/styles.css?v=6.45.1">
-  <link rel="stylesheet" href="./css/components.css?v=6.45.1">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.45.1">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.45.1">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.45.1">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.45.2">
+  <link rel="stylesheet" href="./css/styles.css?v=6.45.2">
+  <link rel="stylesheet" href="./css/components.css?v=6.45.2">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.45.2">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.45.2">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.45.2">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-      <p class="brand-version"><span id="appVersion" class="version-pill">v6.45.1</span></p>
+      <p class="brand-version"><span id="appVersion" class="version-pill">v6.45.2</span></p>
         <p id="headerLeagueName" class="brand-league hidden" aria-live="polite"></p>
       </div>
     </div>
@@ -289,11 +289,8 @@
             <p id="statsSummaryText">Acompanhe sua evolução no bolão.</p>
           </div>
           <div id="statsOverallRing" class="stats-overall-ring" aria-label="Aproveitamento geral"><strong>0%</strong><span>aproveitamento</span></div>
-          <div class="stats-hero-footer" aria-live="polite">
-            <div class="stats-hero-moment">
-              <span id="statsMomentIcon" class="stats-hero-moment-icon" aria-hidden="true">⚽</span>
-              <div><strong id="statsMomentTitle">Temporada em construção</strong><small id="statsMomentText">Continue registrando seus palpites para revelar tendências mais precisas.</small></div>
-            </div>
+          <div class="stats-hero-footer without-moment" aria-live="polite">
+            <div id="statsMomentBlock" class="stats-hero-moment hidden"><p id="statsMomentText"></p></div>
             <div class="stats-current-title">
               <small>TÍTULO ATUAL</small>
               <strong id="statsMomentBadge">⚽ Palpiteiro em evolução</strong>
@@ -906,6 +903,6 @@
       if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-<script type="module" src="./js/app.js?v=6.45.1"></script>
+<script type="module" src="./js/app.js?v=6.45.2"></script>
 </body>
 </html>
