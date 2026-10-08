@@ -4439,7 +4439,6 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 .team-campaign-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .team-campaign-header h2{margin:5px 0}
 .team-campaign-selector{display:flex;align-items:center;gap:12px;font-weight:800}
-.team-campaign-selector select{flex:1;min-width:0}
 .team-campaign-club{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .team-campaign-club img{width:38px;height:38px;object-fit:contain}
 .team-campaign-metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
@@ -4455,7 +4454,17 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 .team-campaign-opponent{display:flex;align-items:center;gap:7px;min-width:0}
 .team-campaign-opponent>span:last-child{overflow:hidden;text-overflow:ellipsis}
 .team-campaign-opponent img{width:24px;height:24px;object-fit:contain;flex-shrink:0}
-.team-campaign-date,.team-campaign-phase{color:var(--muted);font-size:.65rem}
+.team-campaign-date,.team-campaign-position{color:var(--muted);font-size:.65rem}
 .team-campaign-game-points{color:var(--green2)}
 .my-team-campaign-action{margin-top:12px}
 @media(max-width:520px){.team-campaign-modal{padding:16px;max-height:94vh;gap:9px}.team-campaign-metrics{grid-template-columns:repeat(3,1fr)}.team-campaign-header h2{font-size:1.15rem}.my-team-campaign-action{width:100%}}
+
+.team-campaign-selector{position:relative}
+#teamCampaignSelect{display:flex;align-items:center;gap:9px;flex:1;text-align:left}
+#teamCampaignSelect>span:last-child{margin-left:auto}
+#teamCampaignSelect img,#teamCampaignOptions img{width:25px;height:25px;object-fit:contain}
+#teamCampaignOptions{position:absolute;top:100%;left:0;right:0;z-index:4;max-height:240px;overflow:auto;background:var(--surface,#15231c);border:1px solid var(--divider);border-radius:12px;padding:6px;box-shadow:0 12px 30px rgba(0,0,0,.4)}
+#teamCampaignOptions[hidden]{display:none}
+#teamCampaignOptions button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:transparent;border:0}
+#teamCampaignOptions button[aria-selected="true"]{background:rgba(53,220,131,.12)}
+.team-campaign-legend{font-size:.65rem;color:var(--muted);margin:0;line-height:1.4}

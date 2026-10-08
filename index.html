@@ -786,9 +786,10 @@
   <div id="teamCampaignModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="teamCampaignTitle" aria-describedby="teamCampaignSummary">
     <section class="team-campaign-modal card">
       <header class="team-campaign-header"><div><span class="eyebrow">CAMPEONATO BRASILEIRO</span><h2 id="teamCampaignTitle">Campanha do clube</h2></div><button id="teamCampaignClose" class="modal-close" type="button" aria-label="Fechar campanha">✕</button></header>
-      <label class="team-campaign-selector" for="teamCampaignSelect">Clube<select id="teamCampaignSelect"></select></label>
+      <div class="team-campaign-selector"><span id="teamCampaignClubLabel">Clube</span><button id="teamCampaignSelect" type="button" aria-labelledby="teamCampaignClubLabel teamCampaignSelect" aria-haspopup="listbox" aria-expanded="false" aria-controls="teamCampaignOptions"></button><div id="teamCampaignOptions" role="listbox" aria-labelledby="teamCampaignClubLabel" hidden></div></div>
       <p id="teamCampaignSummary" class="muted-note"></p>
       <div id="teamCampaignOverview" aria-live="polite"></div>
+      <p class="team-campaign-legend">M: mandante · V: visitante · Posição calculada por rodada pelos resultados disponíveis; pode diferir do histórico oficial.</p>
       <div id="teamCampaignRounds" class="team-campaign-rounds" tabindex="0" aria-label="Campanha por rodada"></div>
     </section>
   </div>

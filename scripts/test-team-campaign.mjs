@@ -41,13 +41,13 @@ assert.doesNotMatch(modalCode,/state.participant\.time_favorito\s*=|\.update\(|\
 console.log("Campanha do clube: pontos, rodadas, seleção e preservação de dados verificados.");
 
 // Integração do modal com DOM controlado: seleção, foco e ausência de escrita.
-const element=()=>({innerHTML:"",textContent:"",value:"",classes:new Set(["hidden"]),classList:{add(name){this.owner.classes.add(name);},remove(name){this.owner.classes.delete(name);},contains(name){return this.owner.classes.has(name);}},focus(){this.focused=true;},querySelector(){return {offsetTop:420};}});
-const nodes=Object.fromEntries(["teamCampaignSelect","teamCampaignModal","teamCampaignTitle","teamCampaignSummary","teamCampaignOverview","teamCampaignRounds"].map(id=>[id,element()]));
+const element=()=>({innerHTML:"",textContent:"",value:"",classes:new Set(["hidden"]),classList:{add(name){this.owner.classes.add(name);},remove(name){this.owner.classes.delete(name);},contains(name){return this.owner.classes.has(name);}},setAttribute(name,value){this[name]=value;},querySelectorAll(){return [];},focus(){this.focused=true;},querySelector(){return {offsetTop:420};}});
+const nodes=Object.fromEntries(["teamCampaignOptions","teamCampaignSelect","teamCampaignModal","teamCampaignTitle","teamCampaignSummary","teamCampaignOverview","teamCampaignRounds"].map(id=>[id,element()]));
 for(const item of Object.values(nodes))item.classList.owner=item;
 const body=element();body.classList.owner=body;
 const state={games,participant:{time_favorito:"Clube Á"},standings:{table:[{team:"Clube Á",points:10,position:2,playedGames:4,won:2,draw:1,lost:1},{team:"B",points:4,position:3,playedGames:4,won:1,draw:1,lost:2}]}};
 const clubs=[{name:"Clube Á",key:normalizeTeamKey("Clube Á"),logo:""},{name:"B",key:"b",logo:""}];
-const uiNames=["campaignClubs","renderTeamCampaign","openTeamCampaign","closeTeamCampaign"];
+const uiNames=["championshipTableThroughRound","favoriteTeamPositionHistory","setCampaignPickerOpen","campaignClubs","renderTeamCampaign","openTeamCampaign","closeTeamCampaign"];
 const ui=runInNewContext(uiNames.map(source).join("\n")+";({"+uiNames.join(",")+"})",{state,buildTeamCampaign,normalizeTeamKey,...helpers,availableTeams:()=>clubs,teamDisplayName:s=>s,teamLogo:()=>"<img src=\"crest.png\">",findTeam:()=>null,escapeHtml:s=>String(s??""),formatDate:s=>s,currentRoundNumber:()=>29,requestAnimationFrame:fn=>fn(),$:id=>nodes[id],document:{activeElement:null,body},teamCampaignReturnFocus:null});
 const trigger={focus(){this.focused=true;}};
 ui.openTeamCampaign("Clube Á",trigger);
@@ -66,3 +66,32 @@ console.log("Modal da campanha: troca de clube, 38 rodadas, foco e favorito pres
 assert.ok(nodes.teamCampaignRounds.innerHTML.indexOf('data-campaign-round="38"')<nodes.teamCampaignRounds.innerHTML.indexOf('data-campaign-round="1"'));
 assert.ok(nodes.teamCampaignRounds.innerHTML.includes('crest.png'));
 assert.ok(!nodes.teamCampaignRounds.innerHTML.includes('<article'));
+
+assert.ok(nodes.teamCampaignRounds.innerHTML.includes('role="columnheader">Posição'));
+assert.ok(!nodes.teamCampaignRounds.innerHTML.includes('role="columnheader">Situação'));
+assert.ok(nodes.teamCampaignOptions.innerHTML.includes('role="option"'));
+assert.ok(nodes.teamCampaignOptions.innerHTML.includes('crest.png'));
+assert.ok(nodes.teamCampaignSelect.innerHTML.includes('crest.png'));
+const pastRow=nodes.teamCampaignRounds.innerHTML.match(/data-campaign-round="1"[\s\S]*?<\/div>/)?.[0];
+assert.ok(pastRow.includes('>V<'),"mando visitante");
+const futureRow=nodes.teamCampaignRounds.innerHTML.match(/data-campaign-round="38"[\s\S]*?<\/div>/)?.[0];
+assert.ok(futureRow.includes('resultados disponíveis até esta rodada">—'));
+
+const options=clubs.map(club=>({dataset:{campaignClub:club.key},setAttribute(name,value){this[name]=value;},focus(){this.focused=true;}}));
+nodes.teamCampaignOptions.querySelectorAll=()=>options;
+ui.setCampaignPickerOpen(true);
+assert.equal(nodes.teamCampaignOptions.hidden,false);
+assert.equal(options[1]['aria-selected'],"true");
+assert.equal(options[1].focused,true);
+const handlerStart=app.indexOf('$("teamCampaignOptions").addEventListener("keydown",event=>{');
+const callbackStart=app.indexOf('event=>{',handlerStart);
+const callbackEnd=app.indexOf('\n});',callbackStart)+2;
+const keyboardDocument={activeElement:options[0]};
+const keyboard=runInNewContext('('+app.slice(callbackStart,callbackEnd)+')',{$:id=>nodes[id],document:keyboardDocument,setCampaignPickerOpen:ui.setCampaignPickerOpen});
+const keyEvent=key=>({key,preventDefault(){this.prevented=true;},stopPropagation(){this.stopped=true;}});
+options[1].focused=false;keyboard(keyEvent("ArrowDown"));assert.equal(options[1].focused,true);
+options[0].focused=false;keyboard(keyEvent("Home"));assert.equal(options[0].focused,true);
+const escape=keyEvent("Escape");keyboard(escape);assert.equal(nodes.teamCampaignOptions.hidden,true);assert.equal(escape.stopped,true);
+console.log("Seletor com escudos: seleção e navegação por teclado verificadas.");
+
+assert.ok(pastRow.includes('resultados disponíveis até esta rodada">2º'),"posição reconstruída do visitante na rodada 1");

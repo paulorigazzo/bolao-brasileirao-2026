@@ -3777,16 +3777,18 @@ function renderTeamCampaign(){
   $("teamCampaignSummary").textContent=official?"Resumo da classificação oficial · acumulado calculado pelos resultados disponíveis":"Classificação oficial indisponível · resumo calculado pelos resultados disponíveis";
   $("teamCampaignOverview").innerHTML=`<div class="team-campaign-club">${teamLogo(team.logo||official?.crest,name)}<strong>${escapeHtml(name)}</strong></div><div class="team-campaign-metrics">${[[official?.position==null?"—":official.position+"º","Posição"],[data.points,"Pontos"],[data.playedGames,"Jogos"],[data.won,"Vitórias"],[data.draw,"Empates"],[data.lost,"Derrotas"]].map(([value,label])=>`<div><strong>${escapeHtml(value??"—")}</strong><span>${label}</span></div>`).join("")}</div>${model.difference!=null&&model.difference!==0?`<p class="team-campaign-notice">Os resultados disponíveis somam ${model.calculated.points} pontos; a classificação oficial informa ${official.points}. Pode haver resultados ausentes ou ajustes oficiais.</p>`:""}`;
   const current=currentRoundNumber();
+  $("teamCampaignSelect").innerHTML=teamLogo(team.logo||official?.crest,name)+"<span>"+escapeHtml(name)+'</span><span aria-hidden="true">⌄</span>';
+  const positions=new Map(favoriteTeamPositionHistory(team,model.rounds.filter(item=>item.round<=current&&item.fixtures.some(match=>match.points!=null)).map(item=>item.round)).map(item=>[item.round,item.position]));
   const rows=model.rounds.slice().reverse().map(item=>{
     const fixtures=item.fixtures.length?item.fixtures:[null];
     return fixtures.map(match=>{
       const opponent=match?teamDisplayName(match.opponent):"Partida não disponível";
       const logo=match?.opponentLogo||findTeam(match?.opponent)?.logo||"";
       const date=match?.inicio?new Date(match.inicio).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"}):"A definir";
-      return `<div class="team-campaign-round${item.round===current?" is-current":""}" data-campaign-round="${item.round}" role="row"><span role="cell" class="team-campaign-round-number">${item.round}</span><span role="cell" class="team-campaign-opponent" title="${escapeHtml(opponent)}">${match?teamLogo(logo,opponent):""}<span>${escapeHtml(opponent)}</span></span><span role="cell" title="${match?.venue||"Mando indisponível"}">${match?match.venue==="Casa"?"C":"F":"—"}</span><span role="cell" class="team-campaign-date" title="${match?.inicio?escapeHtml(formatDate(match.inicio)):"Data a definir"}">${date}</span><span role="cell" class="team-campaign-phase">${match?escapeHtml(match.phase.label):"—"}</span><strong role="cell">${match?.score||"—"}</strong><span role="cell" class="team-campaign-game-points" title="Pontos da partida">${match?.points??"—"}</span><span role="cell" title="Pontos acumulados até a rodada">${item.accumulated}</span></div>`;
+      return `<div class="team-campaign-round${item.round===current?" is-current":""}" data-campaign-round="${item.round}" role="row"><span role="cell" class="team-campaign-round-number">${item.round}</span><span role="cell" class="team-campaign-opponent" title="${escapeHtml(opponent)}">${match?teamLogo(logo,opponent):""}<span>${escapeHtml(opponent)}</span></span><span role="cell" title="${match?.venue||"Mando indisponível"}">${match?match.venue==="Casa"?"M":"V":"—"}</span><span role="cell" class="team-campaign-date" title="${match?.inicio?escapeHtml(formatDate(match.inicio)):"Data a definir"}">${date}</span><span role="cell" class="team-campaign-position" title="Posição calculada pelos resultados disponíveis até esta rodada">${match?.points!=null&&positions.get(item.round)?positions.get(item.round)+"º":"—"}</span><strong role="cell">${match?.score||"—"}</strong><span role="cell" class="team-campaign-game-points" title="Pontos da partida">${match?.points??"—"}</span><span role="cell" title="Pontos acumulados até a rodada">${item.accumulated}</span></div>`;
     }).join("");
   }).join("");
-  $("teamCampaignRounds").innerHTML='<div class="team-campaign-table" role="table" aria-label="Campanha por rodada"><div class="team-campaign-table-heading" role="row"><span role="columnheader">R</span><span role="columnheader">Adversário</span><span role="columnheader" title="Casa ou fora">M</span><span role="columnheader">Data</span><span role="columnheader">Situação</span><span role="columnheader">Placar</span><span role="columnheader" title="Pontos da partida">Pts</span><span role="columnheader" title="Pontos acumulados">Acum.</span></div>'+rows+'</div>';
+  $("teamCampaignRounds").innerHTML='<div class="team-campaign-table" role="table" aria-label="Campanha por rodada"><div class="team-campaign-table-heading" role="row"><span role="columnheader">R</span><span role="columnheader">Adversário</span><span role="columnheader" title="Mandante ou visitante">M/V</span><span role="columnheader">Data</span><span role="columnheader">Posição</span><span role="columnheader">Placar</span><span role="columnheader" title="Pontos da partida">Pts</span><span role="columnheader" title="Pontos acumulados">Acum.</span></div>'+rows+'</div>';
   requestAnimationFrame(()=>{
     const scroller=$("teamCampaignRounds"),row=scroller.querySelector('[data-campaign-round="'+current+'"]');
     if(row) scroller.scrollTop=row.offsetTop;
@@ -3796,9 +3798,9 @@ function renderTeamCampaign(){
 function openTeamCampaign(teamName,trigger){
   const clubs=campaignClubs();
   teamCampaignReturnFocus=trigger||document.activeElement;
-  $("teamCampaignSelect").innerHTML=clubs.map(team=>`<option value="${escapeHtml(team.key)}">${escapeHtml(teamDisplayName(team.name))}</option>`).join("");
-  $("teamCampaignSelect").value=normalizeTeamKey(teamName);
-  if(!$("teamCampaignSelect").value && clubs[0]) $("teamCampaignSelect").value=clubs[0].key;
+  $("teamCampaignOptions").innerHTML=clubs.map(team=>`<button type="button" role="option" data-campaign-club="${escapeHtml(team.key)}" aria-selected="false">${teamLogo(team.logo,teamDisplayName(team.name))}<span>${escapeHtml(teamDisplayName(team.name))}</span></button>`).join("");
+  $("teamCampaignSelect").value=clubs.find(team=>team.key===normalizeTeamKey(teamName))?.key||clubs[0]?.key||"";
+  setCampaignPickerOpen(false);
   renderTeamCampaign();
   $("teamCampaignModal").classList.remove("hidden");
   document.body.classList.add("modal-open");
@@ -3806,7 +3808,18 @@ function openTeamCampaign(teamName,trigger){
   if(!state.standings) loadStandings().then(()=>{if(!$("teamCampaignModal").classList.contains("hidden")) renderTeamCampaign();});
 }
 
+function setCampaignPickerOpen(open){
+  $("teamCampaignOptions").hidden=!open;
+  $("teamCampaignSelect").setAttribute("aria-expanded",String(open));
+  if(open){
+    const options=[...$("teamCampaignOptions").querySelectorAll("[data-campaign-club]")];
+    options.forEach(option=>option.setAttribute("aria-selected",String(option.dataset.campaignClub===$("teamCampaignSelect").value)));
+    (options.find(option=>option.dataset.campaignClub===$("teamCampaignSelect").value)||options[0])?.focus();
+  }
+}
+
 function closeTeamCampaign(){
+  setCampaignPickerOpen(false);
   $("teamCampaignModal").classList.add("hidden");
   document.body.classList.remove("modal-open");
   teamCampaignReturnFocus?.focus?.();
@@ -6066,11 +6079,27 @@ $("myTeamTab")?.addEventListener("keydown",event=>{
   target.click();
 });
 $("teamCampaignClose").addEventListener("click",closeTeamCampaign);
-$("teamCampaignSelect").addEventListener("change",renderTeamCampaign);
+$("teamCampaignSelect").addEventListener("click",()=>setCampaignPickerOpen($("teamCampaignOptions").hidden));
+$("teamCampaignOptions").addEventListener("click",event=>{
+  const option=event.target.closest("[data-campaign-club]");
+  if(!option) return;
+  $("teamCampaignSelect").value=option.dataset.campaignClub;
+  renderTeamCampaign();setCampaignPickerOpen(false);$("teamCampaignSelect").focus();
+});
+$("teamCampaignOptions").addEventListener("keydown",event=>{
+  const options=[...$("teamCampaignOptions").querySelectorAll("[data-campaign-club]")];
+  const index=options.indexOf(document.activeElement);
+  if(event.key==="Escape"){event.preventDefault();event.stopPropagation();setCampaignPickerOpen(false);$("teamCampaignSelect").focus();}
+  else if(["ArrowDown","ArrowUp","Home","End"].includes(event.key)){
+    event.preventDefault();
+    const next=event.key==="Home"?0:event.key==="End"?options.length-1:(index+(event.key==="ArrowDown"?1:-1)+options.length)%options.length;
+    options[next]?.focus();
+  }
+});
 $("teamCampaignModal").addEventListener("click",event=>{if(event.target===$("teamCampaignModal")) closeTeamCampaign();});
 $("teamCampaignModal").addEventListener("keydown",event=>{
   if(event.key!=="Tab") return;
-  const items=[...$("teamCampaignModal").querySelectorAll("button,select,[tabindex='0']")];
+  const items=[...$("teamCampaignModal").querySelectorAll("button,select,[tabindex='0']")].filter(item=>!item.closest("[hidden]"));
   const first=items[0],last=items.at(-1);
   if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
   else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
