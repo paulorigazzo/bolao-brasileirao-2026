@@ -3779,7 +3779,7 @@ function renderTeamCampaign(){
   const current=currentRoundNumber();
   $("teamCampaignSelect").innerHTML=teamLogo(team.logo||official?.crest,name)+"<span>"+escapeHtml(name)+'</span><span aria-hidden="true">⌄</span>';
   const positions=new Map(favoriteTeamPositionHistory(team,model.rounds.filter(item=>item.round<=current&&item.fixtures.some(match=>match.points!=null)).map(item=>item.round)).map(item=>[item.round,item.position]));
-  const rows=model.rounds.slice().reverse().map(item=>{
+  const rows=model.rounds.filter(item=>item.round<=current).reverse().map(item=>{
     const fixtures=item.fixtures.length?item.fixtures:[null];
     return fixtures.map(match=>{
       const opponent=match?teamDisplayName(match.opponent):"Partida não disponível";

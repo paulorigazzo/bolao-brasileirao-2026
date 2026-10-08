@@ -53,7 +53,7 @@ const trigger={focus(){this.focused=true;}};
 ui.openTeamCampaign("Clube Á",trigger);
 assert.equal(nodes.teamCampaignTitle.textContent,"Campanha do Clube Á");
 assert.equal(nodes.teamCampaignRounds.scrollTop,420);
-assert.equal((nodes.teamCampaignRounds.innerHTML.match(/data-campaign-round=/g)||[]).length,38);
+assert.equal((nodes.teamCampaignRounds.innerHTML.match(/data-campaign-round=/g)||[]).length,29);
 assert.ok(nodes.teamCampaignOverview.innerHTML.includes("classificação oficial informa 10"));
 nodes.teamCampaignSelect.value="b";ui.renderTeamCampaign();
 assert.equal(nodes.teamCampaignTitle.textContent,"Campanha do B");
@@ -61,9 +61,9 @@ assert.equal(state.participant.time_favorito,"Clube Á");
 ui.closeTeamCampaign();assert.equal(trigger.focused,true);
 assert.ok(nodes.teamCampaignModal.classes.has("hidden"));
 assert.ok(!body.classes.has("modal-open"));
-console.log("Modal da campanha: troca de clube, 38 rodadas, foco e favorito preservado verificados.");
+console.log("Modal da campanha: troca de clube, rodadas até a atual, foco e favorito preservado verificados.");
 
-assert.ok(nodes.teamCampaignRounds.innerHTML.indexOf('data-campaign-round="38"')<nodes.teamCampaignRounds.innerHTML.indexOf('data-campaign-round="1"'));
+assert.ok(nodes.teamCampaignRounds.innerHTML.indexOf('data-campaign-round="29"')<nodes.teamCampaignRounds.innerHTML.indexOf('data-campaign-round="1"'));
 assert.ok(nodes.teamCampaignRounds.innerHTML.includes('crest.png'));
 assert.ok(!nodes.teamCampaignRounds.innerHTML.includes('<article'));
 
@@ -74,8 +74,8 @@ assert.ok(nodes.teamCampaignOptions.innerHTML.includes('crest.png'));
 assert.ok(nodes.teamCampaignSelect.innerHTML.includes('crest.png'));
 const pastRow=nodes.teamCampaignRounds.innerHTML.match(/data-campaign-round="1"[\s\S]*?<\/div>/)?.[0];
 assert.ok(pastRow.includes('>V<'),"mando visitante");
-const futureRow=nodes.teamCampaignRounds.innerHTML.match(/data-campaign-round="38"[\s\S]*?<\/div>/)?.[0];
-assert.ok(futureRow.includes('resultados disponíveis até esta rodada">—'));
+assert.ok(!nodes.teamCampaignRounds.innerHTML.includes('data-campaign-round="30"'));
+assert.ok(!nodes.teamCampaignRounds.innerHTML.includes('data-campaign-round="38"'));
 
 const options=clubs.map(club=>({dataset:{campaignClub:club.key},setAttribute(name,value){this[name]=value;},focus(){this.focused=true;}}));
 nodes.teamCampaignOptions.querySelectorAll=()=>options;
