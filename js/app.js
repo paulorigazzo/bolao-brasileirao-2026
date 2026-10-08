@@ -1773,7 +1773,7 @@ function premiumMatchCard(g){
         ${resultComparison}
         ${premiumGoalEvents(g)}
         ${premiumGameDetails(g)}
-        <div class="game-campaign-actions"><span>Campanha no campeonato</span><button class="secondary" type="button" data-game-campaign="${escapeHtml(normalizeTeamKey(g.time_casa))}">${escapeHtml(teamDisplayName(g.time_casa))}</button><button class="secondary" type="button" data-game-campaign="${escapeHtml(normalizeTeamKey(g.time_fora))}">${escapeHtml(teamDisplayName(g.time_fora))}</button></div>
+        <div class="game-campaign-actions"><span>Campanha no campeonato</span><button class="secondary" type="button" data-game-campaign="${escapeHtml(normalizeTeamKey(g.time_casa))}">${teamLogo(g.time_casa_logo,g.time_casa)}<span>${escapeHtml(teamDisplayName(g.time_casa))}</span></button><button class="secondary" type="button" data-game-campaign="${escapeHtml(normalizeTeamKey(g.time_fora))}">${teamLogo(g.time_fora_logo,g.time_fora)}<span>${escapeHtml(teamDisplayName(g.time_fora))}</span></button></div>
         ${!isLocked&&!finished?`<div class="premium-game-actions"><button class="primary premium-save-pick" type="button" ${validPickDraft(g.id_jogo)?"":"disabled"}>${draft?"Salvar palpite":pick?"✓ Palpite salvo":"Salvar palpite"}</button></div>`:""}
       </div>
     </div>

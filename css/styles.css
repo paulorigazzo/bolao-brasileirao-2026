@@ -4474,3 +4474,6 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 .game-campaign-actions{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:12px}
 .game-campaign-actions>span{width:100%;text-align:center;font-size:.65rem;color:var(--muted)}
 .game-campaign-actions button{font-size:.7rem;padding:7px 10px}
+
+.game-campaign-actions button{display:inline-flex;align-items:center;gap:7px}
+.game-campaign-actions button img{width:22px;height:22px;object-fit:contain;flex-shrink:0}
