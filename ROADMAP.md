@@ -136,6 +136,14 @@ Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e 
 - 🔮 **Histórico de 2026:** manter no aplicativo original; qualquer resumo ou importação futura será opcional e dependerá de necessidade demonstrada.
 - ✅ **QW1 técnico:** Pipeline inicial de qualidade no GitHub Actions.
 
+## Preparação da temporada 2027
+
+- 🔵 Direção aprovada: reutilizar este aplicativo, o Supabase atual e suas tabelas; começar a competição de 2027 com dados zerados e novo cadastro dos participantes.
+- 🔵 Encerrar 2026, fazer backup completo e testar restauração antes da limpeza; histórico preservado fora do app de 2027.
+- 🔵 Preparar inventário e procedimento de limpeza, incluindo vínculos, caches, logs, snapshots e checkpoints protegidos; atualizar calendário, clubes, integração e configuração anual.
+- 🔵 Avaliar 1 ponto por placar exato invertido desde a rodada 1 de 2027. Regulamento final pendente; alteração em 2026 sem decisão.
+- Nenhuma limpeza ou mudança funcional autorizada por este planejamento. O Rigazzo continua congelado e não é pré-requisito para 2027. Ver [DEC-2026-066](docs/ai/DECISION_LOG.md#dec-2026-066--preparação-de-2027-no-supabase-atual).
+
 ## Fora do escopo imediato
 
 - geração automática de palpites;

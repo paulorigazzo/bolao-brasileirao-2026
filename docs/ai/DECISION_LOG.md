@@ -2052,3 +2052,32 @@ vivo não são expostos. Movimento geral compara com a posição oficial atual.
 Empates da rodada usam pontos, exatos e nome; `user_id` estabiliza igualdade
 completa sem mudar o Ranking oficial. A versão e os detalhes operacionais estão
 na [nota v6.42.0](../releases/v6.42.0-destaques-ao-vivo.md).
+
+
+## DEC-2026-066 — Preparação de 2027 no Supabase atual
+
+- Data: 2026-10-07.
+- Status: direção aprovada; execução futura não autorizada.
+- Impacto: registro documental de baixo risco; preparação e limpeza de alto risco.
+
+### Contexto
+
+Na discussão de 4 de setembro, foi aceita a reutilização do aplicativo com novo cadastro dos participantes e preferência por um Supabase vazio. Em 7 de outubro, o responsável definiu que prefere limpar os dados atuais e reaproveitar o mesmo projeto Supabase e suas tabelas. Esta decisão substitui a alternativa de banco novo e a exigência de histórico de 2026 consultável no aplicativo para esta preparação. Não altera o congelamento do Rigazzo.
+
+### Decisão
+
+- Reutilizar o aplicativo, o projeto Supabase atual e a estrutura de tabelas, funções e políticas, com as adaptações necessárias para 2027.
+- Encerrar 2026 antes do corte; produzir backup completo e verificar sua restauração antes de qualquer limpeza. O backup será a preservação de 2026 fora do aplicativo de 2027.
+- Exigir novo cadastro dos participantes em 2027; planejar explicitamente a reinicialização da autenticação, autorizações, associações às ligas e cadastro do administrador.
+- Iniciar jogos, palpites, resultados, ranking e estatísticas de 2027 zerados.
+- Inventariar dados competitivos e operacionais, caches, logs, vínculos, snapshots e checkpoints; definir a ordem de limpeza e o tratamento dos registros protegidos em plano próprio, sem apagar indiscriminadamente a estrutura.
+- Atualizar clubes, calendário, mapeamentos e temporada da API-Football, configurações, textos e identificação de caches para 2027.
+- Testar cadastro, permissões, sincronização, fechamento, pontuação, ranking e recuperação antes da ativação.
+
+### Preparação do regulamento
+
+A proposta de 1 ponto total por placar exato invertido fica registrada para avaliação no regulamento de 2027, desde a rodada 1 se aprovada. A decisão de alterar a pontuação em 2026 permanece aberta: nem retroatividade nem vigência na rodada 30 estão autorizadas. Manter o cálculo atual dos empates e alinhar sua documentação é a direção discutida, sem alteração funcional nesta entrega.
+
+### Limites
+
+Este registro não autoriza exclusão de dados, alteração de Auth, migração SQL, mudança de pontuação, corte de conexão ou publicação. A execução exigirá inventário, plano revisável, backup restaurável e aprovação específica.
