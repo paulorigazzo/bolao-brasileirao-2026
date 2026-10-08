@@ -1,3 +1,10 @@
+# v6.45.2 — Momento com dados nas Estatísticas
+
+- Mostra somente a média de pontos por jogo e o total de rodadas do participante no bloco de momento, com mínimo de 3 rodadas e sem tendência clara.
+- Oculta o bloco em históricos menores e em tendências de alta ou queda, preservando Título atual e o restante das Estatísticas.
+- Usa todos os pontos e jogos analisados do histórico; preserva o cálculo de tendência.
+- Detalhes: [nota da versão](docs/releases/v6.45.2-momento-estatisticas-com-dados.md).
+
 # v6.45.1 — Clareza da variação nas Estatísticas
 
 - Identifica a variação da média com setas e unidade pts/jogo, além de “Média estável” e “Sem comparação anterior”.

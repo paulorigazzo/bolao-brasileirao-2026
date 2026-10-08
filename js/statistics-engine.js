@@ -515,11 +515,13 @@ export function buildStatisticsDashboardModel({
   else if (group.gapToLeader != null && group.gapToLeader <= 8) dynamicTitle = { icon: "🦁", title: "Caçador do Líder", description: "A liderança está ao alcance de uma boa sequência." };
   else if (finished >= 3 && specialty?.value) dynamicTitle = { icon: specialty.icon, title: specialty.title, description: `${specialty.label} são o destaque do seu perfil.` };
 
-  let moment = { tone: "neutral", icon: "⚽", eyebrow: "SEU MOMENTO", title: "Temporada em construção", text: "Continue registrando seus palpites para revelar tendências mais precisas.", badge: dynamicTitle.title };
-  if (group.position === 1 && roundAnalysis.trend !== "down") moment = { tone: "celebration", icon: "👑", eyebrow: "SEU MOMENTO", title: "Você dita o ritmo do bolão", text: group.leadOverBelow != null ? `A liderança é sua, com ${group.leadOverBelow} ponto${group.leadOverBelow===1?'':'s'} de vantagem sobre ${group.below || 'o perseguidor mais próximo'}.` : "Você está na liderança e é o participante a ser alcançado.", badge: dynamicTitle.title };
-  else if (roundAnalysis.trend === "up") moment = { tone: "positive", icon: "🔥", eyebrow: "SEU MOMENTO", title: "Em grande fase", text: group.gapToAbove != null ? `Sua média está subindo e faltam ${group.gapToAbove} ponto${group.gapToAbove===1?'':'s'} para alcançar ${group.above || 'a próxima posição'}.` : "Sua média recente cresceu. É uma boa hora para manter a sequência.", badge: dynamicTitle.title };
-  else if (roundAnalysis.trend === "down") moment = { tone: "attention", icon: "⚠️", eyebrow: "SEU MOMENTO", title: "Hora da reação", text: "As últimas rodadas ficaram abaixo do seu ritmo anterior. Uma boa rodada pode mudar rapidamente esse cenário.", badge: dynamicTitle.title };
-  else if (Number.isFinite(consistency) && consistency >= 75) moment = { tone: "steady", icon: "🛡️", eyebrow: "SEU MOMENTO", title: "Regularidade em destaque", text: "Seu desempenho varia pouco entre as rodadas, uma qualidade importante para permanecer competitivo.", badge: dynamicTitle.title };
+  const analyzedRounds=roundAnalysis.rounds||[];
+  const analyzedGames=analyzedRounds.reduce((sum,item)=>sum+item.games,0);
+  const analyzedPoints=analyzedRounds.reduce((sum,item)=>sum+item.points,0);
+  const average=analyzedGames?analyzedPoints/analyzedGames:0;
+  const visible=analyzedRounds.length>=3 && ["stable","insufficient"].includes(roundAnalysis.trend);
+  const momentTone=group.position===1&&roundAnalysis.trend!=="down"?"celebration":roundAnalysis.trend==="up"?"positive":roundAnalysis.trend==="down"?"attention":Number.isFinite(consistency)&&consistency>=75?"steady":"neutral";
+  const moment={visible,tone:momentTone,roundCount:analyzedRounds.length,average,text:visible?`Média de ${average.toFixed(1).replace(".",",")} pts/jogo em ${analyzedRounds.length} rodadas.`:""};
 
   const recommendations = [];
   if (group.position > 1 && group.gapToAbove != null && group.gapToAbove <= 5) recommendations.push({ icon: "🚀", title: "Próxima posição ao alcance", text: `Apenas ${group.gapToAbove} ponto${group.gapToAbove===1?' separa':'s separam'} você de ${group.above || 'quem está logo acima'}.` });

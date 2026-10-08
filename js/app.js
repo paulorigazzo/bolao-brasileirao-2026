@@ -32,7 +32,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.45.1";
+const APP_VERSION = "6.45.2";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -3471,8 +3471,11 @@ function renderStatsMoment(model){
   const title=model.dynamicTitle;
   const hero=$("statsTab")?.querySelector(".stats-hero");
   if(hero) hero.className=`stats-hero card tone-${moment.tone}`;
-  if($("statsMomentIcon")) $("statsMomentIcon").textContent=moment.icon;
-  if($("statsMomentTitle")) $("statsMomentTitle").textContent=moment.title;
+  const block=$("statsMomentBlock");
+  if(block){
+    block.classList.toggle("hidden",!moment.visible);
+    block.closest(".stats-hero-footer")?.classList.toggle("without-moment",!moment.visible);
+  }
   if($("statsMomentText")) $("statsMomentText").textContent=moment.text;
   if($("statsMomentBadge")){
     $("statsMomentBadge").textContent=`${title.icon} ${title.title}`;

@@ -151,10 +151,43 @@ assert.equal(dashboardModel.insights.length, 3);
 assert.equal(dashboardModel.insights[0].key, "trend");
 assert.equal(dashboardModel.records.bestRound.round, 1);
 assert.equal(dashboardModel.medals.length, advanced.medals.length);
-assert.ok(dashboardModel.moment.title.length > 0);
+assert.equal(dashboardModel.moment.visible,false);
 assert.ok(dashboardModel.dynamicTitle.title.length > 0);
 assert.ok(dashboardModel.recommendations.length >= 1);
 assert.ok(dashboardModel.recommendations.length <= 3);
 assert.equal(dashboardModel.executive.consistency.label, "Consistente");
 
 console.log("Motor estatístico verificado com sucesso.");
+
+const momentFor=(rounds,trend="stable")=>buildStatisticsDashboardModel({advancedStats:advanced,roundAnalysis:{rounds,trend,delta:0},predictionProfile}).moment;
+for(const count of [0,1,2]) assert.equal(momentFor(Array.from({length:count},(_,i)=>({round:i+1,games:2,points:10}))).visible,false);
+for(const count of [3,4,5]){
+  const rounds=Array.from({length:count},(_,i)=>({round:i+1,games:2,points:10}));
+  const moment=momentFor(rounds);
+  assert.equal(moment.visible,true);assert.equal(moment.roundCount,count);
+  assert.equal(moment.text,'Média de 5,0 pts/jogo em '+count+' rodadas.');
+  for(const trend of ["up","down"]) assert.equal(momentFor(rounds,trend).visible,false);
+}
+const uneven=momentFor([{round:1,games:1,points:10},{round:2,games:3,points:0},{round:3,games:2,points:2},{round:4,games:4,points:8}]);
+assert.equal(uneven.average,2);assert.equal(uneven.text,"Média de 2,0 pts/jogo em 4 rodadas.");
+const firstThree=momentFor([{round:1,games:1,points:0},{round:2,games:1,points:0},{round:3,games:1,points:0}],"insufficient");
+assert.equal(firstThree.visible,true);assert.equal(firstThree.average,0);
+assert.equal(dashboardModel.dynamicTitle.title,"Em Ascensão");
+console.log("Momento: mínimo de 3 rodadas, histórico completo e ausência de tendência clara verificados.");
+
+const {readFileSync}=await import("node:fs");
+const {runInNewContext}=await import("node:vm");
+const appSource=readFileSync(new URL("../js/app.js",import.meta.url),"utf8");
+const renderStart=appSource.indexOf("function renderStatsMoment(");
+const renderSource=appSource.slice(renderStart,appSource.indexOf("\n}",renderStart)+2);
+const element=()=>({classes:new Set(),classList:{toggle(name,on){on?this.owner.classes.add(name):this.owner.classes.delete(name);}}});
+const block=element(),footer=element();block.classList.owner=block;footer.classList.owner=footer;block.closest=()=>footer;
+const hero={};const nodes={statsMomentBlock:block,statsMomentText:{},statsMomentBadge:{},statsMomentDescription:{},statsTab:{querySelector:()=>hero}};
+const renderMoment=runInNewContext(renderSource+";renderStatsMoment",{$:id=>nodes[id]});
+renderMoment({...dashboardModel,moment:momentFor(Array.from({length:5},(_,i)=>({round:i+1,games:1,points:5})))});
+assert.equal(block.classes.has("hidden"),false);assert.equal(nodes.statsMomentText.textContent,"Média de 5,0 pts/jogo em 5 rodadas.");
+renderMoment(dashboardModel);assert.equal(block.classes.has("hidden"),true);assert.equal(footer.classes.has("without-moment"),true);
+assert.equal(nodes.statsMomentBadge.textContent,dashboardModel.dynamicTitle.icon+" "+dashboardModel.dynamicTitle.title);
+assert.equal(nodes.statsMomentDescription.textContent,dashboardModel.dynamicTitle.description);
+assert.equal(hero.className,"stats-hero card tone-positive");
+console.log("Visibilidade do momento e Título atual preservado verificados.");
