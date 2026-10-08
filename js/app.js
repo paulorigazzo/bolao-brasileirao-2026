@@ -32,7 +32,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.45.0";
+const APP_VERSION = "6.45.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -3742,7 +3742,7 @@ function renderStats(){
   if($("roundHistory")) $("roundHistory").innerHTML=rounds.length?rounds.map((data,index)=>{
     const previous=index?rounds[index-1]:null;
     const change=!previous?null:data.average-previous.average;
-    const changeLabel=change===null?"início":Math.abs(change)<.05?"estável":change>0?`+${change.toFixed(1)}`:change.toFixed(1);
+    const changeLabel=change===null?"Sem comparação anterior":Math.abs(change)<.05?"→ Média estável":change>0?`↑ +${change.toFixed(1).replace(".",",")} pts/jogo`:`↓ −${Math.abs(change).toFixed(1).replace(".",",")} pts/jogo`;
     const changeClass=change===null||Math.abs(change)<.05?"stable":change>0?"up":"down";
     return `<button type="button" class="round-history-item ${bestRound&&data.round===bestRound.round?'best':''}" data-stats-round-highlights="${data.round}" aria-label="Ver Destaques da Rodada ${data.round}"><span>R${data.round}</span><div class="history-track"><div style="width:${data.points/top*100}%"></div></div><strong>${data.points} pts</strong><small>${data.hits}/${data.games} acertos · ${data.average.toFixed(1)} pts/jogo</small><em class="round-change ${changeClass}">${changeLabel}</em><span class="round-history-chevron" aria-hidden="true">›</span></button>`;
   }).reverse().join(""):'<div class="stats-empty-state"><span aria-hidden="true">📈</span><strong>Sem evolução por rodada ainda</strong><p>O gráfico será exibido após os primeiros jogos finalizados com palpite.</p></div>';
