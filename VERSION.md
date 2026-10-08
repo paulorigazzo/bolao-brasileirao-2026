@@ -1,5 +1,5 @@
-6.45.0
+6.45.1
 
-Campanha dos clubes em modal compartilhado pela Classificação e Meu Time, com seletor, resumo oficial e as rodadas até a atual com pontos e acumulado.
+Variação da média por rodada identificada com unidade, direção e texto explicativo nas Estatísticas.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

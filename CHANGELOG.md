@@ -1,3 +1,10 @@
+# v6.45.1 — Clareza da variação nas Estatísticas
+
+- Identifica a variação da média com setas e unidade pts/jogo, além de “Média estável” e “Sem comparação anterior”.
+- Explica a comparação com a rodada anterior disponível e adapta o espaço do indicador no mobile.
+- Preserva os cálculos de médias e pontuação.
+- Detalhes: [nota da versão](docs/releases/v6.45.1-clareza-variacao-estatisticas.md).
+
 # v6.45.0 — Campanha dos clubes
 
 - Adiciona modal de campanha com seletor de clube, resumo oficial e as rodadas até a atual com pontos por jogo e acumulado.

@@ -4485,3 +4485,13 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 #teamCampaignSelect{min-width:0}
 #teamCampaignSelect>span:not(:last-child){white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #teamCampaignSelect img{flex-shrink:0}
+
+/* Unidade e comparação explícitas na evolução por rodada. */
+.premium-history button.round-history-item{grid-template-columns:42px minmax(70px,1fr) 68px minmax(125px,auto) minmax(110px,auto) 18px}
+.premium-history button.round-history-item .round-change{white-space:normal;text-align:center;line-height:1.35}
+@media(max-width:850px){
+  .premium-history button.round-history-item{grid-template-columns:38px minmax(0,1fr) 60px 18px}
+  .premium-history button.round-history-item small{grid-column:2/4;grid-row:2}
+  .premium-history button.round-history-item .round-change{grid-column:2/4;grid-row:3;justify-self:start;text-align:left;margin-top:3px}
+  .premium-history button.round-history-item .round-history-chevron{grid-column:4;grid-row:1/4}
+}
