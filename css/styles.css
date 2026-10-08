@@ -4468,3 +4468,9 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 #teamCampaignOptions button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:transparent;border:0}
 #teamCampaignOptions button[aria-selected="true"]{background:rgba(53,220,131,.12)}
 .team-campaign-legend{font-size:.65rem;color:var(--muted);margin:0;line-height:1.4}
+
+.campaign-trend{margin-left:4px;font-weight:900}.campaign-trend.is-up{color:var(--green2)}.campaign-trend.is-down{color:#ef7c7c}.campaign-trend.is-flat{color:var(--muted)}
+.favorite-campaign-action{margin-top:10px;width:100%}
+.game-campaign-actions{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:12px}
+.game-campaign-actions>span{width:100%;text-align:center;font-size:.65rem;color:var(--muted)}
+.game-campaign-actions button{font-size:.7rem;padding:7px 10px}

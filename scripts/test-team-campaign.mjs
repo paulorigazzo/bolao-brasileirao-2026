@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {runInNewContext} from "node:vm";
-import {buildTeamCampaign} from "../js/team-campaign.js";
+import {buildTeamCampaign,campaignPositionTrend} from "../js/team-campaign.js";
 const app=readFileSync(new URL("../js/app.js",import.meta.url),"utf8");
 const names=["isFinished","isCancelled","hasScoreValue","hasValidScore","isScorableGame","gameStatusDisplay"];
 const source=name=>{const start=app.indexOf("function "+name+"(");return app.slice(start,app.indexOf("\n}",start)+2);};
@@ -48,7 +48,7 @@ const body=element();body.classList.owner=body;
 const state={games,participant:{time_favorito:"Clube Á"},standings:{table:[{team:"Clube Á",points:10,position:2,playedGames:4,won:2,draw:1,lost:1},{team:"B",points:4,position:3,playedGames:4,won:1,draw:1,lost:2}]}};
 const clubs=[{name:"Clube Á",key:normalizeTeamKey("Clube Á"),logo:""},{name:"B",key:"b",logo:""}];
 const uiNames=["championshipTableThroughRound","favoriteTeamPositionHistory","setCampaignPickerOpen","campaignClubs","renderTeamCampaign","openTeamCampaign","closeTeamCampaign"];
-const ui=runInNewContext(uiNames.map(source).join("\n")+";({"+uiNames.join(",")+"})",{state,buildTeamCampaign,normalizeTeamKey,...helpers,availableTeams:()=>clubs,teamDisplayName:s=>s,teamLogo:()=>"<img src=\"crest.png\">",findTeam:()=>null,escapeHtml:s=>String(s??""),formatDate:s=>s,currentRoundNumber:()=>29,requestAnimationFrame:fn=>fn(),$:id=>nodes[id],document:{activeElement:null,body},teamCampaignReturnFocus:null});
+const ui=runInNewContext(uiNames.map(source).join("\n")+";({"+uiNames.join(",")+"})",{state,buildTeamCampaign,campaignPositionTrend,normalizeTeamKey,...helpers,availableTeams:()=>clubs,teamDisplayName:s=>s,teamLogo:()=>"<img src=\"crest.png\">",findTeam:()=>null,escapeHtml:s=>String(s??""),formatDate:s=>s,currentRoundNumber:()=>29,requestAnimationFrame:fn=>fn(),$:id=>nodes[id],document:{activeElement:null,body},teamCampaignReturnFocus:null});
 const trigger={focus(){this.focused=true;}};
 ui.openTeamCampaign("Clube Á",trigger);
 assert.equal(nodes.teamCampaignTitle.textContent,"Campanha do Clube Á");
@@ -95,3 +95,13 @@ const escape=keyEvent("Escape");keyboard(escape);assert.equal(nodes.teamCampaign
 console.log("Seletor com escudos: seleção e navegação por teclado verificadas.");
 
 assert.ok(pastRow.includes('resultados disponíveis até esta rodada">2º'),"posição reconstruída do visitante na rodada 1");
+
+assert.deepEqual(campaignPositionTrend(6,8,2),{arrow:"↑",tone:"up",label:"Subiu 2 posições"});
+assert.deepEqual(campaignPositionTrend(9,8,2),{arrow:"↓",tone:"down",label:"Caiu 1 posição"});
+assert.equal(campaignPositionTrend(8,8,2).arrow,"→");
+assert.equal(campaignPositionTrend(1,2,1),null);
+assert.equal(campaignPositionTrend(1,null,2),null);
+assert.equal(campaignPositionTrend(null,1,2),null);
+assert.match(app,/data-home-action="campaign"/);
+assert.match(app,/data-game-campaign="\$\{escapeHtml\(normalizeTeamKey\(g.time_casa\)\)\}"/);
+assert.match(app,/openTeamCampaign\(button.dataset.gameCampaign,button\)/);

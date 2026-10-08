@@ -26,3 +26,9 @@ export function buildTeamCampaign({team,games=[],official=null,normalizeTeamKey,
   const officialPoints=official?.points==null?null:Number(official.points);
   return {team,official,rounds,calculated:{points:accumulated,playedGames:played,won,draw,lost},difference:Number.isFinite(officialPoints)?officialPoints-accumulated:null};
 }
+
+export function campaignPositionTrend(position,previous,round){
+  if(round<=1 || !Number.isInteger(position) || !Number.isInteger(previous) || position<1 || previous<1) return null;
+  const movement=previous-position;
+  return {arrow:movement>0?"↑":movement<0?"↓":"→",tone:movement>0?"up":movement<0?"down":"flat",label:movement===0?"Manteve a posição":(movement>0?"Subiu ":"Caiu ")+Math.abs(movement)+" "+(Math.abs(movement)===1?"posição":"posições")};
+}

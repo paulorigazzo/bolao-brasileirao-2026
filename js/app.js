@@ -1,4 +1,4 @@
-import { buildTeamCampaign } from "./team-campaign.js";
+import { buildTeamCampaign, campaignPositionTrend } from "./team-campaign.js";
 import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
 import { analyzeAdvancedStatistics, analyzePredictionProfile, analyzeRankingHistory, analyzeRoundPerformance, buildStatisticsDashboardModel, classifyStatisticsGames } from "./statistics-engine.js";
@@ -1773,6 +1773,7 @@ function premiumMatchCard(g){
         ${resultComparison}
         ${premiumGoalEvents(g)}
         ${premiumGameDetails(g)}
+        <div class="game-campaign-actions"><span>Campanha no campeonato</span><button class="secondary" type="button" data-game-campaign="${escapeHtml(normalizeTeamKey(g.time_casa))}">${escapeHtml(teamDisplayName(g.time_casa))}</button><button class="secondary" type="button" data-game-campaign="${escapeHtml(normalizeTeamKey(g.time_fora))}">${escapeHtml(teamDisplayName(g.time_fora))}</button></div>
         ${!isLocked&&!finished?`<div class="premium-game-actions"><button class="primary premium-save-pick" type="button" ${validPickDraft(g.id_jogo)?"":"disabled"}>${draft?"Salvar palpite":pick?"✓ Palpite salvo":"Salvar palpite"}</button></div>`:""}
       </div>
     </div>
@@ -1918,6 +1919,7 @@ function renderGames(){
   const cards=[...document.querySelectorAll(".premium-match-card")];
   cards.forEach(card=>{
     card.querySelector(".game-toggle")?.addEventListener("click",()=>toggleGameCard(card));
+    card.querySelectorAll("[data-game-campaign]").forEach(button=>button.addEventListener("click",()=>openTeamCampaign(button.dataset.gameCampaign,button)));
     card.querySelectorAll(".premium-detail-toggle").forEach(button=>button.addEventListener("click",()=>{
       const section=button.closest(".premium-detail-section");
       const panel=section?.querySelector(".premium-detail-panel");
@@ -2877,6 +2879,7 @@ function renderHomeFavoriteTeam(){
       ${row?`<div class="favorite-standing-main"><div class="favorite-position-link"><strong>${row.position}º <i class="favorite-standing-chevron" aria-hidden="true">›</i></strong><span>posição</span></div><div><strong>${row.points}</strong><span>pontos</span></div></div>
       <div class="favorite-standing-stats"><span><b>${row.playedGames}</b> J</span><span><b>${row.won}</b> V</span><span><b>${row.draw}</b> E</span><span><b>${row.lost}</b> D</span><span><b>${Number(row.goalDifference)>0?'+':''}${row.goalDifference}</b> SG</span></div>`:`<div class="favorite-standings-loading"><span class="favorite-loading-dot"></span><span>Carregando classificação oficial…</span><i class="favorite-standing-chevron" aria-hidden="true">›</i></div>`}
     </div>
+    <button class="secondary favorite-campaign-action" type="button" data-home-action="campaign">Ver campanha do ${escapeHtml(teamName)} <span aria-hidden="true">›</span></button>
     ${historyHtml}
     <div class="favorite-next-match">
       <div><span class="favorite-next-label">PRÓXIMA PARTIDA</span>${contextBadge}<strong>${next?`${escapeHtml(teamName)} × ${escapeHtml(opponentName)}`:'A definir'}</strong><small>${nextDate?`${escapeHtml(nextDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'}))} • ${escapeHtml(nextDate.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}))}${next.local?` • ${escapeHtml(next.local)}`:''}`:'Aguardando a tabela de jogos'}</small></div>
@@ -3782,10 +3785,13 @@ function renderTeamCampaign(){
   const rows=model.rounds.filter(item=>item.round<=current).reverse().map(item=>{
     const fixtures=item.fixtures.length?item.fixtures:[null];
     return fixtures.map(match=>{
+      const position=match?.points!=null?positions.get(item.round):null;
+      const trend=campaignPositionTrend(position,positions.get(item.round-1),item.round);
+      const trendHtml=trend?`<span class="campaign-trend is-${trend.tone}" role="img" aria-label="${trend.label}" title="${trend.label}">${trend.arrow}</span>`:"";
       const opponent=match?teamDisplayName(match.opponent):"Partida não disponível";
       const logo=match?.opponentLogo||findTeam(match?.opponent)?.logo||"";
       const date=match?.inicio?new Date(match.inicio).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"}):"A definir";
-      return `<div class="team-campaign-round${item.round===current?" is-current":""}" data-campaign-round="${item.round}" role="row"><span role="cell" class="team-campaign-round-number">${item.round}</span><span role="cell" class="team-campaign-opponent" title="${escapeHtml(opponent)}">${match?teamLogo(logo,opponent):""}<span>${escapeHtml(opponent)}</span></span><span role="cell" title="${match?.venue||"Mando indisponível"}">${match?match.venue==="Casa"?"M":"V":"—"}</span><span role="cell" class="team-campaign-date" title="${match?.inicio?escapeHtml(formatDate(match.inicio)):"Data a definir"}">${date}</span><span role="cell" class="team-campaign-position" title="Posição calculada pelos resultados disponíveis até esta rodada">${match?.points!=null&&positions.get(item.round)?positions.get(item.round)+"º":"—"}</span><strong role="cell">${match?.score||"—"}</strong><span role="cell" class="team-campaign-game-points" title="Pontos da partida">${match?.points??"—"}</span><span role="cell" title="Pontos acumulados até a rodada">${item.accumulated}</span></div>`;
+      return `<div class="team-campaign-round${item.round===current?" is-current":""}" data-campaign-round="${item.round}" role="row"><span role="cell" class="team-campaign-round-number">${item.round}</span><span role="cell" class="team-campaign-opponent" title="${escapeHtml(opponent)}">${match?teamLogo(logo,opponent):""}<span>${escapeHtml(opponent)}</span></span><span role="cell" title="${match?.venue||"Mando indisponível"}">${match?match.venue==="Casa"?"M":"V":"—"}</span><span role="cell" class="team-campaign-date" title="${match?.inicio?escapeHtml(formatDate(match.inicio)):"Data a definir"}">${date}</span><span role="cell" class="team-campaign-position" title="Posição calculada pelos resultados disponíveis até esta rodada">${position?position+"º":"—"}${trendHtml}</span><strong role="cell">${match?.score||"—"}</strong><span role="cell" class="team-campaign-game-points" title="Pontos da partida">${match?.points??"—"}</span><span role="cell" title="Pontos acumulados até a rodada">${item.accumulated}</span></div>`;
     }).join("");
   }).join("");
   $("teamCampaignRounds").innerHTML='<div class="team-campaign-table" role="table" aria-label="Campanha por rodada"><div class="team-campaign-table-heading" role="row"><span role="columnheader">R</span><span role="columnheader">Adversário</span><span role="columnheader" title="Mandante ou visitante">M/V</span><span role="columnheader">Data</span><span role="columnheader">Posição</span><span role="columnheader">Placar</span><span role="columnheader" title="Pontos da partida">Pts</span><span role="columnheader" title="Pontos acumulados">Acum.</span></div>'+rows+'</div>';
@@ -6045,6 +6051,7 @@ $("homeTab")?.addEventListener("click",async event=>{
     if($("roundSelect")) $("roundSelect").value=target.dataset.round;
     navigateTo("games");renderGames();return;
   }
+  if(action==="campaign"){ openTeamCampaign(state.participant?.time_favorito,target); return; }
   if(action==="calendar"){ openMatchCalendar(target); return; }
   if(action==="round-highlights"){ openRoundHighlights(target.dataset.roundHighlightsRound,target); return; }
   if(action==="refresh"){ target.disabled=true; try{ await refresh(); } finally{ target.disabled=false; } return; }
