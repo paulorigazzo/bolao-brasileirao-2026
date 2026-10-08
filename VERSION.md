@@ -1,5 +1,5 @@
-6.44.6
+6.45.0
 
-O card de Destaques da Home prioriza a rodada atual quando há destaques disponíveis. Rodadas antigas pendentes permanecem como alternativa e acessíveis separadamente nas Estatísticas.
+Campanha dos clubes em modal compartilhado pela Classificação e Meu Time, com seletor, resumo oficial e as 38 rodadas com pontos e acumulado.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)
