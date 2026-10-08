@@ -48,7 +48,7 @@ const body=element();body.classList.owner=body;
 const state={games,participant:{time_favorito:"Clube Á"},standings:{table:[{team:"Clube Á",points:10,position:2,playedGames:4,won:2,draw:1,lost:1},{team:"B",points:4,position:3,playedGames:4,won:1,draw:1,lost:2}]}};
 const clubs=[{name:"Clube Á",key:normalizeTeamKey("Clube Á"),logo:""},{name:"B",key:"b",logo:""}];
 const uiNames=["campaignClubs","renderTeamCampaign","openTeamCampaign","closeTeamCampaign"];
-const ui=runInNewContext(uiNames.map(source).join("\n")+";({"+uiNames.join(",")+"})",{state,buildTeamCampaign,normalizeTeamKey,...helpers,availableTeams:()=>clubs,teamDisplayName:s=>s,teamLogo:()=>"",escapeHtml:s=>String(s??""),formatDate:s=>s,currentRoundNumber:()=>29,requestAnimationFrame:fn=>fn(),$:id=>nodes[id],document:{activeElement:null,body},teamCampaignReturnFocus:null});
+const ui=runInNewContext(uiNames.map(source).join("\n")+";({"+uiNames.join(",")+"})",{state,buildTeamCampaign,normalizeTeamKey,...helpers,availableTeams:()=>clubs,teamDisplayName:s=>s,teamLogo:()=>"<img src=\"crest.png\">",findTeam:()=>null,escapeHtml:s=>String(s??""),formatDate:s=>s,currentRoundNumber:()=>29,requestAnimationFrame:fn=>fn(),$:id=>nodes[id],document:{activeElement:null,body},teamCampaignReturnFocus:null});
 const trigger={focus(){this.focused=true;}};
 ui.openTeamCampaign("Clube Á",trigger);
 assert.equal(nodes.teamCampaignTitle.textContent,"Campanha do Clube Á");
@@ -62,3 +62,7 @@ ui.closeTeamCampaign();assert.equal(trigger.focused,true);
 assert.ok(nodes.teamCampaignModal.classes.has("hidden"));
 assert.ok(!body.classes.has("modal-open"));
 console.log("Modal da campanha: troca de clube, 38 rodadas, foco e favorito preservado verificados.");
+
+assert.ok(nodes.teamCampaignRounds.innerHTML.indexOf('data-campaign-round="38"')<nodes.teamCampaignRounds.innerHTML.indexOf('data-campaign-round="1"'));
+assert.ok(nodes.teamCampaignRounds.innerHTML.includes('crest.png'));
+assert.ok(!nodes.teamCampaignRounds.innerHTML.includes('<article'));

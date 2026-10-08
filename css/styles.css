@@ -4447,12 +4447,15 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 .team-campaign-metrics strong{font-size:1.2rem}.team-campaign-metrics span{font-size:.65rem;color:var(--muted)}
 .team-campaign-notice{font-size:.75rem;color:#f2cc58;line-height:1.5}
 .team-campaign-rounds{min-height:130px;overflow:auto;position:relative;overscroll-behavior:contain}
-.team-campaign-round{padding:12px;border:1px solid var(--divider);border-radius:12px;margin-bottom:9px}
-.team-campaign-round.is-current{border-color:var(--green2)}
-.team-campaign-round header{display:flex;justify-content:space-between;gap:10px;font-size:.78rem;padding-bottom:9px}
-.team-campaign-round header span{color:var(--muted)}
-.team-campaign-match{display:flex;justify-content:space-between;gap:12px;padding:6px 0}
-.team-campaign-match small{display:block;color:var(--muted);font-size:.7rem;margin-top:4px}
-.team-campaign-result{flex-shrink:0;text-align:right}.team-campaign-result span{display:block;font-size:.72rem;color:var(--green2);margin-top:5px}
+.team-campaign-table{min-width:530px}
+.team-campaign-round,.team-campaign-table-heading{display:grid;grid-template-columns:24px minmax(110px,1fr) 22px 52px 72px 50px 28px 38px;align-items:center;gap:8px;padding:9px 7px;font-size:.72rem;white-space:nowrap}
+.team-campaign-table-heading{position:sticky;top:0;z-index:1;background:var(--surface,#111c18);color:var(--muted);font-size:.65rem;font-weight:800}
+.team-campaign-round{border-bottom:1px solid var(--divider)}
+.team-campaign-round.is-current{background:rgba(53,220,131,.06);box-shadow:inset 2px 0 var(--green2)}
+.team-campaign-opponent{display:flex;align-items:center;gap:7px;min-width:0}
+.team-campaign-opponent>span:last-child{overflow:hidden;text-overflow:ellipsis}
+.team-campaign-opponent img{width:24px;height:24px;object-fit:contain;flex-shrink:0}
+.team-campaign-date,.team-campaign-phase{color:var(--muted);font-size:.65rem}
+.team-campaign-game-points{color:var(--green2)}
 .my-team-campaign-action{margin-top:12px}
 @media(max-width:520px){.team-campaign-modal{padding:16px;max-height:94vh;gap:9px}.team-campaign-metrics{grid-template-columns:repeat(3,1fr)}.team-campaign-header h2{font-size:1.15rem}.my-team-campaign-action{width:100%}}

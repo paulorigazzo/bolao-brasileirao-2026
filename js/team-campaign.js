@@ -19,7 +19,7 @@ export function buildTeamCampaign({team,games=[],official=null,normalizeTeamKey,
       if(valid){played++;won+=result==="V"?1:0;draw+=result==="E"?1:0;lost+=result==="D"?1:0;accumulated+=points;}
       const phase=gameStatusDisplay(game);
       const dateDefined=game.situacao_agendamento!=="adiado_sem_data" && phase.key!=="postponed" && Number.isFinite(Date.parse(game.inicio));
-      return {id:game.id_jogo,opponent:home?game.time_fora:game.time_casa,venue:home?"Casa":"Fora",inicio:dateDefined?game.inicio:null,phase,result,points,score:(valid||(phase.key==="live"&&hasValidScore?.(game)))?own+" × "+other:null};
+      return {id:game.id_jogo,opponent:home?game.time_fora:game.time_casa,opponentLogo:(home?game.time_fora_logo:game.time_casa_logo)||"",venue:home?"Casa":"Fora",inicio:dateDefined?game.inicio:null,phase,result,points,score:(valid||(phase.key==="live"&&hasValidScore?.(game)))?own+" × "+other:null};
     });
     return {round,fixtures,accumulated};
   });
