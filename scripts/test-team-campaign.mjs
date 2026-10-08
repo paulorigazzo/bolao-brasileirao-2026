@@ -41,8 +41,8 @@ assert.doesNotMatch(modalCode,/state.participant\.time_favorito\s*=|\.update\(|\
 console.log("Campanha do clube: pontos, rodadas, seleção e preservação de dados verificados.");
 
 // Integração do modal com DOM controlado: seleção, foco e ausência de escrita.
-const element=()=>({innerHTML:"",textContent:"",value:"",classes:new Set(["hidden"]),classList:{add(name){this.owner.classes.add(name);},remove(name){this.owner.classes.delete(name);},contains(name){return this.owner.classes.has(name);}},setAttribute(name,value){this[name]=value;},querySelectorAll(){return [];},focus(){this.focused=true;},querySelector(){return {offsetTop:420};}});
-const nodes=Object.fromEntries(["teamCampaignOptions","teamCampaignSelect","teamCampaignModal","teamCampaignTitle","teamCampaignSummary","teamCampaignOverview","teamCampaignRounds"].map(id=>[id,element()]));
+const element=()=>({dataset:{},innerHTML:"",textContent:"",value:"",classes:new Set(["hidden"]),classList:{add(name){this.owner.classes.add(name);},remove(name){this.owner.classes.delete(name);},contains(name){return this.owner.classes.has(name);}},setAttribute(name,value){this[name]=value;},querySelectorAll(){return [];},focus(){this.focused=true;},querySelector(){return {offsetTop:420};}});
+const nodes=Object.fromEntries(["teamCampaignFavorite","teamCampaignOptions","teamCampaignSelect","teamCampaignModal","teamCampaignTitle","teamCampaignSummary","teamCampaignOverview","teamCampaignRounds"].map(id=>[id,element()]));
 for(const item of Object.values(nodes))item.classList.owner=item;
 const body=element();body.classList.owner=body;
 const state={games,participant:{time_favorito:"Clube Á"},standings:{table:[{team:"Clube Á",points:10,position:2,playedGames:4,won:2,draw:1,lost:1},{team:"B",points:4,position:3,playedGames:4,won:1,draw:1,lost:2}]}};
@@ -105,3 +105,11 @@ assert.equal(campaignPositionTrend(null,1,2),null);
 assert.match(app,/data-home-action="campaign"/);
 assert.match(app,/data-game-campaign="\$\{escapeHtml\(normalizeTeamKey\(g.time_casa\)\)\}"/);
 assert.match(app,/openTeamCampaign\(button.dataset.gameCampaign,button\)/);
+
+assert.equal(nodes.teamCampaignFavorite.hidden,false,"atalho visível consultando outro clube");
+assert.ok(nodes.teamCampaignFavorite.innerHTML.includes('crest.png'));
+nodes.teamCampaignSelect.value=nodes.teamCampaignFavorite.dataset.club;ui.renderTeamCampaign();
+assert.equal(nodes.teamCampaignTitle.textContent,"Campanha do Clube Á");
+assert.equal(nodes.teamCampaignFavorite.hidden,true,"atalho oculto no favorito");
+state.participant.time_favorito=null;nodes.teamCampaignSelect.value="b";ui.renderTeamCampaign();
+assert.equal(nodes.teamCampaignFavorite.hidden,true,"atalho ausente sem favorito");

@@ -3772,6 +3772,15 @@ function campaignClubs(){
 function renderTeamCampaign(){
   const team=campaignClubs().find(item=>item.key===$("teamCampaignSelect").value);
   if(!team) return;
+  const favorite=campaignClubs().find(club=>club.key===normalizeTeamKey(state.participant?.time_favorito||""));
+  const shortcut=$("teamCampaignFavorite");
+  shortcut.hidden=!favorite||favorite.key===team.key;
+  if(favorite){
+    shortcut.innerHTML=teamLogo(favorite.logo,teamDisplayName(favorite.name));
+    shortcut.title="Ver campanha do favorito: "+teamDisplayName(favorite.name);
+    shortcut.setAttribute("aria-label",shortcut.title);
+    shortcut.dataset.club=favorite.key;
+  }
   const official=(state.standings?.table||[]).find(row=>normalizeTeamKey(row.team)===team.key)||null;
   const model=buildTeamCampaign({team,games:state.games,official,normalizeTeamKey,isScorableGame,gameStatusDisplay,hasValidScore});
   const data=official||model.calculated;
@@ -6086,6 +6095,10 @@ $("myTeamTab")?.addEventListener("keydown",event=>{
   target.click();
 });
 $("teamCampaignClose").addEventListener("click",closeTeamCampaign);
+$("teamCampaignFavorite").addEventListener("click",()=>{
+  $("teamCampaignSelect").value=$("teamCampaignFavorite").dataset.club;
+  renderTeamCampaign();setCampaignPickerOpen(false);$("teamCampaignSelect").focus();
+});
 $("teamCampaignSelect").addEventListener("click",()=>setCampaignPickerOpen($("teamCampaignOptions").hidden));
 $("teamCampaignOptions").addEventListener("click",event=>{
   const option=event.target.closest("[data-campaign-club]");

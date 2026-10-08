@@ -4477,3 +4477,11 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 
 .game-campaign-actions button{display:inline-flex;align-items:center;gap:7px}
 .game-campaign-actions button img{width:22px;height:22px;object-fit:contain;flex-shrink:0}
+
+.team-campaign-favorite{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:7px;width:42px;height:42px}
+.team-campaign-favorite[hidden]{display:none}
+.team-campaign-favorite img{width:28px;height:28px;object-fit:contain}
+
+#teamCampaignSelect{min-width:0}
+#teamCampaignSelect>span:not(:last-child){white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#teamCampaignSelect img{flex-shrink:0}
