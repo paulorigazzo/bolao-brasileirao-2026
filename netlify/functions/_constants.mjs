@@ -1,4 +1,4 @@
-export const APP_VERSION = "6.45.2";
+export const APP_VERSION = "6.45.3";
 export const COMPETITION_CODE = "BSA";
 export const SEASON_YEAR = "2026";
 export const CLASSIFICATION_SNAPSHOT_ID = `${COMPETITION_CODE}-${SEASON_YEAR}`;

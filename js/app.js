@@ -32,7 +32,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.45.2";
+const APP_VERSION = "6.45.3";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2375,28 +2375,21 @@ function latestRoundHighlightsCandidate(beforeRound=Infinity){
 }
 
 function homeRoundHighlightsContext({round,lifecycle,nextGame,now=Date.now()}){
-  // A rodada atual tem prioridade; jogos antigos pendentes são uma alternativa.
+  // A rodada atual tem prioridade; a alternativa é a rodada mais recente com resultados.
   if(lifecycle.status==="FINISHED") return {round,mode:"finished"};
   if(roundHighlightsAvailable(round)) return {round,mode:"live"};
   if(isPostponedRoundHighlightsEligible(lifecycle)) return {round,mode:"partial"};
 
-  const earlier=pendingEarlierRounds().find(candidate=>state.games.some(game=>Number(game.rodada)===candidate && gameStatusDisplay(game).key==="live")) || pendingEarlierRounds()[0];
-  if(earlier){
-    const earlierLifecycle=roundLifecycleSummary(state.games.filter(game=>Number(game.rodada)===earlier));
-    if(roundHighlightsAvailable(earlier)) return {round:earlier,mode:"live"};
-    if(isPostponedRoundHighlightsEligible(earlierLifecycle)) return {round:earlier,mode:"partial"};
-  }
-  if(lifecycle.status==="PARTIAL") return null;
-  const previous=latestRoundHighlightsCandidate(round);
-  if(!previous) return null;
-  const previousRound=Number(previous.round);
-  if(isPostponedRoundHighlightsEligible(previous.lifecycle)) return {round:previousRound,mode:"partial"};
-  const previousGames=state.games.filter(game=>Number(game?.rodada)===previousRound);
-  const lastKickoff=Math.max(...previousGames.map(game=>new Date(game?.inicio).getTime()).filter(Number.isFinite));
-  const recentlyFinished=Number.isFinite(lastKickoff) && now-lastKickoff<=72*60*60*1000;
+  // Sem resultados atuais, usa a maior rodada anterior com destaques.
+  // Pendências antigas continuam acessíveis nas Estatísticas.
+  const rounds=[...new Set(state.games.map(game=>Number(game.rodada)))].filter(candidate=>candidate<round).sort((a,b)=>b-a);
+  const previousRound=rounds.find(candidate=>roundHighlightsAvailable(candidate) || isPostponedRoundHighlightsEligible(roundLifecycleSummary(state.games.filter(game=>Number(game.rodada)===candidate))));
+  if(!previousRound) return null;
+  const previousLifecycle=roundLifecycleSummary(state.games.filter(game=>Number(game.rodada)===previousRound));
+  if(previousLifecycle.status!=="FINISHED") return {round:previousRound,mode:roundHighlightsAvailable(previousRound)?"live":"partial"};
   const nextKickoff=new Date(nextGame?.inicio).getTime();
   const longPause=Number.isFinite(nextKickoff) && nextKickoff-now>7*24*60*60*1000;
-  return recentlyFinished||longPause ? {round:previousRound,mode:longPause?"pause":"recent"} : null;
+  return {round:previousRound,mode:longPause?"pause":"recent"};
 }
 
 function provisionalRoundHighlightFact(fact){

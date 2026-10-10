@@ -34,6 +34,10 @@ assert.deepEqual(choose([game(21,"em_andamento",undefined,true),game(29,"em_anda
 assert.equal(choose([game(29,"agendado","2026-10-08T00:30:00Z")]),null);
 assert.equal(choose([game(29,"adiado")]),null);
 const previous=game(28,"encerrado","2026-10-06T21:00:00Z",true);
+assert.deepEqual(choose([...oldPending,previous,game(29,"agendado","2026-10-08T00:30:00Z")]),{round:28,mode:"recent"},"rodada recente supera pendência antiga");
+assert.deepEqual(choose([...oldPending,game(21,"em_andamento",undefined,true),previous,game(29,"em_andamento",undefined,false)]),{round:28,mode:"recent"},"sem placar atual, jogo antigo ao vivo não supera rodada recente");
+assert.deepEqual(choose([...oldPending,game(28,"encerrado",undefined,true),game(28,"adiado"),game(29,"agendado")]),{round:28,mode:"live"},"rodada parcial mais recente supera pendência antiga");
+assert.deepEqual(choose([game(28,"encerrado","2026-09-20T21:00:00Z",true),game(29,"agendado")]),{round:28,mode:"recent"},"última rodada permanece disponível após 72 horas");
 assert.deepEqual(choose([previous,game(29,"agendado","2026-10-08T00:30:00Z")]),{round:28,mode:"recent"},"fallback recente preservado");
 assert.deepEqual(choose([game(28,"encerrado","2026-09-20T21:00:00Z",true),game(29,"agendado","2026-10-20T00:30:00Z")],game(29,"agendado","2026-10-20T00:30:00Z")),{round:28,mode:"pause"},"fallback de pausa longa preservado");
 state.games=[...oldPending,game(29,"em_andamento",undefined,true)];
