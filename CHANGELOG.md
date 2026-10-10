@@ -1,3 +1,9 @@
+# v6.45.3 — Rodada recente nos Destaques da Home
+
+- Usa a rodada anterior mais recente com resultados quando a atual ainda não possui destaques.
+- Preserva acesso às rodadas antigas nas Estatísticas e os cálculos existentes.
+- Detalhes: [nota da versão](docs/releases/v6.45.3-home-destaques-rodada-recente.md).
+
 # v6.45.2 — Momento com dados nas Estatísticas
 
 - Mostra somente a média de pontos por jogo e o total de rodadas do participante no bloco de momento, com mínimo de 3 rodadas e sem tendência clara.
