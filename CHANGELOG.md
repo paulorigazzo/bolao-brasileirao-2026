@@ -1,3 +1,9 @@
+# v6.46.0 — Home 2.0 experimental na ADM
+
+- Adiciona tela contextual para avaliação pelo administrador como participante.
+- Preserva a Home atual; reutiliza consultas e cálculos existentes.
+- Detalhes: [nota da versão](docs/releases/v6.46.0-home-2-0-preview-adm.md).
+
 # v6.45.3 — Rodada recente nos Destaques da Home
 
 - Usa a rodada anterior mais recente com resultados quando a atual ainda não possui destaques.
