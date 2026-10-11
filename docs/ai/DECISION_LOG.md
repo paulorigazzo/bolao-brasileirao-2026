@@ -2081,3 +2081,12 @@ A proposta de 1 ponto total por placar exato invertido fica registrada para aval
 ### Limites
 
 Este registro não autoriza exclusão de dados, alteração de Auth, migração SQL, mudança de pontuação, corte de conexão ou publicação. A execução exigirá inventário, plano revisável, backup restaurável e aprovação específica.
+
+
+## DEC-2026-067 — Avaliação da Home 2.0 pela ADM
+
+- Data: 2026-10-11.
+- Status: plano aprovado.
+- Impacto: interface experimental; sem alterações de banco ou regras de negócio.
+
+A Home 2.0 começa como tela separada, aberta exclusivamente pelo botão Home 2.0 da Área ADM. Usa os dados do administrador conectado como participante da liga ativa. A Home vigente e a barra de navegação continuam operando normalmente. Sua substituição exige nova aprovação após a avaliação visual e funcional. Escopo e limites na [nota v6.46.0](../releases/v6.46.0-home-2-0-preview-adm.md).

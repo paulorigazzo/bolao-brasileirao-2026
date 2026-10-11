@@ -1,3 +1,4 @@
+import { buildHomeV2Model } from "./home-v2.js";
 import { buildTeamCampaign, campaignPositionTrend } from "./team-campaign.js";
 import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
@@ -32,7 +33,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.45.3";
+const APP_VERSION = "6.46.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1498,6 +1499,7 @@ function compactTeam(url,name){
 }
 
 function filterGames(games){
+  if(state.gameFilter==="pending") return games.filter(g=>!locked(g)&&!isFinished(g)&&!ownPick(g.id_jogo));
   if(state.gameFilter==="open") return games.filter(g=>!locked(g));
   if(state.gameFilter==="picked") return games.filter(g=>ownPick(g.id_jogo));
   if(state.gameFilter==="finished") return games.filter(isFinished);
@@ -2884,6 +2886,7 @@ function renderHomeFavoriteTeam(){
 }
 
 function renderHome(){
+  if(!$("homeV2Tab")?.classList.contains("hidden")) renderHomeV2();
   if(!state.participant) return;
   calculateRanking();
   const now=Date.now();
@@ -3005,6 +3008,81 @@ function renderHome(){
   renderTemporaryRankingAccess();
 }
 
+let homeV2PicksRound=null;
+let homeV2ReturnFocus=null;
+function homeV2Model(round=currentRoundNumber()){
+  return buildHomeV2Model({round,games:state.games,ownPick,isOpen:g=>!locked(g)&&!isFinished(g),isUpcoming:g=>!isFinished(g)&&!isPostponed(g)&&gameStatusDisplay(g).key!=="cancelled",isScorable:isScorableGame,isLive:g=>gameStatusDisplay(g).key==="live",points,livePoints:calculatePredictionPoints});
+}
+function homeV2Button(action,label,round,primary=false){
+  return `<button type="button" class="${primary?'primary':'secondary'}" data-v2-action="${action}"${round?` data-round="${Number(round)}"`:''}>${escapeHtml(label)}</button>`;
+}
+function renderHomeV2(){
+  if(!isAdminUser()){show("homeV2Tab",false);$("homeV2Content").innerHTML="";closeHomeV2Picks(false);return;}
+  if(!state.participant||state.leagueContextStatus!=="ready"){
+    closeHomeV2Picks(false);
+    $("homeV2Content").innerHTML=`<article class="v2-card v2-empty"><h2>Seu bolão</h2><p>Selecione uma liga ativa para acompanhar sua rodada.</p>${homeV2Button('league','Selecionar liga')}</article>`;return;
+  }
+  calculateRanking();
+  const previousOpponent=$("homeV2Opponent")?.value;
+  const m=homeV2Model(),round=m.round,life=roundLifecycleSummary(m.current);
+  const earlier=pendingEarlierRounds();
+  const oldMissing=earlier.flatMap(r=>state.games.filter(g=>Number(g.rodada)===r&&!locked(g)&&!isFinished(g)&&!ownPick(g.id_jogo))).sort((a,b)=>new Date(a.inicio)-new Date(b.inicio));
+  const pending=m.pending.length?m.pending:oldMissing.filter(g=>Number(g.rodada)===Number(oldMissing[0]?.rodada));
+  const phase=pending.length?'pending':m.phase;
+  const pendingRound=pending.length?Number(pending[0].rodada):round;
+  const copy={pending:[`${pending.length===1?"Falta 1 palpite":`Faltam ${pending.length} palpites`}`,`Rodada ${pendingRound}${pendingRound<round?' · jogos reagendados':''}`,'pending','Completar pendentes'],ready:[m.filled===m.current.length?'Palpites completos':'Palpites encerrados',`Aguardando os jogos da Rodada ${round}`,'games',m.current.some(g=>!locked(g))?'Revisar palpites':'Ver meus palpites'],live:['Sua rodada está acontecendo',`${m.live.length} jogo(s) ao vivo · pontos provisórios`,'picks','Acompanhar meus palpites'],results:[`Você fez ${m.officialPoints} pontos`,`Rodada ${round} · ${life.status==='FINISHED'?'encerrada':'resultados parciais'}`,'picks','Entender meus pontos'],interval:['Entre rodadas','Acompanhe seus últimos resultados e o próximo jogo','calendar','Abrir calendário']}[phase];
+  const next=state.games.filter(g=>!isFinished(g)&&!isPostponed(g)&&gameStatusDisplay(g).key!=='cancelled'&&new Date(g.inicio)>new Date()).sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
+  const context=homeRoundHighlightsContext({round,lifecycle:life,nextGame:next,now:Date.now()});
+  const idx=state.ranking.findIndex(isCurrentRankingParticipant),me=state.ranking[idx];
+  const neighbors=idx>=0?state.ranking.slice(Math.max(0,idx-1),idx+2):[];
+  const opponents=state.ranking.filter(p=>!isCurrentRankingParticipant(p));
+  const team=findTeam(state.participant.time_favorito),teamRow=team?favoriteTeamStandingsRow(team):null;
+  const teamNext=team?favoriteTeamGames(team).filter(g=>!isFinished(g)&&!isPostponed(g)&&new Date(g.inicio)>new Date()).sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0]:null;
+  const latest=state.games.filter(g=>Number(g.rodada)<=round&&isScorableGame(g)).reduce((max,g)=>Math.max(max,Number(g.rodada)),0);
+  const matchRows=m.live.map(g=>{const p=ownPick(g.id_jogo),minute=liveMatchMinute(g);return `<div class="v2-match"><strong>${escapeHtml(teamDisplayName(g.time_casa))} ${hasValidScore(g)?`${g.gols_casa} × ${g.gols_fora}`:'×'} ${escapeHtml(teamDisplayName(g.time_fora))}</strong><small>AO VIVO${minute?` · ${escapeHtml(minute)}'`:''} · Seu palpite: ${p?`${p.gols_casa} × ${p.gols_fora}`:'sem palpite'} · ${calculatePredictionPoints(p,g)} pts provisórios</small></div>`;}).join('');
+  $("homeV2Content").innerHTML=`
+    <article class="v2-card v2-hero"><span class="eyebrow">${escapeHtml(activeLeagueName(state.activeLeague))} · RODADA ${round}</span><h2>${escapeHtml(copy[0])}</h2><p>${escapeHtml(copy[1])}</p>${pending.length?`<p>Primeiro fechamento: ${escapeHtml(homeDeadline([...pending].sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0]))}</p>`:''}<div class="v2-metrics"><div><strong>${m.filled}/${m.current.length}</strong><small>palpites registrados</small></div><div><strong>${m.officialPoints}</strong><small>pontos oficiais na rodada</small></div>${m.live.length?`<div><strong>${m.provisionalPoints}</strong><small>pontos provisórios ao vivo</small></div>`:`<div><strong>${m.exact}</strong><small>placares exatos na rodada</small></div>`}</div>${matchRows}<div class="v2-actions">${homeV2Button(copy[2],copy[3],phase==='pending'?pendingRound:round,true)}${homeV2Button('refresh','Recarregar dados')}</div></article>
+    <article class="v2-card"><span class="eyebrow">SUA DISPUTA · CLASSIFICAÇÃO OFICIAL</span><h2>${idx>=0?`${idx+1}º lugar · ${me.total} pontos`:'Classificação ainda indisponível'}</h2><div class="v2-list">${neighbors.map(p=>`<div class="v2-neighbor ${isCurrentRankingParticipant(p)?'is-me':''}"><b>${state.ranking.indexOf(p)+1}º</b><span>${escapeHtml(p.name)}${isCurrentRankingParticipant(p)?' · você':''}</span><b>${p.total} pts</b></div>`).join('')}</div>${opponents.length?`<label for="homeV2Opponent">Comparar com</label><select id="homeV2Opponent">${opponents.map(p=>`<option value="${escapeHtml(p.key)}">${escapeHtml(p.name)}</option>`).join('')}</select>`:''}<div class="v2-actions">${opponents.length?homeV2Button('duel','Comparar desempenho'):''}${homeV2Button('ranking','Ver ranking')}${homeV2Button('projection','Ver classificação provisória')}</div></article>
+    <article class="v2-card"><span class="eyebrow">ANDAMENTO DA RODADA</span><h2>${life.finished}/${m.current.length} jogos encerrados</h2><progress max="${Math.max(1,m.current.length)}" value="${life.finished}" aria-label="Jogos encerrados"></progress><p>${life.live} ao vivo · ${life.postponed} adiados${life.cancelled?` · ${life.cancelled} cancelados`:''}</p><div class="v2-actions">${homeV2Button('games','Ver rodada',round)}${context?homeV2Button('highlights','Destaques · Rodada '+context.round,context.round):''}${homeV2Button('calendar','Calendário')}</div>${earlier.map(r=>`<p>Rodada ${r} ainda tem jogos pendentes.</p>${homeV2Button('games','Ver jogos reagendados',r)}`).join('')}${phase==='interval'&&latest?`<p>Último resultado: ${homeV2Model(latest).officialPoints} pontos na Rodada ${latest}</p>${homeV2Button('picks','Entender meus pontos',latest)}`:''}${next?`<p>Próximo jogo: ${escapeHtml(teamDisplayName(next.time_casa))} × ${escapeHtml(teamDisplayName(next.time_fora))} · ${escapeHtml(formatDate(next.inicio))}</p>`:''}</article>
+    <article class="v2-card v2-favorite"><span class="eyebrow">MEU TIME</span>${team?`<div class="v2-row">${teamLogo(team.logo,team.name)}<h2>${escapeHtml(teamDisplayName(team.name))}</h2></div><p>${teamRow?`${teamRow.position}º no Brasileirão · ${teamRow.points} pontos`:'Classificação do clube ainda indisponível'}</p>${teamNext?`<p>Próximo: ${escapeHtml(teamDisplayName(teamNext.time_casa))} × ${escapeHtml(teamDisplayName(teamNext.time_fora))} · ${escapeHtml(formatDate(teamNext.inicio))}</p>`:'<p>Sem próximo jogo confirmado.</p>'}${homeV2Button('campaign','Ver campanha')}`:`<h2>Escolha seu time favorito</h2><p>Defina seu clube no Perfil para acompanhar sua campanha.</p>${homeV2Button('profile','Escolher time')}`}</article>`;
+  if(previousOpponent&&$("homeV2Opponent")?.querySelector(`option[value="${CSS.escape(previousOpponent)}"]`)) $("homeV2Opponent").value=previousOpponent;
+  if(homeV2PicksRound!==null&&!$("homeV2PicksModal").classList.contains("hidden")) renderHomeV2Picks();
+}
+function renderHomeV2Picks(){
+  if(!isAdminUser()||!state.participant)return closeHomeV2Picks(false);
+  const m=homeV2Model(homeV2PicksRound);
+  $("homeV2PicksTitle").textContent='Minha Rodada '+homeV2PicksRound;
+  $("homeV2PicksContent").innerHTML=`<p>${m.officialPoints} pontos oficiais · ${m.exact} placares exatos${m.live.length?` · ${m.provisionalPoints} pontos provisórios ao vivo`:''}</p>`+m.current.map(g=>{const p=ownPick(g.id_jogo),live=gameStatusDisplay(g).key==='live',finished=isScorableGame(g),earned=finished?points(p,g):live?calculatePredictionPoints(p,g):null;return `<div class="v2-match"><strong>${escapeHtml(teamDisplayName(g.time_casa))} × ${escapeHtml(teamDisplayName(g.time_fora))}</strong><small>Seu palpite: ${p?`${p.gols_casa} × ${p.gols_fora}`:'não registrado'} · ${hasValidScore(g)?`Placar: ${g.gols_casa} × ${g.gols_fora} · `:''}${escapeHtml(gameStatusDisplay(g).label)}</small><small>${earned===null?'Aguardando resultado':`${earned} pts ${live?'provisórios':'oficiais'} · ${p?predictionResultLabel(earned,{live}):'Sem palpite registrado'}`}</small></div>`;}).join('');
+}
+function closeHomeV2Picks(restore=true){
+  if($("homeV2PicksModal")?.classList.contains("hidden"))return;
+  show("homeV2PicksModal",false);document.body.classList.remove("modal-open");homeV2PicksRound=null;
+  if(restore)(homeV2ReturnFocus?.isConnected?homeV2ReturnFocus:$("homeV2Back"))?.focus?.();homeV2ReturnFocus=null;
+}
+$("adminHomeV2Button")?.addEventListener("click",()=>navigateTo("homeV2"));
+$("homeV2Back")?.addEventListener("click",()=>navigateTo("admin"));
+$("homeV2PicksClose")?.addEventListener("click",()=>closeHomeV2Picks());
+$("homeV2PicksModal")?.addEventListener("click",e=>{if(e.target===$("homeV2PicksModal"))closeHomeV2Picks();});
+$("homeV2PicksModal")?.addEventListener("keydown",e=>{if(e.key==='Tab'){e.preventDefault();$("homeV2PicksClose").focus();}});
+$("homeV2Content")?.addEventListener("click",async event=>{
+  if(!isAdminUser())return;
+  const button=event.target.closest('[data-v2-action]');if(!button)return;
+  const action=button.dataset.v2Action,round=Number(button.dataset.round)||currentRoundNumber();
+  if(action==='picks'){homeV2PicksRound=round;homeV2ReturnFocus=button;renderHomeV2Picks();show('homeV2PicksModal');document.body.classList.add('modal-open');$("homeV2PicksClose").focus();return;}
+  if(action==='games'||action==='pending'){
+    state.gameFilter=action==='pending'?'pending':'all';
+    document.querySelectorAll('.filter-chip').forEach(b=>{const active=b.dataset.filter===state.gameFilter;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
+    $('roundSelect').value=String(round);navigateTo('games');renderGames();return;
+  }
+  if(action==='duel'){openRankingParticipantPicks($('homeV2Opponent').value,button);if(!$('rankingPicksModal').classList.contains('hidden'))setRankingPicksModalView('duel');return;}
+  if(action==='campaign')return openTeamCampaign(state.participant.time_favorito,button);
+  if(action==='calendar')return openMatchCalendar(button);
+  if(action==='highlights')return openRoundHighlights(round,button);
+  if(action==='projection')return openTemporaryRanking(button);
+  if(action==='league')return openLeagueSelector(button);
+  if(action==='refresh'){button.disabled=true;try{await refresh();}finally{button.disabled=false;}return;}
+  navigateTo(action);
+});
 function participantTeam(participant){
   const identity=typeof participant==="string"?{name:participant}:participant;
   const favoriteTeam=resolveParticipantFavoriteTeam(identity,{
@@ -3933,6 +4011,7 @@ async function loadStandings(force=false){
     if(!response.ok || !result.ok) throw new Error(result.error || "Não foi possível carregar a classificação.");
     state.standings = result;
     renderStandings();
+    if(!$("homeV2Tab")?.classList.contains("hidden")) renderHomeV2();
   }catch(err){
     $("standingsError").textContent = err.message || "Não foi possível carregar a classificação.";
     show("standingsLoading", false);
@@ -5532,6 +5611,8 @@ function updateBottomNavigationMotion(tabName){
 }
 
 function applyNavigationState(tabName){
+  if(tabName==="homeV2"&&!isAdminUser()) return;
+  if(tabName!=="homeV2") closeHomeV2Picks(false);
   const primaryTabs=["home","games","myTeam","ranking","stats","admin"];
   show("participantDashboardSummary",false);
   document.querySelectorAll(".bottom-nav-item").forEach(item=>{
@@ -5539,9 +5620,10 @@ function applyNavigationState(tabName){
     item.classList.toggle("active",active);
     if(active) item.setAttribute("aria-current","page"); else item.removeAttribute("aria-current");
   });
-  ["home","games","myTeam","ranking","standings","stats","admin","rules","profile"].forEach(name=>show(`${name}Tab`,name===tabName));
+  ["home","homeV2","games","myTeam","ranking","standings","stats","admin","rules","profile"].forEach(name=>show(`${name}Tab`,name===tabName));
   if(tabName==="games") requestAnimationFrame(()=>centerSelectedRoundInStrip($("roundNumberStrip")));
   if(tabName==="home") renderHome();
+  if(tabName==="homeV2") renderHomeV2();
   if(tabName==="myTeam") renderMyTeam();
   if(tabName==="ranking") renderRanking();
   if(tabName==="standings") loadStandings();
@@ -5555,6 +5637,7 @@ function applyNavigationState(tabName){
 }
 
 function navigateTo(tabName){
+  if(tabName==="homeV2"&&!isAdminUser()) return;
   const target=$(tabName+"Tab");
   const current=document.querySelector(".tab-content:not(.hidden)");
   if(current===target){
@@ -5590,6 +5673,7 @@ function startMatchClockRefresh(){
       refreshVisibleGameClocks();
     }
     if(!$('adminTab')?.classList.contains('hidden')) renderAdminRoundStatus();
+    if(!$("homeV2Tab")?.classList.contains("hidden")) renderHomeV2();
   },30000);
 }
 
@@ -5992,6 +6076,7 @@ document.addEventListener("keydown",event=>{
   else if(!$("teamCampaignModal")?.classList.contains("hidden")) closeTeamCampaign();
   else if(!$("matchCalendarModal")?.classList.contains("hidden")) closeMatchCalendar();
   else if(!$("roundHighlightsModal")?.classList.contains("hidden")) closeRoundHighlights();
+  else if(!$("homeV2PicksModal")?.classList.contains("hidden")) closeHomeV2Picks();
   else if(!$("rankingPicksModal")?.classList.contains("hidden")) closeRankingParticipantPicks();
   else if(!$("adminParticipantModal")?.classList.contains("hidden")) closeAdminParticipantDetail();
 });

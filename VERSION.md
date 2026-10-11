@@ -1,5 +1,5 @@
-6.45.3
+6.46.0
 
-Destaques da Home usam a rodada atual com resultados ou a rodada anterior mais recente com resultados.
+Home 2.0 experimental acessível pela Área ADM.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)
