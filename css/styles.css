@@ -4561,3 +4561,14 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 #homeFavoriteTeamSection .favorite-history-action:hover{background:rgba(255,255,255,.025)}
 #homeFavoriteTeamSection .favorite-history-action:focus-visible{outline:2px solid var(--premium-green);outline-offset:2px}
 @media(max-width:600px){#homeFavoriteTeamSection .favorite-history-action{width:100%}}
+
+/* Meu time na Home: compactação sem reduzir fontes ou áreas de toque. */
+#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-main>div{padding-block:12px}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-stats span{padding-block:8px}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-campaign-action{margin-top:4px}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-history{padding-block:11px}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-next-match{padding-block:12px}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-personal-summary{padding-top:12px;padding-bottom:14px}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-personal-summary h3{margin-bottom:10px}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-personal-values{margin-bottom:12px}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-personal-action{margin-top:10px}

@@ -1,5 +1,5 @@
-6.46.3
+6.46.4
 
-Últimos jogos da Home abre a classificação do favorito.
+Card Meu time da Home com espaçamentos mais compactos.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

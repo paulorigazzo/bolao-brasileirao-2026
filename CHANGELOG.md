@@ -1,3 +1,8 @@
+# v6.46.4 — Meu time mais compacto
+
+- Reduz espaços internos e entre seções do card Meu time na Home, preservando fontes, informações e áreas de toque.
+- Detalhes: [nota da versão](docs/releases/v6.46.4-home-meu-time-compacto.md).
+
 # v6.46.3 — Classificação pelos últimos jogos
 
 - Abre a classificação no clube favorito e expande seu card no celular.
