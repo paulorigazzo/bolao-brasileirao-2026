@@ -77,3 +77,15 @@
 .home-v2 button:focus-visible,.home-v2 summary:focus-visible{outline:2px solid var(--premium-emerald);outline-offset:3px}
 @media(min-width:850px){.home-v2 .v2-grid{max-width:780px}.home-v2 .v2-card{padding:21px 24px}.home-v2 .v2-club{font-size:.86rem}.home-v2 .v2-fixture-line{grid-template-columns:38px minmax(0,1fr) auto minmax(0,1fr) 38px}.home-v2 .v2-crest{width:38px;height:40px}}
 @media(max-width:360px){.home-v2 .v2-card{padding:14px 12px}.home-v2 .v2-neighbor{gap:6px;padding:10px 8px}.home-v2 .v2-fixture-detail{flex-wrap:wrap}.home-v2 .v2-heading .eyebrow{font-size:.55rem}}
+/* Contexto adicional sem novos blocos. */
+.home-v2 .v2-gap small{display:block;margin-top:4px;font-size:.68rem;color:var(--muted)}
+.home-v2 .v2-highlight-fact{margin:8px 0 12px;padding-left:10px;border-left:2px solid var(--premium-gold)}
+.home-v2 .v2-highlight-fact strong{display:block;font-size:.79rem;line-height:1.4}
+.home-v2 .v2-highlight-fact small{display:block;margin-top:4px;font-size:.7rem;color:var(--muted);line-height:1.45}
+.home-v2 .v2-more-games{margin:7px 0 0;text-align:right}
+.home-v2 .v2-more-games button{min-height:30px;padding:3px 0;border:0;background:transparent;color:var(--premium-emerald);font-size:.7rem}
+.home-v2 button.v2-fixture{display:block;width:100%;text-align:left;color:var(--text);font:inherit}
+.home-v2 .v2-round-details>summary{flex-wrap:wrap}
+.home-v2 .v2-round-details>summary>span:last-child{line-height:1.5}
+
+.home-v2 .v2-live-note button{background:transparent;border:0;color:var(--premium-emerald);padding:2px 0;min-height:30px;font-size:.7rem;text-align:left}
