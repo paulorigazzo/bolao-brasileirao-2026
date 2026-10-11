@@ -1,5 +1,5 @@
-6.46.2
+6.46.3
 
-Card único do favorito na Home atual.
+Últimos jogos da Home abre a classificação do favorito.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

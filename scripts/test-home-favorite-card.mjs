@@ -11,7 +11,7 @@ for(const f of ['calculatePredictionPoints','points','favoriteTeamPredictionStat
 vm.runInContext('renderHomeFavoriteTeam()',context);
 const populated=host.innerHTML;
 assert.equal((populated.match(/<article\b/g)||[]).length,1);
-for(const text of ['pontos do clube','seus pontos','placares exatos','56%','Em 5 jogos com seu palpite','4 palpites pontuaram','42','28','Arena','Santos','Posição na tabela','Ver Meu Time','data-home-action="campaign"','data-home-action="games"'])assert.ok(populated.includes(text),text);
+for(const text of ['pontos do clube','seus pontos','placares exatos','56%','Em 5 jogos com seu palpite','4 palpites pontuaram','42','28','Arena','Santos','Posição na tabela','Ver Meu Time','data-home-action="standings-favorite"','data-expand-favorite="true"','data-home-action="campaign"','data-home-action="games"'])assert.ok(populated.includes(text),text);
 assert.equal((populated.match(/favorite-history-item /g)||[]).length,5);
 context.state.ownPicks=[];vm.runInContext('renderHomeFavoriteTeam()',context);assert.match(host.innerHTML,/Seu desempenho aparecerá/);assert.doesNotMatch(host.innerHTML,/role="progressbar"/);
 const noPicks=host.innerHTML;
@@ -20,3 +20,14 @@ console.log('Favorito: card único, dados preservados, cálculos originais, aç�
 if(process.argv[2]){
  fs.writeFileSync(process.argv[2],'<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="./css/design-system.css"><link rel="stylesheet" href="./css/styles.css"><link rel="stylesheet" href="./css/components.css"><link rel="stylesheet" href="./css/identity-premium.css"><link rel="stylesheet" href="./css/fan-theme.css"><body><main class="home-tab" style="max-width:680px;margin:24px auto;padding:16px"><small style="color:var(--muted)">DADOS SINTÉTICOS · VALIDAÇÃO LOCAL</small><section id="homeFavoriteTeamSection">'+(process.argv[3]==='empty'?host.innerHTML:process.argv[3]==='no-picks'?noPicks:populated)+'</section></main></body></html>');
 }
+// A seleção usa apenas o clube visível e não fecha um card já aberto.
+let expanded=false,clicked=0,scrolled=0;
+const summary={getAttribute:()=>String(expanded),click:()=>{expanded=true;clicked++;}};
+const mobile={dataset:{teamKey:'corinthians'},getClientRects:()=>[{}],matches:()=>true,querySelector:()=>summary,classList:{add(){},remove(){}},scrollIntoView(){scrolled++;}};
+const hidden={dataset:{teamKey:'corinthians'},getClientRects:()=>[],matches:()=>false,classList:{add(){throw Error('Linha oculta selecionada');}}};
+context.document={querySelectorAll:()=>[hidden,mobile]};context.setTimeout=()=>{};
+vm.runInContext(extract('focusFavoriteTeamInStandings'),context);
+vm.runInContext('focusFavoriteTeamInStandings(0,true)',context);
+vm.runInContext('focusFavoriteTeamInStandings(0,true)',context);
+assert.equal(clicked,1);assert.equal(scrolled,2);
+console.log('Classificação: favorito visível selecionado e expansão idempotente aprovados.');

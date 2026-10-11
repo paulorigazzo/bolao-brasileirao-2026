@@ -1,3 +1,8 @@
+# v6.46.3 — Classificação pelos últimos jogos
+
+- Abre a classificação no clube favorito e expande seu card no celular.
+- Detalhes: [nota da versão](docs/releases/v6.46.3-home-ultimos-jogos-classificacao.md).
+
 # v6.46.2 — Favorito em um único card
 
 - Integra dados do clube e desempenho dos palpites na Home, preservando as informações relevantes.
