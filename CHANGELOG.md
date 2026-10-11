@@ -1,3 +1,9 @@
+# v6.46.1 — Cards da Visão Geral
+
+- Alinha títulos, números e textos nos três cards da Home atual.
+- Destaca pontuação e situação dos palpites com as cores existentes.
+- Detalhes: [nota da versão](docs/releases/v6.46.1-home-visao-geral.md).
+
 # v6.46.0 — Home 2.0 experimental na ADM
 
 - Adiciona tela contextual para avaliação pelo administrador como participante.
