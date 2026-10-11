@@ -4530,12 +4530,12 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 /* Favorito unificado: clube e palpites no mesmo card. */
 #homeFavoriteTeamSection .favorite-home-unified .favorite-club-label{margin:0 18px 9px;color:var(--muted);font-size:.65rem;font-weight:850;letter-spacing:.07em;text-transform:uppercase}
 #homeFavoriteTeamSection .favorite-home-unified .favorite-standing-main{padding-bottom:12px}
-#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-main>div{padding:2px 10px;background:transparent;border-radius:0}
-#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-main>div+div{border-left:1px solid var(--premium-line)}
-#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-main>div+div strong{color:var(--premium-gold)}
-#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-stats{gap:5px;padding-bottom:12px}
-#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-stats span{padding:3px;background:transparent;border-radius:0}
-#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-stats b{display:inline;margin:0 3px 0 0;font-size:.85rem}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-main>div{padding:16px 10px;background:rgba(255,255,255,.055);border-radius:15px}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-main>div+div{border-left:0}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-main>div strong{color:var(--text);font-size:2rem}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-stats{gap:7px;padding-bottom:12px}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-stats span{padding:10px 4px;background:rgba(255,255,255,.045);border-radius:11px}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-stats b{display:block;margin:0 0 4px;font-size:1.1rem}
 #homeFavoriteTeamSection .favorite-personal-summary{padding:16px 18px 18px;border-top:1px solid var(--premium-line)}
 #homeFavoriteTeamSection .favorite-personal-summary h3{font-size:.92rem;margin:0 0 14px;line-height:1.4}
 #homeFavoriteTeamSection .favorite-personal-values{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 16px;text-align:center}
