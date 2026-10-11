@@ -4553,3 +4553,11 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 #homeFavoriteTeamSection .favorite-home-unified .premium-kicker{color:var(--premium-green)}
 
 #homeFavoriteTeamSection .favorite-unified-name{display:inline-flex;align-items:center;gap:9px;padding:0;border:0;background:transparent;color:inherit;font:inherit;font-weight:inherit;text-align:left;min-height:36px}#homeFavoriteTeamSection .favorite-unified-name span{color:var(--muted);font-size:1rem}
+
+/* Últimos jogos: classificação do favorito. */
+#homeFavoriteTeamSection .favorite-history-action{display:block;width:calc(100% - 36px);border-left:0;border-right:0;border-radius:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+#homeFavoriteTeamSection .favorite-history-action .favorite-history-label{display:flex;align-items:center;justify-content:space-between}
+#homeFavoriteTeamSection .favorite-history-action .favorite-history-label b{color:var(--premium-green);font-size:1rem}
+#homeFavoriteTeamSection .favorite-history-action:hover{background:rgba(255,255,255,.025)}
+#homeFavoriteTeamSection .favorite-history-action:focus-visible{outline:2px solid var(--premium-green);outline-offset:2px}
+@media(max-width:600px){#homeFavoriteTeamSection .favorite-history-action{width:100%}}

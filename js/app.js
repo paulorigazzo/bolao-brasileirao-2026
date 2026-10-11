@@ -33,7 +33,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.46.2";
+const APP_VERSION = "6.46.3";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2843,11 +2843,11 @@ function renderHomeFavoriteTeam(){
   const opponentName=teamDisplayName(opponent);
   const crest=team.logo?`<img src="${escapeHtml(team.logo)}" alt="Escudo do ${escapeHtml(teamName)}" loading="lazy" referrerpolicy="no-referrer">`:`<span>${escapeHtml(initials(teamName).slice(0,3))}</span>`;
   const historyByRound=new Map(positionHistory.map(item=>[Number(item.round),item]));
-  const historyHtml=form.length?`<div class="favorite-history" aria-label="Últimos jogos e posição do time em cada rodada">
-    <span class="favorite-history-label">Últimos jogos</span>
-    <div class="favorite-history-grid">${form.map((item,index)=>{const positionItem=historyByRound.get(Number(item.round));const previousPosition=index>0?historyByRound.get(Number(form[index-1].round))?.position:null;const position=positionItem?.position;const arrow=index===0||!position||!previousPosition?'':position<previousPosition?'↗':position>previousPosition?'↘':'→';const trendClass=!arrow?'start':position<previousPosition?'up':position>previousPosition?'down':'flat';const trendLabel=trendClass==='up'?'Subiu na classificação':trendClass==='down'?'Caiu na classificação':trendClass==='flat'?'Manteve a posição':'';return `<span class="favorite-history-item ${trendClass}"><small aria-label="Rodada ${item.round}">${item.round}</small><span class="favorite-form-result result-${item.result.toLowerCase()}" title="Rodada ${item.round} · ${item.result==='V'?'Vitória':item.result==='E'?'Empate':'Derrota'}">${item.result}</span><span class="favorite-history-position"><b>${position?`${position}º`:'—'}</b>${arrow?`<i aria-label="${trendLabel}">${arrow}</i>`:''}</span></span>`;}).join('')}</div>
+  const historyHtml=form.length?`<button class="favorite-history favorite-history-action" type="button" data-home-action="standings-favorite" data-expand-favorite="true" aria-label="Abrir classificação do Brasileirão com o time favorito selecionado">
+    <span class="favorite-history-label">Últimos jogos <b aria-hidden="true">›</b></span>
+    <span class="favorite-history-grid">${form.map((item,index)=>{const positionItem=historyByRound.get(Number(item.round));const previousPosition=index>0?historyByRound.get(Number(form[index-1].round))?.position:null;const position=positionItem?.position;const arrow=index===0||!position||!previousPosition?'':position<previousPosition?'↗':position>previousPosition?'↘':'→';const trendClass=!arrow?'start':position<previousPosition?'up':position>previousPosition?'down':'flat';const trendLabel=trendClass==='up'?'Subiu na classificação':trendClass==='down'?'Caiu na classificação':trendClass==='flat'?'Manteve a posição':'';return `<span class="favorite-history-item ${trendClass}"><small aria-label="Rodada ${item.round}">${item.round}</small><span class="favorite-form-result result-${item.result.toLowerCase()}" title="Rodada ${item.round} · ${item.result==='V'?'Vitória':item.result==='E'?'Empate':'Derrota'}">${item.result}</span><span class="favorite-history-position"><b>${position?`${position}º`:'—'}</b>${arrow?`<i aria-label="${trendLabel}">${arrow}</i>`:''}</span></span>`;}).join('')}</span>
     <span class="favorite-history-caption">Posição na tabela</span>
-  </div>`:'<div class="favorite-home-form"><span>Últimos jogos</span><small class="favorite-form-unavailable">Sem resultados concluídos</small></div>';
+  </button>`:'<div class="favorite-home-form"><span>Últimos jogos</span><small class="favorite-form-unavailable">Sem resultados concluídos</small></div>';
   const contextBadge=isToday?'<span class="favorite-context-badge is-today">● Joga hoje</span>':isNextChampionshipGame?'<span class="favorite-context-badge">Próximo jogo do campeonato</span>':'';
 
   host.innerHTML=`<article class="premium-feature-card favorite-home-card favorite-home-unified">
@@ -5630,21 +5630,25 @@ function setupAdminQuickNavigation(){
   adminNavObserver=null;
 }
 
-function focusFavoriteTeamInStandings(attempt=0){
+function focusFavoriteTeamInStandings(attempt=0,expandFavorite=false){
   const favoriteKey=normalizeTeamKey(state.participant?.time_favorito || "");
   if(!favoriteKey) return;
   const rows=[...document.querySelectorAll("#standingsBody .standings-row, #standingsMobileList .standings-mobile-card")];
   const target=rows.find(row=>{
     const rowKey=String(row.dataset.teamKey||"");
-    return rowKey===favoriteKey || rowKey.includes(favoriteKey) || favoriteKey.includes(rowKey);
+    return (!expandFavorite || row.getClientRects().length>0) && (rowKey===favoriteKey || rowKey.includes(favoriteKey) || favoriteKey.includes(rowKey));
   });
   if(target){
+    if(expandFavorite && target.matches(".standings-mobile-card")){
+      const summary=target.querySelector(".standings-card-summary");
+      if(summary?.getAttribute("aria-expanded")!=="true") summary?.click();
+    }
     target.classList.add("is-favorite-standing-pulse");
     target.scrollIntoView({behavior:"smooth",block:"center",inline:"nearest"});
     setTimeout(()=>target.classList.remove("is-favorite-standing-pulse"),1800);
     return;
   }
-  if(attempt<12) setTimeout(()=>focusFavoriteTeamInStandings(attempt+1),180);
+  if(attempt<12) setTimeout(()=>focusFavoriteTeamInStandings(attempt+1,expandFavorite),180);
 }
 
 function updateBottomNavigationMotion(tabName){
@@ -6196,7 +6200,7 @@ $("homeTab")?.addEventListener("click",async event=>{
   if(action==="refresh"){ target.disabled=true; try{ await refresh(); } finally{ target.disabled=false; } return; }
   if(action==="standings-favorite"){
     navigateTo("standings");
-    setTimeout(()=>focusFavoriteTeamInStandings(),140);
+    setTimeout(()=>focusFavoriteTeamInStandings(0,target.dataset.expandFavorite==="true"),140);
     return;
   }
   navigateTo(action);
