@@ -4526,3 +4526,30 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
   #homeOverview .home-mini-card>strong{font-size:1.5rem}
   #homeOverview .home-mini-card>small{font-size:.6rem}
 }
+
+/* Favorito unificado: clube e palpites no mesmo card. */
+#homeFavoriteTeamSection .favorite-home-unified .favorite-club-label{margin:0 18px 9px;color:var(--muted);font-size:.65rem;font-weight:850;letter-spacing:.07em;text-transform:uppercase}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-main{padding-bottom:12px}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-main>div{padding:2px 10px;background:transparent;border-radius:0}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-main>div+div{border-left:1px solid var(--premium-line)}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-main>div+div strong{color:var(--premium-gold)}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-stats{gap:5px;padding-bottom:12px}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-stats span{padding:3px;background:transparent;border-radius:0}
+#homeFavoriteTeamSection .favorite-home-unified .favorite-standing-stats b{display:inline;margin:0 3px 0 0;font-size:.85rem}
+#homeFavoriteTeamSection .favorite-personal-summary{padding:16px 18px 18px;border-top:1px solid var(--premium-line)}
+#homeFavoriteTeamSection .favorite-personal-summary h3{font-size:.92rem;margin:0 0 14px;line-height:1.4}
+#homeFavoriteTeamSection .favorite-personal-values{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 16px;text-align:center}
+#homeFavoriteTeamSection .favorite-personal-values strong{display:block;font-size:1.65rem;color:var(--premium-gold);line-height:1}
+#homeFavoriteTeamSection .favorite-personal-values span{display:block;margin-top:6px;font-size:.69rem;color:var(--muted)}
+#homeFavoriteTeamSection .favorite-personal-summary .favorite-rate-heading span{color:var(--text)}
+#homeFavoriteTeamSection .favorite-personal-summary .favorite-rate-heading strong{color:var(--premium-green);font-size:1rem}
+#homeFavoriteTeamSection .favorite-personal-summary .favorite-rate-track{height:7px}
+#homeFavoriteTeamSection .favorite-personal-summary .favorite-rate-track i{background:linear-gradient(90deg,var(--color-brand-600),var(--premium-green))}
+#homeFavoriteTeamSection .favorite-personal-context{margin:9px 0 5px;font-size:.72rem;color:var(--muted);line-height:1.5}
+#homeFavoriteTeamSection .favorite-personal-explanation{display:block;font-size:.64rem;color:var(--muted);line-height:1.4}
+#homeFavoriteTeamSection .favorite-personal-action{width:100%;margin-top:14px;display:flex;justify-content:space-between;align-items:center;min-height:40px;font-size:.8rem}
+@media(max-width:600px){#homeFavoriteTeamSection .favorite-home-unified .favorite-club-label{margin-inline:14px}#homeFavoriteTeamSection .favorite-personal-summary{padding-inline:14px}}
+
+#homeFavoriteTeamSection .favorite-home-unified .premium-kicker{color:var(--premium-green)}
+
+#homeFavoriteTeamSection .favorite-unified-name{display:inline-flex;align-items:center;gap:9px;padding:0;border:0;background:transparent;color:inherit;font:inherit;font-weight:inherit;text-align:left;min-height:36px}#homeFavoriteTeamSection .favorite-unified-name span{color:var(--muted);font-size:1rem}
