@@ -1,3 +1,9 @@
+# v6.46.2 — Favorito em um único card
+
+- Integra dados do clube e desempenho dos palpites na Home, preservando as informações relevantes.
+- Mantém ações específicas de Campanha, Jogos e Meu Time.
+- Detalhes: [nota da versão](docs/releases/v6.46.2-home-favorito-unificado.md).
+
 # v6.46.1 — Cards da Visão Geral
 
 - Alinha títulos, números e textos nos três cards da Home atual.

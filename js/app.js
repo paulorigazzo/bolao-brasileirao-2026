@@ -33,7 +33,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.46.1";
+const APP_VERSION = "6.46.2";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2681,33 +2681,18 @@ function favoriteTeamPredictionStats(team){
 }
 
 function renderFavoriteTeamPredictionCard(team){
-  if(!team){
-    return `<article class="premium-feature-card favorite-predictions-card favorite-predictions-empty">
-      <header class="premium-card-header"><div><span class="premium-kicker">MEUS PALPITES</span><h2>🎯 Meu desempenho com meu time</h2></div></header>
-      <div class="favorite-predictions-empty-content"><span aria-hidden="true">☆</span><div><strong>Escolha seu time favorito</strong><p>Depois disso, seu desempenho nos jogos do clube aparecerá aqui automaticamente.</p></div></div>
-    </article>`;
-  }
+  if(!team) return "";
   const stats=favoriteTeamPredictionStats(team);
-  const teamName=teamDisplayName(team.name);
-  const plural=stats.games===1?'jogo analisado':'jogos analisados';
-  const aria=`${stats.rate}% de aproveitamento`;
-  return `<article class="premium-feature-card favorite-predictions-card home-navigable-card" data-home-action="myTeam" role="button" tabindex="0" aria-label="Abrir Meu Time 2.0">
-    <span class="home-card-chevron" aria-hidden="true">›</span>
-    <header class="premium-card-header favorite-predictions-header"><div><span class="premium-kicker">MEUS PALPITES</span><h2>🎯 Meu desempenho com o ${escapeHtml(teamName)}</h2></div></header>
-    ${stats.games?`<div class="favorite-predictions-metrics">
-      <div><strong>${stats.games}</strong><span>${plural}</span></div>
-      <div><strong>${stats.points}</strong><span>pontos</span></div>
-      <div><strong>${stats.exact}</strong><span>placares exatos</span></div>
-      <div><strong>${stats.hits}</strong><span>resultados certos</span></div>
-    </div>
-    <div class="favorite-rate-block">
-      <div class="favorite-rate-heading"><span>Aproveitamento</span><strong>${stats.rate}%</strong></div>
-      <div class="favorite-rate-track" role="progressbar" aria-label="${aria}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${stats.rate}"><i style="width:${stats.rate}%"></i></div>
-      <small>Pontos conquistados em relação ao máximo possível nesses jogos.</small>
-    </div>`:`<div class="favorite-predictions-no-data"><span aria-hidden="true">⏳</span><div><strong>Ainda não há jogos pontuados</strong><p>O card será preenchido quando uma partida do ${escapeHtml(teamName)} terminar e seu palpite puder ser calculado.</p></div></div>`}
-  </article>`;
+  return `<section class="favorite-personal-summary" aria-label="Seus palpites com o clube">
+    <h3>🎯 Seus palpites com o clube</h3>
+    ${stats.games?`<div class="favorite-personal-values"><div><strong>${stats.points}</strong><span>seus pontos</span></div><div><strong>${stats.exact}</strong><span>${stats.exact===1?'placar exato':'placares exatos'}</span></div></div>
+    <div class="favorite-rate-heading"><span>Aproveitamento</span><strong>${stats.rate}%</strong></div>
+    <div class="favorite-rate-track" role="progressbar" aria-label="${stats.rate}% dos pontos possíveis nos seus palpites" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${stats.rate}"><i style="width:${stats.rate}%"></i></div>
+    <p class="favorite-personal-context">Em ${stats.games} ${stats.games===1?'jogo com seu palpite':'jogos com seu palpite'} · ${stats.hits} ${stats.hits===1?'palpite pontuou':'palpites pontuaram'}</p>
+    <small class="favorite-personal-explanation">Pontos conquistados em relação ao máximo possível nesses jogos.</small>`:'<p class="favorite-personal-context">Seu desempenho aparecerá após o encerramento de jogos do clube com seu palpite.</p>'}
+    <button class="secondary favorite-personal-action" type="button" data-home-action="myTeam">Ver Meu Time <span aria-hidden="true">›</span></button>
+  </section>`;
 }
-
 
 function favoriteTeamContext(team){
   if(!team) return null;
@@ -2839,7 +2824,7 @@ function renderHomeFavoriteTeam(){
       <header class="premium-card-header"><div><span class="premium-kicker">PERSONALIZAÇÃO</span><h2>⚽ Meu Time</h2></div></header>
       <div class="favorite-home-empty-content"><span class="favorite-home-empty-icon" aria-hidden="true">♡</span><div><strong>Você ainda não escolheu seu time favorito</strong><p>Defina seu time no Perfil para acompanhar a classificação e a próxima partida aqui.</p></div></div>
       <button class="secondary favorite-home-profile-action" type="button" data-home-action="profile">Escolher meu time <b aria-hidden="true">›</b></button>
-    </article>${renderFavoriteTeamPredictionCard(null)}`;
+    </article>`;
     return;
   }
 
@@ -2865,13 +2850,13 @@ function renderHomeFavoriteTeam(){
   </div>`:'<div class="favorite-home-form"><span>Últimos jogos</span><small class="favorite-form-unavailable">Sem resultados concluídos</small></div>';
   const contextBadge=isToday?'<span class="favorite-context-badge is-today">● Joga hoje</span>':isNextChampionshipGame?'<span class="favorite-context-badge">Próximo jogo do campeonato</span>':'';
 
-  host.innerHTML=`<article class="premium-feature-card favorite-home-card">
-    <div class="favorite-home-overview home-navigable-card" role="button" tabindex="0" data-home-action="myTeam" aria-label="Abrir Meu Time e ver detalhes do ${escapeHtml(teamName)}">
+  host.innerHTML=`<article class="premium-feature-card favorite-home-card favorite-home-unified">
+    <div class="favorite-home-overview">
       <header class="premium-card-header favorite-home-header">
-        <div><span class="premium-kicker">MEU TIME</span><h2>${escapeHtml(teamName)}</h2></div>
+        <div><span class="premium-kicker">MEU TIME</span><h2><button class="favorite-unified-name" type="button" data-home-action="myTeam">${escapeHtml(teamName)} <span aria-hidden="true">›</span></button></h2></div>
         <span class="favorite-home-crest">${crest}</span>
       </header>
-      ${row?`<div class="favorite-standing-main"><div class="favorite-position-link"><strong>${row.position}º <i class="favorite-standing-chevron" aria-hidden="true">›</i></strong><span>posição</span></div><div><strong>${row.points}</strong><span>pontos</span></div></div>
+      <h3 class="favorite-club-label">No Brasileirão</h3>${row?`<div class="favorite-standing-main"><div class="favorite-position-link"><strong>${row.position}º</strong><span>posição</span></div><div><strong>${row.points}</strong><span>pontos do clube</span></div></div>
       <div class="favorite-standing-stats"><span><b>${row.playedGames}</b> J</span><span><b>${row.won}</b> V</span><span><b>${row.draw}</b> E</span><span><b>${row.lost}</b> D</span><span><b>${Number(row.goalDifference)>0?'+':''}${row.goalDifference}</b> SG</span></div>`:`<div class="favorite-standings-loading"><span class="favorite-loading-dot"></span><span>Carregando classificação oficial…</span><i class="favorite-standing-chevron" aria-hidden="true">›</i></div>`}
     </div>
     <button class="secondary favorite-campaign-action" type="button" data-home-action="campaign">Ver campanha do ${escapeHtml(teamName)} <span aria-hidden="true">›</span></button>
@@ -2880,7 +2865,8 @@ function renderHomeFavoriteTeam(){
       <div><span class="favorite-next-label">PRÓXIMA PARTIDA</span>${contextBadge}<strong>${next?`${escapeHtml(teamName)} × ${escapeHtml(opponentName)}`:'A definir'}</strong><small>${nextDate?`${escapeHtml(nextDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'}))} • ${escapeHtml(nextDate.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}))}${next.local?` • ${escapeHtml(next.local)}`:''}`:'Aguardando a tabela de jogos'}</small></div>
       ${next?`<button class="favorite-next-action" type="button" data-home-action="games" aria-label="Abrir jogos">›</button>`:''}
     </div>
-  </article>${renderFavoriteTeamPredictionCard(team)}`;
+    ${renderFavoriteTeamPredictionCard(team)}
+  </article>`;
 
   if(!state.standings) loadStandings(false);
 }

@@ -1,5 +1,5 @@
-6.46.1
+6.46.2
 
-Padronização visual dos cards da Visão Geral na Home atual.
+Card único do favorito na Home atual.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)
