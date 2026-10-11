@@ -3020,17 +3020,25 @@ function renderHomeV2(){
   if(!isAdminUser()){show("homeV2Tab",false);$("homeV2Content").innerHTML="";closeHomeV2Picks(false);return;}
   if(!state.participant||state.leagueContextStatus!=="ready"){
     closeHomeV2Picks(false);
-    $("homeV2Content").innerHTML=`<article class="v2-card v2-empty"><h2>Seu bolão</h2><p>Selecione uma liga ativa para acompanhar sua rodada.</p>${homeV2Button('league','Selecionar liga')}</article>`;return;
+    $("homeV2Content").innerHTML=`<article class="v2-card premium-feature-card v2-empty"><h2>Seu bolão</h2><p>Selecione uma liga ativa para acompanhar sua rodada.</p>${homeV2Button('league','Selecionar liga')}</article>`;return;
   }
   calculateRanking();
   const previousOpponent=$("homeV2Opponent")?.value;
+  const compareOpen=$("homeV2Content").querySelector?.(".v2-compare")?.open;
+  const roundDetailsOpen=$("homeV2Content").querySelector?.(".v2-round-details")?.open;
   const m=homeV2Model(),round=m.round,life=roundLifecycleSummary(m.current);
   const earlier=pendingEarlierRounds();
   const oldMissing=earlier.flatMap(r=>state.games.filter(g=>Number(g.rodada)===r&&!locked(g)&&!isFinished(g)&&!ownPick(g.id_jogo))).sort((a,b)=>new Date(a.inicio)-new Date(b.inicio));
   const pending=m.pending.length?m.pending:oldMissing.filter(g=>Number(g.rodada)===Number(oldMissing[0]?.rodada));
   const phase=pending.length?'pending':m.phase;
   const pendingRound=pending.length?Number(pending[0].rodada):round;
-  const copy={pending:[`${pending.length===1?"Falta 1 palpite":`Faltam ${pending.length} palpites`}`,`Rodada ${pendingRound}${pendingRound<round?' · jogos reagendados':''}`,'pending','Completar pendentes'],ready:[m.filled===m.current.length?'Palpites completos':'Palpites encerrados',`Aguardando os jogos da Rodada ${round}`,'games',m.current.some(g=>!locked(g))?'Revisar palpites':'Ver meus palpites'],live:['Sua rodada está acontecendo',`${m.live.length} jogo(s) ao vivo · pontos provisórios`,'picks','Acompanhar meus palpites'],results:[`Você fez ${m.officialPoints} pontos`,`Rodada ${round} · ${life.status==='FINISHED'?'encerrada':'resultados parciais'}`,'picks','Entender meus pontos'],interval:['Entre rodadas','Acompanhe seus últimos resultados e o próximo jogo','calendar','Abrir calendário']}[phase];
+  const copy={
+    pending:[pending.length===1?'Falta 1 palpite':`Faltam ${pending.length} palpites`,`Rodada ${pendingRound}${pendingRound<round?' · jogos reagendados':''}`,'pending','Completar pendentes'],
+    ready:[m.filled===m.current.length?'Palpites completos':'Palpites encerrados',`Aguardando os jogos da Rodada ${round}`,'games',m.current.some(g=>!locked(g))?'Revisar palpites':'Ver meus palpites'],
+    live:['Como estão meus palpites?',`${m.live.length} jogo(s) em andamento`,'picks','Acompanhar meus palpites'],
+    results:[`Você fez ${m.officialPoints} pontos`,life.status==='FINISHED'?'Rodada encerrada':'Resultados parciais','picks','Entender meus pontos'],
+    interval:['Entre rodadas','Acompanhe seus últimos resultados e o próximo jogo','calendar','Abrir calendário']
+  }[phase];
   const next=state.games.filter(g=>!isFinished(g)&&!isPostponed(g)&&gameStatusDisplay(g).key!=='cancelled'&&new Date(g.inicio)>new Date()).sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
   const context=homeRoundHighlightsContext({round,lifecycle:life,nextGame:next,now:Date.now()});
   const idx=state.ranking.findIndex(isCurrentRankingParticipant),me=state.ranking[idx];
@@ -3039,12 +3047,50 @@ function renderHomeV2(){
   const team=findTeam(state.participant.time_favorito),teamRow=team?favoriteTeamStandingsRow(team):null;
   const teamNext=team?favoriteTeamGames(team).filter(g=>!isFinished(g)&&!isPostponed(g)&&new Date(g.inicio)>new Date()).sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0]:null;
   const latest=state.games.filter(g=>Number(g.rodada)<=round&&isScorableGame(g)).reduce((max,g)=>Math.max(max,Number(g.rodada)),0);
-  const matchRows=m.live.map(g=>{const p=ownPick(g.id_jogo),minute=liveMatchMinute(g);return `<div class="v2-match"><strong>${escapeHtml(teamDisplayName(g.time_casa))} ${hasValidScore(g)?`${g.gols_casa} × ${g.gols_fora}`:'×'} ${escapeHtml(teamDisplayName(g.time_fora))}</strong><small>AO VIVO${minute?` · ${escapeHtml(minute)}'`:''} · Seu palpite: ${p?`${p.gols_casa} × ${p.gols_fora}`:'sem palpite'} · ${calculatePredictionPoints(p,g)} pts provisórios</small></div>`;}).join('');
+  const rowGames=phase==='pending'?pending:phase==='live'?m.live:phase==='ready'?m.current.filter(g=>!isFinished(g)&&!isPostponed(g)):[];
+  const matchRows=rowGames.slice(0,2).map(g=>{
+    const p=ownPick(g.id_jogo),live=gameStatusDisplay(g).key==='live',minute=liveMatchMinute(g);
+    const score=live&&hasValidScore(g)?`${g.gols_casa} × ${g.gols_fora}`:'×';
+    return `<div class="v2-fixture"><div class="v2-fixture-line"><span class="v2-crest">${teamLogo(g.time_casa_logo,g.time_casa)}</span><span class="v2-club">${escapeHtml(teamDisplayName(g.time_casa))}</span><strong class="v2-score">${score}</strong><span class="v2-club">${escapeHtml(teamDisplayName(g.time_fora))}</span><span class="v2-crest">${teamLogo(g.time_fora_logo,g.time_fora)}</span></div><div class="v2-fixture-detail">${live?`<span>Seu palpite: ${p?`${p.gols_casa} × ${p.gols_fora}`:'não registrado'}${minute?` · ${escapeHtml(minute)}'`:''}</span><b>${calculatePredictionPoints(p,g)} pts provisórios</b>`:`<span>${escapeHtml(formatDate(g.inicio))}</span><span>${p?'Palpite registrado':'A preencher'}</span>`}</div></div>`;
+  }).join('');
+  const firstPending=[...pending].sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
+  const gap=idx>0?Math.max(0,state.ranking[idx-1].total-me.total):0;
+  const gapText=idx>0?`${gap} ${gap===1?'ponto':'pontos'} atrás do ${idx}º`:idx===0?'Você lidera a liga':'Aguardando classificação';
+  const head=(icon,title,action)=>`<header class="v2-card-heading"><span class="v2-section-icon" aria-hidden="true">${icon}</span><h2>${title}</h2>${action?`<button type="button" data-v2-action="${action}" aria-label="Ver ranking"><span aria-hidden="true">›</span></button>`:''}</header>`;
   $("homeV2Content").innerHTML=`
-    <article class="v2-card v2-hero"><span class="eyebrow">${escapeHtml(activeLeagueName(state.activeLeague))} · RODADA ${round}</span><h2>${escapeHtml(copy[0])}</h2><p>${escapeHtml(copy[1])}</p>${pending.length?`<p>Primeiro fechamento: ${escapeHtml(homeDeadline([...pending].sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0]))}</p>`:''}<div class="v2-metrics"><div><strong>${m.filled}/${m.current.length}</strong><small>palpites registrados</small></div><div><strong>${m.officialPoints}</strong><small>pontos oficiais na rodada</small></div>${m.live.length?`<div><strong>${m.provisionalPoints}</strong><small>pontos provisórios ao vivo</small></div>`:`<div><strong>${m.exact}</strong><small>placares exatos na rodada</small></div>`}</div>${matchRows}<div class="v2-actions">${homeV2Button(copy[2],copy[3],phase==='pending'?pendingRound:round,true)}${homeV2Button('refresh','Recarregar dados')}</div></article>
-    <article class="v2-card"><span class="eyebrow">SUA DISPUTA · CLASSIFICAÇÃO OFICIAL</span><h2>${idx>=0?`${idx+1}º lugar · ${me.total} pontos`:'Classificação ainda indisponível'}</h2><div class="v2-list">${neighbors.map(p=>`<div class="v2-neighbor ${isCurrentRankingParticipant(p)?'is-me':''}"><b>${state.ranking.indexOf(p)+1}º</b><span>${escapeHtml(p.name)}${isCurrentRankingParticipant(p)?' · você':''}</span><b>${p.total} pts</b></div>`).join('')}</div>${opponents.length?`<label for="homeV2Opponent">Comparar com</label><select id="homeV2Opponent">${opponents.map(p=>`<option value="${escapeHtml(p.key)}">${escapeHtml(p.name)}</option>`).join('')}</select>`:''}<div class="v2-actions">${opponents.length?homeV2Button('duel','Comparar desempenho'):''}${homeV2Button('ranking','Ver ranking')}${homeV2Button('projection','Ver classificação provisória')}</div></article>
-    <article class="v2-card"><span class="eyebrow">ANDAMENTO DA RODADA</span><h2>${life.finished}/${m.current.length} jogos encerrados</h2><progress max="${Math.max(1,m.current.length)}" value="${life.finished}" aria-label="Jogos encerrados"></progress><p>${life.live} ao vivo · ${life.postponed} adiados${life.cancelled?` · ${life.cancelled} cancelados`:''}</p><div class="v2-actions">${homeV2Button('games','Ver rodada',round)}${context?homeV2Button('highlights','Destaques · Rodada '+context.round,context.round):''}${homeV2Button('calendar','Calendário')}</div>${earlier.map(r=>`<p>Rodada ${r} ainda tem jogos pendentes.</p>${homeV2Button('games','Ver jogos reagendados',r)}`).join('')}${phase==='interval'&&latest?`<p>Último resultado: ${homeV2Model(latest).officialPoints} pontos na Rodada ${latest}</p>${homeV2Button('picks','Entender meus pontos',latest)}`:''}${next?`<p>Próximo jogo: ${escapeHtml(teamDisplayName(next.time_casa))} × ${escapeHtml(teamDisplayName(next.time_fora))} · ${escapeHtml(formatDate(next.inicio))}</p>`:''}</article>
-    <article class="v2-card v2-favorite"><span class="eyebrow">MEU TIME</span>${team?`<div class="v2-row">${teamLogo(team.logo,team.name)}<h2>${escapeHtml(teamDisplayName(team.name))}</h2></div><p>${teamRow?`${teamRow.position}º no Brasileirão · ${teamRow.points} pontos`:'Classificação do clube ainda indisponível'}</p>${teamNext?`<p>Próximo: ${escapeHtml(teamDisplayName(teamNext.time_casa))} × ${escapeHtml(teamDisplayName(teamNext.time_fora))} · ${escapeHtml(formatDate(teamNext.inicio))}</p>`:'<p>Sem próximo jogo confirmado.</p>'}${homeV2Button('campaign','Ver campanha')}`:`<h2>Escolha seu time favorito</h2><p>Defina seu clube no Perfil para acompanhar sua campanha.</p>${homeV2Button('profile','Escolher time')}`}</article>`;
+    <div class="v2-welcome"><span>${escapeHtml(activeLeagueName(state.activeLeague))}</span><strong>Olá, ${escapeHtml(String(state.participant.nome||'Participante').split(/\s+/)[0])}</strong></div>
+    <article class="v2-card premium-feature-card v2-hero">
+      <span class="v2-round-badge ${phase==='live'?'is-live':''}">${phase==='live'?'● ':''}RODADA ${phase==='pending'?pendingRound:round}${phase==='live'?' · AO VIVO':phase==='results'&&life.status==='FINISHED'?' · ENCERRADA':''}</span>
+      <h2>${escapeHtml(copy[0])}</h2><p class="v2-hero-subtitle">${firstPending?`Próximo fechamento ${escapeHtml(deadlineText(firstPending).replace(/^Fecha /,'').toLowerCase())}`:escapeHtml(copy[1])}</p>
+      ${matchRows}
+      ${phase==='results'?`<div class="v2-result-facts"><div><span aria-hidden="true">🎯</span><strong>${m.exact} ${m.exact===1?'placar exato':'placares exatos'}</strong></div><div><span aria-hidden="true">✓</span><strong>${life.finished} jogos encerrados</strong></div></div>`:''}
+      <p class="v2-round-summary">${m.filled} de ${m.current.length} palpites preenchidos · Rodada ${round}${phase==='live'?`<br><strong>${m.provisionalPoints} pontos provisórios</strong> nos jogos em andamento`:m.officialPoints||phase==='results'?`<br>${m.officialPoints} pontos oficiais na rodada`: ''}</p>
+      ${homeV2Button(copy[2],copy[3]+' →',phase==='pending'?pendingRound:round,true)}
+      ${phase==='live'?'<p class="v2-live-note">ⓘ Os pontos podem mudar até o fim dos jogos.</p>':''}
+    </article>
+    ${context&&phase==='results'?`<article class="v2-card premium-feature-card v2-highlights">${head('🏆','Destaques da rodada')}<p>Confira os resultados do grupo · Rodada ${context.round}</p>${homeV2Button('highlights','Destaques · Rodada '+context.round+' →',context.round)}</article>`:''}
+    <article class="v2-card premium-feature-card v2-dispute">
+      ${head('▥','Minha disputa na liga','ranking')}
+      <span class="v2-caption">CLASSIFICAÇÃO OFICIAL</span>
+      <div class="v2-list">${neighbors.map(p=>`<div class="v2-neighbor ${isCurrentRankingParticipant(p)?'is-me':''}"><b>${state.ranking.indexOf(p)+1}º</b>${rankingAvatar(p)}<strong>${escapeHtml(p.name)}${isCurrentRankingParticipant(p)?' <small>você</small>':''}</strong><span>${p.total} pts</span></div>`).join('')||'<p>Classificação ainda indisponível.</p>'}</div>
+      <p class="v2-gap">${gapText}</p>
+      ${opponents.length?`<details class="v2-compare"><summary>Comparar com… <span aria-hidden="true">→</span></summary><div><label for="homeV2Opponent">Participante da liga</label><select id="homeV2Opponent">${opponents.map(p=>`<option value="${escapeHtml(p.key)}">${escapeHtml(p.name)}</option>`).join('')}</select>${homeV2Button('duel','Comparar desempenho →')}</div></details>`:''}
+      ${phase==='live'?homeV2Button('projection','Ver classificação provisória →'):''}
+    </article>
+    <article class="v2-card premium-feature-card v2-favorite">
+      ${head('★',team?`Meu time · ${escapeHtml(teamDisplayName(team.name))}`:'Meu time')}
+      ${team?`<div class="v2-favorite-body"><span class="v2-favorite-crest">${teamLogo(team.logo,team.name)}</span><div><p>${teamRow?`${teamRow.position}º no Brasileirão · ${teamRow.points} pontos`:'Classificação do clube indisponível'}</p><small>${teamNext?`Próximo: ${escapeHtml(formatDate(teamNext.inicio))}`:'Sem próximo jogo confirmado.'}</small>${homeV2Button('campaign','Ver campanha →')}</div></div>`:`<p>Escolha seu clube para acompanhar a campanha.</p>${homeV2Button('profile','Escolher time →')}`}
+    </article>
+    <details class="v2-card premium-feature-card v2-round-details"><summary><span aria-hidden="true">📅</span> Rodada e calendário <span>${life.finished}/${m.current.length} encerrados</span></summary><div>
+      <progress max="${Math.max(1,m.current.length)}" value="${life.finished}" aria-label="Jogos encerrados"></progress><p>${life.live} ao vivo · ${life.postponed} adiados${life.cancelled?` · ${life.cancelled} cancelados`:''}</p>
+      <div class="v2-actions">${homeV2Button('games','Ver rodada',round)}${context&&phase!=='results'?homeV2Button('highlights','Destaques · Rodada '+context.round,context.round):''}${homeV2Button('calendar','Calendário')}${phase!=='live'?homeV2Button('projection','Ver classificação provisória'):''}</div>
+      ${earlier.map(r=>`<p>Rodada ${r} tem jogos pendentes.</p>${homeV2Button('games','Ver jogos reagendados',r)}`).join('')}
+      ${phase==='interval'&&latest?`<p>Último resultado: ${homeV2Model(latest).officialPoints} pontos na Rodada ${latest}</p>${homeV2Button('picks','Entender meus pontos',latest)}`:''}
+      ${next?`<p>Próximo jogo: ${escapeHtml(teamDisplayName(next.time_casa))} × ${escapeHtml(teamDisplayName(next.time_fora))} · ${escapeHtml(formatDate(next.inicio))}</p>`:''}
+    </div></details>
+    <div class="v2-refresh">${homeV2Button('refresh','↻ Recarregar dados')}</div>`;
+  if(compareOpen&&$("homeV2Content").querySelector(".v2-compare")) $("homeV2Content").querySelector(".v2-compare").open=true;
+  if(roundDetailsOpen) $("homeV2Content").querySelector(".v2-round-details").open=true;
   if(previousOpponent&&$("homeV2Opponent")?.querySelector(`option[value="${CSS.escape(previousOpponent)}"]`)) $("homeV2Opponent").value=previousOpponent;
   if(homeV2PicksRound!==null&&!$("homeV2PicksModal").classList.contains("hidden")) renderHomeV2Picks();
 }
