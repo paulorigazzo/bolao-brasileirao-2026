@@ -1,5 +1,5 @@
-6.46.0
+6.46.1
 
-Home 2.0 experimental acessível pela Área ADM.
+Padronização visual dos cards da Visão Geral na Home atual.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

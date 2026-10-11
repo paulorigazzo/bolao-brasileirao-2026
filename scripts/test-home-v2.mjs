@@ -42,11 +42,11 @@ context.favoriteTeamGames=()=>[{id_jogo:11,rodada:30,status:'open',inicio:'2099-
 context.state.ranking=[{key:'first',name:'Líder',total:30},{key:'me',name:'Teste',total:25},{key:'last',name:'Próximo',total:23}];vm.runInContext('renderHomeV2()',context);assert.match(node('homeV2Content').innerHTML,/2º de 3 participantes/);assert.match(node('homeV2Content').innerHTML,/5 pts do líder · 2 pts à frente do próximo/);assert.match(node('homeV2Content').innerHTML,/Sua melhor rodada até agora/);
 admin=false;vm.runInContext('renderHomeV2()',context);assert.equal(node('homeV2Content').innerHTML,'');
 for(const name of ['navigateTo','applyNavigationState'])assert.match(extract(name),/tabName==="homeV2"&&!isAdminUser\(\)/);
-// A Home vigente conserva o corpo anterior, com apenas o gancho de atualização experimental.
+// Referência da Home aprovada na v6.46.1; inclui a revisão visual da Visão Geral.
 const {createHash}=await import('node:crypto');
 const current=source.slice(source.indexOf('function renderHome(){'),source.indexOf('\nlet homeV2PicksRound='));
 const preserved=current.replace('  if(!$("homeV2Tab")?.classList.contains("hidden")) renderHomeV2();\n','').trim();
-assert.equal(createHash('sha256').update(preserved).digest('hex'),'526ec08dba8f425bc8fa4d24e1a5c96788671097a9f4bea9d609f0a6b8e5314f','Home vigente preservada');
+assert.equal(createHash('sha256').update(preserved).digest('hex'),'3bf4d9a84071d26eb8c3c257b65c8957c3957b08a32d34b107c14d6bf3248828','Home vigente preservada');
 console.log('Home 2.0: estados, pontos, isolamento, Destaques e Home original aprovados.');
 
 if(process.argv[2]){
