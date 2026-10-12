@@ -135,6 +135,15 @@ As fases operacionais devem usar o padrão de cabeçalho `## Fase N — Nome da 
 
 O procedimento detalhado está em `docs/ai/CODEX_WORKFLOW.md`.
 
+## Exceção — Central do Participante
+
+Para tarefas restritas a `central/`, aplicar o fluxo simplificado definido em [CODEX_WORKFLOW.md](docs/ai/CODEX_WORKFLOW.md#fluxo-simplificado--central-do-participante). Esta exceção prevalece sobre as exigências gerais de branch, PR, versionamento e validação integral do app.
+
+- Não exigir branch, PR, nova versão do app, changelog ou nota de release.
+- Validar somente a Central e os recursos afetados, com evidências proporcionais à mudança.
+- Manter revisão e autorização explícita para publicação; a implementação não autoriza commit ou push automaticamente.
+- Se qualquer mudança alcançar o app, dependências, configuração de hospedagem, Functions, banco, autenticação ou regras de negócio, aplicar o fluxo geral.
+
 ## Regras de negócio protegidas
 
 Não alterar sem tarefa específica, critérios de aceite e testes:

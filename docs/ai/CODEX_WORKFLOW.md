@@ -24,6 +24,21 @@ Uma vez aprovado o modo Encerramento, o agente pode executar sem novas autoriza�
 - **Recuperação:** confirmar o estado seguro restaurado e as evidências, ou descrever o bloqueio, impacto e orientação necessária; não ampliar a recuperação para implementação ou publicação.
 - **Encerramento:** confirmar o merge, atualizar a referência local de `main`, remover por padrão as branches local e remota integradas, salvo pedido explícito de preservação, e apresentar o estado final do Git.
 
+## Fluxo simplificado — Central do Participante
+
+Aplicável quando todos os arquivos da entrega estão em `central/`, incluindo textos, imagens, vídeos, catálogo, HTML, CSS e JavaScript exclusivos da página. O pedido aprovado define o escopo; não são necessárias aprovações separadas de plano e nome de branch para uma atualização clara e restrita à Central.
+
+1. Conferir status e diff. Preservar alterações alheias; uma tarefa já em andamento pode continuar com seus próprios arquivos modificados.
+2. Implementar apenas a mudança aprovada. Não atualizar a versão do app, seus identificadores de cache, `VERSION.md`, `CHANGELOG.md`, `ROADMAP.md` ou notas de release para esta entrega.
+3. Validar os arquivos e links afetados, a navegação e a apresentação no tamanho de tela relevante. Para vídeos, verificar capa, duração, reprodução e associação correta no catálogo. Se houver JavaScript alterado, verificar sintaxe e testar os fluxos afetados. Usar servidor local; `npm run check` completo e `netlify dev` não são obrigatórios se a alteração não afetar o app ou seu ambiente.
+4. Mostrar o resultado e os arquivos alterados. Atualizar o controle de produção/divulgação existente quando pertinente, sem criar uma release do app.
+5. Após autorização explícita de publicação, pode realizar commit e push em `main`, sem branch ou PR obrigatórios. Primeiro atualizar a referência remota e confirmar ausência de divergências ou alterações alheias; não usar force push. Se a proteção da branch exigir PR, respeitá-la e explicar a necessidade.
+6. Publicar pelo deploy Git existente e conferir a URL da Central. Não substituir o deploy completo do app por uma pasta parcial da Central. Informar o resultado real da publicação.
+
+A autorização de implementação ou aprovação de um vídeo não autoriza publicação automaticamente. Uma autorização para publicar esta entrega permite o commit e push necessários no fluxo simplificado.
+
+Qualquer arquivo funcional fora de `central/`, dependência, configuração de hospedagem, Function, Supabase, autenticação ou regra de negócio devolve a tarefa ao fluxo geral. A criação desta exceção é uma alteração documental de governança aprovada separadamente e não amplia o escopo das futuras entregas da Central.
+
 ## Estados de uma tarefa
 
 Toda tarefa percorre os seguintes estados:

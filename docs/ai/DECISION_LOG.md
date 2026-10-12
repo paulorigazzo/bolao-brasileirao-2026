@@ -2090,3 +2090,22 @@ Este registro não autoriza exclusão de dados, alteração de Auth, migração 
 - Impacto: interface experimental; sem alterações de banco ou regras de negócio.
 
 A Home 2.0 começa como tela separada, aberta exclusivamente pelo botão Home 2.0 da Área ADM. Usa os dados do administrador conectado como participante da liga ativa. A Home vigente e a barra de navegação continuam operando normalmente. Sua substituição exige nova aprovação após a avaliação visual e funcional. Escopo e limites na [nota v6.46.0](../releases/v6.46.0-home-2-0-preview-adm.md).
+
+## DEC-2026-068 — Fluxo simplificado para a Central do Participante
+
+- Data: 2026-10-12
+- Status: aceita
+- Responsáveis: mantenedor e Codex
+- Substitui: não se aplica; exceção ao fluxo geral
+
+### Contexto
+
+A inclusão de vídeos na página estática da Central não altera o app. Exigir versão funcional, release, branch e PR para cada inclusão cria etapas desnecessárias no fluxo editorial.
+
+### Decisão
+
+Entregas restritas a `central/` usam validação focada e podem ser publicadas em `main`, sem branch ou PR obrigatórios e sem alterar a versão do app. A publicação depende de autorização explícita e respeita proteções de branch. O procedimento está em [CODEX_WORKFLOW.md](CODEX_WORKFLOW.md#fluxo-simplificado--central-do-participante), com a exceção normativa em [AGENTS.md](../../AGENTS.md#exceção--central-do-participante).
+
+### Consequências
+
+O app mantém o fluxo completo quando afetado. A Central utiliza o deploy Git existente, preservando a integridade do app e o histórico para reversão. A simplificação não concede autorização permanente para publicar.
