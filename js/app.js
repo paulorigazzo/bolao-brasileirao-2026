@@ -33,7 +33,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.46.4";
+const APP_VERSION = "6.47.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -6144,6 +6144,7 @@ $("profileShortcut").onclick=()=>{ closeUserMenu(); navigateTo("profile"); };
 $("leagueShortcut").onclick=()=>{ closeUserMenu(); openLeagueSelector($("leagueShortcut")); };
 $("standingsShortcut").onclick=()=>{ closeUserMenu(); navigateTo("standings"); };
 $("rulesShortcut").onclick=()=>{ closeUserMenu(); navigateTo("rules"); };
+$("participantCenterShortcut").onclick=()=>{ closeUserMenu(); window.open("/central/", "_blank", "noopener,noreferrer"); };
 $("adminMenuShortcut").onclick=()=>{ closeUserMenu(); navigateTo("admin"); };
 $("leagueSelectorClose")?.addEventListener("click",closeLeagueSelector);
 $("adminCreateLeagueButton")?.addEventListener("click",openLeagueCreation);
