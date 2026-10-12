@@ -1,5 +1,5 @@
-6.46.4
+6.47.0
 
-Card Meu time da Home com espaçamentos mais compactos.
+Central do Participante com acesso pelo menu do usuário.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

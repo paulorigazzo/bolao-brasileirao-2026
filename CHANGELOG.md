@@ -1,3 +1,9 @@
+# v6.47.0 — Central do Participante
+
+- Adiciona a Central ao menu do usuário, abrindo em nova aba.
+- Disponibiliza apresentação, funcionalidades, regras, dúvidas, busca, tutoriais e guias visuais em `/central/`.
+- Detalhes: [nota da versão](docs/releases/v6.47.0-central-participante.md).
+
 # v6.46.4 — Meu time mais compacto
 
 - Reduz espaços internos e entre seções do card Meu time na Home, preservando fontes, informações e áreas de toque.
