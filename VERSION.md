@@ -1,5 +1,5 @@
-6.47.0
+6.48.0
 
-Central do Participante com acesso pelo menu do usuário.
+Recordes de pontuação por rodada nas Disputas Paralelas.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

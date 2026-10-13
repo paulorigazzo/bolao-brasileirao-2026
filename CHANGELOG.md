@@ -1,3 +1,18 @@
+# v6.48.0 — Recordes por rodada
+
+- Adiciona Recordes por rodada às Disputas Paralelas, comparando as maiores pontuações em rodadas completas de 2026 da liga selecionada.
+- Mostra participante, pontos e rodada; mostra somente o melhor resultado de cada participante. Desempata por placares exatos, acertos de 5 e de 3 pontos; compartilha a posição quando todos os critérios forem iguais.
+- Remove o pódio redundante da tela Ranking e o bloco explicativo longo dos recordes.
+- Preserva cálculo de pontos, classificação completa e as duas disputas atuais.
+- Detalhes: [nota da versão](docs/releases/v6.48.0-recordes-por-rodada.md).
+
+# v6.47.1 — Vinheta na abertura
+
+- Exibe a vinheta aprovada, sem som, enquanto o aplicativo inicia.
+- Libera o acesso assim que a inicialização termina, mesmo antes do fim do vídeo.
+- Mantém logo estático ao terminar, em falha de reprodução ou com movimento reduzido.
+- Detalhes: [nota da versão](docs/releases/v6.47.1-vinheta-abertura.md).
+
 # v6.47.0 — Central do Participante
 
 - Adiciona a Central ao menu do usuário, abrindo em nova aba.
