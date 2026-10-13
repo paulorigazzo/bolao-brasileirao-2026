@@ -3246,7 +3246,6 @@ function renderRanking(){
     <article><span>Distância do líder</span><strong>${me&&leader?(leaderGap===0?"Na liderança":`-${leaderGap} pts`):"—"}</strong><small>${me&&leader?(leaderGap===0?"Melhor posição possível":"Diferença atual"):"Sem pontuação"}</small></article>
     <article><span>Participantes</span><strong>${state.ranking.length}</strong><small>${state.ranking.length===1?"competidor":"competidores"}</small></article>`;
 
-  if($('rankingRoundLabel')) $('rankingRoundLabel').textContent=lifecycle.isProvisional?`${lifecycle.postponed} jogo${lifecycle.postponed===1?"":"s"} adiado${lifecycle.postponed===1?"":"s"}`:completedRound?`Após a rodada ${completedRound}`:"Classificação geral";
   if($('rankingUpdatedAt')) $('rankingUpdatedAt').innerHTML=`<span>✓ ${escapeHtml(updatedLabel)}</span><small>${lifecycle.isProvisional?"A classificação poderá mudar quando as partidas adiadas forem disputadas.":"Os pontos são recalculados com base nos resultados registrados."}</small>`;
 
   friendlyRankingsModel=buildFriendlyRankingsModel({
@@ -3277,21 +3276,6 @@ function renderRanking(){
     </tr>`;
   }).join('') || '<tr><td colspan="6"><p class="muted-note">A classificação aparecerá após os primeiros resultados.</p></td></tr>';
 
-  const medals=['🥇','🥈','🥉'];
-  $('podium').innerHTML=state.ranking.slice(0,3).map((r,i)=>{
-    const rate=r.scored?Math.round(r.total/(r.scored*10)*100):0;
-    const team=participantTeam(r);
-    return `<article class="podium-card card place-${i+1} ${isCurrentRankingParticipant(r)?"is-me":""}">
-      <div class="podium-crown">${medals[i]}</div>
-      <div class="podium-top"><span class="podium-place">${i+1}º lugar</span>${movementBadge(r)}</div>
-      ${rankingAvatar(r,"podium-avatar")}
-      <strong>${escapeHtml(r.name)}</strong>
-      ${isCurrentRankingParticipant(r)?'<span class="podium-you">VOCÊ</span>':""}
-      <span class="podium-points">${r.total} pontos</span>
-      <small>${team?escapeHtml(teamDisplayName(team.name)):`${r.exact} exato${r.exact===1?"":"s"}`}</small>
-      <div class="podium-rate"><span style="width:${rate}%"></span></div><em>${rate}% de aproveitamento</em>
-    </article>`;
-  }).join('') || '<p class="muted-note">O pódio será exibido após os primeiros resultados.</p>';
   renderDashboard();
   renderTemporaryRankingAccess();
 }
