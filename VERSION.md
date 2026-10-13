@@ -1,5 +1,5 @@
-6.47.0
+6.47.1
 
-Central do Participante com acesso pelo menu do usuário.
+Vinheta de abertura durante o carregamento inicial, sem espera obrigatória.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

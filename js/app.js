@@ -1,4 +1,5 @@
 import { buildHomeV2Model } from "./home-v2.js";
+import { finishStartupIntro } from "./startup-intro.js";
 import { buildTeamCampaign, campaignPositionTrend } from "./team-campaign.js";
 import { CONFIG } from "./config.js";
 import { MOTION, installMotionTokens, installMotionInteractions, installFirstVisitTips, animateTabEntry, prefersReducedMotion } from "./motion.js";
@@ -33,7 +34,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.47.0";
+const APP_VERSION = "6.47.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -6269,12 +6270,13 @@ document.addEventListener("visibilitychange",()=>{
   if(!$("adminTab")?.classList.contains("hidden") && Date.now()-adminLastBackgroundRefresh>30000) refreshAdminSilently("ao retornar à aba");
 });
 if(TEMPORARY_RANKING_SYNTHETIC_PREVIEW){
+  finishStartupIntro();
   show("loading",false);
   installTemporaryRankingSyntheticPreview();
 }else{
   try{ const {data:{session}}=await sb.auth.getSession(); if(session) await initialize(session); }
   catch(err){message(err.message||"Não foi possível iniciar o aplicativo.",true);}
-  finally{show("loading",false);}
+  finally{finishStartupIntro();show("loading",false);}
   sb.auth.onAuthStateChange(async (_event,session)=>{ if(session&&!state.user){try{await initialize(session);}catch(err){message(err.message||"Falha de autenticação.",true);}} });
 }
 
