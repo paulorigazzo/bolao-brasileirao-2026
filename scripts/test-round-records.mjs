@@ -32,15 +32,14 @@ for (let round = 1; round <= 7; round++) {
 const build = (options = {}) => buildFriendlyRankingsModel({ games, picks, participants, currentParticipant: participants[0], isScorableGame: scoring.isScorableGame, pointsForPick: scoring.points, ...options });
 const before = JSON.stringify({ games, picks, participants });
 const model = build(), records = model.records.ranking;
-assert.equal(records.length, 6);
+assert.equal(records.length, 3);
 assert.deepEqual(records.map(row => [row.name, row.round, row.points, row.position]), [
-  ["Ana", 2, 100, 1], ["Bia", 1, 100, 1], ["Ana", 1, 70, 3],
-  ["Bia", 2, 50, 4], ["Caio", 2, 10, 5], ["Caio", 1, 0, 6],
+  ["Ana", 2, 100, 1], ["Bia", 1, 100, 1], ["Caio", 2, 10, 3],
 ]);
-assert.equal(records.filter(row => row.isCurrent).length, 2);
+assert.equal(records.filter(row => row.isCurrent).length, 1);
 assert.equal(records.some(row => ["outsider", "inactive", "empty"].includes(row.id)), false);
 assert.deepEqual(build({ picks: [...picks, ...picks], games: [...games, ...games] }).records, model.records, "duplicates must not inflate totals or fixture completeness");
-assert.deepEqual(build({ participants: [participants[1]] }).records.ranking.map(row => row.id), ["bia", "bia"], "member directory isolates another league");
+assert.deepEqual(build({ participants: [participants[1]] }).records.ranking.map(row => row.id), ["bia"], "member directory isolates another league");
 assert.equal(build({ participants: [] }).records.ranking.length, 0);
 assert.equal(build({ games: games.filter(game => game.rodada === 7) }).records.ranking.length, 0, "nine finalized fixtures do not prove a complete round");
 const rescheduled = games.map(game => game.rodada === 4 ? { ...game, status: "encerrado" } : game);
@@ -54,7 +53,7 @@ assert.deepEqual(onlyClosed.efficiency, model.efficiency);
 assert.deepEqual(onlyClosed.hot, model.hot);
 assert.match(source, /pointsForPick:\(pick,game\)=>points\(pick,game\)/);
 assert.deepEqual([records[0].exact, records[0].fivePointHits, records[0].threePointHits], [10, 0, 0]);
-assert.deepEqual([records[3].exact, records[3].fivePointHits, records[3].threePointHits], [0, 10, 0]);
+assert.deepEqual([records[1].exact, records[1].fivePointHits, records[1].threePointHits], [10, 0, 0]);
 const tiedMembers = ["Exatos", "Cinco", "Tres", "Um", "Outro exato", "Mais pontos"].map((nome, i) => ({ user_id: `tie-${i}`, nome }));
 // Inject earned values to exercise every ranking criterion, including a residual tie.
 // This does not change the app's current scoring function, exercised above.
@@ -63,4 +62,12 @@ const tieGames = games.filter(game => game.rodada === 1);
 const tiePicks = tiedMembers.flatMap((member, i) => tieGames.map((game, j) => ({ user_id: member.user_id, id_jogo: game.id_jogo, earned: patterns[i][j] || 0 })));
 const rankedTies = build({ games: tieGames, participants: tiedMembers, picks: tiePicks, pointsForPick: pick => pick.earned }).records.ranking;
 assert.deepEqual(rankedTies.map(row => [row.name, row.position]), [["Mais pontos", 1], ["Exatos", 2], ["Outro exato", 2], ["Cinco", 4], ["Tres", 5], ["Um", 6]]);
+const personalGames = games.filter(game => game.rodada <= 2);
+const personalPicks = personalGames.map(game => ({ user_id: "ana", id_jogo: game.id_jogo, earned: game.rodada === 1 ? (game.id_jogo === 101 ? 10 : 0) : (game.id_jogo <= 202 ? 5 : 0) }));
+let best = build({ games: personalGames, picks: personalPicks, participants: [participants[0]], pointsForPick: pick => pick.earned }).records.ranking;
+assert.equal(best.length, 1);
+assert.equal(best[0].round, 1, "more exact scores outrank a newer personal round with equal points");
+best = build({ games: personalGames, picks: personalGames.map(game => ({ user_id: "ana", id_jogo: game.id_jogo, earned: [101, 201].includes(game.id_jogo) ? 10 : 0 })), participants: [participants[0]], pointsForPick: pick => pick.earned }).records.ranking;
+assert.equal(best[0].round, 2, "equivalent personal records select the most recent round");
+assert.equal(new Set(records.map(row => row.id)).size, records.length, "each participant appears exactly once");
 console.log("Recordes: totais reais, empates, repetições, rodadas completas, reagendados, isolamento, duplicados e preservação aprovados.");

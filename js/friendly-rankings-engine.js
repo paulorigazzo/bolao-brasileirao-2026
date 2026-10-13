@@ -92,9 +92,14 @@ function roundRecords({ games, picks, participants, currentParticipant, isScorab
     if (earned === 3) record.threePointHits++;
   }
   const comparePerformance = (a, b) => b.points - a.points || b.exact - a.exact || b.fivePointHits - a.fivePointHits || b.threePointHits - a.threePointHits;
+  const ordered = [...records.values()].sort((a, b) => comparePerformance(a, b) || b.round - a.round || a.name.localeCompare(b.name, "pt-BR") || a.id.localeCompare(b.id));
+  const personalBests = new Map();
+  for (const record of ordered) {
+    const key = record.id ? `id:${record.id}` : `name:${normalize(record.name)}`;
+    if (!personalBests.has(key)) personalBests.set(key, record);
+  }
   let position = 0, previous = null;
-  return [...records.values()]
-    .sort((a, b) => comparePerformance(a, b) || b.round - a.round || a.name.localeCompare(b.name, "pt-BR") || a.id.localeCompare(b.id))
+  return [...personalBests.values()]
     .map((item, index) => {
       if (!previous || comparePerformance(previous, item) !== 0) position = index + 1;
       previous = item;
