@@ -14,6 +14,17 @@ Cada tema tem controle independente de decisão, produção e divulgação. Todo
 - Registrar responsáveis, links dos materiais, canal e datas na ficha do tema.
 - Antes da gravação, conferir o comportamento na versão em produção e escolher exemplos legíveis. Prioridades são sugestões, não decisões aprovadas.
 
+## Padrão de vinheta para novos vídeos
+
+Decisão aprovada em 13/10/2026: todos os vídeos criados daqui em diante devem usar a vinheta Entrada em campo, mantendo a identidade visual do bolão e sua assinatura sonora original.
+
+- Abertura: `central/vinhetas/entrada-em-campo-abertura.mp4`, 2,4 segundos.
+- Encerramento: `central/vinhetas/entrada-em-campo-encerramento.mp4`, 2 segundos, com Bora pro próximo palpite?.
+- Incorporar os 4,4 segundos ao limite total aprovado de cada vídeo; ajustar o roteiro antes da gravação, sem cortar fala ou acelerar as animações para acomodar a vinheta.
+- Preservar H.264 Main nível 3.1, 20 fps, yuv420p, áudio AAC e faststart na exportação final; conferir duração e decodificação integral.
+- Os dois arquivos são reutilizáveis e independentes do vídeo de apresentação. Não aplicar retroativamente aos vídeos já publicados sem nova solicitação.
+- A vinheta de abertura foi implementada no app, sem som, na versão 6.47.1 (PR #255). O carregamento concluído interrompe a animação; falhas e preferência por movimento reduzido usam o logo estático. Ver [nota da versão](../releases/v6.47.1-vinheta-abertura.md).
+
 ## Opções de conteúdo
 
 | ID | Tema e mensagem ao participante | Formato e demonstração sugeridos | Prioridade sugerida |
@@ -31,6 +42,7 @@ Cada tema tem controle independente de decisão, produção e divulgação. Todo
 | 11 | **Jogos reagendados continuam acessíveis.** Partidas antigas pendentes têm acessos próprios, mantendo o foco na rodada atual. | Imagem ou vídeo de aviso real e abertura da partida reagendada. | Média — depende de exemplo disponível |
 | 12 | **Ativação de notificações.** Habilite seu aparelho para receber lembretes de palpites enviados pela administração. | Tutorial do convite Ativar notificações e da autorização do navegador. | Alta |
 | 13 | **Disputas Paralelas.** Conheça rankings recreativos que oferecem outras formas de comparar o desempenho dos participantes, usando os mesmos resultados, sem mudar a classificação oficial. | Vídeo: abrir Ranking → Ver disputas paralelas, explorar as opções e mostrar como consultar seu desempenho. Manter narração, legendas, toques destacados e vinhetas, em até 30 s. | Alta |
+| 15 | **Conheça o Bolão: apresentação do app.** Apresentar de forma leve as funcionalidades básicas e mais úteis, conectando cada recurso ao benefício para o participante. | Vídeo promocional com imagens e telas reais, navegação e animações fiéis ao app, narração descontraída e acabamento profissional. Briefing na ficha 15. | A definir |
 
 ## Cuidados com as mensagens
 
@@ -74,6 +86,7 @@ Primeira leva sugerida: três vídeos curtos sobre Ranking provisório, Destaque
 | 12 | Notificações | Selecionado | Criado | Não programada | Vídeo de 28 s com vinhetas; ficha abaixo |
 | 13 | Disputas Paralelas | Selecionado | Criado | Não programada | Vídeo de 29 s com vinhetas; ficha abaixo |
 | 14 | Central do Participante | Selecionado | Aprovado | Não programada | Publicado na Central em 12/10/2026; versão corrigida para iPhone |
+| 15 | Apresentação promocional do app | Selecionado | Aprovada | Publicada na Central | Vídeo de 59,5 s com vinheta Entrada em campo; envio aos participantes não programado |
 
 ### Modelo de ficha por conteúdo
 
@@ -263,3 +276,45 @@ Em 11/10/2026, por solicitação do usuário, os itens 06 e 09 foram marcados co
 ## Compatibilidade dos vídeos com iPhone — 12/10/2026
 
 Teste do tutorial Prazo dos palpites confirmado pelo usuário em um iPhone. Aplicação da mesma exportação aos oito tutoriais publicados e ao vídeo 14: H.264 Main nível 3.1, 20 fps, yuv420p, faststart e áudio original preservado. Processo de vinhetas corrigido para as próximas produções. Validação em um aparelho não equivale a teste de todos os modelos de iPhone.
+
+## Ficha 15 / vídeo 01 — Conheça o Bolão: apresentação do app
+
+- Solicitação: registrada em 13/10/2026. Preparar futuramente uma apresentação das melhores e mais básicas funcionalidades do app, com acabamento de vídeo de vendas promocional de um produto profissional.
+- Objetivo: despertar interesse e mostrar como o participante pode aproveitar o bolão no cotidiano, conectando recursos a benefícios claros.
+- Tom: leve, próximo e descontraído, com comentários naturais e humor pontual; evitar narração robótica, exageros e linguagem técnica.
+- Candidatos para o roteiro: Home e Visão Geral; preencher e conferir palpites; acompanhar ranking e ligas; consultar o time favorito; explorar estatísticas e detalhes dos jogos; acessar a Central do Participante. Selecionar uma sequência curta e coerente após conferir a versão em produção, sem tentar apresentar todos os recursos.
+- Imagens: usar imagens, telas e ativos reais do app. Capturar toques, aberturas, rolagens e animações reais, mantendo a sequência e o movimento das interações. Cortes podem encurtar esperas, mas não devem inventar transições ou funcionalidades.
+- Direção visual: preservar a identidade do bolão, com logo, cores e tipografia existentes. Usar telas legíveis, aproximações discretas, ritmo de apresentação de produto, legendas concisas, vinhetas integradas e chamada final clara. Priorizar acabamento profissional e narrativa de benefício.
+- Som: voz natural no padrão aprovado; música discreta apenas se adequada e com licença de uso, sem competir com a narração. Não anunciar prêmios ou capacidades que o app não oferece.
+- Inspiração: se necessário durante o roteiro, pesquisar vídeos de apps de bolão, futebol e produtos digitais semelhantes. Registrar links e aspectos úteis de ritmo, narrativa e demonstração; não copiar imagens, textos ou músicas. Nenhuma pesquisa foi realizada nesta inclusão na lista.
+- Duração e formato: definir no roteiro antes da produção, conforme canal e tempo necessário para legibilidade e fidelidade das animações.
+- Compatibilidade: aplicar a exportação corrigida para iPhone e verificar duração, áudio e reprodução. Manter captura e exportação coerentes para preservar o movimento das telas.
+- Estado: Selecionado; produção não iniciada, roteiro pendente e divulgação não programada. A inclusão nesta lista não registra um vídeo já criado nem autoriza publicação ou envio aos participantes.
+- Material, canal e data: a definir.
+
+### Produção do item 15 — 13/10/2026
+
+- Primeira versão criada: vídeo vertical 720 × 1280, com 56,1 segundos, voz Antonio e trilha instrumental original discreta.
+- Narrativa: convite descontraído → palpites e prazo → ligas → ranking provisório → time favorito → estatísticas → Central do Participante → encerramento.
+- Usa capturas reais já produzidas em 12/10/2026, com seus tempos originais de interação, cortes editoriais entre cenas e indicadores de toque. Os valores exibidos são do momento da captura, não a situação atual em tempo real.
+- Arquivo: .artifacts/video-apresentacao-app/item15-apresentacao-app.mp4. Materiais de produção ignorados pelo Git; o vídeo ainda não foi publicado.
+- Compatibilidade: H.264 Main nível 3.1, 20 fps, yuv420p, AAC e faststart. Duração, quadros de revisão e decodificação integral verificados. Não houve novo teste físico em iPhone deste arquivo.
+- Estado atual: Em revisão, aguardando avaliação humana do vídeo e do áudio. Este registro atualiza o estado inicial do briefing. Divulgação não programada.
+
+
+### Revisão 02 do item 15 — Vinheta Entrada em campo
+
+- Proposta aprovada pelo usuário: desenho progressivo das linhas do campo, aproximação suave do logo, brilho dourado e assinatura sonora original.
+- Abertura de 2,4 s e encerramento de 2 s, com a chamada Bora pro próximo palpite?. Substituem apenas as vinhetas simples de 0,5 s; o conteúdo de 55,1 s permanece integral.
+- Duração final: 59,5 s, dentro do limite de um minuto. Voz, cenas e trilha do conteúdo preservadas; versão anterior mantida.
+- Arquivo: .artifacts/video-apresentacao-app/item15-apresentacao-app-vinheta-campo.mp4.
+- Codificação para iPhone conferida: H.264 Main nível 3.1, 20 fps e faststart. Decodificação integral aprovada; avaliação humana do som e da nova vinheta pendente.
+- Estado: Em revisão, sem publicação ou envio aos participantes.
+
+### Aprovação e publicação do item 15 — 13/10/2026
+
+- Vídeo e vinheta aprovados pelo usuário. Publicação concluída na Central, no commit 085d942, com deploy confirmado.
+- Acesso: [Conheça o Bolão em 1 minuto](https://bolaorigazzo2026.netlify.app/central/#conheca-bolao).
+- Abertura e encerramento disponíveis separadamente em central/vinhetas/, para reutilização nos próximos vídeos.
+- Estado atual: Aprovada e publicada na Central. Envio aos participantes não programado. Este registro substitui os estados de revisão anteriores.
+- Registro documental integrado separadamente da publicação da Central. As novas vinhetas também foram aplicadas aos oito tutoriais e à apresentação da Central, com aprovação do usuário, no commit c9415bd. Conteúdo, narração e movimentos preservados; pequeno aumento de duração aprovado. Exportação compatível com iPhone e decodificação integral verificadas, sem novo teste físico de todos os arquivos.
