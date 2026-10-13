@@ -34,7 +34,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.47.1";
+const APP_VERSION = "6.48.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -3308,17 +3308,25 @@ function friendlyRankingRows(ranking,kind){
 
 function renderFriendlyRankingsModal(){
   if(!friendlyRankingsModel) return;
-  const efficiency=friendlyRankingsView==='efficiency';
-  $('friendlyRankingsEfficiencyTab')?.classList.toggle('active',efficiency);
-  $('friendlyRankingsHotTab')?.classList.toggle('active',!efficiency);
-  $('friendlyRankingsEfficiencyTab')?.setAttribute('aria-selected',String(efficiency));
-  $('friendlyRankingsHotTab')?.setAttribute('aria-selected',String(!efficiency));
-  $('friendlyRankingsEfficiencyPanel')?.toggleAttribute('hidden',!efficiency);
-  $('friendlyRankingsHotPanel')?.toggleAttribute('hidden',efficiency);
+  for(const [view,suffix] of [['efficiency','Efficiency'],['hot','Hot'],['records','Records']]){
+    const selected=friendlyRankingsView===view;
+    $(`friendlyRankings${suffix}Tab`)?.classList.toggle('active',selected);
+    $(`friendlyRankings${suffix}Tab`)?.setAttribute('aria-selected',String(selected));
+    $(`friendlyRankings${suffix}Panel`)?.toggleAttribute('hidden',!selected);
+  }
   if($('friendlyRankingsEfficiencyPhrase')) $('friendlyRankingsEfficiencyPhrase').textContent=`“${friendlyRankingsModel.efficiency.phrase}”`;
   if($('friendlyRankingsHotPhrase')) $('friendlyRankingsHotPhrase').textContent=`“${friendlyRankingsModel.hot.phrase}”`;
   if($('friendlyRankingsEfficiencyList')) $('friendlyRankingsEfficiencyList').innerHTML=friendlyRankingRows(friendlyRankingsModel.efficiency.ranking,'efficiency');
   if($('friendlyRankingsHotList')) $('friendlyRankingsHotList').innerHTML=friendlyRankingRows(friendlyRankingsModel.hot.ranking,'hot');
+  if($('friendlyRankingsRecordsScope')) $('friendlyRankingsRecordsScope').textContent=`${state.activeLeague?.liga_nome||'Liga selecionada'} · Temporada 2026`;
+  const records=friendlyRankingsModel.records.ranking;
+  if($('friendlyRankingsRecordsList')) $('friendlyRankingsRecordsList').innerHTML=records.length
+    ? `<ol class="friendly-rankings-list friendly-round-records">${records.map(item=>`<li class="${item.isCurrent?'is-me':''}">
+      <span class="friendly-ranking-position">${item.position}º</span>
+      <div><strong>${escapeHtml(item.name)}</strong>${item.isCurrent?'<small>VOCÊ</small>':''}<span>Rodada ${item.round}</span></div>
+      <b>${item.points}</b><em>pontos</em>
+    </li>`).join('')}</ol>`
+    : '<p class="muted-note friendly-rankings-empty">Ainda não há pontuações registradas em rodadas completamente encerradas nesta liga.</p>';
 }
 
 function openFriendlyRankings(trigger){

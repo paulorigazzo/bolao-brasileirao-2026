@@ -1,5 +1,5 @@
-6.47.1
+6.48.0
 
-Vinheta de abertura durante o carregamento inicial, sem espera obrigatória.
+Recordes de pontuação por rodada nas Disputas Paralelas.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

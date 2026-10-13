@@ -1,3 +1,10 @@
+# v6.48.0 — Recordes por rodada
+
+- Adiciona Recordes por rodada às Disputas Paralelas, comparando as maiores pontuações em rodadas completas de 2026 da liga selecionada.
+- Mostra participante, pontos e rodada; permite múltiplos registros por participante e posições compartilhadas nos empates.
+- Preserva cálculo de pontos, Ranking principal e as duas disputas atuais.
+- Detalhes: [nota da versão](docs/releases/v6.48.0-recordes-por-rodada.md).
+
 # v6.47.1 — Vinheta na abertura
 
 - Exibe a vinheta aprovada, sem som, enquanto o aplicativo inicia.
