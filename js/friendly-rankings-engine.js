@@ -60,6 +60,53 @@ function addParticipantPhrases(kind, ranking, criteria) {
   return ranking.map(item => ({ ...item, effectPhrase: participantPhrase(kind, item, ranking, criteria) }));
 }
 
+function roundRecords({ games, picks, participants, currentParticipant, isScorableGame, pointsForPick }) {
+  const rounds = new Map();
+  for (const game of games) {
+    const round = Number(game.rodada), id = Number(game.id_jogo);
+    if (!Number.isInteger(round) || round < 1 || !Number.isInteger(id) || id < 1) continue;
+    if (!rounds.has(round)) rounds.set(round, new Map());
+    rounds.get(round).set(id, game);
+  }
+  // Brasileirão: ten distinct fixtures must be present and finalized, including rescheduled games.
+  const completed = new Map([...rounds].filter(([, fixtures]) => fixtures.size === 10 && [...fixtures.values()].every(isScorableGame)));
+  const gamesById = new Map([...completed.values()].flatMap(fixtures => [...fixtures]));
+  const members = participants.filter(participant => participant.ativo !== false);
+  const records = new Map(), seen = new Set();
+  for (const pick of picks) {
+    const game = gamesById.get(Number(pick.id_jogo));
+    if (!game) continue;
+    const member = members.find(participant => belongsTo(pick, participant));
+    if (!member) continue;
+    const participant = identity(member);
+    const key = participant.id ? `id:${participant.id}` : `name:${normalize(participant.name)}`;
+    const pickKey = `${key}:game:${Number(game.id_jogo)}`;
+    if (seen.has(pickKey)) continue;
+    seen.add(pickKey);
+    const round = Number(game.rodada), recordKey = `${key}:round:${round}`;
+    if (!records.has(recordKey)) records.set(recordKey, { key: recordKey, ...participant, round, points: 0, exact: 0, fivePointHits: 0, threePointHits: 0, isCurrent: Boolean(currentParticipant && sameParticipant(member, currentParticipant)) });
+    const record = records.get(recordKey), earned = Math.max(0, Number(pointsForPick(pick, game)) || 0);
+    record.points += earned;
+    if (earned === 10) record.exact++;
+    if (earned === 5) record.fivePointHits++;
+    if (earned === 3) record.threePointHits++;
+  }
+  const comparePerformance = (a, b) => b.points - a.points || b.exact - a.exact || b.fivePointHits - a.fivePointHits || b.threePointHits - a.threePointHits;
+  const ordered = [...records.values()].sort((a, b) => comparePerformance(a, b) || b.round - a.round || a.name.localeCompare(b.name, "pt-BR") || a.id.localeCompare(b.id));
+  const personalBests = new Map();
+  for (const record of ordered) {
+    const key = record.id ? `id:${record.id}` : `name:${normalize(record.name)}`;
+    if (!personalBests.has(key)) personalBests.set(key, record);
+  }
+  let position = 0, previous = null;
+  return [...personalBests.values()]
+    .map((item, index) => {
+      if (!previous || comparePerformance(previous, item) !== 0) position = index + 1;
+      previous = item;
+      return { ...item, position };
+    });
+}
+
 export function buildFriendlyRankingsModel({
   games = [],
   picks = [],
@@ -134,5 +181,6 @@ export function buildFriendlyRankingsModel({
     teaser,
     efficiency: { ranking: efficiencyRanking, phrase: leaderPhrase("efficiency", efficiencyRanking) },
     hot: { ranking: hotRanking, phrase: leaderPhrase("hot", hotRanking) },
+    records: { ranking: roundRecords({ games, picks, participants, currentParticipant, isScorableGame, pointsForPick }) },
   };
 }

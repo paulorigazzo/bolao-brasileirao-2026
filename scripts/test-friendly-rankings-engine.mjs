@@ -54,7 +54,7 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const html = readFileSync(`${root}index.html`, "utf8");
 const app = readFileSync(`${root}js/app.js`, "utf8");
 assert.equal((html.match(/id="friendlyRankingsModal"/g) || []).length, 1);
-assert.match(html, /id="rankingTableTitle"[\s\S]*id="rankingUpdatedAt"[\s\S]*id="friendlyRankingsTeaser"/i, "a chamada deve aparecer depois da classificação completa");
+assert.match(html, /id="rankingHighlights"[\s\S]*id="friendlyRankingsTeaser"[\s\S]*id="rankingTableTitle"[\s\S]*id="rankingUpdatedAt"/i, "a chamada deve aparecer após os indicadores e antes da classificação completa");
 assert.match(html, /Quem joga, resolve[\s\S]*Tá vindo quente/i);
 assert.match(app, /minimumEvaluated = 20|buildFriendlyRankingsModel\([\s\S]*pointsForPick/i);
 assert.match(app, /friendlyRankingsReturnFocus[\s\S]*target\?\.focus/i, "o foco deve voltar ao acionador");
