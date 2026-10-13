@@ -3323,7 +3323,7 @@ function renderFriendlyRankingsModal(){
   if($('friendlyRankingsRecordsList')) $('friendlyRankingsRecordsList').innerHTML=records.length
     ? `<ol class="friendly-rankings-list friendly-round-records">${records.map(item=>`<li class="${item.isCurrent?'is-me':''}">
       <span class="friendly-ranking-position">${item.position}º</span>
-      <div><strong>${escapeHtml(item.name)}</strong>${item.isCurrent?'<small>VOCÊ</small>':''}<span>Rodada ${item.round}</span></div>
+      <div><strong>${escapeHtml(item.name)}</strong>${item.isCurrent?'<small>VOCÊ</small>':''}<span>Rodada ${item.round}</span><span>${item.exact} exatos · ${item.fivePointHits} de 5 pts · ${item.threePointHits} de 3 pts</span></div>
       <b>${item.points}</b><em>pontos</em>
     </li>`).join('')}</ol>`
     : '<p class="muted-note friendly-rankings-empty">Ainda não há pontuações registradas em rodadas completamente encerradas nesta liga.</p>';

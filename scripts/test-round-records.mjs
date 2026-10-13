@@ -53,4 +53,14 @@ const onlyClosed = build({ games: games.filter(game => scoring.isScorableGame(ga
 assert.deepEqual(onlyClosed.efficiency, model.efficiency);
 assert.deepEqual(onlyClosed.hot, model.hot);
 assert.match(source, /pointsForPick:\(pick,game\)=>points\(pick,game\)/);
+assert.deepEqual([records[0].exact, records[0].fivePointHits, records[0].threePointHits], [10, 0, 0]);
+assert.deepEqual([records[3].exact, records[3].fivePointHits, records[3].threePointHits], [0, 10, 0]);
+const tiedMembers = ["Exatos", "Cinco", "Tres", "Um", "Outro exato", "Mais pontos"].map((nome, i) => ({ user_id: `tie-${i}`, nome }));
+// Inject earned values to exercise every ranking criterion, including a residual tie.
+// This does not change the app's current scoring function, exercised above.
+const patterns = [[10], [5, 5], [3, 3, 3, 1], Array(10).fill(1), [10], [5, 5, 5]];
+const tieGames = games.filter(game => game.rodada === 1);
+const tiePicks = tiedMembers.flatMap((member, i) => tieGames.map((game, j) => ({ user_id: member.user_id, id_jogo: game.id_jogo, earned: patterns[i][j] || 0 })));
+const rankedTies = build({ games: tieGames, participants: tiedMembers, picks: tiePicks, pointsForPick: pick => pick.earned }).records.ranking;
+assert.deepEqual(rankedTies.map(row => [row.name, row.position]), [["Mais pontos", 1], ["Exatos", 2], ["Outro exato", 2], ["Cinco", 4], ["Tres", 5], ["Um", 6]]);
 console.log("Recordes: totais reais, empates, repetições, rodadas completas, reagendados, isolamento, duplicados e preservação aprovados.");

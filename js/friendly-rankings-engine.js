@@ -84,15 +84,20 @@ function roundRecords({ games, picks, participants, currentParticipant, isScorab
     if (seen.has(pickKey)) continue;
     seen.add(pickKey);
     const round = Number(game.rodada), recordKey = `${key}:round:${round}`;
-    if (!records.has(recordKey)) records.set(recordKey, { key: recordKey, ...participant, round, points: 0, isCurrent: Boolean(currentParticipant && sameParticipant(member, currentParticipant)) });
-    records.get(recordKey).points += Math.max(0, Number(pointsForPick(pick, game)) || 0);
+    if (!records.has(recordKey)) records.set(recordKey, { key: recordKey, ...participant, round, points: 0, exact: 0, fivePointHits: 0, threePointHits: 0, isCurrent: Boolean(currentParticipant && sameParticipant(member, currentParticipant)) });
+    const record = records.get(recordKey), earned = Math.max(0, Number(pointsForPick(pick, game)) || 0);
+    record.points += earned;
+    if (earned === 10) record.exact++;
+    if (earned === 5) record.fivePointHits++;
+    if (earned === 3) record.threePointHits++;
   }
-  let position = 0, previousPoints = null;
+  const comparePerformance = (a, b) => b.points - a.points || b.exact - a.exact || b.fivePointHits - a.fivePointHits || b.threePointHits - a.threePointHits;
+  let position = 0, previous = null;
   return [...records.values()]
-    .sort((a, b) => b.points - a.points || b.round - a.round || a.name.localeCompare(b.name, "pt-BR") || a.id.localeCompare(b.id))
+    .sort((a, b) => comparePerformance(a, b) || b.round - a.round || a.name.localeCompare(b.name, "pt-BR") || a.id.localeCompare(b.id))
     .map((item, index) => {
-      if (item.points !== previousPoints) position = index + 1;
-      previousPoints = item.points;
+      if (!previous || comparePerformance(previous, item) !== 0) position = index + 1;
+      previous = item;
       return { ...item, position };
     });
 }
