@@ -1,3 +1,10 @@
+# v6.47.1 — Vinheta na abertura
+
+- Exibe a vinheta aprovada, sem som, enquanto o aplicativo inicia.
+- Libera o acesso assim que a inicialização termina, mesmo antes do fim do vídeo.
+- Mantém logo estático ao terminar, em falha de reprodução ou com movimento reduzido.
+- Detalhes: [nota da versão](docs/releases/v6.47.1-vinheta-abertura.md).
+
 # v6.47.0 — Central do Participante
 
 - Adiciona a Central ao menu do usuário, abrindo em nova aba.

@@ -12,17 +12,18 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.47.0">
-  <link rel="stylesheet" href="./css/styles.css?v=6.47.0">
-  <link rel="stylesheet" href="./css/home-v2.css?v=6.47.0">
-  <link rel="stylesheet" href="./css/components.css?v=6.47.0">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.47.0">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.47.0">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.47.0">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.47.1">
+  <link rel="stylesheet" href="./css/styles.css?v=6.47.1">
+  <link rel="stylesheet" href="./css/home-v2.css?v=6.47.1">
+  <link rel="stylesheet" href="./css/components.css?v=6.47.1">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.47.1">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.47.1">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.47.1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
   <div id="loading" class="loading-screen" role="status" aria-live="polite" aria-label="Carregando o bolão">
+    <video id="startupIntro" class="loading-intro" muted playsinline preload="none" aria-hidden="true" tabindex="-1" data-src="./central/vinhetas/entrada-em-campo-abertura.mp4"></video>
     <img class="loading-brand" src="./assets/brand/jarvis-approved.png" alt="Bolão Brasileirão 2026">
     <strong>Carregando o bolão…</strong>
   </div>
@@ -32,7 +33,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-      <p class="brand-version"><span id="appVersion" class="version-pill">v6.47.0</span></p>
+      <p class="brand-version"><span id="appVersion" class="version-pill">v6.47.1</span></p>
         <p id="headerLeagueName" class="brand-league hidden" aria-live="polite"></p>
       </div>
     </div>
@@ -913,6 +914,7 @@
       if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-<script type="module" src="./js/app.js?v=6.47.0"></script>
+<script type="module" src="./js/startup-intro.js"></script>
+<script type="module" src="./js/app.js?v=6.47.1"></script>
 </body>
 </html>
