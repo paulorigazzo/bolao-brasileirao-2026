@@ -23,7 +23,7 @@ Decisão aprovada em 13/10/2026: todos os vídeos criados daqui em diante devem 
 - Incorporar os 4,4 segundos ao limite total aprovado de cada vídeo; ajustar o roteiro antes da gravação, sem cortar fala ou acelerar as animações para acomodar a vinheta.
 - Preservar H.264 Main nível 3.1, 20 fps, yuv420p, áudio AAC e faststart na exportação final; conferir duração e decodificação integral.
 - Os dois arquivos são reutilizáveis e independentes do vídeo de apresentação. Não aplicar retroativamente aos vídeos já publicados sem nova solicitação.
-- A exibição da vinheta ao abrir o app é apenas uma proposta: depende de plano específico para o carregamento, acessibilidade, desempenho e autorização de implementação. Som automático pode ser bloqueado no iPhone.
+- A vinheta de abertura foi implementada no app, sem som, na versão 6.47.1 (PR #255). O carregamento concluído interrompe a animação; falhas e preferência por movimento reduzido usam o logo estático. Ver [nota da versão](../releases/v6.47.1-vinheta-abertura.md).
 
 ## Opções de conteúdo
 
@@ -317,4 +317,4 @@ Teste do tutorial Prazo dos palpites confirmado pelo usuário em um iPhone. Apli
 - Acesso: [Conheça o Bolão em 1 minuto](https://bolaorigazzo2026.netlify.app/central/#conheca-bolao).
 - Abertura e encerramento disponíveis separadamente em central/vinhetas/, para reutilização nos próximos vídeos.
 - Estado atual: Aprovada e publicada na Central. Envio aos participantes não programado. Este registro substitui os estados de revisão anteriores.
-- O documento de controle permanece localmente modificado, fora do commit de publicação da Central.
+- Registro documental integrado separadamente da publicação da Central. As novas vinhetas também foram aplicadas aos oito tutoriais e à apresentação da Central, com aprovação do usuário, no commit c9415bd. Conteúdo, narração e movimentos preservados; pequeno aumento de duração aprovado. Exportação compatível com iPhone e decodificação integral verificadas, sem novo teste físico de todos os arquivos.
