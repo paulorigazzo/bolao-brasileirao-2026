@@ -1,5 +1,5 @@
-6.48.0
+6.49.0
 
-Recordes de pontuação por rodada nas Disputas Paralelas.
+Contexto pessoal, Disputas Paralelas e ajuda da Central na Home 2.0 experimental.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

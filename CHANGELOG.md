@@ -1,3 +1,11 @@
+# v6.49.0 — Contexto pessoal na Home 2.0
+
+- Acrescenta comparação com a média anterior por rodada e destaques de recorde pessoal no resultado de rodadas completas, reutilizando os Destaques.
+- Inclui chamada pessoal para as Disputas Paralelas e acessos às abas existentes, no contexto da liga ativa.
+- Oferece ajuda contextual e acesso à Central do Participante, sem iniciar vídeos automaticamente.
+- Mantém a Home 2.0 experimental e restrita à ADM; preserva a Home atual e as regras de pontuação.
+- Detalhes: [nota da versão](docs/releases/v6.49.0-home-v2-contexto-pessoal.md).
+
 # v6.48.0 — Recordes por rodada
 
 - Adiciona Recordes por rodada às Disputas Paralelas, comparando as maiores pontuações em rodadas completas de 2026 da liga selecionada.
