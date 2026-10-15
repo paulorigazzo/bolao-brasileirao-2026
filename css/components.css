@@ -180,3 +180,11 @@ input:disabled,select:disabled,textarea:disabled{cursor:not-allowed;opacity:.58}
   button,.button,.btn{min-height:44px}
 }
 @media(prefers-reduced-motion:reduce){.skeleton::after{animation:none;display:none}}
+
+/* Ajuda contextual: acesso discreto à Central, sem competir com a ação principal. */
+a.participant-help-link{display:flex;align-items:center;width:fit-content;max-width:100%;min-height:44px;margin:4px 0;color:var(--muted);font-size:.72rem;line-height:1.5;text-underline-offset:3px;overflow-wrap:anywhere}
+a.participant-help-link:hover{color:var(--text)}
+a.participant-help-link:focus-visible{outline:2px solid var(--premium-emerald);outline-offset:3px;border-radius:3px}
+
+.participant-center-footer{padding:16px 0 8px;text-align:center}
+.participant-center-footer > a.participant-help-link{margin:0 auto;justify-content:center;text-align:center}
