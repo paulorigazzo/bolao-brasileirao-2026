@@ -14,7 +14,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 - 🟡 Tela experimental na Área ADM para avaliação pelo administrador como participante da liga ativa.
 - Home vigente preservada; substituição condicionada a validação e aprovação futuras.
-- Complementos pessoais, Disputas Paralelas e ajuda contextual da Central: implementados para revisão local, ainda sem publicação. [Nota v6.49.0](docs/releases/v6.49.0-home-v2-contexto-pessoal.md).
+- Complementos pessoais, Disputas Paralelas e ajuda contextual da Central: implementados na v6.49.0, mantendo o acesso experimental pela ADM. [Nota v6.49.0](docs/releases/v6.49.0-home-v2-contexto-pessoal.md).
 - Escopo: [nota v6.46.0](docs/releases/v6.46.0-home-2-0-preview-adm.md).
 
 ## Legenda
