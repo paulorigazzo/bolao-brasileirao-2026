@@ -1,5 +1,5 @@
-6.49.0
+6.49.1
 
-Contexto pessoal, Disputas Paralelas e ajuda da Central na Home 2.0 experimental.
+Ajuda contextual da Central em Disputas Paralelas, Ranking provisório, Ligas, Estatísticas e Notificações.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

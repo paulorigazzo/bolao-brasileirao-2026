@@ -12,13 +12,13 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.49.0">
-  <link rel="stylesheet" href="./css/styles.css?v=6.49.0">
-  <link rel="stylesheet" href="./css/home-v2.css?v=6.49.0">
-  <link rel="stylesheet" href="./css/components.css?v=6.49.0">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.49.0">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.49.0">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.49.0">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.49.1">
+  <link rel="stylesheet" href="./css/styles.css?v=6.49.1">
+  <link rel="stylesheet" href="./css/home-v2.css?v=6.49.1">
+  <link rel="stylesheet" href="./css/components.css?v=6.49.1">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.49.1">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.49.1">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.49.1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
@@ -33,7 +33,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-      <p class="brand-version"><span id="appVersion" class="version-pill">v6.49.0</span></p>
+      <p class="brand-version"><span id="appVersion" class="version-pill">v6.49.1</span></p>
         <p id="headerLeagueName" class="brand-league hidden" aria-live="polite"></p>
       </div>
     </div>
@@ -302,6 +302,7 @@
           <div class="section-title"><div><span class="eyebrow">EVOLUÇÃO</span><h2 id="statsEvolutionTitle">Pontuação por rodada</h2><p class="stats-section-copy">A variação compara sua média de pontos por jogo com a rodada anterior disponível. Toque em uma rodada para rever os Destaques.</p></div><div class="stats-evolution-badges"><span id="bestRoundBadge" class="best-round-badge">Melhor rodada: —</span><span id="statsEvolutionHighlight" class="best-round-badge secondary">Maior evolução: —</span></div></div>
           <div id="statsLiveRoundHighlights"></div>
           <div id="roundHistory" class="round-history premium-history"></div>
+          <a id="statsHelpLink" class="participant-help-link" href="/central/#estatisticas" target="_blank" rel="noopener noreferrer" aria-label="Entenda seus números (abre em nova aba)">Entenda seus números →</a>
         </section>
 
         <div class="stats-grid stats-core-grid">
@@ -590,6 +591,7 @@
               <button id="disablePushBtn" class="secondary hidden" type="button">Desativar neste aparelho</button>
             </div>
             <small id="pushPreferenceStatus" class="profile-form-status" aria-live="polite">Verificando compatibilidade…</small>
+          <a id="notificationsHelpLink" class="participant-help-link" href="/central/#notificacoes" target="_blank" rel="noopener noreferrer" aria-label="Precisa de ajuda para ativar? (abre em nova aba)">Precisa de ajuda para ativar? →</a>
           </div>
           <div class="card favorite-team-card">
             <span class="eyebrow">PERSONALIZAÇÃO</span>
@@ -655,6 +657,7 @@
         <div><span class="eyebrow">CONTEXTO COMPETITIVO</span><h2 id="leagueSelectorTitle">Escolher liga</h2><p id="leagueSelectorSummary" class="muted-note">Ranking, estatísticas, destaques e duelos acompanham a liga selecionada. Seus palpites continuam únicos.</p></div>
         <button id="leagueSelectorClose" class="modal-close" type="button" aria-label="Fechar seleção de liga">✕</button>
       </header>
+      <a id="leagueHelpLink" class="participant-help-link" href="/central/#ligas" target="_blank" rel="noopener noreferrer" aria-label="Dúvidas sobre as ligas? (abre em nova aba)">Dúvidas sobre as ligas? →</a>
       <div id="leagueSelectorOptions" class="league-selector-options" role="radiogroup" aria-label="Ligas disponíveis"></div>
       <p id="leagueSelectorStatus" class="league-selector-status" aria-live="polite"></p>
     </section>
@@ -698,6 +701,7 @@
           <span class="eyebrow">CLASSIFICAÇÃO PROVISÓRIA</span>
           <h2 id="temporaryRankingModalTitle">Se a rodada terminasse agora</h2>
           <p id="temporaryRankingModalSummary" class="muted-note">Projeção informativa baseada nos placares disponíveis.</p>
+          <a id="temporaryRankingHelpLink" class="participant-help-link" href="/central/#ranking" target="_blank" rel="noopener noreferrer" aria-label="Como funciona esta projeção? (abre em nova aba)">Como funciona esta projeção? →</a>
         </div>
         <button id="temporaryRankingModalClose" class="modal-close" type="button" aria-label="Fechar Ranking provisório">✕</button>
       </header>
@@ -756,6 +760,7 @@
         <button id="friendlyRankingsHotTab" type="button" role="tab" aria-selected="false" aria-controls="friendlyRankingsHotPanel" data-friendly-ranking-view="hot">Tá vindo quente</button>
         <button id="friendlyRankingsRecordsTab" type="button" role="tab" aria-selected="false" aria-controls="friendlyRankingsRecordsPanel" data-friendly-ranking-view="records">Recordes por rodada</button>
       </div>
+      <a id="parallelHelpLink" class="participant-help-link" href="/central/#disputas" target="_blank" rel="noopener noreferrer" aria-label="Dúvidas sobre estas disputas? (abre em nova aba)">Dúvidas sobre estas disputas? →</a>
       <section id="friendlyRankingsEfficiencyPanel" class="friendly-rankings-panel" role="tabpanel" aria-labelledby="friendlyRankingsEfficiencyTab">
         <div class="friendly-rankings-intro"><span aria-hidden="true">🎯</span><div><h3>Quem joga, resolve</h3><p>Média por palpite entre participantes com pelo menos 20 palpites avaliados.</p></div></div>
         <p id="friendlyRankingsEfficiencyPhrase" class="friendly-rankings-phrase"></p><div id="friendlyRankingsEfficiencyList"></div>
@@ -913,6 +918,6 @@
     }
   </script>
 <script type="module" src="./js/startup-intro.js"></script>
-<script type="module" src="./js/app.js?v=6.49.0"></script>
+<script type="module" src="./js/app.js?v=6.49.1"></script>
 </body>
 </html>
