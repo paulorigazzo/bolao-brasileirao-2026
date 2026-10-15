@@ -1,6 +1,7 @@
 # v6.49.1 — Ajuda contextual da Central
 
 - Adiciona links aos guias relacionados nos modais de Disputas Paralelas, Ranking provisório e seleção de liga, em Pontuação por rodada e nas preferências de notificações do perfil.
+- Inclui acesso à página inicial da Central no rodapé de Home, Ranking, Jogos, Meu Time e Estatísticas.
 - Mantém tratamento discreto, foco visível e abertura em nova aba, preservando a consulta atual.
 - Não altera regras, cálculos, permissões de notificações nem o conteúdo da Central.
 - Detalhes: [nota da versão](docs/releases/v6.49.1-ajuda-contextual-central.md).
