@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
-import {buildHomeV2Model} from '../js/home-v2.js';
+import {buildHomeV2Model,buildHomeV2PersonalContext} from '../js/home-v2.js';
+import {buildFriendlyRankingsModel} from '../js/friendly-rankings-engine.js';
+import {buildRoundHighlightsModel} from '../js/round-highlights-engine.js';
 const games=[{id_jogo:1,rodada:29,status:'open'},{id_jogo:2,rodada:29,status:'live'},{id_jogo:3,rodada:29,status:'finished'},{id_jogo:4,rodada:30,status:'open'}];
 const inputs={round:29,games,ownPick:id=>id===3?{earned:10,gols_casa:2,gols_fora:1}:id===2?{earned:3,gols_casa:1,gols_fora:0}:null,isOpen:g=>g.status==='open',isLive:g=>g.status==='live',isScorable:g=>g.status==='finished',points:p=>p?.earned||0,livePoints:p=>p?.earned||0};
 const build=extra=>buildHomeV2Model({...inputs,...extra});
@@ -20,9 +22,9 @@ const source=readFileSync(new URL('../js/app.js',import.meta.url),'utf8').replac
 function extract(name){const start=source.indexOf('function '+name+'(');assert.ok(start>=0,name);const end=source.indexOf('\nfunction ',start+1);return source.slice(start,end<0?source.length:end);}
 const nodes=new Map();function node(id){if(!nodes.has(id))nodes.set(id,{innerHTML:'',textContent:'',classList:{contains:()=>true},value:'',focus(){}});return nodes.get(id);}
 let admin=true;
-const context={publicPicksRefreshPending:false,buildRoundHighlights:()=>({facts:{personal:[{key:"personal-round-performance",title:"Você fez 10 pontos na rodada",detail:"Resumo dos resultados oficiais."},{key:"new-personal-best",title:"Sua melhor rodada até agora",detail:"Novo recorde pessoal: 10 pontos."}],group:[]},isProvisional:false}),teamNamesDisplayText:x=>x,provisionalRoundHighlightFact:x=>x,normalizeTeamKey:x=>String(x||"").toLowerCase(),CSS:{escape:x=>x},buildHomeV2Model,$:node,isAdminUser:()=>admin,show(){},closeHomeV2Picks(){},calculateRanking(){},state:{participant:{nome:'Teste'},leagueContextStatus:'ready',ranking:[{key:'me',name:'Teste',total:25}],games:games.slice(0,3),ownPicks:[]},currentRoundNumber:()=>29,ownPick:inputs.ownPick,locked:g=>g.status!=='open',isFinished:g=>g.status==='finished',isScorableGame:inputs.isScorable,gameStatusDisplay:g=>({key:g.status,label:g.status}),points:inputs.points,calculatePredictionPoints:inputs.livePoints,roundLifecycleSummary:()=>({finished:1,live:1,postponed:0,cancelled:0,status:'PARTIAL'}),pendingEarlierRounds:()=>[],isPostponed:g=>g.status==='postponed',homeRoundHighlightsContext:()=>({round:29,mode:'live'}),isCurrentRankingParticipant:p=>p.key==='me',findTeam:()=>null,activeLeagueName:()=> 'Liga de teste',teamDisplayName:x=>x||'Clube',escapeHtml:x=>String(x??''),rankingAvatar:()=>'<span class="ranking-avatar">T</span>',teamLogo:()=>'<span>⚽</span>',deadlineText:()=>"Fecha em 45 min",liveMatchMinute:()=> '20',hasValidScore:()=>false,homeDeadline:()=> '20:00',formatDate:()=>'',Date,homeV2PicksRound:null};
+const context={publicPicksRefreshPending:false,buildHomeV2PersonalContext,buildFriendlyRankingsModel,buildRoundHighlights:()=>({facts:{personal:[{key:"personal-round-performance",title:"Você fez 10 pontos na rodada",detail:"Resumo dos resultados oficiais."},{key:"new-personal-best",title:"Sua melhor rodada até agora",detail:"Novo recorde pessoal: 10 pontos."}],group:[]},isProvisional:false}),teamNamesDisplayText:x=>x,provisionalRoundHighlightFact:x=>x,normalizeTeamKey:x=>String(x||"").toLowerCase(),CSS:{escape:x=>x},buildHomeV2Model,$:node,isAdminUser:()=>admin,show(){},closeHomeV2Picks(){},calculateRanking(){},state:{participant:{nome:'Teste'},leagueContextStatus:'ready',ranking:[{key:'me',name:'Teste',total:25}],games:games.slice(0,3),ownPicks:[]},currentRoundNumber:()=>29,ownPick:inputs.ownPick,locked:g=>g.status!=='open',isFinished:g=>g.status==='finished',isScorableGame:inputs.isScorable,gameStatusDisplay:g=>({key:g.status,label:g.status}),points:inputs.points,calculatePredictionPoints:inputs.livePoints,roundLifecycleSummary:()=>({finished:1,live:1,postponed:0,cancelled:0,status:'PARTIAL'}),pendingEarlierRounds:()=>[],isPostponed:g=>g.status==='postponed',homeRoundHighlightsContext:()=>({round:29,mode:'live'}),isCurrentRankingParticipant:p=>p.key==='me',findTeam:()=>null,activeLeagueName:()=> 'Liga de teste',teamDisplayName:x=>x||'Clube',escapeHtml:x=>String(x??''),rankingAvatar:()=>'<span class="ranking-avatar">T</span>',teamLogo:()=>'<span>⚽</span>',deadlineText:()=>"Fecha em 45 min",liveMatchMinute:()=> '20',hasValidScore:()=>false,homeDeadline:()=> '20:00',formatDate:()=>'',Date,homeV2PicksRound:null};
 vm.createContext(context);
-for(const name of ['homeV2Model','homeV2Button','renderHomeV2','renderHomeV2Picks'])vm.runInContext(extract(name),context);
+for(const name of ['homeV2Model','homeV2Button','homeV2Help','homeV2FriendlyRankings','renderHomeV2','renderHomeV2Picks'])vm.runInContext(extract(name),context);
 vm.runInContext('renderHomeV2()',context);
 assert.match(node('homeV2Content').innerHTML,/Completar pendentes/);assert.match(node('homeV2Content').innerHTML,/pontos oficiais/);assert.match(node('homeV2Content').innerHTML,/Destaques · Rodada 29/);assert.doesNotMatch(node('homeV2Content').innerHTML,/Rodada 30/);
 context.state.games=[games[0]];context.ownPick=()=>({earned:0,gols_casa:1,gols_fora:0});vm.runInContext('renderHomeV2()',context);assert.match(node('homeV2Content').innerHTML,/Revisar palpites/);
@@ -39,7 +41,59 @@ assert.match(node('homeV2Content').innerHTML,/1º de 1 participante/);
 context.findTeam=()=>({name:'Corinthians',logo:''});context.favoriteTeamStandingsRow=()=>({position:8,points:42});
 context.favoriteTeamGames=()=>[{id_jogo:11,rodada:30,status:'open',inicio:'2099-10-11T21:30:00Z',time_casa:'Corinthians',time_fora:'Santos'}];vm.runInContext('renderHomeV2()',context);assert.match(node('homeV2Content').innerHTML,/Próximo: Santos · em casa/);
 context.favoriteTeamGames=()=>[{id_jogo:11,rodada:30,status:'open',inicio:'2099-10-11T21:30:00Z',time_casa:'Santos',time_fora:'Corinthians'}];vm.runInContext('renderHomeV2()',context);assert.match(node('homeV2Content').innerHTML,/Próximo: Santos · fora/);context.findTeam=()=>null;
-context.state.ranking=[{key:'first',name:'Líder',total:30},{key:'me',name:'Teste',total:25},{key:'last',name:'Próximo',total:23}];vm.runInContext('renderHomeV2()',context);assert.match(node('homeV2Content').innerHTML,/2º de 3 participantes/);assert.match(node('homeV2Content').innerHTML,/5 pts do líder · 2 pts à frente do próximo/);assert.match(node('homeV2Content').innerHTML,/Sua melhor rodada até agora/);
+context.state.ranking=[{key:'first',name:'Líder',total:30},{key:'me',name:'Teste',total:25},{key:'last',name:'Próximo',total:23}];vm.runInContext('renderHomeV2()',context);assert.match(node('homeV2Content').innerHTML,/2º de 3 participantes/);assert.match(node('homeV2Content').innerHTML,/5 pts do líder · 2 pts à frente do próximo/);assert.doesNotMatch(node('homeV2Content').innerHTML,/Sua melhor rodada até agora/);
+// Contexto pessoal deriva dos Destaques e Disputas reais, sem recriar suas regras.
+const members=[{user_id:'me',nome:'Teste'},{user_id:'other',nome:'Outro'}];
+const history=Array.from({length:30},(_,i)=>({id_jogo:i+1,rodada:Math.floor(i/10)+1,status:'finished',gols_casa:2,gols_fora:1}));
+const personalPicks=history.map(g=>({user_id:'me',usuario:'Teste',id_jogo:g.id_jogo,score:(g.id_jogo-1)%10<g.rodada+1?10:0}));
+const deps={isScorableGame:g=>g.status==='finished',gameStatusDisplay:g=>({key:g.status}),pointsForPick:p=>p.score};
+const highlights=(round=3,picks=personalPicks,gs=history)=>buildRoundHighlightsModel({round,games:gs,picks,participants:members,selectedParticipantId:'me',...deps});
+const friendly=(picks=personalPicks,participants=members)=>buildFriendlyRankingsModel({games:history,picks,participants,currentParticipant:members[0],...deps});
+let personal=buildHomeV2PersonalContext({highlights:highlights(),friendlyRankings:friendly()});
+assert.equal(personal.comparison.average,25);assert.match(personal.comparison.detail,/acima/);assert.equal(personal.record.key,'new-personal-best');assert.equal(personal.parallel.view,'hot');
+const changedRound=score=>personalPicks.map(p=>p.id_jogo>20?{...p,score:p.id_jogo===21?score:0}:p);
+assert.match(buildHomeV2PersonalContext({highlights:highlights(3,changedRound(10))}).comparison.detail,/abaixo/);
+assert.match(buildHomeV2PersonalContext({highlights:highlights(3,changedRound(25))}).comparison.detail,/próximo/);
+assert.equal(buildHomeV2PersonalContext({highlights:highlights(3,changedRound(30))}).record.key,'matched-personal-best');
+assert.equal(buildHomeV2PersonalContext({highlights:highlights(1)}).comparison,null);
+assert.equal(buildHomeV2PersonalContext({highlights:highlights(1)}).record,null);
+for(const status of ['postponed','future','live','cancelled']){
+  const incomplete=history.map(g=>g.id_jogo===30?{...g,status}:g);
+  const partial=buildHomeV2PersonalContext({highlights:highlights(3,personalPicks,incomplete)});
+  assert.equal(partial.comparison,null,status);assert.equal(partial.record,null,status);
+}
+assert.equal(buildHomeV2PersonalContext({highlights:highlights(3,personalPicks,history.filter(g=>g.id_jogo!==30))}).record,null);
+assert.equal(buildHomeV2PersonalContext({friendlyRankings:friendly(personalPicks.filter(p=>p.id_jogo<=20))}).parallel.view,'efficiency');
+assert.equal(buildHomeV2PersonalContext({friendlyRankings:friendly([])}).parallel.position,null);
+assert.equal(buildHomeV2PersonalContext({friendlyRankings:friendly([],[members[1]])}).parallel.position,null,'recordes não atravessam ligas');
+const savedHighlights=context.buildRoundHighlights;
+context.buildRoundHighlights=()=>({...highlights(),round:29});context.state.participants=members;context.state.publicPicks=personalPicks;context.state.participant={nome:'Teste',user_id:'me'};
+context.state.games=[games[2]];context.roundLifecycleSummary=()=>({finished:10,live:0,postponed:0,cancelled:0,status:'FINISHED'});
+vm.runInContext('renderHomeV2()',context);
+assert.match(node('homeV2Content').innerHTML,/Sua média anterior: 25 pontos por rodada/);
+assert.match(node('homeV2Content').innerHTML,/Nova melhor rodada pessoal/);
+assert.equal((node('homeV2Content').innerHTML.match(/Nova melhor rodada pessoal/g)||[]).length,1);
+assert.match(node('homeV2Content').innerHTML,/data-v2-action="records"/);
+assert.match(node('homeV2Content').innerHTML,/href="\/central\/#pontuacao"/);
+assert.match(node('homeV2Content').innerHTML,/href="\/central\/#disputas"/);
+assert.match(node('homeV2Content').innerHTML,/Dúvidas\? Explore a Central/);
+context.publicPicksRefreshPending=true;vm.runInContext('renderHomeV2()',context);
+assert.doesNotMatch(node('homeV2Content').innerHTML,/Sua média anterior|Nova melhor rodada/);
+assert.match(node('homeV2Content').innerHTML,/Conheça as Disputas Paralelas/);
+context.publicPicksRefreshPending=false;context.buildRoundHighlights=savedHighlights;
+// Exercita os novos acessos pelo listener real e sua reconstrução do contexto da liga.
+let clickHome;node('homeV2Content').addEventListener=(_,handler)=>{clickHome=handler;};
+let opened=null;context.openFriendlyRankings=trigger=>{opened=trigger;context.friendlyRankingsView='efficiency';};context.renderFriendlyRankingsModal=()=>{};
+context.friendlyRankingsModel=null;context.friendlyRankingsView='efficiency';
+const listenerStart=source.indexOf('$("homeV2Content")?.addEventListener("click"');
+vm.runInContext(source.slice(listenerStart,source.indexOf('\nfunction participantTeam(',listenerStart)),context);
+const recordButton={dataset:{v2Action:'records'}};
+await clickHome({target:{closest:()=>recordButton}});assert.equal(opened,recordButton);assert.equal(context.friendlyRankingsView,'records');
+await clickHome({target:{closest:()=>({dataset:{v2Action:'parallel',view:'hot'}})}});assert.equal(context.friendlyRankingsView,'hot');
+context.state.publicPicks=[];await clickHome({target:{closest:()=>({dataset:{v2Action:'parallel',view:'efficiency'}})}});assert.equal(context.friendlyRankingsView,'efficiency');assert.equal(context.friendlyRankingsModel.hot.ranking.length,0);
+context.state.games=[games[0]];context.ownPick=()=>null;vm.runInContext('renderHomeV2()',context);assert.match(node('homeV2Content').innerHTML,/href="\/central\/#palpites"/);
+context.state.games=[games[1]];vm.runInContext('renderHomeV2()',context);assert.match(node('homeV2Content').innerHTML,/href="\/central\/#ranking"/);
+
 admin=false;vm.runInContext('renderHomeV2()',context);assert.equal(node('homeV2Content').innerHTML,'');
 for(const name of ['navigateTo','applyNavigationState'])assert.match(extract(name),/tabName==="homeV2"&&!isAdminUser\(\)/);
 // Referência da Home aprovada na v6.46.1; inclui a revisão visual da Visão Geral.
@@ -64,8 +118,32 @@ if(process.argv[2]){
   context.buildRoundHighlights=()=>({facts:{personal:[{key:'unique-exact:1',title:'Só você acertou Corinthians × Santos',detail:'Placar exato de 2 × 1 nos resultados desta rodada.'}],group:[]},isProvisional:false});
   context.formatDate=()=> 'hoje, 18h30';context.ownPick=()=>null;
   if(process.argv[3]==='live'){context.state.games.push({...context.state.games[0],id_jogo:9,rodada:21});context.state.games.forEach(g=>{g.status='live';g.gols_casa=1;g.gols_fora=0;});context.ownPick=()=>({earned:3,gols_casa:2,gols_fora:0});context.hasValidScore=()=>true;}
-  if(process.argv[3]==='results'){context.state.games.forEach(g=>{g.status='finished';g.gols_casa=2;g.gols_fora=1;});context.ownPick=()=>({earned:10,gols_casa:2,gols_fora:1});context.hasValidScore=()=>true;context.roundLifecycleSummary=()=>({finished:2,live:0,postponed:0,cancelled:0,status:'FINISHED'});}
+  if(process.argv[3]==='results'){
+    context.state.games=history.map(g=>({...g,rodada:g.rodada+26}));
+    context.state.participant={nome:'Paulo',user_id:'me'};context.state.participants=[{user_id:'me',nome:'Paulo'}];
+    context.state.publicPicks=personalPicks.map(p=>({...p,earned:p.score}));
+    context.ownPick=id=>context.state.publicPicks.find(p=>p.id_jogo===id);
+    context.buildRoundHighlights=()=>({...highlights(),round:29});
+    context.hasValidScore=()=>true;
+  }
   vm.runInContext('renderHomeV2()',context);
   const {writeFileSync}=await import('node:fs');
-  writeFileSync(process.argv[2], '<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="http://localhost:8892/css/design-system.css"><link rel="stylesheet" href="http://localhost:8892/css/styles.css"><link rel="stylesheet" href="http://localhost:8892/css/components.css"><link rel="stylesheet" href="http://localhost:8892/css/identity-premium.css"><link rel="stylesheet" href="http://localhost:8892/css/home-v2.css"><body><main style="max-width:1100px;margin:auto;padding:16px"><section class="home-v2"><header class="v2-heading"><div><span class="eyebrow">DADOS SINTÉTICOS · VALIDAÇÃO LOCAL</span><h2>Home 2.0</h2></div><button class="secondary">Voltar à ADM</button></header><div class="v2-grid">'+node('homeV2Content').innerHTML+'</div></section></main></body></html>');
+  const previewHtml=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const modal=previewHtml.slice(previewHtml.indexOf('  <div id="friendlyRankingsModal"'),previewHtml.indexOf('  <div id="roundHighlightsModal"'));
+  const modalFunctions=source.slice(source.indexOf('function friendlyRankingRows('),source.indexOf('function rankingParticipantPick('));
+  const integration=`<script type="module">
+import {buildFriendlyRankingsModel} from '/js/friendly-rankings-engine.js';
+const state=${JSON.stringify(context.state)};
+const $=id=>document.getElementById(id),points=p=>p?.earned||0,isScorableGame=g=>g.status==='finished',isAdminUser=()=>true,currentRoundNumber=()=>29;
+const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let friendlyRankingsModel=null,friendlyRankingsView='efficiency',friendlyRankingsReturnFocus=null;
+${extract('homeV2FriendlyRankings')}
+${modalFunctions}
+${source.slice(listenerStart,source.indexOf('\nfunction participantTeam(',listenerStart))}
+$('friendlyRankingsModalClose').onclick=closeFriendlyRankings;
+$('friendlyRankingsModal').onclick=event=>{const tab=event.target.closest('[data-friendly-ranking-view]');if(tab){friendlyRankingsView=tab.dataset.friendlyRankingView;renderFriendlyRankingsModal();}else if(event.target===$('friendlyRankingsModal'))closeFriendlyRankings();};
+document.addEventListener('keydown',event=>{if(event.key==='Escape')closeFriendlyRankings();});
+</script>`;
+
+  writeFileSync(process.argv[2], '<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="http://localhost:8892/css/design-system.css"><link rel="stylesheet" href="http://localhost:8892/css/styles.css"><link rel="stylesheet" href="http://localhost:8892/css/components.css"><link rel="stylesheet" href="http://localhost:8892/css/identity-premium.css"><link rel="stylesheet" href="http://localhost:8892/css/home-v2.css"><body><main style="max-width:1100px;margin:auto;padding:16px"><section class="home-v2"><header class="v2-heading"><div><span class="eyebrow">DADOS SINTÉTICOS · VALIDAÇÃO LOCAL</span><h2>Home 2.0</h2></div><button class="secondary">Voltar à ADM</button></header><div id="homeV2Content" class="v2-grid">'+node('homeV2Content').innerHTML+'</div></section></main>'+modal+integration+'</body></html>');
 }

@@ -89,3 +89,17 @@
 .home-v2 .v2-round-details>summary>span:last-child{line-height:1.5}
 
 .home-v2 .v2-live-note button{background:transparent;border:0;color:var(--premium-emerald);padding:2px 0;min-height:30px;font-size:.7rem;text-align:left}
+
+/* Complementos pessoais e ajuda, dentro dos cards existentes. */
+.home-v2 .v2-personal-result{margin:12px 0;border-left:2px solid var(--premium-gold);padding-left:11px}
+.home-v2 .v2-personal-result p{margin:8px 0;font-size:.8rem;line-height:1.5}
+.home-v2 .v2-personal-result small{display:block;color:var(--muted);font-size:.7rem}
+.home-v2 .v2-personal-record strong{color:var(--premium-gold)}
+.home-v2 .v2-personal-result button{font-size:.74rem;min-height:44px;padding:8px 10px}
+.home-v2 .v2-help{display:inline-flex;align-items:center;min-height:44px;font-size:.72rem;color:var(--muted);text-underline-offset:3px;line-height:1.5}
+.home-v2 .v2-hero>.v2-help{margin-top:4px}
+.home-v2 .v2-parallel{border-top:1px solid var(--premium-line);padding-top:11px;margin-top:12px}
+.home-v2 .v2-parallel>small{display:block;font-size:.6rem;letter-spacing:.06em;color:var(--muted)}
+.home-v2 .v2-parallel-action{display:block;background:transparent;border:0;padding:7px 0;min-height:44px;text-align:left;font-size:.79rem;color:var(--premium-emerald);line-height:1.5;white-space:normal}
+.home-v2 .v2-central{text-align:center}
+.home-v2 a:focus-visible{outline:2px solid var(--premium-emerald);outline-offset:3px}

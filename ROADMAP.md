@@ -4,7 +4,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.48.0`.
+- Versão funcional: `v6.49.0`.
 - Prioridade: **manter o Bolão 2026 estável e evoluí-lo incrementalmente para múltiplas ligas com palpites compartilhados**.
 - Próxima etapa coordenada: monitoramento normal da API-Football nas próximas rodadas; o Rigazzo permanece congelado como histórico e possível laboratório.
 - Jogos reagendados da Rodada 21: contexto e comunicação no app preparados na v6.44.2; confirmação oficial das duas datas aplicada no Supabase, com validação visual autenticada ainda pendente.
@@ -14,6 +14,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 - 🟡 Tela experimental na Área ADM para avaliação pelo administrador como participante da liga ativa.
 - Home vigente preservada; substituição condicionada a validação e aprovação futuras.
+- Complementos pessoais, Disputas Paralelas e ajuda contextual da Central: implementados na v6.49.0, mantendo o acesso experimental pela ADM. [Nota v6.49.0](docs/releases/v6.49.0-home-v2-contexto-pessoal.md).
 - Escopo: [nota v6.46.0](docs/releases/v6.46.0-home-2-0-preview-adm.md).
 
 ## Legenda
