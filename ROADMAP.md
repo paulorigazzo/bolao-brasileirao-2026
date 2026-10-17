@@ -152,7 +152,7 @@ Princípio: o sistema calcula os fatos; a IA apenas explica dados autorizados e 
 - 🔵 Direção aprovada: reutilizar este aplicativo, o Supabase atual e suas tabelas; começar a competição de 2027 com dados zerados e novo cadastro dos participantes.
 - 🔵 Encerrar 2026, fazer backup completo e testar restauração antes da limpeza; histórico preservado fora do app de 2027.
 - 🔵 Preparar inventário e procedimento de limpeza, incluindo vínculos, caches, logs, snapshots e checkpoints protegidos; atualizar calendário, clubes, integração e configuração anual.
-- 🔵 Avaliar 1 ponto por placar exato invertido desde a rodada 1 de 2027. Regulamento final pendente; alteração em 2026 sem decisão.
+- 🔵 Plano final aprovado: nova regra de 1 ponto total por placar exato invertido desde a rodada 1 de 2027, apenas Standard na abertura, único administrador, limite de 30 participantes e endereço sem ano sujeito à disponibilidade. Decisões, fases, portões e critérios no [plano de preparação de 2027](docs/process/PREPARACAO_TEMPORADA_2027.md). Implementação e corte pendentes de autorização específica; nenhuma mudança de pontuação em 2026 autorizada.
 - Nenhuma limpeza ou mudança funcional autorizada por este planejamento. O Rigazzo continua congelado e não é pré-requisito para 2027. Ver [DEC-2026-066](docs/ai/DECISION_LOG.md#dec-2026-066--preparação-de-2027-no-supabase-atual).
 
 ## Fora do escopo imediato
