@@ -1,5 +1,5 @@
-6.49.1
+6.50.0
 
-Ajuda contextual da Central em Disputas Paralelas, Ranking provisório, Ligas, Estatísticas e Notificações.
+Exclusão controlada de ligas privadas arquivadas pela administração central. Migração remota aplicada; interface em revisão antes da liberação.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

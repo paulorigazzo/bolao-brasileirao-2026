@@ -2109,3 +2109,15 @@ Entregas restritas a `central/` usam validação focada e podem ser publicadas e
 ### Consequências
 
 O app mantém o fluxo completo quando afetado. A Central utiliza o deploy Git existente, preservando a integridade do app e o histórico para reversão. A simplificação não concede autorização permanente para publicar.
+
+
+## DEC-2026-069 — Exclusão controlada de ligas privadas arquivadas
+
+- Data: 2026-10-17.
+- Estado: decisão aprovada; implementação em revisão; migração remota aplicada e conciliada em 2026-10-17.
+- Contexto: arquivamento preserva dados, mas ligas criadas por engano precisam poder ser removidas pela administração central.
+- Decisão: permitir exclusão permanente somente ao gestor central, em liga privada arquivada, com conferência dos registros, ID, nome exato e confirmação explícita. Standard e ligas ativas são protegidas. Designações pendentes bloqueiam a operação; designações resolvidas são mostradas e removidas junto ao histórico.
+- Proteção: transação única, revalidação da revisão e bloqueios; exceção de auditoria restrita à liga, usuário, processo e transação por capacidade privada sem escrita para papéis da API. Não desabilitar gatilhos durante a operação.
+- Preservações: contas, autorizações globais, palpites, jogos, pontuação e outras ligas.
+- Consequência: exclusão não possui desfazer; rollback técnico desativa o recurso, mas recuperação de dados exige backup. Migração deve ser autorizada, aplicada e conciliada antes do merge.
+- Fonte: [nota v6.50.0](../releases/v6.50.0-exclusao-controlada-ligas.md).

@@ -12,13 +12,13 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.49.1">
-  <link rel="stylesheet" href="./css/styles.css?v=6.49.1">
-  <link rel="stylesheet" href="./css/home-v2.css?v=6.49.1">
-  <link rel="stylesheet" href="./css/components.css?v=6.49.1">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.49.1">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.49.1">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.49.1">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.50.0">
+  <link rel="stylesheet" href="./css/styles.css?v=6.50.0">
+  <link rel="stylesheet" href="./css/home-v2.css?v=6.50.0">
+  <link rel="stylesheet" href="./css/components.css?v=6.50.0">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.50.0">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.50.0">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.50.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
@@ -33,7 +33,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-      <p class="brand-version"><span id="appVersion" class="version-pill">v6.49.1</span></p>
+      <p class="brand-version"><span id="appVersion" class="version-pill">v6.50.0</span></p>
         <p id="headerLeagueName" class="brand-league hidden" aria-live="polite"></p>
       </div>
     </div>
@@ -691,6 +691,21 @@
     </section>
   </div>
 
+  <div id="leagueDeleteModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="leagueDeleteTitle" aria-describedby="leagueDeleteWarning">
+    <section class="league-selector-modal league-delete-modal card" tabindex="-1">
+      <header class="league-selector-header"><div><span class="eyebrow">GESTÃO CENTRALIZADA</span><h2 id="leagueDeleteTitle">Excluir liga</h2></div><button id="leagueDeleteClose" class="modal-close" type="button" aria-label="Fechar exclusão de liga">✕</button></header>
+      <p id="leagueDeleteIdentity" class="league-delete-identity"></p>
+      <p id="leagueDeleteWarning" class="muted-note">A exclusão é permanente. Serão removidos a liga, seus vínculos de membros e seu histórico. Contas, palpites, jogos e outras ligas serão preservados.</p>
+      <dl id="leagueDeleteCounts" class="league-delete-counts"></dl>
+      <form id="leagueDeleteForm" class="league-delete-form">
+        <label for="leagueDeleteName">Digite exatamente o nome da liga<input id="leagueDeleteName" type="text" autocomplete="off" spellcheck="false" maxlength="100" required disabled></label>
+        <label class="league-delete-check"><input id="leagueDeletePermanent" type="checkbox" required disabled>Entendo que esta exclusão é permanente.</label>
+        <div class="league-delete-actions"><button id="leagueDeleteCancel" class="secondary" type="button">Cancelar</button><button id="leagueDeleteSubmit" class="danger" type="submit" disabled>Excluir permanentemente</button></div>
+      </form>
+      <p id="leagueDeleteStatus" class="league-selector-status" role="status" aria-live="polite"></p>
+    </section>
+  </div>
+
   <div id="leagueCreateModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="leagueCreateTitle">
     <section class="league-selector-modal card" tabindex="-1">
       <header class="league-selector-header"><div><span class="eyebrow">NOVA LIGA</span><h2 id="leagueCreateTitle">Criar liga</h2><p class="muted-note">Os palpites permanecem únicos e compartilhados.</p></div><button id="leagueCreateClose" class="modal-close" type="button" aria-label="Fechar criação de liga">✕</button></header>
@@ -923,6 +938,6 @@
     }
   </script>
 <script type="module" src="./js/startup-intro.js"></script>
-<script type="module" src="./js/app.js?v=6.49.1"></script>
+<script type="module" src="./js/app.js?v=6.50.0"></script>
 </body>
 </html>

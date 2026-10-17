@@ -34,7 +34,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.49.1";
+const APP_VERSION = "6.50.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1193,7 +1193,84 @@ async function searchLeagueDirectory(event){event?.preventDefault();$("leagueAdm
 async function addSelectedLeagueMembers(){const ids=[...selectedLeagueDirectoryUsers];if(!ids.length)return;$("leagueAdminStatus").textContent="Adicionando participantes…";$("leagueDirectoryAddButton").disabled=true;try{const {data,error}=await sb.rpc("adicionar_membros_liga_em_lote",{p_liga_id:state.adminTargetLeague.liga_id,p_user_ids:ids});if(error)throw error;const result=Array.isArray(data)?data[0]:data;await refreshAfterLeagueMutation(`${Number(result?.adicionados)||0} adicionado(s), ${Number(result?.reativados)||0} reativado(s).`);$("leagueAdminStatus").textContent="";}catch(error){$("leagueAdminStatus").textContent=error.message||"Não foi possível adicionar os participantes.";renderLeagueDirectory();}}
 
 async function loadAdministeredLeagues(){const {data,error}=await sb.rpc("listar_ligas_administracao");if(error)throw error;state.administeredLeagues=data||[];return state.administeredLeagues;}
-function renderAdminLeagues(){const list=$("adminLeaguesList");if(!list)return;$("adminLeaguesCount").textContent=`${state.administeredLeagues.length} liga${state.administeredLeagues.length===1?'':'s'}`;list.innerHTML=state.administeredLeagues.map(item=>{const active=item.liga_status==="ativa";const current=String(item.liga_id)===String(state.activeLeague?.liga_id);return `<article class="admin-league-row ${active?'':'is-archived'}"><div><strong>${escapeHtml(item.liga_nome)}</strong><small>${item.liga_tipo==='standard'?'Liga Standard':'Liga privada'} · ${Number(item.membros_ativos)||0} membros · ${active?'Ativa':'Arquivada'}${current?' · Liga ativa':''}</small></div><div>${active?`<button class="secondary" type="button" data-admin-league-manage="${escapeHtml(item.liga_id)}">Administrar</button>${current?'':`<button class="secondary" type="button" data-admin-league-use="${escapeHtml(item.liga_id)}">Usar como liga ativa</button>`}`:`<button class="secondary" type="button" data-league-reactivate="${escapeHtml(item.liga_id)}">Reativar</button>`}</div></article>`;}).join("")||'<p class="muted-note">Nenhuma liga encontrada.</p>';}
+function renderAdminLeagues(){const list=$("adminLeaguesList");if(!list)return;$("adminLeaguesCount").textContent=`${state.administeredLeagues.length} liga${state.administeredLeagues.length===1?'':'s'}`;list.innerHTML=state.administeredLeagues.map(item=>{const active=item.liga_status==="ativa";const current=String(item.liga_id)===String(state.activeLeague?.liga_id);return `<article class="admin-league-row ${active?'':'is-archived'}"><div><strong>${escapeHtml(item.liga_nome)}</strong><small>${item.liga_tipo==='standard'?'Liga Standard':'Liga privada'} · ${Number(item.membros_ativos)||0} membros · ${active?'Ativa':'Arquivada'}${current?' · Liga ativa':''}</small></div><div>${active?`<button class="secondary" type="button" data-admin-league-manage="${escapeHtml(item.liga_id)}">Administrar</button>${current?'':`<button class="secondary" type="button" data-admin-league-use="${escapeHtml(item.liga_id)}">Usar como liga ativa</button>`}`:`<button class="secondary" type="button" data-league-reactivate="${escapeHtml(item.liga_id)}">Reativar</button>${state.leagueManager&&item.liga_tipo==='privada'&&item.liga_status==='arquivada'?`<button class="danger" type="button" data-league-delete="${escapeHtml(item.liga_id)}">Excluir liga</button>`:''}`}</div></article>`;}).join("")||'<p class="muted-note">Nenhuma liga encontrada.</p>';}
+let leagueDeletePreview=null,leagueDeleteReturnFocus=null,leagueDeleteBusy=false,leagueDeleteRequest=0;
+function updateLeagueDeleteConfirmation(){
+  const ready=Boolean(leagueDeletePreview)&&!leagueDeleteBusy&&Number(leagueDeletePreview.pendencias)===0;
+  $("leagueDeleteName").disabled=!ready;
+  $("leagueDeletePermanent").disabled=!ready;
+  $("leagueDeleteSubmit").disabled=!ready||$("leagueDeleteName").value!==leagueDeletePreview.nome||!$("leagueDeletePermanent").checked;
+  $("leagueDeleteCancel").disabled=leagueDeleteBusy;
+  $("leagueDeleteClose").disabled=leagueDeleteBusy;
+  $("leagueDeleteForm").setAttribute("aria-busy",String(leagueDeleteBusy));
+}
+async function openLeagueDeletion(leagueId,trigger){
+  if(!state.leagueManager||leagueDeleteBusy)return;
+  const target=state.administeredLeagues.find(item=>String(item.liga_id)===String(leagueId));
+  if(!target||target.liga_tipo!=="privada"||target.liga_status!=="arquivada")return;
+  const request=++leagueDeleteRequest;
+  leagueDeletePreview=null;leagueDeleteReturnFocus=trigger||document.activeElement;
+  $("leagueDeleteForm").reset();$("leagueDeleteCounts").textContent="";
+  $("leagueDeleteIdentity").textContent=`${target.liga_nome} · ID ${target.liga_id.slice(0,8)}`;
+  $("leagueDeleteStatus").textContent="Conferindo os registros desta liga…";
+  updateLeagueDeleteConfirmation();show("leagueDeleteModal",true);document.body.classList.add("modal-open");
+  $("leagueDeleteCancel").focus();
+  try{
+    const {data,error}=await sb.rpc("preparar_exclusao_liga",{p_liga_id:leagueId});
+    if(request!==leagueDeleteRequest)return;
+    if(error)throw error;
+    if(!data||String(data.liga_id)!==String(leagueId)||!data.revisao)throw new Error("Não foi possível conferir a liga. Reabra a confirmação.");
+    leagueDeletePreview=data;
+    $("leagueDeleteIdentity").textContent=`${data.nome} · ID ${data.liga_id.slice(0,8)}`;
+    const counts=[["Vínculos de membros (ativos e inativos)",data.membros],["Registros do histórico da liga",data.historico_liga],["Registros do histórico dos membros",data.historico_membros],["Designações já aplicadas ou canceladas",data.designacoes_resolvidas]];
+    $("leagueDeleteCounts").innerHTML=counts.map(([label,count])=>`<div><dt>${label}</dt><dd>${Number(count)||0}</dd></div>`).join("");
+    $("leagueDeleteStatus").textContent=Number(data.pendencias)>0?`${Number(data.pendencias)} designação(ões) pendente(s). Cancele ou resolva as pendências antes de excluir a liga.`:"Confira o nome, o identificador e os registros antes de confirmar.";
+    updateLeagueDeleteConfirmation();
+  }catch(error){if(request===leagueDeleteRequest){leagueDeletePreview=null;updateLeagueDeleteConfirmation();$("leagueDeleteStatus").textContent=error.message||"Não foi possível conferir a liga.";}}
+}
+function closeLeagueDeletion(){
+  if(leagueDeleteBusy)return;
+  ++leagueDeleteRequest;leagueDeletePreview=null;show("leagueDeleteModal",false);document.body.classList.remove("modal-open");
+  const target=leagueDeleteReturnFocus;leagueDeleteReturnFocus=null;
+  (target?.isConnected?target:$("adminCreateLeagueButton"))?.focus();
+}
+async function submitLeagueDeletion(event){
+  event.preventDefault();updateLeagueDeleteConfirmation();
+  if($("leagueDeleteSubmit").disabled)return;
+  const preview=leagueDeletePreview;
+  leagueDeleteBusy=true;updateLeagueDeleteConfirmation();$("leagueDeleteStatus").textContent="Excluindo liga… Aguarde a confirmação.";
+  let deleted=false;
+  try{
+    const {data,error}=await sb.rpc("excluir_liga",{p_liga_id:preview.liga_id,p_nome_confirmacao:$("leagueDeleteName").value,p_revisao:preview.revisao});
+    if(error)throw error;
+    if(String(data)!==String(preview.liga_id))throw new Error("Resposta não confirmada. Atualize a lista antes de tentar novamente.");
+    deleted=true;leagueDeletePreview=null;
+    state.administeredLeagues=state.administeredLeagues.filter(item=>String(item.liga_id)!==String(preview.liga_id));
+    state.leagues=state.leagues.filter(item=>String(item.liga_id)!==String(preview.liga_id));
+    state.leagueAssignments=state.leagueAssignments.filter(item=>String(item.liga_id)!==String(preview.liga_id));
+    state.leagueLifecycleAudit=state.leagueLifecycleAudit.filter(item=>String(item.liga_id)!==String(preview.liga_id));
+    if(String(state.adminTargetLeague?.liga_id)===String(preview.liga_id)){
+      state.adminTargetLeague=null;state.leagueManagedMembers=[];state.leagueMemberAudit=[];state.leagueDirectory=[];
+    }
+    if(String(state.activeLeague?.liga_id)===String(preview.liga_id)){
+      leagueRequestGate.issue();resetRoundHighlightsContext();
+      state.activeLeague=null;state.leagueContextStatus="idle";
+      state.participants=[];state.publicPicks=[];state.pickCounts=[];state.ranking=[];state.leagueRanking=[];state.leagueRankingMovement=[];
+      renderLeagueScopedViews();
+    }
+    renderLeagueContext();
+    renderAdminLeagues();leagueDeleteBusy=false;closeLeagueDeletion();
+    await reloadLeagues(state.activeLeague?.liga_id);
+    await loadAdministeredLeagues();renderAdminLeagues();
+    $("adminLeaguesStatus").textContent="Liga excluída permanentemente. Contas e palpites preservados.";
+  }catch(error){
+    if(deleted){leagueDeleteBusy=false;closeLeagueDeletion();$("adminLeaguesStatus").textContent="Liga excluída. Não foi possível atualizar todos os dados; recarregue a página.";}
+    else{
+      // Falha ou resposta incerta exige nova leitura; nunca reenviar automaticamente.
+      leagueDeletePreview=null;$("leagueDeleteStatus").textContent=`${error.message||"Não foi possível confirmar a exclusão."} Feche e atualize a lista antes de tentar novamente.`;
+    }
+  }finally{leagueDeleteBusy=false;updateLeagueDeleteConfirmation();}
+}
 async function refreshAdminLeagues(){if(!state.leagueManager)return;$("adminLeaguesStatus").textContent="Carregando ligas…";try{await loadAdministeredLeagues();renderAdminLeagues();$("adminLeaguesStatus").textContent="";}catch(error){$("adminLeaguesStatus").textContent=error.message||"Não foi possível carregar as ligas.";}}
 async function openLeagueCreation(){show("leagueCreateModal",true);document.body.classList.add("modal-open");$("leagueCreateStatus").textContent="";setTimeout(()=>$("newLeagueName")?.focus(),30);}
 function closeLeagueCreation(){show("leagueCreateModal",false);document.body.classList.remove("modal-open");$("adminCreateLeagueButton")?.focus();}
@@ -6140,7 +6217,8 @@ $("adminParticipantModalClose").onclick=closeAdminParticipantDetail;
 $("adminParticipantModal").onclick=event=>{ if(event.target===$("adminParticipantModal")) closeAdminParticipantDetail(); };
 document.addEventListener("keydown",event=>{
   if(event.key!=="Escape") return;
-  if(!$("leagueAdminModal")?.classList.contains("hidden")) closeLeagueManagement();
+  if(!$("leagueDeleteModal")?.classList.contains("hidden")) closeLeagueDeletion();
+  else if(!$("leagueAdminModal")?.classList.contains("hidden")) closeLeagueManagement();
   else if(!$("leagueCreateModal")?.classList.contains("hidden")) closeLeagueCreation();
   else if(!$("leagueSelectorModal")?.classList.contains("hidden")) closeLeagueSelector();
   else if(!$("temporaryRankingModal")?.classList.contains("hidden")) closeTemporaryRanking();
@@ -6173,8 +6251,23 @@ $("adminCreateLeagueButton")?.addEventListener("click",openLeagueCreation);
 $("leagueCreateClose")?.addEventListener("click",closeLeagueCreation);
 $("leagueCreateModal")?.addEventListener("click",event=>{if(event.target===$("leagueCreateModal"))closeLeagueCreation();});
 $("leagueCreateForm")?.addEventListener("submit",createLeague);
+$("leagueDeleteForm")?.addEventListener("submit",submitLeagueDeletion);
+$("leagueDeleteName")?.addEventListener("input",updateLeagueDeleteConfirmation);
+$("leagueDeletePermanent")?.addEventListener("change",updateLeagueDeleteConfirmation);
+$("leagueDeleteClose")?.addEventListener("click",closeLeagueDeletion);
+$("leagueDeleteCancel")?.addEventListener("click",closeLeagueDeletion);
+$("leagueDeleteModal")?.addEventListener("click",event=>{if(event.target===$("leagueDeleteModal"))closeLeagueDeletion();});
+$("leagueDeleteModal")?.addEventListener("keydown",event=>{
+  if(event.key!=="Tab")return;
+  const controls=[...$("leagueDeleteModal").querySelectorAll('button:not(:disabled),input:not(:disabled)')];
+  const first=controls[0],last=controls[controls.length-1];
+  if(!first){event.preventDefault();return;}
+  if(!controls.includes(document.activeElement)){event.preventDefault();(event.shiftKey?last:first).focus();return;}
+  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+  else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+});
 $("adminLeaguesCard")?.querySelector("[data-admin-collapse]")?.addEventListener("click",()=>setTimeout(()=>{if(!$("adminLeaguesCard").classList.contains("is-collapsed"))refreshAdminLeagues();},0));
-$("adminLeaguesList")?.addEventListener("click",async event=>{const manage=event.target.closest("[data-admin-league-manage]");if(manage){openLeagueManagement(manage.dataset.adminLeagueManage,manage);return;}const use=event.target.closest("[data-admin-league-use]");if(use){await selectActiveLeague(use.dataset.adminLeagueUse);renderAdminLeagues();return;}const reactivate=event.target.closest("[data-league-reactivate]");if(reactivate)changeLeagueStatus(reactivate.dataset.leagueReactivate,true);});
+$("adminLeaguesList")?.addEventListener("click",async event=>{const manage=event.target.closest("[data-admin-league-manage]");if(manage){openLeagueManagement(manage.dataset.adminLeagueManage,manage);return;}const use=event.target.closest("[data-admin-league-use]");if(use){await selectActiveLeague(use.dataset.adminLeagueUse);renderAdminLeagues();return;}const remove=event.target.closest("[data-league-delete]");if(remove){openLeagueDeletion(remove.dataset.leagueDelete,remove);return;}const reactivate=event.target.closest("[data-league-reactivate]");if(reactivate)changeLeagueStatus(reactivate.dataset.leagueReactivate,true);});
 $("leagueAdminClose")?.addEventListener("click",closeLeagueManagement);
 $("leagueAdminModal")?.addEventListener("click",event=>{if(event.target===$("leagueAdminModal"))closeLeagueManagement();});
 $("leagueDirectorySearchForm")?.addEventListener("submit",searchLeagueDirectory);
