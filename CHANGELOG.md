@@ -1,3 +1,12 @@
+# v6.50.0 — Exclusão controlada de ligas
+
+- Adiciona Excluir liga à administração central, apenas para ligas privadas arquivadas.
+- Exige conferência dos registros, nome exato e confirmação de exclusão permanente; pendências impedem a operação.
+- Remove somente a liga, seus membros, auditorias e designações resolvidas. Preserva contas, jogos e palpites compartilhados.
+- Operação atômica com validação de permissão, revisão dos dados e proteção da Liga Standard.
+- Migração aplicada e conciliada no Supabase; nenhuma liga existente foi excluída.
+- Detalhes: [nota da versão](docs/releases/v6.50.0-exclusao-controlada-ligas.md).
+
 # v6.49.1 — Ajuda contextual da Central
 
 - Adiciona links aos guias relacionados nos modais de Disputas Paralelas, Ranking provisório e seleção de liga, em Pontuação por rodada e nas preferências de notificações do perfil.
