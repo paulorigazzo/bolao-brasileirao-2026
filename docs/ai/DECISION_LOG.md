@@ -2078,6 +2078,10 @@ Na discussão de 4 de setembro, foi aceita a reutilização do aplicativo com no
 
 A proposta de 1 ponto total por placar exato invertido fica registrada para avaliação no regulamento de 2027, desde a rodada 1 se aprovada. A decisão de alterar a pontuação em 2026 permanece aberta: nem retroatividade nem vigência na rodada 30 estão autorizadas. Manter o cálculo atual dos empates e alinhar sua documentação é a direção discutida, sem alteração funcional nesta entrega.
 
+### Atualização aprovada em 17/10/2026
+
+O responsável aprovou o [plano final de preparação de 2027](../process/PREPARACAO_TEMPORADA_2027.md), fonte das decisões detalhadas, atividades, dependências e evidências. A proposta de placar exato invertido acima passa a regra aprovada para 2027: 1 ponto total, sem acumulação, desde a rodada 1. Nenhuma mudança em 2026 foi autorizada. Foram definidos abertura apenas com a Standard, único administrador, limite de 30 participantes, novo cadastro com aprovação manual e nome Bolão Brasileirão 2027 com endereço sem ano sujeito à disponibilidade. A aprovação atual autoriza registrar o plano; execução operacional e publicação continuam sujeitas aos portões abaixo e ao workflow.
+
 ### Limites
 
 Este registro não autoriza exclusão de dados, alteração de Auth, migração SQL, mudança de pontuação, corte de conexão ou publicação. A execução exigirá inventário, plano revisável, backup restaurável e aprovação específica.
