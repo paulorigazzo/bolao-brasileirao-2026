@@ -1,3 +1,10 @@
+# v6.51.3 — Destaques do Bolão
+
+- Renomeia o cabeçalho da seção nas Homes atual e experimental para Destaques do Bolão.
+- Destaca somente o nome da liga selecionada com o mesmo dourado do cabeçalho; mantém a temporada discreta.
+- Preserva cards, acessos, dados e cálculos.
+- Detalhes: [nota da versão](docs/releases/v6.51.3-home-destaques-bolao.md).
+
 # v6.51.2 — Destaques reunidos na Home
 
 - Move Ver todos os destaques da rodada para abaixo dos três cards de Destaques da liga, identificando a rodada consultada.
