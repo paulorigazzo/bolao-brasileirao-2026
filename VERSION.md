@@ -1,5 +1,5 @@
-6.51.0
+6.51.1
 
-Destaques da liga com duas Disputas Paralelas e a liderança da rodada, na Home atual e na Home 2.0 experimental.
+Card Meu Time expansível na Home, com resumo e detalhes preservados.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

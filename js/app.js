@@ -34,7 +34,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.51.0";
+const APP_VERSION = "6.51.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2898,9 +2898,12 @@ function renderMyTeam(){
     <section class="my-team-section"><div class="my-team-section-heading"><div><span class="eyebrow">CONQUISTAS</span><h2>Marcos do Meu Time</h2></div></div><div class="my-team-achievements">${achievements.map(item=>`<article class="card my-team-achievement-card ${item.unlocked?'is-unlocked':'is-progress'}"><span aria-hidden="true">${item.icon}</span><div><div class="my-team-achievement-heading"><strong>${escapeHtml(item.title)}</strong><small>${item.unlocked?'Conquistado':escapeHtml(item.progressLabel)}</small></div><p>${escapeHtml(item.text)}</p><div class="my-team-achievement-progress" role="progressbar" aria-label="${escapeHtml(`${item.title}: ${item.unlocked?'conquistado':item.progressLabel}`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${item.progress}"><i style="width:${item.progress}%"></i></div></div></article>`).join('')}</div></section>`;
 }
 
+let homeFavoriteExpanded=false;
 function renderHomeFavoriteTeam(){
   const host=$("homeFavoriteTeamSection");
   if(!host || !state.participant) return;
+  const previous=host.querySelector("#homeFavoriteDetails");
+  if(previous)homeFavoriteExpanded=previous.open;
   const team=findTeam(state.participant.time_favorito);
 
   if(!team){
@@ -2935,11 +2938,14 @@ function renderHomeFavoriteTeam(){
   const contextBadge=isToday?'<span class="favorite-context-badge is-today">● Joga hoje</span>':isNextChampionshipGame?'<span class="favorite-context-badge">Próximo jogo do campeonato</span>':'';
 
   host.innerHTML=`<article class="premium-feature-card favorite-home-card favorite-home-unified">
-    <div class="favorite-home-overview">
-      <header class="premium-card-header favorite-home-header">
-        <div><span class="premium-kicker">MEU TIME</span><h2><button class="favorite-unified-name" type="button" data-home-action="myTeam">${escapeHtml(teamName)} <span aria-hidden="true">›</span></button></h2></div>
+    <details id="homeFavoriteDetails" class="favorite-home-details"${homeFavoriteExpanded?' open':''}>
+      <summary class="favorite-home-summary">
         <span class="favorite-home-crest">${crest}</span>
-      </header>
+        <span class="favorite-home-summary-copy"><span class="premium-kicker">MEU TIME</span><strong>${escapeHtml(teamName)}</strong><small>${row?`${row.position}º no Brasileirão · ${row.points} pontos`:'Carregando classificação oficial…'}</small></span>
+        <span class="favorite-home-toggle" aria-hidden="true">⌄</span>
+      </summary>
+      <div class="favorite-home-details-content">
+    <div class="favorite-home-overview">
       <h3 class="favorite-club-label">No Brasileirão</h3>${row?`<div class="favorite-standing-main"><div class="favorite-position-link"><strong>${row.position}º</strong><span>posição</span></div><div><strong>${row.points}</strong><span>pontos do clube</span></div></div>
       <div class="favorite-standing-stats"><span><b>${row.playedGames}</b> J</span><span><b>${row.won}</b> V</span><span><b>${row.draw}</b> E</span><span><b>${row.lost}</b> D</span><span><b>${Number(row.goalDifference)>0?'+':''}${row.goalDifference}</b> SG</span></div>`:`<div class="favorite-standings-loading"><span class="favorite-loading-dot"></span><span>Carregando classificação oficial…</span><i class="favorite-standing-chevron" aria-hidden="true">›</i></div>`}
     </div>
@@ -2950,6 +2956,8 @@ function renderHomeFavoriteTeam(){
       ${next?`<button class="favorite-next-action" type="button" data-home-action="games" aria-label="Abrir jogos">›</button>`:''}
     </div>
     ${renderFavoriteTeamPredictionCard(team)}
+      </div>
+    </details>
   </article>`;
 
   if(!state.standings) loadStandings(false);
