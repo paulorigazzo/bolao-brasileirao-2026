@@ -108,6 +108,7 @@
 :is(.home-v2,.home-league-highlights) .v2-league-highlights>header{padding:3px 2px 12px}
 :is(.home-v2,.home-league-highlights) .v2-league-highlights h2{margin:0 0 5px;font-size:.95rem}
 :is(.home-v2,.home-league-highlights) .v2-league-highlights>header p{margin:0;color:var(--muted);font-size:.7rem;line-height:1.5;overflow-wrap:anywhere}
+:is(.home-v2,.home-league-highlights) .v2-highlights-league-name{color:var(--premium-gold)}
 :is(.home-v2,.home-league-highlights) .v2-league-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:10px}
 :is(.home-v2,.home-league-highlights) .v2-round-leader-slot{display:contents}
 :is(.home-v2,.home-league-highlights) .v2-league-metric{position:relative;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:0;min-width:0;width:100%;padding:12px 9px;border:1px solid var(--premium-line);border-radius:18px;box-shadow:inset 3px 0 var(--premium-emerald),var(--premium-card-shadow);color:var(--text);font:inherit;text-align:center;white-space:normal}

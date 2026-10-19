@@ -1,5 +1,5 @@
-6.51.2
+6.51.3
 
-Acesso aos destaques da rodada reunido abaixo dos cards de Destaques da liga na Home.
+Destaques do Bolão nas duas Homes, com o nome da liga ativa em dourado.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

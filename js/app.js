@@ -34,7 +34,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.51.2";
+const APP_VERSION = "6.51.3";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -3085,7 +3085,7 @@ function homeV2LeagueMetric(card){
 }
 function homeV2LeagueHighlights(cards,prefix="homeV2",roundAccess=""){
   return `<section id="${prefix}LeagueHighlightsSection" class="v2-league-highlights ${cards.length||roundAccess?'':'hidden'}" aria-labelledby="${prefix}LeagueHighlightsTitle">
-    <header><h2 id="${prefix}LeagueHighlightsTitle">Destaques da liga</h2><p>${escapeHtml(activeLeagueName(state.activeLeague))} · Temporada 2026</p></header>
+    <header><h2 id="${prefix}LeagueHighlightsTitle">Destaques do Bolão</h2><p><span class="v2-highlights-league-name">${escapeHtml(activeLeagueName(state.activeLeague))}</span> · Temporada 2026</p></header>
     <div class="v2-league-metrics">${cards.map(homeV2LeagueMetric).join('')}<div id="${prefix}RoundLeaderSlot" class="v2-round-leader-slot"></div></div>${roundAccess}
   </section>`;
 }
