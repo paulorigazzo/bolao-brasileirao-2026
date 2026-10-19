@@ -38,17 +38,27 @@ export function buildHomeV2PersonalContext({highlights=null,friendlyRankings=nul
 export function buildHomeV2LeagueHighlights(friendlyRankings=null) {
   return [
     {view:'efficiency',icon:'🎯',title:'Quem joga, resolve',unit:'pontos por palpite'},
-    {view:'hot',icon:'🔥',title:'Tá vindo quente',unit:'pontos por palpite'},
-    {view:'records',icon:'🏅',title:'Recordes por rodada',unit:'pontos em uma rodada'}
+    {view:'hot',icon:'🔥',title:'Tá vindo quente',unit:'pontos por palpite'}
   ].flatMap(card=>{
     const leaders=friendlyRankings?.[card.view]?.ranking.filter(item=>item.position===1)||[];
     if(!leaders.length)return [];
-    const record=card.view==='records';
-    const value=record?leaders[0].points:leaders[0].average;
-    return [{...card,value:Number(value).toLocaleString('pt-BR',record?{}:{minimumFractionDigits:2,maximumFractionDigits:2}),
+    return [{...card,value:Number(leaders[0].average).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}),
       shared:leaders.length>1,
       leaders:leaders.map(item=>({name:item.name,isCurrent:item.isCurrent,
-        detail:record?`Rodada ${item.round}`:card.view==='hot'?`Rodadas ${item.rounds.join(', ')}`:`${item.evaluated} palpites avaliados`
+        detail:card.view==='hot'?`Rodadas ${item.rounds.join(', ')}`:`${item.evaluated} palpites avaliados`
       }))}];
   });
+}
+
+// Fonte agregada dos Destaques ao vivo; não reconstrói palpites ou pontuação.
+export function buildHomeV2RoundLeader(model,round,selectedUserId) {
+  if(!model||model.round!==round||!model.hasResults||!model.ranking.length)return null;
+  const total=model.ranking[0].total;
+  if(total<=0)return null;
+  // O destaque de liderança da rodada compartilha a marca entre totais iguais.
+  const leaders=model.ranking.filter(row=>row.total===total);
+  return {view:'round-leader',action:'highlights',round,icon:'🏆',title:'Líder da rodada',
+    value:total.toLocaleString('pt-BR'),unit:'pontos na rodada',shared:leaders.length>1,
+    status:!model.isProvisional?'Resultado final':model.projected?'Ao vivo · Provisório':'Provisório',
+    leaders:leaders.map(row=>({name:row.nome,isCurrent:row.user_id===selectedUserId,detail:`Rodada ${round}`}))};
 }

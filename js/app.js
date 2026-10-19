@@ -1,4 +1,4 @@
-import { buildHomeV2Model, buildHomeV2PersonalContext, buildHomeV2LeagueHighlights } from "./home-v2.js";
+import { buildHomeV2Model, buildHomeV2PersonalContext, buildHomeV2LeagueHighlights, buildHomeV2RoundLeader } from "./home-v2.js";
 import { finishStartupIntro } from "./startup-intro.js";
 import { buildTeamCampaign, campaignPositionTrend } from "./team-campaign.js";
 import { CONFIG } from "./config.js";
@@ -2401,7 +2401,9 @@ async function refreshRoundHighlightsViews({force=false}={}){
   const candidateHome=$("homeRoundLiveFacts");
   const home=candidateHome?.getClientRects().length?candidateHome:null;
   const selected=roundHighlightsSelection;
-  const rounds=new Set([home?Number(home.dataset.round):null,selected?.round].filter(value=>value!=null));
+  const v2Tab=$("homeV2Tab");
+  const v2Round=v2Tab&&!v2Tab.classList.contains("hidden")&&isAdminUser()&&state.leagueContextStatus==="ready"&&roundHighlightsAvailable(currentRoundNumber())?currentRoundNumber():null;
+  const rounds=new Set([home?Number(home.dataset.round):null,selected?.round,v2Round].filter(value=>value!=null));
   const session=roundHighlightsSession;
   await Promise.all([...rounds].map(async round=>{
     const key=roundHighlightsKey(round);
@@ -2416,6 +2418,7 @@ async function refreshRoundHighlightsViews({force=false}={}){
       }else currentHome.innerHTML='<p class="muted-note">Destaques indisponíveis. Abra para tentar novamente.</p>';
     }
     if(session===roundHighlightsSession&&roundHighlightsSelection?.round===round) renderRoundHighlightsAggregate(entry,round);
+    if(round===v2Round)renderHomeV2RoundLeader(entry,round);
   }));
 }
 
@@ -3086,18 +3089,35 @@ function homeV2FriendlyRankings(){
 function homeV2Help(slug,label){
   return `<a class="v2-help" href="/central/#${slug}" target="_blank" rel="noopener">${escapeHtml(label)} →</a>`;
 }
+function homeV2LeagueMetricContent(card){
+  return `<span class="v2-metric-heading"><span class="v2-metric-icon" aria-hidden="true">${card.icon}</span><span class="v2-metric-title">${card.title}</span></span>
+    <strong class="v2-metric-value">${card.value}</strong><span class="v2-metric-unit">${card.unit}</span>
+    ${card.shared?'<span class="v2-metric-shared">Liderança compartilhada</span>':''}
+    <span class="v2-metric-leaders">${card.leaders.map(leader=>`<span class="v2-metric-leader"><span class="v2-metric-name">${escapeHtml(leader.name)}${leader.isCurrent?'<em class="v2-metric-you">Você</em>':''}</span><span class="v2-metric-detail">${escapeHtml(leader.detail)}</span></span>`).join('')}</span>
+    ${card.status?`<span class="v2-metric-status">${card.status}</span>`:''}
+    <span class="v2-metric-chevron" aria-hidden="true">›</span>`;
+}
+function homeV2LeagueMetric(card){
+  return `<button type="button" class="premium-feature-card v2-league-metric ${card.view==='round-leader'?'is-round-leader':''}" data-v2-action="${card.action||'parallel'}" data-view="${card.view}"${card.round?` data-round="${card.round}" data-v2-round-leader`:''}>${homeV2LeagueMetricContent(card)}</button>`;
+}
 function homeV2LeagueHighlights(cards){
-  if(!cards.length)return '';
-  return `<section class="v2-league-highlights" aria-labelledby="homeV2LeagueHighlightsTitle">
-    <header><h2 id="homeV2LeagueHighlightsTitle">Destaques da liga</h2><p>Disputas Paralelas · ${escapeHtml(activeLeagueName(state.activeLeague))} · Temporada 2026</p></header>
-    <div class="v2-league-metrics">${cards.map(card=>`<button type="button" class="premium-feature-card v2-league-metric ${card.view==='records'?'is-record':''}" data-v2-action="${card.view==='records'?'records':'parallel'}" data-view="${card.view}">
-      <span class="v2-metric-heading"><span class="v2-metric-icon" aria-hidden="true">${card.icon}</span><span class="v2-metric-title">${card.title}</span></span>
-      <strong class="v2-metric-value">${card.value}</strong><span class="v2-metric-unit">${card.unit}</span>
-      ${card.shared?'<span class="v2-metric-shared">Liderança compartilhada</span>':''}
-      <span class="v2-metric-leaders">${card.leaders.map(leader=>`<span class="v2-metric-leader"><span class="v2-metric-name">${escapeHtml(leader.name)}${leader.isCurrent?'<em class="v2-metric-you">Você</em>':''}</span><span class="v2-metric-detail">${escapeHtml(leader.detail)}</span></span>`).join('')}</span>
-      <span class="v2-metric-chevron" aria-hidden="true">›</span>
-    </button>`).join('')}</div>
+  return `<section id="homeV2LeagueHighlightsSection" class="v2-league-highlights ${cards.length?'':'hidden'}" aria-labelledby="homeV2LeagueHighlightsTitle">
+    <header><h2 id="homeV2LeagueHighlightsTitle">Destaques da liga</h2><p>${escapeHtml(activeLeagueName(state.activeLeague))} · Temporada 2026</p></header>
+    <div class="v2-league-metrics">${cards.map(homeV2LeagueMetric).join('')}<div id="homeV2RoundLeaderSlot" class="v2-round-leader-slot"></div></div>
   </section>`;
+}
+function renderHomeV2RoundLeader(entry,round){
+  const slot=$("homeV2RoundLeaderSlot"),section=$("homeV2LeagueHighlightsSection"),tab=$("homeV2Tab");
+  if(!slot||!section||!tab||tab.classList.contains("hidden")||!isAdminUser()||state.leagueContextStatus!=="ready"||round!==currentRoundNumber())return;
+  const valid=entry?.data&&!entry.error&&String(entry.data.leagueId)===String(state.activeLeague?.liga_id)&&entry.data.round===round;
+  const card=valid?buildHomeV2RoundLeader(buildRoundLiveHighlightsModel(entry.data,state.user?.id),round,state.user?.id):null;
+  const button=slot.querySelector('button');
+  if(card){
+    const content=homeV2LeagueMetricContent(card);
+    if(button){if(button.innerHTML!==content)button.innerHTML=content;}
+    else slot.innerHTML=homeV2LeagueMetric(card);
+  }else slot.innerHTML='';
+  section.classList.toggle('hidden',!section.querySelector('.v2-league-metric'));
 }
 function renderHomeV2(){
   if(!isAdminUser()){show("homeV2Tab",false);$("homeV2Content").innerHTML="";closeHomeV2Picks(false);return;}
@@ -3211,6 +3231,8 @@ function renderHomeV2(){
   if(roundDetailsOpen) $("homeV2Content").querySelector(".v2-round-details").open=true;
   if(previousOpponent&&$("homeV2Opponent")?.querySelector(`option[value="${CSS.escape(previousOpponent)}"]`)) $("homeV2Opponent").value=previousOpponent;
   if(homeV2PicksRound!==null&&!$("homeV2PicksModal").classList.contains("hidden")) renderHomeV2Picks();
+  renderHomeV2RoundLeader(roundHighlightsLoader.peek(roundHighlightsKey(round)),round);
+  if(roundHighlightsAvailable(round))queueMicrotask(()=>refreshRoundHighlightsViews());
 }
 function renderHomeV2Picks(){
   if(!isAdminUser()||!state.participant)return closeHomeV2Picks(false);
