@@ -2403,7 +2403,9 @@ async function refreshRoundHighlightsViews({force=false}={}){
   const selected=roundHighlightsSelection;
   const v2Tab=$("homeV2Tab");
   const v2Round=v2Tab&&!v2Tab.classList.contains("hidden")&&isAdminUser()&&state.leagueContextStatus==="ready"&&roundHighlightsAvailable(currentRoundNumber())?currentRoundNumber():null;
-  const rounds=new Set([home?Number(home.dataset.round):null,selected?.round,v2Round].filter(value=>value!=null));
+  const homeTab=$("homeTab");
+  const homeRound=homeTab&&!homeTab.classList.contains("hidden")&&state.leagueContextStatus==="ready"&&roundHighlightsAvailable(currentRoundNumber())?currentRoundNumber():null;
+  const rounds=new Set([home?Number(home.dataset.round):null,selected?.round,v2Round,homeRound].filter(value=>value!=null));
   const session=roundHighlightsSession;
   await Promise.all([...rounds].map(async round=>{
     const key=roundHighlightsKey(round);
@@ -2419,6 +2421,7 @@ async function refreshRoundHighlightsViews({force=false}={}){
     }
     if(session===roundHighlightsSession&&roundHighlightsSelection?.round===round) renderRoundHighlightsAggregate(entry,round);
     if(round===v2Round)renderHomeV2RoundLeader(entry,round);
+    if(round===homeRound)renderHomeV2RoundLeader(entry,round,"home");
   }));
 }
 
@@ -3071,6 +3074,7 @@ function renderHome(){
     <div class="home-ranking-list">${state.ranking.slice(0,3).map((item,index)=>`<div class="home-ranking-row ${isCurrentRankingParticipant(item)?"is-me":""}"><span class="home-medal">${medals[index]}</span>${rankingAvatar(item.name)}<div><strong>${escapeHtml(item.name)}${isCurrentRankingParticipant(item)?' <em class="home-you-badge">VOCÊ</em>':''}</strong><small>${isCurrentRankingParticipant(item)?"Sua posição atual":"Participante"}</small></div><b>${item.total} pts</b><span class="row-chevron" aria-hidden="true">›</span></div>`).join("")||'<p class="muted-note">A classificação aparecerá após os primeiros resultados.</p>'}</div>
   </article>`;
 
+  renderHomeLeagueHighlights();
   renderHomeFavoriteTeam();
   renderTemporaryRankingAccess();
 }
@@ -3100,15 +3104,15 @@ function homeV2LeagueMetricContent(card){
 function homeV2LeagueMetric(card){
   return `<button type="button" class="premium-feature-card v2-league-metric ${card.view==='round-leader'?'is-round-leader':''}" data-v2-action="${card.action||'parallel'}" data-view="${card.view}"${card.round?` data-round="${card.round}" data-v2-round-leader`:''}>${homeV2LeagueMetricContent(card)}</button>`;
 }
-function homeV2LeagueHighlights(cards){
-  return `<section id="homeV2LeagueHighlightsSection" class="v2-league-highlights ${cards.length?'':'hidden'}" aria-labelledby="homeV2LeagueHighlightsTitle">
-    <header><h2 id="homeV2LeagueHighlightsTitle">Destaques da liga</h2><p>${escapeHtml(activeLeagueName(state.activeLeague))} · Temporada 2026</p></header>
-    <div class="v2-league-metrics">${cards.map(homeV2LeagueMetric).join('')}<div id="homeV2RoundLeaderSlot" class="v2-round-leader-slot"></div></div>
+function homeV2LeagueHighlights(cards,prefix="homeV2"){
+  return `<section id="${prefix}LeagueHighlightsSection" class="v2-league-highlights ${cards.length?'':'hidden'}" aria-labelledby="${prefix}LeagueHighlightsTitle">
+    <header><h2 id="${prefix}LeagueHighlightsTitle">Destaques da liga</h2><p>${escapeHtml(activeLeagueName(state.activeLeague))} · Temporada 2026</p></header>
+    <div class="v2-league-metrics">${cards.map(homeV2LeagueMetric).join('')}<div id="${prefix}RoundLeaderSlot" class="v2-round-leader-slot"></div></div>
   </section>`;
 }
-function renderHomeV2RoundLeader(entry,round){
-  const slot=$("homeV2RoundLeaderSlot"),section=$("homeV2LeagueHighlightsSection"),tab=$("homeV2Tab");
-  if(!slot||!section||!tab||tab.classList.contains("hidden")||!isAdminUser()||state.leagueContextStatus!=="ready"||round!==currentRoundNumber())return;
+function renderHomeV2RoundLeader(entry,round,prefix="homeV2"){
+  const slot=$(prefix+"RoundLeaderSlot"),section=$(prefix+"LeagueHighlightsSection"),tab=$(prefix+"Tab");
+  if(!slot||!section||!tab||tab.classList.contains("hidden")||(prefix==="homeV2"&&!isAdminUser())||state.leagueContextStatus!=="ready"||round!==currentRoundNumber())return;
   const valid=entry?.data&&!entry.error&&String(entry.data.leagueId)===String(state.activeLeague?.liga_id)&&entry.data.round===round;
   const card=valid?buildHomeV2RoundLeader(buildRoundLiveHighlightsModel(entry.data,state.user?.id),round,state.user?.id):null;
   const button=slot.querySelector('button');
@@ -3119,6 +3123,27 @@ function renderHomeV2RoundLeader(entry,round){
   }else slot.innerHTML='';
   section.classList.toggle('hidden',!section.querySelector('.v2-league-metric'));
 }
+function renderHomeLeagueHighlights(){
+  const host=$("homeLeagueHighlights");
+  if(!host)return;
+  if(!state.participant||state.leagueContextStatus!=="ready"){host.innerHTML="";return;}
+  const cards=buildHomeV2LeagueHighlights(publicPicksRefreshPending?null:homeV2FriendlyRankings());
+  host.innerHTML=homeV2LeagueHighlights(cards,"home");
+  const round=currentRoundNumber();
+  renderHomeV2RoundLeader(roundHighlightsLoader.peek(roundHighlightsKey(round)),round,"home");
+  if(roundHighlightsAvailable(round))queueMicrotask(()=>refreshRoundHighlightsViews());
+}
+$("homeLeagueHighlights")?.addEventListener("click",event=>{
+  const button=event.target.closest('[data-v2-action]');
+  if(!button||state.leagueContextStatus!=="ready")return;
+  if(button.dataset.v2Action==='highlights')return openRoundHighlights(currentRoundNumber(),button);
+  if(button.dataset.v2Action!=='parallel')return;
+  friendlyRankingsModel=homeV2FriendlyRankings();
+  openFriendlyRankings(button);
+  friendlyRankingsView=button.dataset.view==='hot'?'hot':'efficiency';
+  renderFriendlyRankingsModal();
+});
+
 function renderHomeV2(){
   if(!isAdminUser()){show("homeV2Tab",false);$("homeV2Content").innerHTML="";closeHomeV2Picks(false);return;}
   if(!state.participant||state.leagueContextStatus!=="ready"){

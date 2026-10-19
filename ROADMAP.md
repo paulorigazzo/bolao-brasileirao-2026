@@ -16,7 +16,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Home 2.0
 
-- Badges de Destaques da liga: implementados na v6.51.0 exclusivamente na Home experimental. [Nota v6.51.0](docs/releases/v6.51.0-home-v2-destaques-disputas.md).
+- Badges de Destaques da liga: implementados na v6.51.0 na Home experimental e replicados abaixo de Visão geral na Home atual. [Nota v6.51.0](docs/releases/v6.51.0-home-v2-destaques-disputas.md).
 
 - 🟡 Tela experimental na Área ADM para avaliação pelo administrador como participante da liga ativa.
 - Home vigente preservada; substituição condicionada a validação e aprovação futuras.
