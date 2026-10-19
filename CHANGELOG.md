@@ -1,3 +1,11 @@
+# v6.51.1 — Meu Time expansível na Home
+
+- Inicia o card recolhido, com escudo, nome, posição no Brasileirão e pontos visíveis.
+- Expande pelo cabeçalho para mostrar todas as informações e acessos existentes.
+- Preserva aberto/recolhido durante navegação e atualizações na sessão, sem preferência permanente.
+- Mantém o convite para escolher um favorito e preserva Home 2.0, tela Meu Time e cálculos.
+- Detalhes: [nota da versão](docs/releases/v6.51.1-home-meu-time-expansivel.md).
+
 # v6.51.0 — Destaques da liga nas Homes
 
 - Adiciona cards compactos para Quem joga, resolve, Tá vindo quente e Líder da rodada, com números grandes, líderes, contexto e acesso aos detalhes existentes.
