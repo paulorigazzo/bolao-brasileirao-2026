@@ -34,7 +34,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.51.1";
+const APP_VERSION = "6.51.2";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2398,27 +2398,17 @@ function renderRoundHighlightsAggregate(entry,round){
 
 async function refreshRoundHighlightsViews({force=false}={}){
   if(document.hidden||!state.user||!state.activeLeague?.liga_id) return;
-  const candidateHome=$("homeRoundLiveFacts");
-  const home=candidateHome?.getClientRects().length?candidateHome:null;
   const selected=roundHighlightsSelection;
   const v2Tab=$("homeV2Tab");
   const v2Round=v2Tab&&!v2Tab.classList.contains("hidden")&&isAdminUser()&&state.leagueContextStatus==="ready"&&roundHighlightsAvailable(currentRoundNumber())?currentRoundNumber():null;
   const homeTab=$("homeTab");
   const homeRound=homeTab&&!homeTab.classList.contains("hidden")&&state.leagueContextStatus==="ready"&&roundHighlightsAvailable(currentRoundNumber())?currentRoundNumber():null;
-  const rounds=new Set([home?Number(home.dataset.round):null,selected?.round,v2Round,homeRound].filter(value=>value!=null));
+  const rounds=new Set([selected?.round,v2Round,homeRound].filter(value=>value!=null));
   const session=roundHighlightsSession;
   await Promise.all([...rounds].map(async round=>{
     const key=roundHighlightsKey(round);
     const entry=await roundHighlightsLoader.load(key,{p_liga_id:state.activeLeague.liga_id,p_rodada:round},{force});
     if(!entry||key!==roundHighlightsKey(round)) return;
-    const currentHome=$("homeRoundLiveFacts");
-    if(currentHome&&Number(currentHome.dataset.round)===round){
-      if(entry.data){
-        const model=buildRoundLiveHighlightsModel(entry.data,state.user.id);
-        const facts=[model.facts.personal[0],model.facts.group[0]].filter(Boolean);
-        currentHome.innerHTML=`<p class="muted-note">${escapeHtml(roundHighlightsNotice(model))}</p><div class="home-round-highlights-list">${facts.map(fact=>`<div><p><strong>${escapeHtml(fact.title)}</strong><small>${escapeHtml(fact.detail)}</small></p></div>`).join("")}</div>${entry.error?'<p class="round-highlights-update-error">Dados desatualizados. Abra os destaques para tentar novamente.</p>':""}`;
-      }else currentHome.innerHTML='<p class="muted-note">Destaques indisponíveis. Abra para tentar novamente.</p>';
-    }
     if(session===roundHighlightsSession&&roundHighlightsSelection?.round===round) renderRoundHighlightsAggregate(entry,round);
     if(round===v2Round)renderHomeV2RoundLeader(entry,round);
     if(round===homeRound)renderHomeV2RoundLeader(entry,round,"home");
@@ -2505,27 +2495,9 @@ function roundHighlightIcon(key){
   })[key]||"•";
 }
 
-function homeRoundHighlightsHtml(context){
-  if(!context) return "";
-  if(context.mode==="live"){
-    queueMicrotask(()=>refreshRoundHighlightsViews());
-    return `<section class="home-round-highlights" aria-label="Destaques da Rodada ${context.round}"><div class="home-round-highlights-heading"><span>DESTAQUES DA RODADA</span><strong>Rodada ${context.round}</strong></div><div id="homeRoundLiveFacts" data-round="${context.round}"><p class="muted-note">Carregando destaques…</p></div><button class="home-round-highlights-action" type="button" data-home-action="round-highlights" data-round-highlights-round="${context.round}">Ver todos os destaques <b aria-hidden="true">›</b></button></section>`;
-  }
-  const model=buildRoundHighlights(context.round);
-  const partial=context.mode==="partial" && isPostponedRoundHighlightsEligible(model.lifecycle);
-  if(model.isProvisional && !partial) return "";
-  const displayFact=fact=>partial?provisionalRoundHighlightFact(fact):fact;
-  const personal=displayFact(model.facts.personal[0]||null);
-  const group=displayFact(model.facts.group.find(fact=>!personal || fact.key!==personal.key)||model.facts.group[0]||null);
-  const facts=[personal,group].filter(Boolean).slice(0,2);
-  if(!facts.length) return "";
-  const label=context.mode==="pause"?"ENQUANTO A BOLA NÃO VOLTA":"DESTAQUES DA RODADA";
-  return `<section class="home-round-highlights" aria-label="Destaques da Rodada ${context.round}">
-    <div class="home-round-highlights-heading"><span>${label}</span><strong>Rodada ${context.round}</strong></div>
-    ${partial?`<div class="round-highlights-partial-notice" role="status"><strong>⚠ Rodada com jogos adiados</strong><span>Destaques consideram ${model.lifecycle.finished} de ${model.lifecycle.total} jogos concluídos.</span></div>`:""}
-    <div class="home-round-highlights-list">${facts.map(fact=>`<div><i aria-hidden="true">${roundHighlightIcon(fact.key)}</i><p><strong>${escapeHtml(fact.title)}</strong><small>${escapeHtml(teamNamesDisplayText(fact.detail))}</small></p></div>`).join("")}</div>
-    <button class="home-round-highlights-action" type="button" data-home-action="round-highlights" data-round-highlights-round="${context.round}">Ver todos os destaques <b aria-hidden="true">›</b></button>
-  </section>`;
+function homeRoundHighlightsAccess(context){
+  if(!context||!roundHighlightsAvailable(context.round))return '';
+  return `<button class="home-round-highlights-action home-league-highlights-action" type="button" data-home-action="round-highlights" data-round-highlights-round="${context.round}">Ver todos os destaques da rodada <b aria-hidden="true">→</b><small>Rodada ${context.round}</small></button>`;
 }
 
 function renderRoundHighlightsModal(model){
@@ -3063,7 +3035,6 @@ function renderHome(){
     <div class="premium-segment-progress" aria-label="Progresso esportivo da rodada"><span class="segment-finished" style="width:${roundGames.length?lifecycle.finished/roundGames.length*100:0}%"></span><span class="segment-live" style="width:${roundGames.length?lifecycle.live/roundGames.length*100:0}%"></span><span class="segment-postponed" style="width:${roundGames.length?lifecycle.postponed/roundGames.length*100:0}%"></span><span class="segment-cancelled" style="width:${roundGames.length?lifecycle.cancelled/roundGames.length*100:0}%"></span><span class="segment-future" style="width:${roundGames.length?lifecycle.future/roundGames.length*100:0}%"></span></div>
     <div class="premium-round-stats integrity-stats"><div class="is-finished"><i>✓</i><strong>${lifecycle.finished}</strong><span>finalizados</span></div><div class="is-live"><i>◉</i><strong>${lifecycle.live}</strong><span>ao vivo</span></div><div class="is-postponed"><i>!</i><strong>${lifecycle.postponed}</strong><span>adiados</span></div><div class="is-future"><i>◷</i><strong>${lifecycle.future}</strong><span>futuros</span></div></div>
     <p class="round-integrity-note">${lifecycleView.message}${lifecycle.cancelled?` · ${lifecycle.cancelled} cancelado${lifecycle.cancelled===1?"":"s"}.`:""}</p>
-    ${homeRoundHighlightsHtml(highlightsContext)}
     ${nextGame?`<div class="premium-next-game"><span class="premium-next-label">PRÓXIMO JOGO · RODADA ${Number(nextGame.rodada)}</span><div class="premium-matchup"><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_casa_logo,nextGame.time_casa)}</span><strong>${escapeHtml(teamDisplayName(nextGame.time_casa))}</strong></div><b>×</b><div><span class="team-badge home-match-crest">${teamLogo(nextGame.time_fora_logo,nextGame.time_fora)}</span><strong>${escapeHtml(teamDisplayName(nextGame.time_fora))}</strong></div></div><div class="premium-game-meta"><span>📅 ${escapeHtml(new Date(nextGame.inicio).toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit"}))}</span><span>◷ ${escapeHtml(new Date(nextGame.inicio).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}))}</span>${nextGame.local_partida?`<span>⌖ ${escapeHtml(nextGame.local_partida)}</span>`:""}</div><button class="premium-next-games-action" type="button" data-home-action="calendar">Abrir calendário <b aria-hidden="true">›</b></button></div>`:`<div class="premium-next-game is-empty"><span class="premium-next-label">AGENDA DE JOGOS</span><p class="muted-note">Consulte as próximas datas e as partidas que aguardam reagendamento.</p><button class="premium-next-games-action" type="button" data-home-action="calendar">Abrir calendário <b aria-hidden="true">›</b></button></div>`}
   </article>`;
 
@@ -3082,7 +3053,7 @@ function renderHome(){
     <div class="home-ranking-list">${state.ranking.slice(0,3).map((item,index)=>`<div class="home-ranking-row ${isCurrentRankingParticipant(item)?"is-me":""}"><span class="home-medal">${medals[index]}</span>${rankingAvatar(item.name)}<div><strong>${escapeHtml(item.name)}${isCurrentRankingParticipant(item)?' <em class="home-you-badge">VOCÊ</em>':''}</strong><small>${isCurrentRankingParticipant(item)?"Sua posição atual":"Participante"}</small></div><b>${item.total} pts</b><span class="row-chevron" aria-hidden="true">›</span></div>`).join("")||'<p class="muted-note">A classificação aparecerá após os primeiros resultados.</p>'}</div>
   </article>`;
 
-  renderHomeLeagueHighlights();
+  renderHomeLeagueHighlights(highlightsContext);
   renderHomeFavoriteTeam();
   renderTemporaryRankingAccess();
 }
@@ -3112,10 +3083,10 @@ function homeV2LeagueMetricContent(card){
 function homeV2LeagueMetric(card){
   return `<button type="button" class="premium-feature-card v2-league-metric ${card.view==='round-leader'?'is-round-leader':''}" data-v2-action="${card.action||'parallel'}" data-view="${card.view}"${card.round?` data-round="${card.round}" data-v2-round-leader`:''}>${homeV2LeagueMetricContent(card)}</button>`;
 }
-function homeV2LeagueHighlights(cards,prefix="homeV2"){
-  return `<section id="${prefix}LeagueHighlightsSection" class="v2-league-highlights ${cards.length?'':'hidden'}" aria-labelledby="${prefix}LeagueHighlightsTitle">
+function homeV2LeagueHighlights(cards,prefix="homeV2",roundAccess=""){
+  return `<section id="${prefix}LeagueHighlightsSection" class="v2-league-highlights ${cards.length||roundAccess?'':'hidden'}" aria-labelledby="${prefix}LeagueHighlightsTitle">
     <header><h2 id="${prefix}LeagueHighlightsTitle">Destaques da liga</h2><p>${escapeHtml(activeLeagueName(state.activeLeague))} · Temporada 2026</p></header>
-    <div class="v2-league-metrics">${cards.map(homeV2LeagueMetric).join('')}<div id="${prefix}RoundLeaderSlot" class="v2-round-leader-slot"></div></div>
+    <div class="v2-league-metrics">${cards.map(homeV2LeagueMetric).join('')}<div id="${prefix}RoundLeaderSlot" class="v2-round-leader-slot"></div></div>${roundAccess}
   </section>`;
 }
 function renderHomeV2RoundLeader(entry,round,prefix="homeV2"){
@@ -3129,14 +3100,14 @@ function renderHomeV2RoundLeader(entry,round,prefix="homeV2"){
     if(button){if(button.innerHTML!==content)button.innerHTML=content;}
     else slot.innerHTML=homeV2LeagueMetric(card);
   }else slot.innerHTML='';
-  section.classList.toggle('hidden',!section.querySelector('.v2-league-metric'));
+  section.classList.toggle('hidden',!section.querySelector('.v2-league-metric,[data-home-action="round-highlights"]'));
 }
-function renderHomeLeagueHighlights(){
+function renderHomeLeagueHighlights(context){
   const host=$("homeLeagueHighlights");
   if(!host)return;
   if(!state.participant||state.leagueContextStatus!=="ready"){host.innerHTML="";return;}
   const cards=buildHomeV2LeagueHighlights(publicPicksRefreshPending?null:homeV2FriendlyRankings());
-  host.innerHTML=homeV2LeagueHighlights(cards,"home");
+  host.innerHTML=homeV2LeagueHighlights(cards,"home",homeRoundHighlightsAccess(context));
   const round=currentRoundNumber();
   renderHomeV2RoundLeader(roundHighlightsLoader.peek(roundHighlightsKey(round)),round,"home");
   if(roundHighlightsAvailable(round))queueMicrotask(()=>refreshRoundHighlightsViews());

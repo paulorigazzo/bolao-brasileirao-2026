@@ -1,3 +1,10 @@
+# v6.51.2 — Destaques reunidos na Home
+
+- Move Ver todos os destaques da rodada para abaixo dos três cards de Destaques da liga, identificando a rodada consultada.
+- Remove o resumo de Destaques da rodada de Integridade da Rodada, preservando progresso, adiamentos e agenda.
+- Mantém o modal completo, disponibilidade e seleção contextual de rodada; preserva Home 2.0 e cálculos.
+- Detalhes: [nota da versão](docs/releases/v6.51.2-home-unificar-destaques.md).
+
 # v6.51.1 — Meu Time expansível na Home
 
 - Inicia o card recolhido, com escudo, nome, posição no Brasileirão e pontos visíveis.

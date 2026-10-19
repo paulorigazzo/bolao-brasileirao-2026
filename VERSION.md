@@ -1,5 +1,5 @@
-6.51.1
+6.51.2
 
-Card Meu Time expansível na Home, com resumo e detalhes preservados.
+Acesso aos destaques da rodada reunido abaixo dos cards de Destaques da liga na Home.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)
