@@ -130,3 +130,6 @@
 
 .home-league-highlights{margin-block:18px}
 .home-league-highlights:empty,.home-league-highlights:has(>.hidden){display:none}
+
+.home-league-highlights-action{margin-top:12px;flex-wrap:wrap}
+.home-league-highlights-action small{font-size:.65rem;color:var(--muted)}

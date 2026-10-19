@@ -25,7 +25,7 @@ const nodes=new Map();function node(id){if(!nodes.has(id))nodes.set(id,{innerHTM
 let admin=true;
 const context={publicPicksRefreshPending:false,roundHighlightsLoader:{peek:()=>null},roundHighlightsKey:()=>'test',roundHighlightsAvailable:()=>false,buildRoundLiveHighlightsModel,buildHomeV2RoundLeader,buildHomeV2PersonalContext,buildHomeV2LeagueHighlights,buildFriendlyRankingsModel,buildRoundHighlights:()=>({facts:{personal:[{key:"personal-round-performance",title:"Você fez 10 pontos na rodada",detail:"Resumo dos resultados oficiais."},{key:"new-personal-best",title:"Sua melhor rodada até agora",detail:"Novo recorde pessoal: 10 pontos."}],group:[]},isProvisional:false}),teamNamesDisplayText:x=>x,provisionalRoundHighlightFact:x=>x,normalizeTeamKey:x=>String(x||"").toLowerCase(),CSS:{escape:x=>x},buildHomeV2Model,$:node,isAdminUser:()=>admin,show(){},closeHomeV2Picks(){},calculateRanking(){},state:{participant:{nome:'Teste'},leagueContextStatus:'ready',ranking:[{key:'me',name:'Teste',total:25}],games:games.slice(0,3),ownPicks:[]},currentRoundNumber:()=>29,ownPick:inputs.ownPick,locked:g=>g.status!=='open',isFinished:g=>g.status==='finished',isScorableGame:inputs.isScorable,gameStatusDisplay:g=>({key:g.status,label:g.status}),points:inputs.points,calculatePredictionPoints:inputs.livePoints,roundLifecycleSummary:()=>({finished:1,live:1,postponed:0,cancelled:0,status:'PARTIAL'}),pendingEarlierRounds:()=>[],isPostponed:g=>g.status==='postponed',homeRoundHighlightsContext:()=>({round:29,mode:'live'}),isCurrentRankingParticipant:p=>p.key==='me',findTeam:()=>null,activeLeagueName:()=> 'Liga de teste',teamDisplayName:x=>x||'Clube',escapeHtml:x=>String(x??''),rankingAvatar:()=>'<span class="ranking-avatar">T</span>',teamLogo:()=>'<span>⚽</span>',deadlineText:()=>"Fecha em 45 min",liveMatchMinute:()=> '20',hasValidScore:()=>false,homeDeadline:()=> '20:00',formatDate:()=>'',Date,homeV2PicksRound:null};
 vm.createContext(context);
-for(const name of ['homeV2Model','homeV2Button','homeV2Help','homeV2FriendlyRankings','homeV2LeagueMetricContent','homeV2LeagueMetric','homeV2LeagueHighlights','renderHomeV2RoundLeader','renderHomeV2','renderHomeV2Picks'])vm.runInContext(extract(name),context);
+for(const name of ['homeV2Model','homeV2Button','homeV2Help','homeV2FriendlyRankings','homeV2LeagueMetricContent','homeV2LeagueMetric','homeV2LeagueHighlights','homeRoundHighlightsAccess','renderHomeV2RoundLeader','renderHomeV2','renderHomeV2Picks'])vm.runInContext(extract(name),context);
 vm.runInContext('renderHomeV2()',context);
 assert.match(node('homeV2Content').innerHTML,/Completar pendentes/);assert.match(node('homeV2Content').innerHTML,/pontos oficiais/);assert.match(node('homeV2Content').innerHTML,/Destaques · Rodada 29/);assert.doesNotMatch(node('homeV2Content').innerHTML,/Rodada 30/);
 context.state.games=[games[0]];context.ownPick=()=>({earned:0,gols_casa:1,gols_fora:0});vm.runInContext('renderHomeV2()',context);assert.match(node('homeV2Content').innerHTML,/Revisar palpites/);
@@ -185,6 +185,16 @@ context.publicPicksRefreshPending=true;vm.runInContext('renderHomeLeagueHighligh
 assert.doesNotMatch(node('homeLeagueHighlights').innerHTML,/class="premium-feature-card v2-league-metric/);
 context.publicPicksRefreshPending=false;context.state.leagueContextStatus='loading';vm.runInContext('renderHomeLeagueHighlights()',context);assert.equal(node('homeLeagueHighlights').innerHTML,'');
 context.state.leagueContextStatus='ready';
+context.roundHighlightsAvailable=round=>round===28;
+context.highlightsContext={round:28,mode:'recent'};
+vm.runInContext('renderHomeLeagueHighlights(highlightsContext)',context);
+assert.match(node('homeLeagueHighlights').innerHTML,/data-round-highlights-round="28"/);
+assert.doesNotMatch(vm.runInContext('homeV2LeagueHighlights([],"home",homeRoundHighlightsAccess(highlightsContext))',context),/class="v2-league-highlights hidden"/,'acesso disponível mantém a seção mesmo sem cards');
+assert.ok(node('homeLeagueHighlights').innerHTML.indexOf('home-round-highlights-action')>node('homeLeagueHighlights').innerHTML.indexOf('v2-round-leader-slot'));
+assert.equal(vm.runInContext('homeRoundHighlightsAccess(null)',context),'');
+assert.equal(vm.runInContext('homeRoundHighlightsAccess({round:30})',context),'');
+context.roundHighlightsAvailable=()=>false;
+assert.doesNotMatch(source,/homeRoundLiveFacts|homeRoundHighlightsHtml/);
 const markup=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 assert.ok(markup.indexOf('id="homeOverview"')<markup.indexOf('id="homeLeagueHighlights"'));
 assert.ok(markup.indexOf('id="homeLeagueHighlights"')<markup.indexOf('id="homeLiveSection"'));
@@ -194,11 +204,11 @@ vm.runInContext('renderHomeV2RoundLeader(entry,29,"home")',leaderContext);assert
 
 admin=false;vm.runInContext('renderHomeV2()',context);assert.equal(node('homeV2Content').innerHTML,'');
 for(const name of ['navigateTo','applyNavigationState'])assert.match(extract(name),/tabName==="homeV2"&&!isAdminUser\(\)/);
-// Referência da Home aprovada na v6.46.1; inclui a revisão visual da Visão Geral.
+// Referência v6.51.2: retira apenas o bloco antigo de Destaques da rodada.
 const {createHash}=await import('node:crypto');
 const current=source.slice(source.indexOf('function renderHome(){'),source.indexOf('\nlet homeV2PicksRound='));
-const preserved=current.replace('  if(!$("homeV2Tab")?.classList.contains("hidden")) renderHomeV2();\n','').replace('  renderHomeLeagueHighlights();\n','').trim();
-assert.equal(createHash('sha256').update(preserved).digest('hex'),'3bf4d9a84071d26eb8c3c257b65c8957c3957b08a32d34b107c14d6bf3248828','Home vigente preservada');
+const preserved=current.replace('  if(!$("homeV2Tab")?.classList.contains("hidden")) renderHomeV2();\n','').replace('  renderHomeLeagueHighlights(highlightsContext);\n','').trim();
+assert.equal(createHash('sha256').update(preserved).digest('hex'),'a5bf0d01608190e869031d8b254ad1a9b2780283ecacb5494a55831f45c8f72f','Demais blocos da Home preservados na v6.51.2');
 console.log('Home 2.0: estados, pontos, isolamento, Destaques e Home original aprovados.');
 
 if(process.argv[2]){
@@ -262,7 +272,8 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')closeFriendl
     vm.runInNewContext(source.slice(overviewStart,overviewEnd),{$:()=>overview,round:29,roundGames:Array(10),finished:Array(2),completedPicks:10,pending:[],roundPoints:5});
     const cards=buildHomeV2LeagueHighlights(vm.runInContext('homeV2FriendlyRankings()',context));
     context.fixtureCards=cards;
-    const section=vm.runInContext('homeV2LeagueHighlights(fixtureCards,"home")',context).replace('<div id="homeRoundLeaderSlot" class="v2-round-leader-slot"></div>','<div id="homeRoundLeaderSlot" class="v2-round-leader-slot">'+sampleMarkup+'</div>');
+    context.roundHighlightsAvailable=()=>true;
+    const section=vm.runInContext('homeV2LeagueHighlights(fixtureCards,"home",homeRoundHighlightsAccess({round:29}))',context).replace('<div id="homeRoundLeaderSlot" class="v2-round-leader-slot"></div>','<div id="homeRoundLeaderSlot" class="v2-round-leader-slot">'+sampleMarkup+'</div>');
     const styles=previewHtml.match(/<link[^>]+rel="stylesheet"[^>]*>/g).join('').replaceAll('href="./','href="/');
     writeFileSync(process.argv[2], '<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'+styles+'<body><main style="max-width:1100px;margin:auto;padding:16px"><section id="homeTab" class="home-tab"><p class="eyebrow">DADOS SINTÉTICOS · VALIDAÇÃO LOCAL</p><section class="home-section-heading"><div><span class="eyebrow">VISÃO GERAL</span><h2>Seu bolão agora</h2></div><button class="home-secondary-action home-refresh-action">↻ Recarregar dados</button></section><section id="homeOverview" class="home-overview-grid">'+overview.innerHTML+'</section><div id="homeLeagueHighlights" class="home-league-highlights">'+section+'</div><section class="premium-feature-card"><h2>Partidas em andamento</h2><p>Conteúdo seguinte da Home preservado</p></section></section></main></body></html>');
   }
