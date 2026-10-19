@@ -3095,7 +3095,7 @@ function homeV2LeagueHighlights(cards){
       <strong class="v2-metric-value">${card.value}</strong><span class="v2-metric-unit">${card.unit}</span>
       ${card.shared?'<span class="v2-metric-shared">Liderança compartilhada</span>':''}
       <span class="v2-metric-leaders">${card.leaders.map(leader=>`<span class="v2-metric-leader"><span class="v2-metric-name">${escapeHtml(leader.name)}${leader.isCurrent?'<em class="v2-metric-you">Você</em>':''}</span><span class="v2-metric-detail">${escapeHtml(leader.detail)}</span></span>`).join('')}</span>
-      <span class="v2-metric-link">Ver disputa <span aria-hidden="true">›</span></span>
+      <span class="v2-metric-chevron" aria-hidden="true">›</span>
     </button>`).join('')}</div>
   </section>`;
 }
