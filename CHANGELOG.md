@@ -1,3 +1,11 @@
+# v6.51.0 — Destaques da liga nas Homes
+
+- Adiciona cards compactos para Quem joga, resolve, Tá vindo quente e Líder da rodada, com números grandes, líderes, contexto e acesso aos detalhes existentes.
+- Reutiliza as Disputas Paralelas com jogos encerrados e os Destaques agregados com pontos confirmados e provisórios para a liderança atual da liga selecionada.
+- Inclui a seção imediatamente abaixo de Visão geral na Home atual, compartilhando apresentação, dados e acessos com a Home 2.0.
+- Oculta cards sem dados suficientes; preserva os demais blocos da Home e as regras existentes.
+- Detalhes: [nota da versão](docs/releases/v6.51.0-home-v2-destaques-disputas.md).
+
 # v6.50.0 — Exclusão controlada de ligas
 
 - Adiciona Excluir liga à administração central, apenas para ligas privadas arquivadas.

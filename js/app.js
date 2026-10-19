@@ -1,4 +1,4 @@
-import { buildHomeV2Model, buildHomeV2PersonalContext } from "./home-v2.js";
+import { buildHomeV2Model, buildHomeV2PersonalContext, buildHomeV2LeagueHighlights, buildHomeV2RoundLeader } from "./home-v2.js";
 import { finishStartupIntro } from "./startup-intro.js";
 import { buildTeamCampaign, campaignPositionTrend } from "./team-campaign.js";
 import { CONFIG } from "./config.js";
@@ -34,7 +34,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.50.0";
+const APP_VERSION = "6.51.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2401,7 +2401,11 @@ async function refreshRoundHighlightsViews({force=false}={}){
   const candidateHome=$("homeRoundLiveFacts");
   const home=candidateHome?.getClientRects().length?candidateHome:null;
   const selected=roundHighlightsSelection;
-  const rounds=new Set([home?Number(home.dataset.round):null,selected?.round].filter(value=>value!=null));
+  const v2Tab=$("homeV2Tab");
+  const v2Round=v2Tab&&!v2Tab.classList.contains("hidden")&&isAdminUser()&&state.leagueContextStatus==="ready"&&roundHighlightsAvailable(currentRoundNumber())?currentRoundNumber():null;
+  const homeTab=$("homeTab");
+  const homeRound=homeTab&&!homeTab.classList.contains("hidden")&&state.leagueContextStatus==="ready"&&roundHighlightsAvailable(currentRoundNumber())?currentRoundNumber():null;
+  const rounds=new Set([home?Number(home.dataset.round):null,selected?.round,v2Round,homeRound].filter(value=>value!=null));
   const session=roundHighlightsSession;
   await Promise.all([...rounds].map(async round=>{
     const key=roundHighlightsKey(round);
@@ -2416,6 +2420,8 @@ async function refreshRoundHighlightsViews({force=false}={}){
       }else currentHome.innerHTML='<p class="muted-note">Destaques indisponíveis. Abra para tentar novamente.</p>';
     }
     if(session===roundHighlightsSession&&roundHighlightsSelection?.round===round) renderRoundHighlightsAggregate(entry,round);
+    if(round===v2Round)renderHomeV2RoundLeader(entry,round);
+    if(round===homeRound)renderHomeV2RoundLeader(entry,round,"home");
   }));
 }
 
@@ -3068,6 +3074,7 @@ function renderHome(){
     <div class="home-ranking-list">${state.ranking.slice(0,3).map((item,index)=>`<div class="home-ranking-row ${isCurrentRankingParticipant(item)?"is-me":""}"><span class="home-medal">${medals[index]}</span>${rankingAvatar(item.name)}<div><strong>${escapeHtml(item.name)}${isCurrentRankingParticipant(item)?' <em class="home-you-badge">VOCÊ</em>':''}</strong><small>${isCurrentRankingParticipant(item)?"Sua posição atual":"Participante"}</small></div><b>${item.total} pts</b><span class="row-chevron" aria-hidden="true">›</span></div>`).join("")||'<p class="muted-note">A classificação aparecerá após os primeiros resultados.</p>'}</div>
   </article>`;
 
+  renderHomeLeagueHighlights();
   renderHomeFavoriteTeam();
   renderTemporaryRankingAccess();
 }
@@ -3086,6 +3093,57 @@ function homeV2FriendlyRankings(){
 function homeV2Help(slug,label){
   return `<a class="v2-help" href="/central/#${slug}" target="_blank" rel="noopener">${escapeHtml(label)} →</a>`;
 }
+function homeV2LeagueMetricContent(card){
+  return `<span class="v2-metric-heading"><span class="v2-metric-icon" aria-hidden="true">${card.icon}</span><span class="v2-metric-title">${card.title}</span></span>
+    <strong class="v2-metric-value">${card.value}</strong><span class="v2-metric-unit">${card.unit}</span>
+    ${card.shared?'<span class="v2-metric-shared">Liderança compartilhada</span>':''}
+    <span class="v2-metric-leaders">${card.leaders.map(leader=>`<span class="v2-metric-leader"><span class="v2-metric-name">${escapeHtml(leader.name)}${leader.isCurrent?'<em class="v2-metric-you">Você</em>':''}</span><span class="v2-metric-detail">${escapeHtml(leader.detail)}</span></span>`).join('')}</span>
+    ${card.status?`<span class="v2-metric-status">${card.status}</span>`:''}
+    <span class="v2-metric-chevron" aria-hidden="true">›</span>`;
+}
+function homeV2LeagueMetric(card){
+  return `<button type="button" class="premium-feature-card v2-league-metric ${card.view==='round-leader'?'is-round-leader':''}" data-v2-action="${card.action||'parallel'}" data-view="${card.view}"${card.round?` data-round="${card.round}" data-v2-round-leader`:''}>${homeV2LeagueMetricContent(card)}</button>`;
+}
+function homeV2LeagueHighlights(cards,prefix="homeV2"){
+  return `<section id="${prefix}LeagueHighlightsSection" class="v2-league-highlights ${cards.length?'':'hidden'}" aria-labelledby="${prefix}LeagueHighlightsTitle">
+    <header><h2 id="${prefix}LeagueHighlightsTitle">Destaques da liga</h2><p>${escapeHtml(activeLeagueName(state.activeLeague))} · Temporada 2026</p></header>
+    <div class="v2-league-metrics">${cards.map(homeV2LeagueMetric).join('')}<div id="${prefix}RoundLeaderSlot" class="v2-round-leader-slot"></div></div>
+  </section>`;
+}
+function renderHomeV2RoundLeader(entry,round,prefix="homeV2"){
+  const slot=$(prefix+"RoundLeaderSlot"),section=$(prefix+"LeagueHighlightsSection"),tab=$(prefix+"Tab");
+  if(!slot||!section||!tab||tab.classList.contains("hidden")||(prefix==="homeV2"&&!isAdminUser())||state.leagueContextStatus!=="ready"||round!==currentRoundNumber())return;
+  const valid=entry?.data&&!entry.error&&String(entry.data.leagueId)===String(state.activeLeague?.liga_id)&&entry.data.round===round;
+  const card=valid?buildHomeV2RoundLeader(buildRoundLiveHighlightsModel(entry.data,state.user?.id),round,state.user?.id):null;
+  const button=slot.querySelector('button');
+  if(card){
+    const content=homeV2LeagueMetricContent(card);
+    if(button){if(button.innerHTML!==content)button.innerHTML=content;}
+    else slot.innerHTML=homeV2LeagueMetric(card);
+  }else slot.innerHTML='';
+  section.classList.toggle('hidden',!section.querySelector('.v2-league-metric'));
+}
+function renderHomeLeagueHighlights(){
+  const host=$("homeLeagueHighlights");
+  if(!host)return;
+  if(!state.participant||state.leagueContextStatus!=="ready"){host.innerHTML="";return;}
+  const cards=buildHomeV2LeagueHighlights(publicPicksRefreshPending?null:homeV2FriendlyRankings());
+  host.innerHTML=homeV2LeagueHighlights(cards,"home");
+  const round=currentRoundNumber();
+  renderHomeV2RoundLeader(roundHighlightsLoader.peek(roundHighlightsKey(round)),round,"home");
+  if(roundHighlightsAvailable(round))queueMicrotask(()=>refreshRoundHighlightsViews());
+}
+$("homeLeagueHighlights")?.addEventListener("click",event=>{
+  const button=event.target.closest('[data-v2-action]');
+  if(!button||state.leagueContextStatus!=="ready")return;
+  if(button.dataset.v2Action==='highlights')return openRoundHighlights(currentRoundNumber(),button);
+  if(button.dataset.v2Action!=='parallel')return;
+  friendlyRankingsModel=homeV2FriendlyRankings();
+  openFriendlyRankings(button);
+  friendlyRankingsView=button.dataset.view==='hot'?'hot':'efficiency';
+  renderFriendlyRankingsModal();
+});
+
 function renderHomeV2(){
   if(!isAdminUser()){show("homeV2Tab",false);$("homeV2Content").innerHTML="";closeHomeV2Picks(false);return;}
   if(!state.participant||state.leagueContextStatus!=="ready"){
@@ -3136,7 +3194,9 @@ function renderHomeV2(){
   const rankContext=[gapToLeader!==null?`${gapToLeader} pts do líder`:null,leadOverNext!==null?`${leadOverNext} pts à frente do próximo`:null].filter(Boolean).join(' · ');
   const roundSummary=[`${life.finished}/${m.current.length} encerrados`,life.live?`${life.live} ao vivo`:null,life.postponed?`${life.postponed} adiados`:null,life.cancelled?`${life.cancelled} cancelados`:null].filter(Boolean).join(' · ');
   const highlightsModel=context&&!publicPicksRefreshPending?buildRoundHighlights(context.round):null;
-  const personal=buildHomeV2PersonalContext({highlights:highlightsModel,friendlyRankings:publicPicksRefreshPending?null:homeV2FriendlyRankings()});
+  const parallelModel=publicPicksRefreshPending?null:homeV2FriendlyRankings();
+  const personal=buildHomeV2PersonalContext({highlights:highlightsModel,friendlyRankings:parallelModel});
+  const leagueHighlights=buildHomeV2LeagueHighlights(parallelModel);
   const resultContext=phase==='results'&&Number(highlightsModel?.round)===round?personal:null;
   const otherFacts=highlightsModel?.facts.personal.filter(fact=>!['new-personal-best','matched-personal-best'].includes(fact.key)||(!resultContext&&personal.record?.key===fact.key))||[];
   const rawFact=otherFacts.find(fact=>fact.key!=="personal-round-performance")||highlightsModel?.facts.group[0]||otherFacts[0];
@@ -3178,6 +3238,7 @@ function renderHomeV2(){
         ${homeV2Help('disputas','Como funcionam essas disputas?')}
       </div>
     </article>
+    ${homeV2LeagueHighlights(leagueHighlights)}
     <article class="v2-card premium-feature-card v2-favorite">
       ${head('★',team?`Meu time · ${escapeHtml(teamDisplayName(team.name))}`:'Meu time')}
       ${team?`<div class="v2-favorite-body"><span class="v2-favorite-crest">${teamLogo(team.logo,team.name)}</span><div><p>${teamRow?`${teamRow.position}º no Brasileirão · ${teamRow.points} pontos`:'Classificação do clube indisponível'}</p><small>${teamNext?`Próximo: ${escapeHtml(favoriteOpponent)} · ${favoriteHome?"em casa":"fora"}<br>${escapeHtml(formatDate(teamNext.inicio))}`:'Sem próximo jogo confirmado.'}</small>${homeV2Button('campaign','Ver campanha →')}</div></div>`:`<p>Escolha seu clube para acompanhar a campanha.</p>${homeV2Button('profile','Escolher time →')}`}
@@ -3195,6 +3256,8 @@ function renderHomeV2(){
   if(roundDetailsOpen) $("homeV2Content").querySelector(".v2-round-details").open=true;
   if(previousOpponent&&$("homeV2Opponent")?.querySelector(`option[value="${CSS.escape(previousOpponent)}"]`)) $("homeV2Opponent").value=previousOpponent;
   if(homeV2PicksRound!==null&&!$("homeV2PicksModal").classList.contains("hidden")) renderHomeV2Picks();
+  renderHomeV2RoundLeader(roundHighlightsLoader.peek(roundHighlightsKey(round)),round);
+  if(roundHighlightsAvailable(round))queueMicrotask(()=>refreshRoundHighlightsViews());
 }
 function renderHomeV2Picks(){
   if(!isAdminUser()||!state.participant)return closeHomeV2Picks(false);
