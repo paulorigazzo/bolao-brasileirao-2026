@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
-import {buildHomeV2Model,buildHomeV2PersonalContext} from '../js/home-v2.js';
+import {buildHomeV2Model,buildHomeV2PersonalContext,buildHomeV2LeagueHighlights} from '../js/home-v2.js';
 import {buildFriendlyRankingsModel} from '../js/friendly-rankings-engine.js';
 import {buildRoundHighlightsModel} from '../js/round-highlights-engine.js';
 const games=[{id_jogo:1,rodada:29,status:'open'},{id_jogo:2,rodada:29,status:'live'},{id_jogo:3,rodada:29,status:'finished'},{id_jogo:4,rodada:30,status:'open'}];
@@ -22,9 +22,9 @@ const source=readFileSync(new URL('../js/app.js',import.meta.url),'utf8').replac
 function extract(name){const start=source.indexOf('function '+name+'(');assert.ok(start>=0,name);const end=source.indexOf('\nfunction ',start+1);return source.slice(start,end<0?source.length:end);}
 const nodes=new Map();function node(id){if(!nodes.has(id))nodes.set(id,{innerHTML:'',textContent:'',classList:{contains:()=>true},value:'',focus(){}});return nodes.get(id);}
 let admin=true;
-const context={publicPicksRefreshPending:false,buildHomeV2PersonalContext,buildFriendlyRankingsModel,buildRoundHighlights:()=>({facts:{personal:[{key:"personal-round-performance",title:"Você fez 10 pontos na rodada",detail:"Resumo dos resultados oficiais."},{key:"new-personal-best",title:"Sua melhor rodada até agora",detail:"Novo recorde pessoal: 10 pontos."}],group:[]},isProvisional:false}),teamNamesDisplayText:x=>x,provisionalRoundHighlightFact:x=>x,normalizeTeamKey:x=>String(x||"").toLowerCase(),CSS:{escape:x=>x},buildHomeV2Model,$:node,isAdminUser:()=>admin,show(){},closeHomeV2Picks(){},calculateRanking(){},state:{participant:{nome:'Teste'},leagueContextStatus:'ready',ranking:[{key:'me',name:'Teste',total:25}],games:games.slice(0,3),ownPicks:[]},currentRoundNumber:()=>29,ownPick:inputs.ownPick,locked:g=>g.status!=='open',isFinished:g=>g.status==='finished',isScorableGame:inputs.isScorable,gameStatusDisplay:g=>({key:g.status,label:g.status}),points:inputs.points,calculatePredictionPoints:inputs.livePoints,roundLifecycleSummary:()=>({finished:1,live:1,postponed:0,cancelled:0,status:'PARTIAL'}),pendingEarlierRounds:()=>[],isPostponed:g=>g.status==='postponed',homeRoundHighlightsContext:()=>({round:29,mode:'live'}),isCurrentRankingParticipant:p=>p.key==='me',findTeam:()=>null,activeLeagueName:()=> 'Liga de teste',teamDisplayName:x=>x||'Clube',escapeHtml:x=>String(x??''),rankingAvatar:()=>'<span class="ranking-avatar">T</span>',teamLogo:()=>'<span>⚽</span>',deadlineText:()=>"Fecha em 45 min",liveMatchMinute:()=> '20',hasValidScore:()=>false,homeDeadline:()=> '20:00',formatDate:()=>'',Date,homeV2PicksRound:null};
+const context={publicPicksRefreshPending:false,buildHomeV2PersonalContext,buildHomeV2LeagueHighlights,buildFriendlyRankingsModel,buildRoundHighlights:()=>({facts:{personal:[{key:"personal-round-performance",title:"Você fez 10 pontos na rodada",detail:"Resumo dos resultados oficiais."},{key:"new-personal-best",title:"Sua melhor rodada até agora",detail:"Novo recorde pessoal: 10 pontos."}],group:[]},isProvisional:false}),teamNamesDisplayText:x=>x,provisionalRoundHighlightFact:x=>x,normalizeTeamKey:x=>String(x||"").toLowerCase(),CSS:{escape:x=>x},buildHomeV2Model,$:node,isAdminUser:()=>admin,show(){},closeHomeV2Picks(){},calculateRanking(){},state:{participant:{nome:'Teste'},leagueContextStatus:'ready',ranking:[{key:'me',name:'Teste',total:25}],games:games.slice(0,3),ownPicks:[]},currentRoundNumber:()=>29,ownPick:inputs.ownPick,locked:g=>g.status!=='open',isFinished:g=>g.status==='finished',isScorableGame:inputs.isScorable,gameStatusDisplay:g=>({key:g.status,label:g.status}),points:inputs.points,calculatePredictionPoints:inputs.livePoints,roundLifecycleSummary:()=>({finished:1,live:1,postponed:0,cancelled:0,status:'PARTIAL'}),pendingEarlierRounds:()=>[],isPostponed:g=>g.status==='postponed',homeRoundHighlightsContext:()=>({round:29,mode:'live'}),isCurrentRankingParticipant:p=>p.key==='me',findTeam:()=>null,activeLeagueName:()=> 'Liga de teste',teamDisplayName:x=>x||'Clube',escapeHtml:x=>String(x??''),rankingAvatar:()=>'<span class="ranking-avatar">T</span>',teamLogo:()=>'<span>⚽</span>',deadlineText:()=>"Fecha em 45 min",liveMatchMinute:()=> '20',hasValidScore:()=>false,homeDeadline:()=> '20:00',formatDate:()=>'',Date,homeV2PicksRound:null};
 vm.createContext(context);
-for(const name of ['homeV2Model','homeV2Button','homeV2Help','homeV2FriendlyRankings','renderHomeV2','renderHomeV2Picks'])vm.runInContext(extract(name),context);
+for(const name of ['homeV2Model','homeV2Button','homeV2Help','homeV2FriendlyRankings','homeV2LeagueHighlights','renderHomeV2','renderHomeV2Picks'])vm.runInContext(extract(name),context);
 vm.runInContext('renderHomeV2()',context);
 assert.match(node('homeV2Content').innerHTML,/Completar pendentes/);assert.match(node('homeV2Content').innerHTML,/pontos oficiais/);assert.match(node('homeV2Content').innerHTML,/Destaques · Rodada 29/);assert.doesNotMatch(node('homeV2Content').innerHTML,/Rodada 30/);
 context.state.games=[games[0]];context.ownPick=()=>({earned:0,gols_casa:1,gols_fora:0});vm.runInContext('renderHomeV2()',context);assert.match(node('homeV2Content').innerHTML,/Revisar palpites/);
@@ -94,6 +94,42 @@ context.state.publicPicks=[];await clickHome({target:{closest:()=>({dataset:{v2A
 context.state.games=[games[0]];context.ownPick=()=>null;vm.runInContext('renderHomeV2()',context);assert.match(node('homeV2Content').innerHTML,/href="\/central\/#palpites"/);
 context.state.games=[games[1]];vm.runInContext('renderHomeV2()',context);assert.match(node('homeV2Content').innerHTML,/href="\/central\/#ranking"/);
 
+// Badges apresentam o modelo canônico, incluindo empates reais (sem comparar médias arredondadas).
+assert.deepEqual(buildHomeV2LeagueHighlights(),[]);
+const tiedPicks=members.flatMap(member=>history.map(game=>({user_id:member.user_id,usuario:member.nome,id_jogo:game.id_jogo,score:10})));
+const tied=buildFriendlyRankingsModel({games:history,picks:tiedPicks,participants:members,currentParticipant:members[0],...deps});
+const badges=buildHomeV2LeagueHighlights(tied);
+assert.deepEqual(badges.map(card=>card.view),['efficiency','hot','records']);
+assert.equal(badges[0].value,'10,00');assert.equal(badges[0].leaders.length,1);
+assert.equal(badges[0].leaders[0].detail,'30 palpites avaliados');
+assert.equal(badges[1].leaders[0].detail,'Rodadas 1, 2, 3');
+assert.equal(badges[2].value,'100');assert.equal(badges[2].shared,true);assert.equal(badges[2].leaders.length,2);
+assert.equal(badges[2].leaders[0].detail,'Rodada 3');assert.equal(badges[2].leaders.some(leader=>leader.isCurrent),true);
+const differentRounds=tiedPicks.map(p=>({...p,score:(p.user_id==='me'?p.id_jogo<=10:p.id_jogo>20)?10:0}));
+const sharedRecords=buildHomeV2LeagueHighlights(friendly(differentRounds)).find(card=>card.view==='records');
+assert.deepEqual(sharedRecords.leaders.map(leader=>leader.detail).sort(),['Rodada 1','Rodada 3']);
+assert.equal(buildHomeV2LeagueHighlights({efficiency:{ranking:[]},hot:tied.hot,records:tied.records}).length,2);
+assert.equal(buildHomeV2LeagueHighlights(friendly(personalPicks.slice(0,19))).some(card=>card.view==='efficiency'||card.view==='hot'),false);
+const savedPoints=context.points;
+context.state.games=history;context.state.publicPicks=tiedPicks;context.state.participants=members;context.points=p=>p?.score??p?.earned??0;
+context.state.participant=members[0];context.state.activeLeague={liga_id:'a'};
+vm.runInContext('renderHomeV2()',context);
+let badgeHtml=node('homeV2Content').innerHTML;
+assert.equal((badgeHtml.match(/class="premium-feature-card v2-league-metric/g)||[]).length,3);
+assert.match(badgeHtml,/Liderança compartilhada/);assert.match(badgeHtml,/v2-metric-you/);
+assert.ok(badgeHtml.indexOf('v2-dispute')<badgeHtml.indexOf('v2-league-highlights'));
+assert.ok(badgeHtml.indexOf('v2-league-highlights')<badgeHtml.indexOf('v2-favorite'));
+for(const view of ['efficiency','hot','records']){
+  await clickHome({target:{closest:()=>({dataset:{v2Action:view==='records'?'records':'parallel',view}})}});
+  assert.equal(context.friendlyRankingsView,view);
+}
+context.publicPicksRefreshPending=true;vm.runInContext('renderHomeV2()',context);
+assert.doesNotMatch(node('homeV2Content').innerHTML,/v2-league-highlights/);
+context.publicPicksRefreshPending=false;
+context.state.activeLeague={liga_id:'b'};context.state.participants=[];context.state.publicPicks=[];vm.runInContext('renderHomeV2()',context);
+assert.doesNotMatch(node('homeV2Content').innerHTML,/v2-league-highlights/,'troca de liga não conserva badges antigos');
+context.state.participants=members;context.state.publicPicks=tiedPicks;context.points=savedPoints;
+
 admin=false;vm.runInContext('renderHomeV2()',context);assert.equal(node('homeV2Content').innerHTML,'');
 for(const name of ['navigateTo','applyNavigationState'])assert.match(extract(name),/tabName==="homeV2"&&!isAdminUser\(\)/);
 // Referência da Home aprovada na v6.46.1; inclui a revisão visual da Visão Geral.
@@ -118,13 +154,19 @@ if(process.argv[2]){
   context.buildRoundHighlights=()=>({facts:{personal:[{key:'unique-exact:1',title:'Só você acertou Corinthians × Santos',detail:'Placar exato de 2 × 1 nos resultados desta rodada.'}],group:[]},isProvisional:false});
   context.formatDate=()=> 'hoje, 18h30';context.ownPick=()=>null;
   if(process.argv[3]==='live'){context.state.games.push({...context.state.games[0],id_jogo:9,rodada:21});context.state.games.forEach(g=>{g.status='live';g.gols_casa=1;g.gols_fora=0;});context.ownPick=()=>({earned:3,gols_casa:2,gols_fora:0});context.hasValidScore=()=>true;}
-  if(process.argv[3]==='results'){
+  if(process.argv[3]==='results'||process.argv[3]==='badges'){
     context.state.games=history.map(g=>({...g,rodada:g.rodada+26}));
     context.state.participant={nome:'Paulo',user_id:'me'};context.state.participants=[{user_id:'me',nome:'Paulo'}];
     context.state.publicPicks=personalPicks.map(p=>({...p,earned:p.score}));
     context.ownPick=id=>context.state.publicPicks.find(p=>p.id_jogo===id);
     context.buildRoundHighlights=()=>({...highlights(),round:29});
     context.hasValidScore=()=>true;
+  }
+  if(process.argv[3]==='badges'){
+    context.state.participant={nome:'Paulo Rigazzo',user_id:'me'};
+    context.state.participants=[{user_id:'me',nome:'Paulo Rigazzo'},{user_id:'other',nome:'Alexandre de Albuquerque e Silva'}];
+    context.state.publicPicks=context.state.participants.flatMap(member=>context.state.games.map(game=>({user_id:member.user_id,usuario:member.nome,id_jogo:game.id_jogo,earned:10})));
+    context.ownPick=id=>context.state.publicPicks.find(p=>p.user_id==='me'&&p.id_jogo===id);
   }
   vm.runInContext('renderHomeV2()',context);
   const {writeFileSync}=await import('node:fs');

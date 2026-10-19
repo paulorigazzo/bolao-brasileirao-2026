@@ -33,3 +33,22 @@ export function buildHomeV2PersonalContext({highlights=null,friendlyRankings=nul
     :{view:'efficiency',position:null,label:null};
   return {comparison,record,parallel};
 }
+
+// Somente apresenta líderes/posições fornecidos pelas Disputas Paralelas.
+export function buildHomeV2LeagueHighlights(friendlyRankings=null) {
+  return [
+    {view:'efficiency',icon:'🎯',title:'Quem joga, resolve',unit:'pontos por palpite'},
+    {view:'hot',icon:'🔥',title:'Tá vindo quente',unit:'pontos por palpite'},
+    {view:'records',icon:'🏅',title:'Recordes por rodada',unit:'pontos em uma rodada'}
+  ].flatMap(card=>{
+    const leaders=friendlyRankings?.[card.view]?.ranking.filter(item=>item.position===1)||[];
+    if(!leaders.length)return [];
+    const record=card.view==='records';
+    const value=record?leaders[0].points:leaders[0].average;
+    return [{...card,value:Number(value).toLocaleString('pt-BR',record?{}:{minimumFractionDigits:2,maximumFractionDigits:2}),
+      shared:leaders.length>1,
+      leaders:leaders.map(item=>({name:item.name,isCurrent:item.isCurrent,
+        detail:record?`Rodada ${item.round}`:card.view==='hot'?`Rodadas ${item.rounds.join(', ')}`:`${item.evaluated} palpites avaliados`
+      }))}];
+  });
+}

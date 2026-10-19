@@ -103,3 +103,24 @@
 .home-v2 .v2-parallel-action{display:block;background:transparent;border:0;padding:7px 0;min-height:44px;text-align:left;font-size:.79rem;color:var(--premium-emerald);line-height:1.5;white-space:normal}
 .home-v2 .v2-central{text-align:center}
 .home-v2 a:focus-visible{outline:2px solid var(--premium-emerald);outline-offset:3px}
+
+/* Badges das disputas: escopo exclusivo da Home experimental. */
+.home-v2 .v2-league-highlights>header{padding:3px 2px 12px}
+.home-v2 .v2-league-highlights h2{margin:0 0 5px;font-size:.95rem}
+.home-v2 .v2-league-highlights>header p{margin:0;color:var(--muted);font-size:.7rem;line-height:1.5;overflow-wrap:anywhere}
+.home-v2 .v2-league-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:10px}
+.home-v2 .v2-league-metric{position:relative;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:0;min-width:0;width:100%;padding:16px 10px;border:1px solid var(--premium-line);border-radius:18px;box-shadow:inset 3px 0 var(--premium-emerald),var(--premium-card-shadow);color:var(--text);font:inherit;text-align:center;white-space:normal}
+.home-v2 .v2-league-metric.is-record{box-shadow:inset 3px 0 var(--premium-gold),var(--premium-card-shadow)}
+.home-v2 .v2-metric-heading{display:flex;flex-direction:column;align-items:center;gap:8px;min-height:88px}
+.home-v2 .v2-metric-icon{display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--premium-line);border-radius:50%;background:rgba(53,220,131,.09);font-size:1.1rem}
+.home-v2 .v2-metric-title{display:grid;align-items:center;min-height:3.6em;font-size:.8rem;font-weight:800;line-height:1.2}
+.home-v2 .v2-metric-value{display:block;margin:12px 0 6px;font-size:clamp(1.5rem,7.2vw,2.6rem);line-height:1.05;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+.home-v2 .is-record .v2-metric-value{color:var(--premium-gold)}
+.home-v2 .v2-metric-unit{display:block;min-height:2.8em;color:var(--muted);font-size:.7rem;line-height:1.4}
+.home-v2 .v2-metric-leaders{display:grid;gap:10px;margin:14px 0 12px}
+.home-v2 .v2-metric-name{display:block;font-size:.78rem;font-weight:800;line-height:1.4;overflow-wrap:anywhere}
+.home-v2 .v2-metric-detail{display:block;margin-top:5px;font-size:.67rem;color:var(--muted);line-height:1.45;overflow-wrap:anywhere}
+.home-v2 .v2-metric-you{display:table;margin:4px auto 0;padding:2px 7px;border-radius:999px;background:rgba(53,220,131,.12);color:var(--premium-emerald);font-size:.6rem;font-weight:800;font-style:normal}
+.home-v2 .v2-metric-shared{display:block;margin-top:8px;color:var(--premium-gold);font-size:.63rem;line-height:1.4}
+.home-v2 .v2-metric-link{display:block;margin-top:auto;padding-top:8px;color:var(--premium-emerald);font-size:.67rem;font-weight:750}
+@media(max-width:360px){.home-v2 .v2-league-metrics{gap:7px}.home-v2 .v2-league-metric{padding:14px 8px}.home-v2 .v2-metric-title{font-size:.72rem}.home-v2 .v2-metric-name{font-size:.7rem}.home-v2 .v2-metric-unit{font-size:.63rem}}

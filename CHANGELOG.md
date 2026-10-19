@@ -1,3 +1,10 @@
+# v6.51.0 — Destaques da liga na Home 2.0
+
+- Adiciona badges para Quem joga, resolve, Tá vindo quente e Recordes por rodada, com números grandes, líderes, contexto e acesso às abas correspondentes.
+- Reutiliza o modelo de Disputas Paralelas da liga selecionada, incluindo desempates existentes e liderança compartilhada nos recordes.
+- Oculta cada card sem dados suficientes e os destaques durante atualização dos palpites públicos; preserva a Home atual.
+- Detalhes: [nota da versão](docs/releases/v6.51.0-home-v2-destaques-disputas.md).
+
 # v6.50.0 — Exclusão controlada de ligas
 
 - Adiciona Excluir liga à administração central, apenas para ligas privadas arquivadas.

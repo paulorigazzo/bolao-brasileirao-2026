@@ -1,4 +1,4 @@
-import { buildHomeV2Model, buildHomeV2PersonalContext } from "./home-v2.js";
+import { buildHomeV2Model, buildHomeV2PersonalContext, buildHomeV2LeagueHighlights } from "./home-v2.js";
 import { finishStartupIntro } from "./startup-intro.js";
 import { buildTeamCampaign, campaignPositionTrend } from "./team-campaign.js";
 import { CONFIG } from "./config.js";
@@ -34,7 +34,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.50.0";
+const APP_VERSION = "6.51.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -3086,6 +3086,19 @@ function homeV2FriendlyRankings(){
 function homeV2Help(slug,label){
   return `<a class="v2-help" href="/central/#${slug}" target="_blank" rel="noopener">${escapeHtml(label)} →</a>`;
 }
+function homeV2LeagueHighlights(cards){
+  if(!cards.length)return '';
+  return `<section class="v2-league-highlights" aria-labelledby="homeV2LeagueHighlightsTitle">
+    <header><h2 id="homeV2LeagueHighlightsTitle">Destaques da liga</h2><p>Disputas Paralelas · ${escapeHtml(activeLeagueName(state.activeLeague))} · Temporada 2026</p></header>
+    <div class="v2-league-metrics">${cards.map(card=>`<button type="button" class="premium-feature-card v2-league-metric ${card.view==='records'?'is-record':''}" data-v2-action="${card.view==='records'?'records':'parallel'}" data-view="${card.view}">
+      <span class="v2-metric-heading"><span class="v2-metric-icon" aria-hidden="true">${card.icon}</span><span class="v2-metric-title">${card.title}</span></span>
+      <strong class="v2-metric-value">${card.value}</strong><span class="v2-metric-unit">${card.unit}</span>
+      ${card.shared?'<span class="v2-metric-shared">Liderança compartilhada</span>':''}
+      <span class="v2-metric-leaders">${card.leaders.map(leader=>`<span class="v2-metric-leader"><span class="v2-metric-name">${escapeHtml(leader.name)}${leader.isCurrent?'<em class="v2-metric-you">Você</em>':''}</span><span class="v2-metric-detail">${escapeHtml(leader.detail)}</span></span>`).join('')}</span>
+      <span class="v2-metric-link">Ver disputa <span aria-hidden="true">›</span></span>
+    </button>`).join('')}</div>
+  </section>`;
+}
 function renderHomeV2(){
   if(!isAdminUser()){show("homeV2Tab",false);$("homeV2Content").innerHTML="";closeHomeV2Picks(false);return;}
   if(!state.participant||state.leagueContextStatus!=="ready"){
@@ -3136,7 +3149,9 @@ function renderHomeV2(){
   const rankContext=[gapToLeader!==null?`${gapToLeader} pts do líder`:null,leadOverNext!==null?`${leadOverNext} pts à frente do próximo`:null].filter(Boolean).join(' · ');
   const roundSummary=[`${life.finished}/${m.current.length} encerrados`,life.live?`${life.live} ao vivo`:null,life.postponed?`${life.postponed} adiados`:null,life.cancelled?`${life.cancelled} cancelados`:null].filter(Boolean).join(' · ');
   const highlightsModel=context&&!publicPicksRefreshPending?buildRoundHighlights(context.round):null;
-  const personal=buildHomeV2PersonalContext({highlights:highlightsModel,friendlyRankings:publicPicksRefreshPending?null:homeV2FriendlyRankings()});
+  const parallelModel=publicPicksRefreshPending?null:homeV2FriendlyRankings();
+  const personal=buildHomeV2PersonalContext({highlights:highlightsModel,friendlyRankings:parallelModel});
+  const leagueHighlights=buildHomeV2LeagueHighlights(parallelModel);
   const resultContext=phase==='results'&&Number(highlightsModel?.round)===round?personal:null;
   const otherFacts=highlightsModel?.facts.personal.filter(fact=>!['new-personal-best','matched-personal-best'].includes(fact.key)||(!resultContext&&personal.record?.key===fact.key))||[];
   const rawFact=otherFacts.find(fact=>fact.key!=="personal-round-performance")||highlightsModel?.facts.group[0]||otherFacts[0];
@@ -3178,6 +3193,7 @@ function renderHomeV2(){
         ${homeV2Help('disputas','Como funcionam essas disputas?')}
       </div>
     </article>
+    ${homeV2LeagueHighlights(leagueHighlights)}
     <article class="v2-card premium-feature-card v2-favorite">
       ${head('★',team?`Meu time · ${escapeHtml(teamDisplayName(team.name))}`:'Meu time')}
       ${team?`<div class="v2-favorite-body"><span class="v2-favorite-crest">${teamLogo(team.logo,team.name)}</span><div><p>${teamRow?`${teamRow.position}º no Brasileirão · ${teamRow.points} pontos`:'Classificação do clube indisponível'}</p><small>${teamNext?`Próximo: ${escapeHtml(favoriteOpponent)} · ${favoriteHome?"em casa":"fora"}<br>${escapeHtml(formatDate(teamNext.inicio))}`:'Sem próximo jogo confirmado.'}</small>${homeV2Button('campaign','Ver campanha →')}</div></div>`:`<p>Escolha seu clube para acompanhar a campanha.</p>${homeV2Button('profile','Escolher time →')}`}
