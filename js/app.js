@@ -1,5 +1,5 @@
 import { loadLeaguePublicPicks } from "./league-public-picks.js";
-import { buildHomeV2Model, buildHomeV2PersonalContext, buildHomeV2LeagueHighlights, buildHomeV2RoundLeader } from "./home-v2.js";
+import { buildHomeV2Model, buildHomeV2PersonalContext, buildHomeV2LeagueHighlights, buildHomeV2RoundLeader, buildHomeV2RoundRecord } from "./home-v2.js";
 import { finishStartupIntro } from "./startup-intro.js";
 import { buildTeamCampaign, campaignPositionTrend } from "./team-campaign.js";
 import { CONFIG } from "./config.js";
@@ -3086,7 +3086,7 @@ function homeV2LeagueMetricContent(card){
     <span class="v2-metric-chevron" aria-hidden="true">›</span>`;
 }
 function homeV2LeagueMetric(card){
-  return `<button type="button" class="premium-feature-card v2-league-metric ${card.view==='round-leader'?'is-round-leader':''}" data-v2-action="${card.action||'parallel'}" data-view="${card.view}"${card.round?` data-round="${card.round}" data-v2-round-leader`:''}>${homeV2LeagueMetricContent(card)}</button>`;
+  return `<button type="button" class="premium-feature-card v2-league-metric ${['round-leader','records'].includes(card.view)?'is-round-leader':''}" data-v2-action="${card.action||'parallel'}" data-view="${card.view}"${card.round?` data-round="${card.round}" data-v2-round-leader`:''}>${homeV2LeagueMetricContent(card)}</button>`;
 }
 function homeV2LeagueHighlights(cards,prefix="homeV2",roundAccess=""){
   return `<section id="${prefix}LeagueHighlightsSection" class="v2-league-highlights ${cards.length||roundAccess?'':'hidden'}" aria-labelledby="${prefix}LeagueHighlightsTitle">
@@ -3098,11 +3098,14 @@ function renderHomeV2RoundLeader(entry,round,prefix="homeV2"){
   const slot=$(prefix+"RoundLeaderSlot"),section=$(prefix+"LeagueHighlightsSection"),tab=$(prefix+"Tab");
   if(!slot||!section||!tab||tab.classList.contains("hidden")||(prefix==="homeV2"&&!isAdminUser())||state.leagueContextStatus!=="ready"||round!==currentRoundNumber())return;
   const valid=entry?.data&&!entry.error&&String(entry.data.leagueId)===String(state.activeLeague?.liga_id)&&entry.data.round===round;
-  const card=valid?buildHomeV2RoundLeader(buildRoundLiveHighlightsModel(entry.data,state.user?.id),round,state.user?.id):null;
+  const model=valid?buildRoundLiveHighlightsModel(entry.data,state.user?.id):null;
+  const localResults=state.games.some(game=>Number(game.rodada)===round&&(isScorableGame(game)||(['live','suspended'].includes(gameStatusDisplay(game).key)&&hasValidScore(game))));
+  const card=model?.hasResults?buildHomeV2RoundLeader(model,round,state.user?.id)
+    :!localResults&&!publicPicksRefreshPending?buildHomeV2RoundRecord(homeV2FriendlyRankings()):null;
   const button=slot.querySelector('button');
   if(card){
     const content=homeV2LeagueMetricContent(card);
-    if(button){if(button.innerHTML!==content)button.innerHTML=content;}
+    if(button&&button.dataset.view===card.view){if(button.innerHTML!==content)button.innerHTML=content;}
     else slot.innerHTML=homeV2LeagueMetric(card);
   }else slot.innerHTML='';
   section.classList.toggle('hidden',!section.querySelector('.v2-league-metric,[data-home-action="round-highlights"]'));
@@ -3124,7 +3127,7 @@ $("homeLeagueHighlights")?.addEventListener("click",event=>{
   if(button.dataset.v2Action!=='parallel')return;
   friendlyRankingsModel=homeV2FriendlyRankings();
   openFriendlyRankings(button);
-  friendlyRankingsView=button.dataset.view==='hot'?'hot':'efficiency';
+  friendlyRankingsView=['hot','records'].includes(button.dataset.view)?button.dataset.view:'efficiency';
   renderFriendlyRankingsModal();
 });
 
@@ -3274,7 +3277,7 @@ $("homeV2Content")?.addEventListener("click",async event=>{
   if(action==='parallel'||action==='records'){
     friendlyRankingsModel=homeV2FriendlyRankings();
     openFriendlyRankings(button);
-    friendlyRankingsView=action==='records'?'records':button.dataset.view==='hot'?'hot':'efficiency';
+    friendlyRankingsView=action==='records'?'records':['hot','records'].includes(button.dataset.view)?button.dataset.view:'efficiency';
     renderFriendlyRankingsModal();return;
   }
   if(action==='duel'){openRankingParticipantPicks($('homeV2Opponent').value,button);if(!$('rankingPicksModal').classList.contains('hidden'))setRankingPicksModalView('duel');return;}

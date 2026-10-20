@@ -1,5 +1,7 @@
 # v6.51.4 — Palpites encerrados completos por liga
 
+- Terceiro destaque da Home e Home 2.0 mostra Recorde por rodada entre rodadas, com acesso ao modal correspondente.
+
 - Pagina a consulta autorizada em lotes de 500 registros, com ordem estável e conferência da quantidade total.
 - Corrige o carregamento inicial e as atualizações automáticas, que antes podiam alimentar os indicadores com apenas mil palpites; atualiza também o modal de Disputas Paralelas já aberto.
 - Descarta páginas incompletas, repetidas, com falha ou de contexto antigo; aplica somente leituras completas.

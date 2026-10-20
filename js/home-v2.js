@@ -51,6 +51,15 @@ export function buildHomeV2LeagueHighlights(friendlyRankings=null) {
 }
 
 // Fonte agregada dos Destaques ao vivo; não reconstrói palpites ou pontuação.
+export function buildHomeV2RoundRecord(friendlyRankings) {
+  const leaders=friendlyRankings?.records?.ranking.filter(item=>item.position===1)||[];
+  if(!leaders.length)return null;
+  return {view:'records',action:'parallel',icon:'🏆',title:'Recorde por rodada',
+    value:Number(leaders[0].points).toLocaleString('pt-BR'),unit:'pontos em uma rodada',shared:leaders.length>1,
+    leaders:leaders.map(item=>({name:item.name,isCurrent:item.isCurrent,detail:`Rodada ${item.round}`}))};
+}
+
+// Fonte agregada dos Destaques ao vivo; não reconstrói palpites ou pontuação.
 export function buildHomeV2RoundLeader(model,round,selectedUserId) {
   if(!model||model.round!==round||!model.hasResults||!model.ranking.length)return null;
   const total=model.ranking[0].total;

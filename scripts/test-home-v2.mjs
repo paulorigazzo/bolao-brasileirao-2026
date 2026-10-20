@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
-import {buildHomeV2Model,buildHomeV2PersonalContext,buildHomeV2LeagueHighlights,buildHomeV2RoundLeader} from '../js/home-v2.js';
+import {buildHomeV2Model,buildHomeV2PersonalContext,buildHomeV2LeagueHighlights,buildHomeV2RoundLeader,buildHomeV2RoundRecord} from '../js/home-v2.js';
 import {buildRoundLiveHighlightsModel} from '../js/round-live-highlights-engine.js';
 import {buildFriendlyRankingsModel} from '../js/friendly-rankings-engine.js';
 import {buildRoundHighlightsModel} from '../js/round-highlights-engine.js';
@@ -148,12 +148,12 @@ assert.equal(buildHomeV2RoundLeader({...leaderModel,projected:false},29,'me').st
 const leaderSlot={innerHTML:'',querySelector(){return this.button||null;}};
 const leaderSection={classList:{toggle(_name,value){this.hidden=value;}},querySelector:()=>leaderSlot.innerHTML||leaderSlot.button||null};
 const leaderTab={classList:{contains:()=>false}};
-const leaderContext={$:id=>({homeV2RoundLeaderSlot:leaderSlot,homeV2LeagueHighlightsSection:leaderSection,homeV2Tab:leaderTab}[id]),isAdminUser:()=>true,state:{user:{id:'me'},activeLeague:{liga_id:'a'},leagueContextStatus:'ready'},currentRoundNumber:()=>29,buildHomeV2RoundLeader,buildRoundLiveHighlightsModel,escapeHtml:context.escapeHtml};
+const leaderContext={publicPicksRefreshPending:false,buildHomeV2RoundRecord,homeV2FriendlyRankings:()=>null,isScorableGame:()=>false,gameStatusDisplay:()=>({key:'scheduled'}),hasValidScore:()=>false,$:id=>({homeV2RoundLeaderSlot:leaderSlot,homeV2LeagueHighlightsSection:leaderSection,homeV2Tab:leaderTab}[id]),isAdminUser:()=>true,state:{games:[],user:{id:'me'},activeLeague:{liga_id:'a'},leagueContextStatus:'ready'},currentRoundNumber:()=>29,buildHomeV2RoundLeader,buildRoundLiveHighlightsModel,escapeHtml:context.escapeHtml};
 vm.createContext(leaderContext);
 for(const name of ['homeV2LeagueMetricContent','homeV2LeagueMetric','renderHomeV2RoundLeader'])vm.runInContext(extract(name),leaderContext);
 leaderContext.entry={data:leaderPayload};vm.runInContext('renderHomeV2RoundLeader(entry,29)',leaderContext);
 assert.match(leaderSlot.innerHTML,/data-v2-action="highlights"/);assert.match(leaderSlot.innerHTML,/data-round="29"/);assert.match(leaderSlot.innerHTML,/Ao vivo · Provisório/);
-leaderSlot.button={innerHTML:'old'};const stableButton=leaderSlot.button;
+leaderSlot.button={innerHTML:'old',dataset:{view:'round-leader'}};const stableButton=leaderSlot.button;
 vm.runInContext('renderHomeV2RoundLeader(entry,29)',leaderContext);assert.equal(leaderSlot.button,stableButton,'atualização mantém o botão para retorno de foco');
 leaderContext.entry={data:{...leaderPayload,leagueId:'b'}};vm.runInContext('renderHomeV2RoundLeader(entry,29)',leaderContext);assert.equal(leaderSlot.innerHTML,'');
 leaderContext.entry={data:leaderPayload,error:true};vm.runInContext('renderHomeV2RoundLeader(entry,29)',leaderContext);assert.equal(leaderSlot.innerHTML,'');
@@ -226,7 +226,7 @@ if(process.argv[2]){
   context.buildRoundHighlights=()=>({facts:{personal:[{key:'unique-exact:1',title:'Só você acertou Corinthians × Santos',detail:'Placar exato de 2 × 1 nos resultados desta rodada.'}],group:[]},isProvisional:false});
   context.formatDate=()=> 'hoje, 18h30';context.ownPick=()=>null;
   if(process.argv[3]==='live'){context.state.games.push({...context.state.games[0],id_jogo:9,rodada:21});context.state.games.forEach(g=>{g.status='live';g.gols_casa=1;g.gols_fora=0;});context.ownPick=()=>({earned:3,gols_casa:2,gols_fora:0});context.hasValidScore=()=>true;}
-  if(process.argv[3]==='results'||process.argv[3]==='badges'||process.argv[3]==='home'){
+  if(process.argv[3]==='results'||process.argv[3]==='badges'||process.argv[3]==='home'||process.argv[3]==='home-record'){
     context.state.games=history.map(g=>({...g,rodada:g.rodada+26}));
     context.state.participant={nome:'Paulo',user_id:'me'};context.state.participants=[{user_id:'me',nome:'Paulo'}];
     context.state.publicPicks=personalPicks.map(p=>({...p,earned:p.score}));
@@ -242,7 +242,7 @@ if(process.argv[2]){
   }
   vm.runInContext('renderHomeV2()',context);
   const sampleModel=buildRoundLiveHighlightsModel({...leaderPayload,ranking:leaderPayload.ranking.slice(0,process.argv[3]==='badges'?2:1)},'me');
-  const sampleCard=buildHomeV2RoundLeader(sampleModel,29,'me');
+  const sampleCard=process.argv[3]==='home-record'?buildHomeV2RoundRecord({records:{ranking:[{position:1,name:'Paulo Rigazzo',points:53,round:31,isCurrent:true}]}}):buildHomeV2RoundLeader(sampleModel,29,'me');
   context.sampleCard=sampleCard;
   const sampleMarkup=vm.runInContext('homeV2LeagueMetric(sampleCard)',context);
   node('homeV2Content').innerHTML=node('homeV2Content').innerHTML.replace('<div id="homeV2RoundLeaderSlot" class="v2-round-leader-slot"></div>','<div id="homeV2RoundLeaderSlot" class="v2-round-leader-slot">'+sampleMarkup+'</div>');
@@ -265,7 +265,7 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')closeFriendl
 </script>`;
 
   writeFileSync(process.argv[2], '<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="http://localhost:8892/css/design-system.css"><link rel="stylesheet" href="http://localhost:8892/css/styles.css"><link rel="stylesheet" href="http://localhost:8892/css/components.css"><link rel="stylesheet" href="http://localhost:8892/css/identity-premium.css"><link rel="stylesheet" href="http://localhost:8892/css/home-v2.css"><body><main style="max-width:1100px;margin:auto;padding:16px"><section class="home-v2"><header class="v2-heading"><div><span class="eyebrow">DADOS SINTÉTICOS · VALIDAÇÃO LOCAL</span><h2>Home 2.0</h2></div><button class="secondary">Voltar à ADM</button></header><div id="homeV2Content" class="v2-grid">'+node('homeV2Content').innerHTML+'</div></section></main>'+modal+integration+'</body></html>');
-  if(process.argv[3]==='home'){
+  if(['home','home-record'].includes(process.argv[3])){
     const overview={innerHTML:''};
     const overviewStart=source.indexOf('$("homeOverview").innerHTML=');
     const overviewEnd=source.indexOf(';',overviewStart)+1;
@@ -279,3 +279,25 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')closeFriendl
   }
 
 }
+
+assert.equal(buildHomeV2RoundRecord(null),null);
+assert.equal(buildHomeV2RoundRecord({records:{ranking:[]}}),null);
+const recordModel={records:{ranking:[{position:1,name:'Pedro',points:53,round:31,isCurrent:true},{position:2,name:'Paulo',points:50,round:30}]}};
+const recordCard=buildHomeV2RoundRecord(recordModel);
+assert.equal(recordCard.value,'53');assert.equal(recordCard.view,'records');assert.equal(recordCard.leaders.length,1);
+assert.equal(recordCard.leaders[0].detail,'Rodada 31');assert.equal(recordCard.leaders[0].isCurrent,true);
+leaderSlot.button=null;leaderContext.homeV2FriendlyRankings=()=>recordModel;leaderContext.entry=null;
+vm.runInContext('renderHomeV2RoundLeader(entry,29,"home")',leaderContext);
+assert.match(leaderSlot.innerHTML,/Recorde por rodada/);assert.match(leaderSlot.innerHTML,/data-view="records"/);assert.doesNotMatch(leaderSlot.innerHTML,/data-round=/);
+leaderContext.entry={data:leaderPayload};vm.runInContext('renderHomeV2RoundLeader(entry,29,"home")',leaderContext);assert.match(leaderSlot.innerHTML,/Líder da rodada/);
+leaderContext.entry=null;leaderContext.isScorableGame=()=>true;leaderContext.state.games=[{rodada:29}];
+vm.runInContext('renderHomeV2RoundLeader(entry,29,"home")',leaderContext);assert.equal(leaderSlot.innerHTML,'');
+context.clickLeague({target:{closest:()=>({dataset:{v2Action:'parallel',view:'records'}})}});assert.equal(context.friendlyRankingsView,'records');
+
+leaderContext.state.games=[];leaderContext.publicPicksRefreshPending=true;
+vm.runInContext('renderHomeV2RoundLeader(entry,29,"home")',leaderContext);assert.equal(leaderSlot.innerHTML,'');
+leaderContext.publicPicksRefreshPending=false;leaderContext.isAdminUser=()=>true;
+leaderContext.$=id=>({homeV2RoundLeaderSlot:leaderSlot,homeV2LeagueHighlightsSection:leaderSection,homeV2Tab:leaderTab}[id]);
+vm.runInContext('renderHomeV2RoundLeader(entry,29)',leaderContext);assert.match(leaderSlot.innerHTML,/Recorde por rodada/);
+const sharedRecord=buildHomeV2RoundRecord({records:{ranking:[recordModel.records.ranking[0],{...recordModel.records.ranking[0],name:'Outro'}]}});
+assert.equal(sharedRecord.shared,true);assert.equal(sharedRecord.leaders.length,2);
