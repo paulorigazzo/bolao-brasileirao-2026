@@ -39,9 +39,10 @@ assert.deepEqual(
 const app=readFileSync(new URL("../js/app.js",import.meta.url),"utf8");
 const html=readFileSync(new URL("../index.html",import.meta.url),"utf8");
 assert.match(app,/sb\.rpc\("listar_minhas_ligas"\)/);
-for(const rpc of ["listar_membros_liga","obter_palpites_encerrados_liga","obter_contagem_palpites_liga","obter_ranking_liga","obter_ranking_provisorio_liga"]){
+for(const rpc of ["listar_membros_liga","obter_contagem_palpites_liga","obter_ranking_liga","obter_ranking_provisorio_liga"]){
   assert.match(app,new RegExp(`sb\\.rpc\\(["']${rpc}["']`));
 }
+assert.match(app,/loadLeaguePublicPicks\(\{supabase:sb,leagueId:league\.liga_id,isCurrent\}\)/);
 assert.match(app,/const params=\{p_liga_id:league\.liga_id\}/);
 assert.doesNotMatch(app,/const payloads?=\{[^}]*liga_id\s*:/i);
 assert.doesNotMatch(app,/state\.leagueContextStatus="loading"/);
