@@ -1,16 +1,17 @@
 # Divulgação de novidades aos participantes
 
-Documento de trabalho para revisar temas, selecionar conteúdos e acompanhar produção e divulgação. Registrado em 11/10/2026, com base nas entregas até a v6.46.4.
+Documento de trabalho para revisar temas, selecionar conteúdos e acompanhar produção, publicação na Central e divulgação aos participantes. Registrado em 11/10/2026; controle conciliado em 20/10/2026 com a Central publicada na v6.51.4, incluindo os commits `01bb53f`, `8617f17` e `7e469cb`.
 
 Título sugerido da campanha: **Veja o que ficou melhor no seu bolão**.
 
 ## Como usar
 
-Cada tema tem controle independente de decisão, produção e divulgação. Todos começam como propostas: nenhum conteúdo foi produzido ou divulgado por este registro.
+Cada tema tem controle independente de decisão, produção, publicação na Central e divulgação aos grupos. A tabela de controle consolidada abaixo representa o estado atual; as fichas preservam o histórico das versões anteriores e não devem ser interpretadas como pendências atuais quando houver revisão posterior registrada.
 
 - Decisão: A revisar / Selecionado / Adiado / Descartado.
-- Produção: Não iniciada / Em roteiro / Em produção / Criado / Em revisão / Aprovada.
-- Divulgação: Não programada / Programada / Divulgada.
+- Produção: Não iniciada / Em roteiro / Em produção / Criado / Em revisão / Aprovado.
+- Publicação na Central: Não publicado / Publicado / Substituído por vídeo atual do tema.
+- Divulgação aos grupos: Não programada / Programada / Divulgada. Publicar na Central não comprova envio por WhatsApp.
 - Registrar responsáveis, links dos materiais, canal e datas na ficha do tema.
 - Antes da gravação, conferir o comportamento na versão em produção e escolher exemplos legíveis. Prioridades são sugestões, não decisões aprovadas.
 
@@ -22,14 +23,14 @@ Decisão aprovada em 13/10/2026: todos os vídeos criados daqui em diante devem 
 - Encerramento: `central/vinhetas/entrada-em-campo-encerramento.mp4`, 2 segundos, com Bora pro próximo palpite?.
 - Incorporar os 4,4 segundos ao limite total aprovado de cada vídeo; ajustar o roteiro antes da gravação, sem cortar fala ou acelerar as animações para acomodar a vinheta.
 - Preservar H.264 Main nível 3.1, 20 fps, yuv420p, áudio AAC e faststart na exportação final; conferir duração e decodificação integral.
-- Os dois arquivos são reutilizáveis e independentes do vídeo de apresentação. Não aplicar retroativamente aos vídeos já publicados sem nova solicitação.
+- Os dois arquivos são reutilizáveis e independentes do vídeo de apresentação. A aplicação retroativa aos oito tutoriais e à apresentação da Central foi aprovada e publicada no commit `c9415bd`; qualquer nova alteração depende de solicitação específica.
 - A vinheta de abertura foi implementada no app, sem som, na versão 6.47.1 (PR #255). O carregamento concluído interrompe a animação; falhas e preferência por movimento reduzido usam o logo estático. Ver [nota da versão](../releases/v6.47.1-vinheta-abertura.md).
 
 ## Opções de conteúdo
 
 | ID | Tema e mensagem ao participante | Formato e demonstração sugeridos | Prioridade sugerida |
 | --- | --- | --- | --- |
-| 01 | **Meu time reunido na Home.** Posição, pontos do clube, campanha, últimos resultados, próxima partida e desempenho dos seus palpites em um único card mais compacto. Últimos jogos abre a Classificação no favorito. | Imagem do card completo e vídeo percorrendo o bloco e tocando em Últimos jogos. | Alta |
+| 01 | **Meu time reunido na Home.** Posição, pontos do clube, campanha, últimos resultados, próxima partida e desempenho dos seus palpites em um card expansível, inicialmente recolhido. Toque no cabeçalho para abrir. Últimos jogos abre a Classificação no favorito. | Imagem do card completo e vídeo percorrendo o bloco e tocando em Últimos jogos. | Alta |
 | 02 | **Visão Geral mais organizada.** Números maiores e centralizados, alinhamento uniforme e cores para pontos confirmados, palpites completos e pendências. | Imagem antes/depois, destacando organização e leitura. | Média |
 | 03 | **Campanha de qualquer clube.** Uma linha por rodada, escudos, placares, pontos conquistados e acumulados, posição e evolução; seleção de outros clubes e retorno ao favorito. | Vídeo abrindo Ver campanha, explorando a lista, trocando o clube e voltando pelo escudo do favorito. | Alta |
 | 04 | **Estatísticas mais fáceis de entender.** Variação da média em pts/jogo, com setas e comparação explicada. O resumo do histórico mostra média quando aplicável, com mínimo de três rodadas. | Imagem com destaques na variação e na média do histórico, usando exemplo real. | Média |
@@ -42,7 +43,10 @@ Decisão aprovada em 13/10/2026: todos os vídeos criados daqui em diante devem 
 | 11 | **Jogos reagendados continuam acessíveis.** Partidas antigas pendentes têm acessos próprios, mantendo o foco na rodada atual. | Imagem ou vídeo de aviso real e abertura da partida reagendada. | Média — depende de exemplo disponível |
 | 12 | **Ativação de notificações.** Habilite seu aparelho para receber lembretes de palpites enviados pela administração. | Tutorial do convite Ativar notificações e da autorização do navegador. | Alta |
 | 13 | **Disputas Paralelas.** Conheça rankings recreativos que oferecem outras formas de comparar o desempenho dos participantes, usando os mesmos resultados, sem mudar a classificação oficial. | Vídeo: abrir Ranking → Ver disputas paralelas, explorar as opções e mostrar como consultar seu desempenho. Manter narração, legendas, toques destacados e vinhetas, em até 30 s. | Alta |
+| 14 | **Central do Participante.** Encontre guias, vídeos e respostas sobre o bolão. | Vídeo mostrando o acesso à Central pelo menu, a busca e os guias de onde tocar. | Publicado |
 | 15 | **Conheça o Bolão: apresentação do app.** Apresentar de forma leve as funcionalidades básicas e mais úteis, conectando cada recurso ao benefício para o participante. | Vídeo promocional com imagens e telas reais, navegação e animações fiéis ao app, narração descontraída e acabamento profissional. Briefing na ficha 15. | A definir |
+| 16 | **Instalar no Android.** Adicione o bolão à tela inicial pelo Chrome. | Tutorial com menus ilustrados, tela real do app e narração Antonio. | Publicado |
+| 17 | **Instalar no iPhone.** Adicione o bolão à Tela de Início pelo Safari. | Tutorial com menus ilustrados, tela real do app e narração Antonio. | Publicado |
 
 ## Cuidados com as mensagens
 
@@ -70,23 +74,29 @@ Primeira leva sugerida: três vídeos curtos sobre Ranking provisório, Destaque
 
 ## Controle de revisão, produção e divulgação
 
-| ID | Tema | Decisão | Produção | Divulgação | Material / ficha |
-| --- | --- | --- | --- | --- | --- |
-| 01 | Meu time na Home | Selecionado | Aprovado | Não programada | Publicado na Central em 12/10/2026; envio ao grupo não programado |
-| 02 | Visão Geral | A revisar | Não iniciada | Não programada | — |
-| 03 | Campanha dos clubes | Selecionado | Criado | Não programada | Vídeo de 29 s com vinhetas; ficha abaixo |
-| 04 | Estatísticas | Selecionado | Criado | Não programada | Vídeo de 29 s com vinhetas; ficha abaixo |
-| 05 | Prazo dos palpites | Selecionado | Aprovado | Não programada | Publicado na Central em 12/10/2026; envio ao grupo não programado |
-| 06 | Ligas | Selecionado | Criado | Não programada | Vídeo de 30 s com vinhetas; ficha abaixo |
-| 07 | Ranking provisório | Selecionado | Criado | Não programada | Vídeo de 29 s com vinhetas; ficha abaixo |
-| 08 | Destaques da rodada | Selecionado | Criado | Não programada | Vídeo de 29 s com vinhetas; ficha abaixo |
-| 09 | Detalhes dos jogos | Selecionado | Criado | Não programada | Vídeo de 27 s com toques, aprovado visualmente; ficha abaixo |
-| 10 | Seletor de rodadas | A revisar | Não iniciada | Não programada | — |
-| 11 | Jogos reagendados | A revisar | Não iniciada | Não programada | — |
-| 12 | Notificações | Selecionado | Criado | Não programada | Vídeo de 28 s com vinhetas; ficha abaixo |
-| 13 | Disputas Paralelas | Selecionado | Criado | Não programada | Vídeo de 29 s com vinhetas; ficha abaixo |
-| 14 | Central do Participante | Selecionado | Aprovado | Não programada | Publicado na Central em 12/10/2026; versão corrigida para iPhone |
-| 15 | Apresentação promocional do app | Selecionado | Aprovada | Publicada na Central | Vídeo de 59,5 s com vinheta Entrada em campo; envio aos participantes não programado |
+| ID | Tema | Decisão | Produção | Central do Participante | Divulgação aos grupos | Material / revisão atual |
+| --- | --- | --- | --- | --- | --- | --- |
+| 01 | Meu time na Home | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#meu-time) | Não programada | Atualizado na v6.51.4: expansão do card, 31,13 s; commit `01bb53f` |
+| 02 | Visão Geral | A revisar | Não iniciada | Não publicado | Não programada | Tema ainda sem vídeo dedicado |
+| 03 | Campanha dos clubes | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#campanha) | Não programada | Atualizado na v6.51.4: expandir Meu Time antes de Ver campanha, 32,43 s; commit `01bb53f` |
+| 04 | Estatísticas | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#estatisticas) | Não programada | Versão atual com Antonio e vinheta Entrada em campo; duração indicada de 33 s |
+| 05 | Prazo dos palpites | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#palpites) | Não programada | Versão atual com vinheta Entrada em campo; duração indicada de 33 s |
+| 06 | Ligas | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#ligas) | Não programada | Ranking sem pódio na versão atual; commit `73e1476`, duração indicada de 34 s |
+| 07 | Ranking provisório | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#ranking) | Não programada | Versão atual de 32,8 s com vinhetas Entrada em campo; commit `8617f17` |
+| 08 | Destaques da rodada | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#destaques) | Não programada | Atualizado na v6.51.4: acesso abaixo de Destaques do Bolão, 30,87 s; commit `01bb53f` |
+| 09 | Detalhes dos jogos e escalações | Selecionado | Aprovado — vídeo atual do tema | [Publicado](https://bolaorigazzo2026.netlify.app/central/#escalacoes) | Não programada | Escalações em Lista e Campo, commit `8888150`, duração indicada de 32 s. O vídeo original 09 é material anterior, não uma nova pendência de publicação |
+| 10 | Seletor de rodadas | A revisar | Não iniciada | Não publicado | Não programada | Tema ainda sem vídeo dedicado |
+| 11 | Jogos reagendados | A revisar | Não iniciada | Não publicado | Não programada | Depende de exemplo disponível |
+| 12 | Notificações | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#notificacoes) | Não programada | Versão atual com vinheta Entrada em campo; duração indicada de 32 s |
+| 13 | Disputas Paralelas | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#disputas) | Não programada | Inclui Recordes por rodada e Ranking atual; commit `c9059ac`, duração indicada de 35 s |
+| 14 | Central do Participante | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#conheca-central) | Não programada | Versão com vinheta Entrada em campo; duração indicada de 33 s |
+| 15 | Apresentação promocional do app | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#conheca-bolao) | Não programada | Atualizado na v6.51.4: Home, Ranking sem pódio e Meu Time expansível; 59,5 s; commit `01bb53f` |
+| 16 | Instalar no Android | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#instalar-android) | Não programada | Menus ilustrados, tela real do bolão e Antonio; duração indicada de 42 s; commit `d3d9f42` |
+| 17 | Instalar no iPhone | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#instalar-iphone) | Não programada | Menus ilustrados, tela real do bolão e Antonio; duração indicada de 43 s; commit `d3d9f42` |
+
+As durações indicadas são as exibidas no catálogo quando não foi registrada a duração medida. A apresentação do app fica fora da lista de tutoriais, na abertura recolhível da Central. Não foi identificado registro de envio aos grupos; por isso, a divulgação permanece não programada.
+
+**Pendência de vídeo já produzido:** nenhuma. Os temas 02, 10 e 11 ainda não foram produzidos. Versões antigas, testes e vinhetas independentes são materiais de trabalho.
 
 ### Modelo de ficha por conteúdo
 
@@ -318,3 +328,47 @@ Teste do tutorial Prazo dos palpites confirmado pelo usuário em um iPhone. Apli
 - Abertura e encerramento disponíveis separadamente em central/vinhetas/, para reutilização nos próximos vídeos.
 - Estado atual: Aprovada e publicada na Central. Envio aos participantes não programado. Este registro substitui os estados de revisão anteriores.
 - Registro documental integrado separadamente da publicação da Central. As novas vinhetas também foram aplicadas aos oito tutoriais e à apresentação da Central, com aprovação do usuário, no commit c9415bd. Conteúdo, narração e movimentos preservados; pequeno aumento de duração aprovado. Exportação compatível com iPhone e decodificação integral verificadas, sem novo teste físico de todos os arquivos.
+
+## Conciliação do controle — v6.51.4
+
+A tabela consolidada foi conferida com `central/videos.json`, as apresentações em `central/central.js` e o histórico de publicações. As fichas anteriores permanecem como histórico, inclusive estados de Criado ou Em revisão que já foram superados pela publicação. Publicação na Central e divulgação via WhatsApp são etapas distintas.
+
+### Atualizações aprovadas e publicadas — commit 01bb53f
+
+- Meu Time: demonstra o toque no cabeçalho e a expansão do card; 31,13 s.
+- Campanha: inclui a expansão antes do acesso à consulta e preserva a seleção de clubes; 32,43 s.
+- Destaques: acesso abaixo dos cards de Destaques do Bolão; 30,87 s.
+- Apresentação do app: substitui o Ranking com pódio, atualiza Home e Meu Time, preserva o áudio aprovado; 59,5 s.
+- Capas, imagens de recurso e guias de onde tocar de Campanha e Destaques atualizados na mesma publicação.
+- Padrão de exportação preservado: H.264 Main 3.1, 20 fps, yuv420p, AAC e faststart. Os quatro arquivos foram decodificados integralmente e conferidos no navegador; sem novo teste físico em iPhone.
+
+### Item 07 — Versão aprovada e publicada
+
+- Objetivo: ensinar o acesso pelo Ranking atual e distinguir classificação oficial de projeção provisória.
+- Imagens: navegação real atual da v6.51.4 e exemplo real ao vivo capturado em 11/10/2026. O exemplo anterior é identificado, sem simular jogos ao vivo nem exibir o pódio removido.
+- Roteiro: abrir Ranking pela barra inferior; acessar Ver Ranking provisório quando disponível; conferir a classificação projetada e a separação dos pontos confirmados e provisórios; lembrar que a projeção acompanha a liga selecionada e pode mudar.
+- Narração Antonio, legendas e toques destacados; abertura e encerramento Entrada em campo.
+- Material local: `C:/Users/user/Documents/Codex/ranking-provisorio-atualizado-2026-10-20/ranking-provisorio-atualizado.mp4`.
+- Duração medida da nova versão: 32,8 segundos, incluindo vinhetas. H.264 Main 3.1, 20 fps, yuv420p, AAC e faststart; decodificação integral e revisão dos quadros aprovadas. Sem novo teste físico em iPhone.
+- Estado: aprovado e publicado na Central, na seção Ranking, commit `8617f17`. Divulgação aos grupos não programada.
+- A versão antiga é preservada como material de trabalho. A seção Ranking passou a ter o tutorial narrado, com capa e indicação de 33 segundos no catálogo.
+
+### Tutoriais de instalação — itens 16 e 17
+
+Ambos foram aprovados e publicados no commit `d3d9f42`, com narração Antonio, imagens reais do bolão e menus ilustrados dos navegadores. As opções podem variar por sistema e versão; não prometer telas idênticas em todos os aparelhos. Os arquivos publicados são `central/instalar-android.mp4` e `central/instalar-iphone.mp4`. Envio aos grupos não programado.
+
+### Publicação do item 07 confirmada
+
+Após aprovação humana, o vídeo foi publicado na seção Ranking, no commit `8617f17`, deploy `6ad6d4fb7cf772d73b526d3e` com estado ready. O player aponta para `ranking.mp4?v=provisorio-1`. A publicação substitui o estado de revisão anterior. A tabela consolidada passa a registrar 14 temas publicados e três ainda não produzidos.
+
+### Organização e navegação da Central — commit 7e469cb
+
+Publicada a organização dos guias e dos vídeos na mesma sequência, em cinco grupos: Começar a jogar; Acompanhar a disputa; Seu clube; Explorar as partidas; No celular. A revisão incluiu Pontuação no menu, atalhos iniciais, busca com prioridade por tema e entradas para Google, regras e instalação nos dois sistemas. Foram corrigidos os guias ilustrados de Ranking e Meu Time e os alvos dos recortes. Os vídeos e as regras do app foram preservados. A publicação desta revisão não representa envio de conteúdo aos grupos.
+
+### Resumo atual do controle
+
+- 17 temas registrados.
+- 14 temas com vídeos publicados: 12 tutoriais no catálogo e duas apresentações recolhíveis da Central.
+- Nenhum vídeo produzido aguardando publicação.
+- Três temas ainda não produzidos: 02 — Visão Geral; 10 — Seletor de rodadas; 11 — Jogos reagendados. Continuam em A revisar; este registro não os seleciona para produção.
+- Divulgação aos grupos não programada: não há confirmação de envio registrada neste controle.
