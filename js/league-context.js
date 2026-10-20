@@ -32,6 +32,7 @@ export function createLeagueRequestGate() {
   let current = 0;
   return {
     issue() { current += 1; return current; },
+    capture() { const captured=current; return ()=>captured===current; },
     isCurrent(requestId) { return requestId === current; }
   };
 }

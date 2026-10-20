@@ -1,3 +1,11 @@
+# v6.51.4 — Palpites encerrados completos por liga
+
+- Pagina a consulta autorizada em lotes de 500 registros, com ordem estável e conferência da quantidade total.
+- Corrige o carregamento inicial e as atualizações automáticas, que antes podiam alimentar os indicadores com apenas mil palpites; atualiza também o modal de Disputas Paralelas já aberto.
+- Descarta páginas incompletas, repetidas, com falha ou de contexto antigo; aplica somente leituras completas.
+- Preserva fórmulas e critérios das Disputas Paralelas, ranking oficial, permissões e dados gravados. Sem migração SQL.
+- Detalhes: [nota da versão](docs/releases/v6.51.4-palpites-encerrados-completos.md).
+
 # v6.51.3 — Destaques do Bolão
 
 - Renomeia o cabeçalho da seção nas Homes atual e experimental para Destaques do Bolão.

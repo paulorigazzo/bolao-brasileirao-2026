@@ -1,3 +1,4 @@
+import { loadLeaguePublicPicks } from "./league-public-picks.js";
 import { buildHomeV2Model, buildHomeV2PersonalContext, buildHomeV2LeagueHighlights, buildHomeV2RoundLeader } from "./home-v2.js";
 import { finishStartupIntro } from "./startup-intro.js";
 import { buildTeamCampaign, campaignPositionTrend } from "./team-campaign.js";
@@ -34,7 +35,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.51.3";
+const APP_VERSION = "6.51.4";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1016,14 +1017,17 @@ async function loadLeagueContext(league){
   resetRoundHighlightsContext();
   const requestId=leagueRequestGate.issue();
   const params={p_liga_id:league.liga_id};
-  const [{data:members,error:membersErr},{data:publicPicks,error:publicPicksErr},{data:counts,error:countsErr},{data:ranking,error:rankingErr},{data:rankingMovement,error:rankingMovementErr},{data:profiles,error:profilesErr}]=await Promise.all([
+  const userId=state.user?.id;
+  const isCurrent=()=>leagueRequestGate.isCurrent(requestId)&&state.user?.id===userId;
+  const [{data:members,error:membersErr},{data:publicPicks,error:publicPicksErr,cancelled:publicPicksCancelled},{data:counts,error:countsErr},{data:ranking,error:rankingErr},{data:rankingMovement,error:rankingMovementErr},{data:profiles,error:profilesErr}]=await Promise.all([
     sb.rpc("listar_membros_liga",params),
-    sb.rpc("obter_palpites_encerrados_liga",params),
+    loadLeaguePublicPicks({supabase:sb,leagueId:league.liga_id,isCurrent}),
     sb.rpc("obter_contagem_palpites_liga",params),
     sb.rpc("obter_ranking_liga",params),
     sb.rpc("obter_movimentacao_ranking_liga",params),
     sb.from("participantes").select("user_id,nome,email,time_favorito,ativo")
   ]);
+  if(publicPicksCancelled||!isCurrent())return false;
   const error=membersErr||publicPicksErr||countsErr||rankingErr||profilesErr;
   if(error) throw error;
   if(rankingMovementErr) console.warn("A movimentação do Ranking não pôde ser carregada.",rankingMovementErr);
@@ -1032,6 +1036,7 @@ async function loadLeagueContext(league){
   const memberById=new Map((members||[]).map(member=>[String(member.user_id),member]));
   state.participants=scopedProfiles.map(profile=>({...profile,...memberById.get(String(profile.user_id))}));
   state.publicPicks=publicPicks||[];
+  publicPicksRefreshPending=false;
   state.pickCounts=counts||[];
   state.leagueRanking=ranking||[];
   state.leagueRankingMovement=rankingMovement||[];
@@ -3404,6 +3409,8 @@ function renderRanking(){
     isScorableGame,
     pointsForPick:(pick,game)=>points(pick,game),
   });
+  const friendlyModal=$('friendlyRankingsModal');
+  if(friendlyModal&&!friendlyModal.classList.contains('hidden'))renderFriendlyRankingsModal();
   if($('friendlyRankingsTeaser')) $('friendlyRankingsTeaser').innerHTML=`
     <div><span class="eyebrow">TROFÉUS SEM VALIDADE NO CARTÓRIO</span><strong>Nem todo mundo concorda com a tabela…</strong><p>${escapeHtml(friendlyRankingsModel.teaser)}</p></div>
     <button id="friendlyRankingsOpen" class="secondary" type="button">Ver disputas paralelas</button>
@@ -5875,11 +5882,15 @@ async function refreshLiveScoresSilently(){
   if(document.hidden || !state.user) return;
   if((!shouldRefreshGamesFromSupabase(state.games)&&!publicPicksRefreshPending) || liveScoreRefreshInFlight) return;
   liveScoreRefreshInFlight=true;
+  const contextIsCurrent=leagueRequestGate.capture();
+  const leagueId=state.activeLeague?.liga_id,userId=state.user.id;
+  const isCurrent=()=>contextIsCurrent()&&state.user?.id===userId&&state.activeLeague?.liga_id===leagueId&&state.leagueContextStatus==="ready";
   try{
     // A sincronização automática da fonte pertence exclusivamente ao agendamento
     // do Netlify. Todas as sessões apenas releem o Supabase; administradores ainda
     // podem usar a ação manual explícita quando uma contingência exigir.
     const {data,error}=await sb.from("jogos").select("*").order("rodada").order("inicio");
+    if(!isCurrent())return;
     if(error) throw error;
     if(Array.isArray(data)){
       const detailIds=data.filter(game=>shouldRefreshGameDetails(game)).map(game=>game.id_jogo);
@@ -5888,6 +5899,7 @@ async function refreshLiveScoresSilently(){
           sb.from("detalhes_partida_cache").select("id_jogo,id_externo,estatisticas,escalacoes,estatisticas_observadas_em,escalacoes_observadas_em").in("id_jogo",detailIds),
           sb.from("eventos_partida_cache").select("id_jogo,id_externo,eventos,observado_em").in("id_jogo",detailIds),
         ]);
+        if(!isCurrent())return;
         if(detailsError) console.warn("Os detalhes ao vivo não puderam ser atualizados.",detailsError);
         else{
           const refreshed=new Set((details||[]).map(item=>Number(item.id_jogo)));
@@ -5901,16 +5913,18 @@ async function refreshLiveScoresSilently(){
       }
       const shouldRefreshPublicPicks=publicPicksRefreshPending||hasNewlyRevealablePublicPicks(state.games,data);
       if(shouldRefreshPublicPicks){
-        const {data:publicPicks,error:publicPicksError}=await sb.rpc("obter_palpites_encerrados_liga",{p_liga_id:state.activeLeague?.liga_id});
+        const {data:publicPicks,error:publicPicksError,cancelled}=await loadLeaguePublicPicks({supabase:sb,leagueId,isCurrent});
+        if(cancelled||!isCurrent())return;
         if(publicPicksError){
           publicPicksRefreshPending=true;
           console.warn("Os palpites recém-encerrados ainda não puderam ser atualizados; uma nova tentativa será feita automaticamente.",publicPicksError);
         }else{
-          state.publicPicks=publicPicks||[];
           const [{data:leagueRanking,error:leagueRankingError},{data:rankingMovement,error:rankingMovementError}]=await Promise.all([
-            sb.rpc("obter_ranking_liga",{p_liga_id:state.activeLeague?.liga_id}),
-            sb.rpc("obter_movimentacao_ranking_liga",{p_liga_id:state.activeLeague?.liga_id})
+            sb.rpc("obter_ranking_liga",{p_liga_id:leagueId}),
+            sb.rpc("obter_movimentacao_ranking_liga",{p_liga_id:leagueId})
           ]);
+          if(!isCurrent())return;
+          state.publicPicks=publicPicks;
           if(!leagueRankingError) state.leagueRanking=leagueRanking||[];
           if(!rankingMovementError) state.leagueRankingMovement=rankingMovement||[];
           else console.warn("A movimentação do Ranking não pôde ser atualizada.",rankingMovementError);
