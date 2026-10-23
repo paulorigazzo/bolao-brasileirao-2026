@@ -35,7 +35,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.51.4";
+const APP_VERSION = "6.51.5";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -4319,6 +4319,18 @@ function adminState(snapshot){
   return {key:"attention",label:"Atenção",title:`Ainda ${pending.length===1?"falta 1 participante":`faltam ${pending.length} participantes`} nos jogos abertos.`,description:snapshot.closeAt?`Próximo fechamento em ${formatRemaining(remaining)}.`:"Há palpites pendentes nos jogos abertos.",action:"reminder"};
 }
 
+function sortAdminPendingParticipants(participants,mode="name"){
+  return [...participants].sort((a,b)=>{
+    if(mode==="recent" || mode==="oldest"){
+      const left=Number.isFinite(a.lastUpdate) && a.lastUpdate>0?a.lastUpdate:0;
+      const right=Number.isFinite(b.lastUpdate) && b.lastUpdate>0?b.lastUpdate:0;
+      if(Boolean(left)!==Boolean(right)) return left?-1:1;
+      if(left!==right) return mode==="recent"?right-left:left-right;
+    }
+    return String(a.name||"").localeCompare(String(b.name||""),"pt-BR",{sensitivity:"base"});
+  });
+}
+
 function renderAdminControlCenter(snapshot=state.adminSnapshot || buildAdminSnapshot()){
   if(!isAdminUser() || !$("adminControlCenter")) return;
   const completed=snapshot.participants.length-snapshot.actionablePending.length;
@@ -4382,9 +4394,10 @@ function renderAdminAttention(){
   };
   const showComplete=adminPendingFilter==="all" || adminPendingFilter==="complete";
   const showPending=adminPendingFilter==="all" || adminPendingFilter==="pending";
-  const inTime=snapshot.participants.filter(item=>!snapshot.actionablePending.includes(item));
+  const inTime=sortAdminPendingParticipants(snapshot.participants.filter(item=>!snapshot.actionablePending.includes(item)),adminPendingSort);
+  const pendingParticipants=sortAdminPendingParticipants(snapshot.actionablePending,adminPendingSort);
   const completedHtml=showComplete && inTime.length?`<section class="admin-progress-group admin-completed-group"><div class="admin-progress-group-title"><strong>🟢 Em dia nos jogos abertos</strong><span>${inTime.length}</span></div><div class="admin-pending-list">${inTime.map(participantCard).join("")}</div></section>`:"";
-  const pendingHtml=showPending && snapshot.actionablePending.length?`<section class="admin-progress-group admin-incomplete-group"><div class="admin-progress-group-title"><strong>🟡 Palpites ainda possíveis</strong><span>${snapshot.actionablePending.length}</span></div><div class="admin-pending-list">${snapshot.actionablePending.map(participantCard).join("")}</div></section>`:"";
+  const pendingHtml=showPending && pendingParticipants.length?`<section class="admin-progress-group admin-incomplete-group"><div class="admin-progress-group-title"><strong>🟡 Palpites ainda possíveis</strong><span>${pendingParticipants.length}</span></div><div class="admin-pending-list">${pendingParticipants.map(participantCard).join("")}</div></section>`:"";
   const emptyFilter=!completedHtml&&!pendingHtml?`<div class="admin-filter-empty">Nenhum participante neste filtro.</div>`:"";
   $("adminAttentionContent").innerHTML=`<h3>${escapeHtml(view.title)}</h3><p>${escapeHtml(view.description)}</p>${participantSummary}<div class="admin-participant-groups">${pendingHtml}${completedHtml}${emptyFilter}</div>`;
   setAnimatedText("adminFilterAllCount",snapshot.participants.length);
@@ -5580,6 +5593,7 @@ async function syncGames(triggerButton=null){
 let adminAutoRefreshTimer=null;
 let adminLastBackgroundRefresh=0;
 let adminPendingFilter="all";
+let adminPendingSort="name";
 
 function setAnimatedText(id,value){
   const element=$(id);
@@ -6270,6 +6284,10 @@ $("adminAttentionCard")?.addEventListener("click",event=>{
   const filter=event.target.closest("[data-admin-pending-filter]");
   if(!filter) return;
   adminPendingFilter=filter.dataset.adminPendingFilter || "all";
+  renderAdminAttention();
+});
+$("adminPendingSort")?.addEventListener("change",event=>{
+  adminPendingSort=["name","recent","oldest"].includes(event.target.value)?event.target.value:"name";
   renderAdminAttention();
 });
 $("adminParticipantModalClose").onclick=closeAdminParticipantDetail;

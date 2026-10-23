@@ -1284,6 +1284,9 @@ footer{padding-bottom:calc(26px + env(safe-area-inset-bottom))}
 @media(max-width:520px){.push-activation-backdrop{padding:14px}.push-activation-modal{padding:28px 20px 22px;border-radius:22px}.push-activation-modal h2{font-size:1.22rem}}
 
 
+.admin-pending-order{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin:0 0 12px;color:var(--color-text-muted);font-size:.78rem}
+.admin-pending-order select{width:auto;max-width:100%;min-height:44px;padding:6px 10px;font:inherit;border-radius:8px}
+
 /* v4.5.0 — Painel ADM / Card 2: Situação da Rodada */
 .admin-round-card{margin-top:14px;background:radial-gradient(circle at 92% 0,rgba(113,183,255,.11),transparent 34%),linear-gradient(145deg,rgba(18,55,36,.97),rgba(8,28,18,.98));border-color:rgba(113,183,255,.2)}
 .admin-round-header,.admin-round-progress-label,.admin-next-game,.admin-round-game{display:flex;align-items:center;justify-content:space-between;gap:14px}.admin-round-header h2{margin:5px 0 0;font-size:1.35rem}.admin-round-badge{display:inline-flex;align-items:center;min-height:34px;padding:7px 12px;border:1px solid rgba(113,183,255,.32);border-radius:999px;background:rgba(113,183,255,.1);color:#9bcdff;font-size:.7rem;font-weight:900;letter-spacing:.055em;text-transform:uppercase;white-space:nowrap}.admin-round-badge.is-live{border-color:rgba(255,107,107,.38);background:rgba(255,107,107,.1);color:#ff9696}.admin-round-badge.is-finished{border-color:rgba(112,236,165,.32);background:rgba(112,236,165,.1);color:#70eca5}

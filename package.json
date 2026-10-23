@@ -1,6 +1,6 @@
 {
   "name": "bolao-br-2026",
-  "version": "6.51.4",
+  "version": "6.51.5",
   "private": true,
   "type": "module",
   "scripts": {
@@ -67,7 +67,7 @@
     "test:competitive-snapshots": "node scripts/test-competitive-snapshots.mjs",
     "test:recovery-protection": "node scripts/test-recovery-protection.mjs",
     "test:admin-attention-whatsapp": "node scripts/test-admin-attention-whatsapp.mjs",
-    "test:admin-pick-progress": "node scripts/test-admin-pick-progress.mjs",
+    "test:admin-pick-progress": "node scripts/test-admin-pick-progress.mjs && node scripts/test-admin-pending-sort.mjs",
     "events:dry-run": "node scripts/reprocess-api-football-events.mjs",
     "test:round-live-highlights": "node scripts/test-round-live-highlights.mjs",
     "test:round-live-highlights-sql": "node scripts/test-round-live-highlights-sql.mjs",

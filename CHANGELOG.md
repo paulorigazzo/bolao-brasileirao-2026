@@ -1,3 +1,9 @@
+# v6.51.5 — Ordenação de participantes na ADM
+
+- Adiciona ordenação por nome (A–Z), atualização mais recente ou mais antiga na Situação da rodada.
+- Mantém os grupos e filtros existentes, com participantes sem data ao final nas ordenações por atualização.
+- Detalhes: [nota da versão](docs/releases/v6.51.5-adm-ordenacao-palpites.md).
+
 # v6.51.4 — Palpites encerrados completos por liga
 
 - Terceiro destaque da Home e Home 2.0 mostra Recorde por rodada entre rodadas, com acesso ao modal correspondente.

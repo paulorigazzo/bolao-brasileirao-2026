@@ -12,13 +12,13 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.51.4">
-  <link rel="stylesheet" href="./css/styles.css?v=6.51.4">
-  <link rel="stylesheet" href="./css/home-v2.css?v=6.51.4">
-  <link rel="stylesheet" href="./css/components.css?v=6.51.4">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.51.4">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.51.4">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.51.4">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.51.5">
+  <link rel="stylesheet" href="./css/styles.css?v=6.51.5">
+  <link rel="stylesheet" href="./css/home-v2.css?v=6.51.5">
+  <link rel="stylesheet" href="./css/components.css?v=6.51.5">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.51.5">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.51.5">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.51.5">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
@@ -33,7 +33,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-      <p class="brand-version"><span id="appVersion" class="version-pill">v6.51.4</span></p>
+      <p class="brand-version"><span id="appVersion" class="version-pill">v6.51.5</span></p>
         <p id="headerLeagueName" class="brand-league hidden" aria-live="polite"></p>
       </div>
     </div>
@@ -419,6 +419,7 @@
             </div>
             <div id="adminPickDeadline" class="admin-pick-deadline" aria-live="polite"><span>Próximo fechamento</span><strong>Calculando…</strong></div>
           </div>
+          <div class="admin-pending-order"><label for="adminPendingSort">Ordenar</label><select id="adminPendingSort"><option value="name">Nome (A–Z)</option><option value="recent">Atualização mais recente</option><option value="oldest">Atualização mais antiga</option></select></div>
           <div id="adminAttentionContent" class="admin-attention-content">
             <p class="muted-note">Consultando jogos e palpites dos participantes.</p>
           </div>
@@ -939,6 +940,6 @@
     }
   </script>
 <script type="module" src="./js/startup-intro.js"></script>
-<script type="module" src="./js/app.js?v=6.51.4"></script>
+<script type="module" src="./js/app.js?v=6.51.5"></script>
 </body>
 </html>
