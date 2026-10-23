@@ -1,5 +1,5 @@
-6.51.4
+6.51.5
 
-Carregamento completo dos palpites encerrados da liga, sem corte em mil registros.
+Ordenação dos participantes por nome ou última atualização dos palpites na ADM.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)
