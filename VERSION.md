@@ -1,5 +1,5 @@
-6.51.5
+6.51.6
 
-Ordenação dos participantes por nome ou última atualização dos palpites na ADM.
+Ranking Provisório disponível durante a rodada atual em aberto.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)
