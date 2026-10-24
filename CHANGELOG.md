@@ -1,3 +1,10 @@
+# v6.51.7 — Renovação da classificação na sessão
+
+- Renova a classificação ao abrir a tela com consulta anterior de uma hora ou mais e enquanto ela permanece visível.
+- Preserva consulta manual e tabela anterior durante atualização ou falha, evitando requisições simultâneas na sessão.
+- Mantém o cache e a consulta do servidor existentes, sem migração.
+- Detalhes: [nota da versão](docs/releases/v6.51.7-atualizacao-classificacao.md).
+
 # v6.51.6 — Projeção durante a rodada aberta
 
 - Mantém o acesso ao Ranking Provisório antes e entre jogos da rodada atual, sem exigir placar ao vivo.

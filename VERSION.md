@@ -1,5 +1,5 @@
-6.51.6
+6.51.7
 
-Ranking Provisório disponível durante a rodada atual em aberto.
+Renovação automática da classificação após uma hora na sessão.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

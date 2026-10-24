@@ -1,0 +1,45 @@
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import vm from "node:vm";
+
+const app=readFileSync(new URL("../js/app.js",import.meta.url),"utf8");
+const source=app.slice(app.indexOf("const STANDINGS_REFRESH_INTERVAL="),app.indexOf("function isAdminUser(){",app.indexOf("const STANDINGS_REFRESH_INTERVAL=")));
+let now=1000,calls=0,fail=false,release=null,mode=null;
+const elements=new Map();
+const element=id=>{
+  if(!elements.has(id)) elements.set(id,{textContent:"",disabled:false,hidden:false,classList:{contains:()=>id==="standingsTab"?hiddenTab:true}});
+  return elements.get(id);
+};
+let hiddenTab=false;
+const state={user:{id:"test"},standings:null};
+const document={hidden:false};
+const context={state,document,$:element,Date:{now:()=>now},show:(id,value)=>{element(id).hidden=!value;},renderStandings:()=>{element("standingsTableWrap").hidden=false;},renderHomeV2:()=>{},fetch:async(_url,options)=>{
+  calls++;mode=options.cache;
+  if(release) await release.promise;
+  if(fail) throw new Error("Sem conexão");
+  return {ok:true,json:async()=>({ok:true,table:[{points:calls}]})};
+}};
+vm.createContext(context);
+vm.runInContext(source,context);
+const load=force=>vm.runInContext(`loadStandings(${Boolean(force)})`,context);
+const tick=()=>vm.runInContext("refreshStandingsIfVisible()",context);
+await load();assert.equal(calls,1);
+now+=3599999;await load();await tick();assert.equal(calls,1,"reutiliza a tabela antes de uma hora");
+now++;await tick();assert.equal(calls,2,"atualiza com uma hora na tela visível");
+now+=3600000;document.hidden=true;await tick();assert.equal(calls,2);
+document.hidden=false;hiddenTab=true;await tick();assert.equal(calls,2);
+hiddenTab=false;await tick();assert.equal(calls,3,"retorno à tela atualiza quando necessário");
+await load(true);assert.equal(calls,4);assert.equal(mode,"reload","botão manual preservado");
+now+=3600000;let resolve;release={promise:new Promise(done=>{resolve=done;})};
+const first=load();await load(true);assert.equal(calls,5,"evita consulta concorrente na mesma sessão");
+resolve();await first;release=null;
+const previous=state.standings;fail=true;now+=3600000;await tick();
+assert.equal(state.standings,previous,"falha preserva a tabela anterior");
+assert.equal(element("standingsTableWrap").hidden,false);
+assert.match(element("standingsError").textContent,/mantida/);
+await tick();assert.equal(calls,6,"falha não inicia repetição a cada minuto");
+fail=false;now+=3600000;await load();assert.equal(calls,7,"abrir a tela com dados antigos renova");
+state.user=null;now+=3600000;await tick();assert.equal(calls,7);
+assert.match(app,/liveScoreRefreshTimer=setInterval\(async\(\)=>\{\s*await refreshStandingsIfVisible\(\)/);
+assert.match(app,/visibilitychange[\s\S]*?if\(document.hidden\) return;\s*refreshStandingsIfVisible\(\)/);
+console.log("Classificação: intervalo de uma hora, visibilidade, concorrência, consulta manual e falhas aprovados.");
