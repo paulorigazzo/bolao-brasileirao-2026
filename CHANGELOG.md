@@ -1,3 +1,9 @@
+# v6.51.6 — Projeção durante a rodada aberta
+
+- Mantém o acesso ao Ranking Provisório antes e entre jogos da rodada atual, sem exigir placar ao vivo.
+- Explica quando a projeção contém apenas pontos oficiais; preserva o tratamento de reagendados ao vivo e o avanço da rodada.
+- Detalhes: [nota da versão](docs/releases/v6.51.6-ranking-provisorio-rodada-aberta.md).
+
 # v6.51.5 — Ordenação de participantes na ADM
 
 - Adiciona ordenação por nome (A–Z), atualização mais recente ou mais antiga na Situação da rodada.

@@ -35,7 +35,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.51.5";
+const APP_VERSION = "6.51.6";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2219,13 +2219,16 @@ function renderTemporaryRankingAccess(){
     return;
   }
   const pending=context.postponed+context.future;
+  const explanation=context.liveWithScore+context.suspendedWithScore>0
+    ? 'Resultados ao vivo e jogos suspensos com placar podem alterar temporariamente as posições.'
+    : 'Sem placares provisórios disponíveis: a projeção mostra apenas os pontos oficiais. Jogos não iniciados não acrescentam pontos.';
   if(home){
     home.className='temporary-ranking-access temporary-ranking-home-access card';
     home.innerHTML=`<span class="temporary-ranking-access-icon" aria-hidden="true">◉</span><div><span class="eyebrow">RODADA ${context.round} EM ABERTO</span><strong>Ranking provisório</strong><p>Veja como ficaria a classificação se a rodada terminasse agora.${pending?` ${pending} partida${pending===1?'':'s'} ainda sem pontuação.`:''}</p></div><button class="primary" type="button" data-home-action="temporary-ranking">Ver projeção</button>`;
   }
   if(ranking){
     ranking.className='temporary-ranking-access temporary-ranking-page-access card';
-    ranking.innerHTML=`<div><span class="eyebrow">RODADA ${context.round} EM ABERTO</span><strong>Existe uma classificação provisória disponível</strong><p>Resultados ao vivo e jogos suspensos com placar podem alterar temporariamente as posições.</p></div><button class="secondary" type="button" data-temporary-ranking-open>Ver Ranking provisório</button>`;
+    ranking.innerHTML=`<div><span class="eyebrow">RODADA ${context.round} EM ABERTO</span><strong>Existe uma classificação provisória disponível</strong><p>${explanation}</p></div><button class="secondary" type="button" data-temporary-ranking-open>Ver Ranking provisório</button>`;
   }
 }
 
@@ -2242,7 +2245,7 @@ function renderTemporaryRankingModal(model,rows,{synthetic=false,currentUserId=n
   const meta=rows?.[0]||{};
   const updated=meta.atualizado_em?new Date(meta.atualizado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'agora';
   const context=model.availability;
-  $('temporaryRankingModalSummary').textContent=synthetic?'Demonstração visual com participantes e placares inteiramente fictícios.':'Projeção informativa baseada nos placares disponíveis.';
+  $('temporaryRankingModalSummary').textContent=synthetic?'Demonstração visual com participantes e placares inteiramente fictícios.':context.liveWithScore+context.suspendedWithScore>0?'Projeção informativa baseada nos placares disponíveis.':'Sem placares provisórios disponíveis: a projeção mostra apenas os pontos oficiais. Jogos não iniciados não acrescentam pontos.';
   status.classList.toggle('is-preview',synthetic);
   status.innerHTML=`<strong>${synthetic?'DEMONSTRAÇÃO SINTÉTICA · ':''}Rodada ${context.round} • atualizada às ${escapeHtml(updated)}</strong><span>${context.finished} encerrado${context.finished===1?'':'s'} · ${context.live} ao vivo · ${context.suspended} suspenso${context.suspended===1?'':'s'} · ${context.postponed} adiado${context.postponed===1?'':'s'} · ${context.future} futuro${context.future===1?'':'s'}</span>`;
   content.innerHTML=model.ranking.length?`<div class="temporary-ranking-list">${model.ranking.map(item=>{
@@ -2275,7 +2278,7 @@ async function refreshTemporaryRankingModal({silent=false}={}){
 
 function openTemporaryRanking(trigger,{allowUnavailable=false}={}){
   const adminOverride=allowUnavailable && isAdminUser();
-  if(!temporaryRankingContext().available && !adminOverride) return message('O Ranking provisório estará disponível quando a rodada possuir resultados relevantes.',true);
+  if(!temporaryRankingContext().available && !adminOverride) return message('O Ranking provisório fica disponível enquanto a rodada atual estiver em aberto.',true);
   temporaryRankingAllowUnavailable=adminOverride;
   temporaryRankingReturnFocus=trigger||document.activeElement;
   $('temporaryRankingModal')?.classList.remove('hidden');

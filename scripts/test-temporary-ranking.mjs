@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import vm from "node:vm";
+import {competitionRound} from "../js/round-context.js";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { buildTemporaryRankingModel, temporaryRankingAvailability, temporaryRankingGameState } from "../js/temporary-ranking-engine.js";
@@ -11,13 +13,18 @@ assert.equal(temporaryRankingGameState(game("POSTPONED")),"postponed");
 assert.equal(temporaryRankingGameState(game("FINISHED")),"finished");
 assert.equal(temporaryRankingGameState(game("CANCELLED")),"cancelled");
 
-assert.equal(temporaryRankingAvailability([game("TIMED")],24).available,false);
-assert.equal(temporaryRankingAvailability([game("FINISHED",{gols_casa:2,gols_fora:1}),game("TIMED")],24).available,false);
-assert.equal(temporaryRankingAvailability([game("FINISHED",{gols_casa:null,gols_fora:null}),game("TIMED")],24).available,false);
+assert.equal(temporaryRankingAvailability([game("TIMED")],24).available,true);
+assert.equal(temporaryRankingAvailability([game("FINISHED",{gols_casa:2,gols_fora:1}),game("TIMED")],24).available,true);
+assert.equal(temporaryRankingAvailability([game("FINISHED",{gols_casa:null,gols_fora:null}),game("TIMED")],24).available,true);
 assert.equal(temporaryRankingAvailability([game("IN_PLAY",{gols_casa:1,gols_fora:0}),game("TIMED")],24).available,true);
-assert.equal(temporaryRankingAvailability([game("IN_PLAY")],24).available,false);
-assert.equal(temporaryRankingAvailability([game("SUSPENDED",{gols_casa:1,gols_fora:1}),game("POSTPONED")],24).available,false);
+assert.equal(temporaryRankingAvailability([game("IN_PLAY")],24).available,true);
+assert.equal(temporaryRankingAvailability([game("SUSPENDED",{gols_casa:1,gols_fora:1}),game("POSTPONED")],24).available,true);
 assert.equal(temporaryRankingAvailability([game("FINISHED",{gols_casa:2,gols_fora:1}),game("CANCELLED")],24).available,false);
+
+assert.equal(temporaryRankingAvailability([],24).available,false);
+assert.equal(temporaryRankingAvailability([game("FINISHED")],24).available,false);
+assert.equal(temporaryRankingAvailability([{...game("TIMED"),rodada:25}],24).available,false);
+assert.equal(temporaryRankingAvailability([game("CANCELLED")],24).available,false);
 
 const official=[
   {userId:"ana",name:"Ana",total:100},
@@ -54,6 +61,21 @@ const root=fileURLToPath(new URL("../",import.meta.url));
 const sql=readFileSync(`${root}supabase/migrations/20260811111102_corrige_ranking_provisorio_atualizado_em.sql`,"utf8");
 const app=readFileSync(`${root}js/app.js`,"utf8");
 const html=readFileSync(`${root}index.html`,"utf8");
+const contextSource=app.slice(app.indexOf('function temporaryRankingContext(){'),app.indexOf('function renderTemporaryRankingAccess(){'));
+const fixtureGames=[{rodada:23,status:'postponed'},{rodada:24,status:'finished',inicio:'2026-10-20T12:00Z'},{rodada:24,status:'future',inicio:'2026-10-25T12:00Z'}];
+const contextState={games:fixtureGames};
+const contextSandbox={TEMPORARY_RANKING_PREVIEW_FIXTURE:null,state:contextState,currentRoundNumber:()=>24,pendingEarlierRounds:()=>[23],gameStatusDisplay:g=>({key:temporaryRankingGameState(g)}),temporaryRankingAvailability};
+const context=vm.runInNewContext('('+contextSource.trim()+')',contextSandbox);
+assert.equal(context().round,24,'adiados antigos não substituem a rodada atual');
+assert.equal(context().available,true,'intervalo entre jogos mantém o acesso');
+contextState.games[0]={rodada:23,status:'IN_PLAY',gols_casa:0,gols_fora:0};
+assert.equal(context().round,23,'reagendado ao vivo mantém prioridade');
+contextState.games[0]={rodada:23,status:'finished'};
+assert.equal(context().round,24,'fim do reagendado retorna à rodada atual');
+assert.equal(competitionRound(fixtureGames,Date.parse('2026-10-23T12:00Z'),temporaryRankingGameState),24);
+const officialOnly=buildTemporaryRankingModel({rows:[{user_id:'ana',nome:'Ana',pontos_oficiais:100,pontos_provisorios:0,total_projetado:100}],officialRanking:official,games:[game('TIMED')],round:24});
+assert.equal(officialOnly.ranking[0].projectedTotal,100);
+assert.equal(officialOnly.ranking[0].livePoints,0);
 assert.match(sql,/security definer/i);
 assert.match(sql,/set search_path = pg_catalog, public/i);
 assert.match(sql,/public\.email_autorizado\(\)/i);
