@@ -26,10 +26,11 @@ let callback;
 runInNewContext(app.slice(start,end)+"\nstartLiveScoreRefresh();startLiveScoreRefresh();",{
   liveScoreRefreshTimer:null,
   setInterval(fn,ms){assert.equal(ms,60000);assert.equal(callback,undefined,"only one timer");callback=fn;return 1;},
+  async refreshStandingsIfVisible(){calls.push("standings");},
   async refreshLiveScoresSilently(){calls.push("scores");},
   async refreshRoundHighlightsViews(options){assert.equal(options.force,true);calls.push("highlights");}
 });
 await callback();
-assert.deepEqual(calls,["scores","highlights"]);
+assert.deepEqual(calls,["standings","scores","highlights"]);
 
 console.log("Janela e frequência da sincronização ao vivo verificadas com sucesso.");

@@ -35,7 +35,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.51.6";
+const APP_VERSION = "6.51.7";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -4192,18 +4192,31 @@ function renderStandings(){
 }
 
 
+const STANDINGS_REFRESH_INTERVAL=60*60*1000;
+let standingsLastAttemptAt=null;
+let standingsLoadInFlight=false;
+
+async function refreshStandingsIfVisible(){
+  if(!state.user || document.hidden || $("standingsTab")?.classList.contains("hidden") || !$("standingsTab")) return;
+  if(standingsLastAttemptAt!==null && Date.now()-standingsLastAttemptAt<STANDINGS_REFRESH_INTERVAL) return;
+  await loadStandings();
+}
+
 async function loadStandings(force=false){
-  if(state.standings && !force){
+  if(standingsLoadInFlight) return;
+  if(state.standings && !force && standingsLastAttemptAt!==null && Date.now()-standingsLastAttemptAt<STANDINGS_REFRESH_INTERVAL){
     renderStandings();
     return;
   }
 
+  standingsLoadInFlight=true;
+  standingsLastAttemptAt=Date.now();
+  const hasPrevious=Boolean(state.standings);
   const button = $("refreshStandingsBtn");
   if(button){ button.disabled = true; button.textContent = "Buscando…"; }
-  show("standingsLoading", true);
+  show("standingsLoading", !hasPrevious);
   show("standingsError", false);
-  show("standingsTableWrap", false);
-  show("standingsMobileList", false);
+  if(!hasPrevious){ show("standingsTableWrap", false); show("standingsMobileList", false); }
 
   try{
     const response = await fetch("/.netlify/functions/classificacao-brasileirao", {
@@ -4216,10 +4229,11 @@ async function loadStandings(force=false){
     renderStandings();
     if(!$("homeV2Tab")?.classList.contains("hidden")) renderHomeV2();
   }catch(err){
-    $("standingsError").textContent = err.message || "Não foi possível carregar a classificação.";
+    $("standingsError").textContent = `${err.message || "Não foi possível carregar a classificação."}${hasPrevious?" A última tabela carregada foi mantida.":""}`;
     show("standingsLoading", false);
     show("standingsError", true);
   }finally{
+    standingsLoadInFlight=false;
     if(button){ button.disabled = false; button.textContent = "Buscar classificação oficial"; }
   }
 }
@@ -5973,6 +5987,7 @@ async function refreshLiveScoresSilently(){
 function startLiveScoreRefresh(){
   if(liveScoreRefreshTimer) return;
   liveScoreRefreshTimer=setInterval(async()=>{
+    await refreshStandingsIfVisible();
     await refreshLiveScoresSilently();
     await refreshRoundHighlightsViews({force:true});
   },60*1000);
@@ -6460,6 +6475,7 @@ setupTabs();
 prepareRegistrationForm();
 document.addEventListener("visibilitychange",()=>{
   if(document.hidden) return;
+  refreshStandingsIfVisible();
   refreshLiveScoresSilently().then(()=>refreshRoundHighlightsViews({force:true}));
   if(!$("adminTab")?.classList.contains("hidden") && Date.now()-adminLastBackgroundRefresh>30000) refreshAdminSilently("ao retornar à aba");
 });
