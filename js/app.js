@@ -36,7 +36,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.53.0";
+const APP_VERSION = "6.54.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -5942,6 +5942,14 @@ function openPreviousRoundStatistics(round){
 function openPushNotificationTarget(search=location.search){
   const params=new URLSearchParams(search);
   const round=Number(params.get("rodada"));
+  if(params.get("notificacao")==="adm-disparo"){
+    const type=params.get("tipo");
+    if(!isAdminUser()||!Number.isInteger(round)||round<1||round>38||!["12h","2h","summary"].includes(type))return;
+    navigateTo("admin",{onReady:()=>{
+      if(isAdminUser())adminNotificationsController.open($("adminNotificationsOpen"),{round,type});
+    }});
+    return;
+  }
   if(!Number.isInteger(round)||round<1||round>38||!$("roundSelect")?.querySelector(`option[value="${round}"]`)) return;
   $("roundSelect").value=String(round);
   renderGames();

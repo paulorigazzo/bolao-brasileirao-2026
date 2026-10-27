@@ -57,15 +57,17 @@ export function createAdminNotificationsController({document,isAdmin,userId,getT
       if(id===requestId){$('adminNotificationsRefresh').disabled=false;if(!isAdmin()||userId()!==user)close({restoreFocus:false});}
     }
   }
-  function open(trigger){
+  function open(trigger,{round:requestedRound,type:requestedType}={}){
     if(!isAdmin())return;
     returnFocus=trigger||document.activeElement;page=1;
     for(const id of ['adminNotificationsRound','adminNotificationsType','adminNotificationsState'])$(id).value='all';
-    const round=Number(getCurrentRound());
+    const requested=Number(requestedRound);
+    const round=Number(Number.isInteger(requested)&&requested>=1&&requested<=38?requested:getCurrentRound());
     if(Number.isInteger(round)&&round>=1&&round<=38){
       $('adminNotificationsRound').innerHTML=`<option value="all">Todas</option><option value="${round}">Rodada ${round}</option>`;
       $('adminNotificationsRound').value=String(round);
     }
+    if(Object.hasOwn(TYPE_LABELS,requestedType))$('adminNotificationsType').value=requestedType;
     modal.classList.remove('hidden');document.body.classList.add('modal-open');$('adminNotificationsClose').focus();refresh();
   }
   $('adminNotificationsClose').addEventListener('click',()=>close());

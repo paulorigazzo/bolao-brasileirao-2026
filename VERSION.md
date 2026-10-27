@@ -1,5 +1,5 @@
-6.53.0
+6.54.0
 
-Acompanhamento de notificações automáticas na Área ADM.
+Avisos consolidados ao ADM sobre disparos automáticos.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

@@ -1,3 +1,10 @@
+# v6.54.0 — Consolidados dos disparos automáticos ao ADM
+
+- Um aviso consolidado por rodada e tipo aos aparelhos ativos dos administradores, após concluir os lotes e retentativas dos participantes.
+- Contagens por participante e aparelho, falhas, destino ao acompanhamento filtrado e controle separado contra duplicidade.
+- Migração aditiva aplicada e conciliada no banco. Sem alteração das regras dos avisos aos participantes.
+- [Contrato, validação e operação](docs/releases/v6.54.0-consolidados-push-adm.md).
+
 # v6.53.0 — Acompanhamento de notificações na ADM
 
 - Agrupa Enviar lembrete, Avisar por notificação e Acompanhar notificações no topo da Central de Atenção, antes dos filtros, com adaptação em telas estreitas.

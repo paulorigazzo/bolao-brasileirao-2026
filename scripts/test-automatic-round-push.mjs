@@ -27,7 +27,7 @@ const makeClient=({content={endpoint:'https://push.example.test',p256dh:'test',a
   const calls=[];
   return {calls,async rpc(name,args){calls.push([name,args]);
     if(name===fail)return {error:{message:'PRIVATE-ERROR'}};
-    return {data:name==='reservar_push_automaticos'?jobs:name==='obter_conteudo_push_automatico'?content:name==='concluir_push_automatico'?ack:null};
+    return {data:name==='reservar_push_automaticos'?jobs:name==='obter_conteudo_push_automatico'?content:name==='concluir_push_automatico_com_adm'?ack:null};
   }};
 };
 let client=makeClient(),sent=[];
@@ -39,6 +39,7 @@ for(const [content,expected] of [[null,'skipped'],[{deferUntil:'2026-10-28T00:00
   client=makeClient({content});sent=[];
   await runAutomaticRoundPush({now,env,deploymentContext:'production',client,send:async()=>sent.push(1)});
   assert.equal(sent.length,0);assert.equal(client.calls.at(-1)[1].p_resultado,expected);
+  assert.equal(client.calls.at(-1)[1].p_tentado,false,'descarte/adiamento sem transporte não conta como tentativa real');
 }
 client=makeClient();
 await runAutomaticRoundPush({now,env,deploymentContext:'production',client,send:async()=>{throw {statusCode:410};}});
@@ -48,7 +49,7 @@ await runAutomaticRoundPush({now,env,deploymentContext:'production',client,send:
 assert.equal(client.calls.at(-1)[1].p_resultado,'retry');
 client=makeClient({ack:false});result=await runAutomaticRoundPush({now,env,deploymentContext:'production',client,send:async()=>{}});
 assert.equal(result.deferred,1,'reserva perdida não confirma sucesso');
-client=makeClient({fail:'preparar_push_automaticos'});
+client=makeClient({fail:'preparar_push_automaticos_com_adm'});
 await assert.rejects(runAutomaticRoundPush({now,env,deploymentContext:'production',client,send:async()=>{}}),error=>!error.message.includes('PRIVATE-ERROR'));
 client=makeClient();await runAutomaticRoundPush({now,env:()=>undefined,client});assert.equal(client.calls.length,0);
 let events=[];
