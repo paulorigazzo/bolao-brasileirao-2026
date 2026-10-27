@@ -4639,6 +4639,7 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 
 
 .home-previous-round{display:grid;gap:12px}
+#homeRoundHighlightsAccess:empty{display:none}
 .home-previous-round .home-section-heading{margin:0}
 .home-previous-round .home-mini-card{background:linear-gradient(145deg,rgba(255,255,255,.025),rgba(255,255,255,.008))}
 .home-previous-round .mini-card-icon{opacity:.8}

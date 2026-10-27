@@ -3148,9 +3148,11 @@ function renderHomeV2RoundLeader(entry,round,prefix="homeV2"){
 function renderHomeLeagueHighlights(context){
   const host=$("homeLeagueHighlights");
   if(!host)return;
-  if(!state.participant||state.leagueContextStatus!=="ready"){host.innerHTML="";return;}
+  const access=$("homeRoundHighlightsAccess");
+  if(!state.participant||state.leagueContextStatus!=="ready"){host.innerHTML="";if(access)access.innerHTML="";return;}
   const cards=buildHomeV2LeagueHighlights(publicPicksRefreshPending?null:homeV2FriendlyRankings());
-  host.innerHTML=homeV2LeagueHighlights(cards,"home",homeRoundHighlightsAccess(context));
+  host.innerHTML=homeV2LeagueHighlights(cards,"home");
+  if(access)access.innerHTML=homeRoundHighlightsAccess(context);
   const round=currentRoundNumber();
   renderHomeV2RoundLeader(roundHighlightsLoader.peek(roundHighlightsKey(round)),round,"home");
   if(roundHighlightsAvailable(round))queueMicrotask(()=>refreshRoundHighlightsViews());
