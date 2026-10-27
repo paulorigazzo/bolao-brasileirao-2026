@@ -2956,7 +2956,8 @@ function homePreviousRoundModel(currentRound,games){
       if(Number(pick.gols_casa)===Number(game.gols_casa) && Number(pick.gols_fora)===Number(game.gols_fora)) exact++;
     }
   }
-  return {round,total:previous.length,finished:previous.filter(isScorableGame).length,registered,points:totalPoints,exact,
+  const finished=previous.filter(isScorableGame).length;
+  return {round,total:previous.length,finished,registered,points:totalPoints,exact,rate:finished?Math.round(totalPoints/(finished*10)*100):null,
     partial:previous.some(game=>!isScorableGame(game) && gameStatusDisplay(game).key!=="cancelled")};
 }
 
@@ -2969,7 +2970,7 @@ function renderHomePreviousRound(round){
   host.innerHTML=`<header class="home-section-heading"><div><span class="eyebrow">SUA RODADA ANTERIOR</span><h2 id="homePreviousRoundTitle">Rodada ${model.round}</h2></div>${model.partial?'<small class="muted-note">Resultado parcial</small>':""}</header>
     <div class="home-overview-grid">
       <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="previous-round-stats" data-round="${model.round}" aria-label="Ver pontuação da Rodada ${model.round} nas Estatísticas"><span class="mini-card-icon" aria-hidden="true">📅</span><span>Rodada<br>anterior</span><b aria-hidden="true">›</b><strong>${model.round}</strong><small><b>${model.finished} de ${model.total}</b> jogos encerrados</small></article>
-      <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="legacy-games" data-round="${model.round}" aria-label="Conferir seus palpites da Rodada ${model.round}"><span class="mini-card-icon" aria-hidden="true">🎯</span><span>Seus<br>palpites</span><b aria-hidden="true">›</b><strong>${model.registered}/${model.total}</strong><small>Registrados na rodada</small></article>
+      <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="legacy-games" data-round="${model.round}" aria-label="Conferir jogos e aproveitamento da Rodada ${model.round}"><span class="mini-card-icon" aria-hidden="true">🎯</span><span>Aprovei&shy;tamento</span><b aria-hidden="true">›</b><strong>${model.rate===null?"—":`${model.rate}%`}</strong><small>${model.finished} ${model.finished===1?"jogo avaliado":"jogos avaliados"}</small></article>
       <article class="home-mini-card card mini-tone-gold home-navigable-card" role="button" tabindex="0" data-home-action="round-highlights" data-round-highlights-round="${model.round}" aria-label="Ver destaques da Rodada ${model.round}"><span class="mini-card-icon" aria-hidden="true">⭐</span><span>Pontos<br>da rodada</span><b aria-hidden="true">›</b><strong>${model.points}</strong><small>Pontos confirmados · ${model.exact} ${model.exact===1?"placar exato":"placares exatos"}</small></article>
     </div>`;
 }
