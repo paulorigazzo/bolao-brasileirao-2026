@@ -12,13 +12,13 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.52.0">
-  <link rel="stylesheet" href="./css/styles.css?v=6.52.0">
-  <link rel="stylesheet" href="./css/home-v2.css?v=6.52.0">
-  <link rel="stylesheet" href="./css/components.css?v=6.52.0">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.52.0">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.52.0">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.52.0">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.53.0">
+  <link rel="stylesheet" href="./css/styles.css?v=6.53.0">
+  <link rel="stylesheet" href="./css/home-v2.css?v=6.53.0">
+  <link rel="stylesheet" href="./css/components.css?v=6.53.0">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.53.0">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.53.0">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.53.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
@@ -33,7 +33,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-      <p class="brand-version"><span id="appVersion" class="version-pill">v6.52.0</span></p>
+      <p class="brand-version"><span id="appVersion" class="version-pill">v6.53.0</span></p>
         <p id="headerLeagueName" class="brand-league hidden" aria-live="polite"></p>
       </div>
     </div>
@@ -421,7 +421,7 @@
             </div>
             <div id="adminPickDeadline" class="admin-pick-deadline" aria-live="polite"><span>Próximo fechamento</span><strong>Calculando…</strong></div>
           </div>
-          <div class="admin-pending-order"><label for="adminPendingSort">Ordenar</label><select id="adminPendingSort"><option value="name">Nome (A–Z)</option><option value="recent">Atualização mais recente</option><option value="oldest">Atualização mais antiga</option></select></div>
+          <div class="admin-pending-order"><label for="adminPendingSort">Ordenar</label><select id="adminPendingSort"><option value="name">Nome (A–Z)</option><option value="recent">Atualização mais recente</option><option value="oldest">Atualização mais antiga</option></select><button id="adminNotificationsOpen" class="secondary" type="button" aria-haspopup="dialog">🔔 Notificações</button></div>
           <div id="adminAttentionContent" class="admin-attention-content">
             <p class="muted-note">Consultando jogos e palpites dos participantes.</p>
           </div>
@@ -887,6 +887,17 @@
   </div>
 
 
+  <div id="adminNotificationsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="adminNotificationsTitle" aria-describedby="adminNotificationsDescription">
+    <section class="card admin-notifications-modal">
+      <header class="admin-notifications-heading"><div><span class="eyebrow">ACOMPANHAMENTO ADM</span><h2 id="adminNotificationsTitle">🔔 Notificações automáticas</h2></div><button id="adminNotificationsClose" class="modal-close" type="button" aria-label="Fechar acompanhamento de notificações">✕</button></header>
+      <p id="adminNotificationsDescription" class="muted-note">Consulte o processamento dos avisos. Aceito pelo serviço não comprova entrega ou leitura no celular.</p>
+      <div class="admin-notifications-filters"><label>Rodada<select id="adminNotificationsRound"><option value="all">Todas</option></select></label><label>Tipo<select id="adminNotificationsType"><option value="all">Todos</option><option value="12h">Lembrete de 12h</option><option value="2h">Lembrete de 2h</option><option value="summary">Resumo da rodada</option></select></label><label>Situação<select id="adminNotificationsState"><option value="all">Todas</option><option value="pending">Aguardando</option><option value="processing">Em processamento</option><option value="sent">Aceito pelo serviço</option><option value="skipped">Não enviado</option><option value="failed">Falha</option></select></label><button id="adminNotificationsRefresh" class="secondary" type="button">Atualizar consulta</button></div>
+      <p id="adminNotificationsStatus" class="muted-note" role="status" aria-live="polite"></p>
+      <div id="adminNotificationsContent"></div>
+      <p class="admin-notification-caption">Registros operacionais da temporada, sem histórico permanente. Motivos detalhados de falha ou descarte não são armazenados.</p>
+    </section>
+  </div>
+
   <div id="adminParticipantManagerModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="adminParticipantManagerTitle">
     <section class="admin-participant-manager-modal card">
       <div class="admin-detail-header"><div><span class="eyebrow">NOVO ACESSO</span><h2 id="adminParticipantManagerTitle">Adicionar participante</h2><p class="muted-note">A pessoa deverá entrar com exatamente esta conta Google.</p></div><button id="adminParticipantManagerClose" class="modal-close" type="button" aria-label="Fechar">✕</button></div>
@@ -942,6 +953,6 @@
     }
   </script>
 <script type="module" src="./js/startup-intro.js"></script>
-<script type="module" src="./js/app.js?v=6.52.0"></script>
+<script type="module" src="./js/app.js?v=6.53.0"></script>
 </body>
 </html>

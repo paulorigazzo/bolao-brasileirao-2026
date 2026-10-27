@@ -4,8 +4,9 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.52.0`.
-- Notificações automáticas: implementação em revisão; migração aplicada e conciliada; ativação em produção pendente de autorização. [Plano e operação](docs/releases/v6.52.0-notificacoes-automaticas.md).
+- Versão funcional: `v6.53.0`.
+- Notificações automáticas: ativas em produção desde 2026-10-27; migração aplicada e conciliada. [Plano e operação](docs/releases/v6.52.0-notificacoes-automaticas.md).
+- Acompanhamento das notificações na ADM: implementação em revisão. [Nota v6.53.0](docs/releases/v6.53.0-adm-acompanhamento-notificacoes.md).
 - Prioridade: **manter o Bolão 2026 estável e evoluí-lo incrementalmente para múltiplas ligas com palpites compartilhados**.
 - Próxima etapa coordenada: monitoramento normal da API-Football nas próximas rodadas; o Rigazzo permanece congelado como histórico e possível laboratório.
 - Jogos reagendados da Rodada 21: contexto e comunicação no app preparados na v6.44.2; confirmação oficial das duas datas aplicada no Supabase, com validação visual autenticada ainda pendente.
