@@ -4608,3 +4608,38 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 #homeFavoriteTeamSection .favorite-home-details-content .favorite-home-overview:hover{background:none}
 #homeFavoriteTeamSection .favorite-home-details-content .favorite-home-overview:active{transform:none}
 @media(max-width:360px){#homeFavoriteTeamSection .favorite-home-summary{gap:9px;padding:12px}#homeFavoriteTeamSection .favorite-home-summary .favorite-home-crest{width:44px;height:44px;border-radius:12px}#homeFavoriteTeamSection .favorite-home-summary .favorite-home-crest img{width:36px;height:36px}}
+
+/* Resumo anterior: mesmo alinhamento dos badges da Visão geral. */
+/* Visão Geral: cabeçalho uniforme e dados usando toda a largura do card. */
+#homePreviousRound .home-mini-card{grid-template-columns:44px minmax(0,1fr) 14px;grid-template-rows:48px auto 1fr;gap:12px 9px;align-items:start}
+#homePreviousRound .mini-card-icon{grid-row:1;grid-column:1;align-self:center}
+#homePreviousRound .home-mini-card>span:not(.mini-card-icon){grid-row:1;grid-column:2/-1;align-self:center;min-width:0;line-height:1.2}
+#homePreviousRound .home-mini-card>b{position:absolute;top:10px;right:10px;line-height:1;text-align:right}
+#homePreviousRound .home-mini-card>strong{grid-row:2;grid-column:1/-1;align-self:start;margin:3px 0 0;font-size:2.1rem;text-align:center;line-height:1;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+#homePreviousRound .home-mini-card>small{grid-row:3;grid-column:1/-1;align-self:start;min-height:2.7em;margin:0;text-align:center;line-height:1.4;color:var(--muted)}
+#homePreviousRound .home-mini-card>small b{font-weight:750;color:var(--text)}
+#homePreviousRound .mini-tone-gold>strong{color:var(--premium-gold)}
+#homePreviousRound .home-mini-card>small.overview-complete{color:var(--premium-green)}
+#homePreviousRound .home-mini-card>small.overview-pending{color:var(--premium-gold)}
+@media(max-width:680px){
+  #homePreviousRound .home-mini-card{grid-template-columns:28px minmax(0,1fr) 9px;grid-template-rows:38px auto 1fr;gap:10px 5px;padding:12px 9px}
+  #homePreviousRound .mini-card-icon{width:28px;height:28px;font-size:.8rem}
+  #homePreviousRound .home-mini-card>span:not(.mini-card-icon){font-size:.64rem}
+  #homePreviousRound .home-mini-card>b{font-size:1rem}
+  #homePreviousRound .home-mini-card>strong{font-size:1.75rem}
+  #homePreviousRound .home-mini-card>small{font-size:.66rem}
+}
+@media(max-width:360px){
+  #homePreviousRound .home-mini-card{grid-template-columns:20px minmax(0,1fr) 8px;column-gap:3px;padding-inline:7px}
+  #homePreviousRound .mini-card-icon{width:20px;height:20px;font-size:.68rem}
+  #homePreviousRound .home-mini-card>span:not(.mini-card-icon){font-size:.58rem}
+  #homePreviousRound .home-mini-card>strong{font-size:1.5rem}
+  #homePreviousRound .home-mini-card>small{font-size:.6rem}
+}
+
+
+.home-previous-round{display:grid;gap:12px}
+#homeRoundHighlightsAccess:empty{display:none}
+.home-previous-round .home-section-heading{margin:0}
+.home-previous-round .home-mini-card{background:linear-gradient(145deg,rgba(255,255,255,.025),rgba(255,255,255,.008))}
+.home-previous-round .mini-card-icon{opacity:.8}

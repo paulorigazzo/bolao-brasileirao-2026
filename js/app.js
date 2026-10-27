@@ -35,7 +35,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.51.7";
+const APP_VERSION = "6.51.8";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2943,6 +2943,37 @@ function renderHomeFavoriteTeam(){
   if(!state.standings) loadStandings(false);
 }
 
+function homePreviousRoundModel(currentRound,games){
+  const round=Number(currentRound)-1;
+  const previous=games.filter(game=>Number(game.rodada)===round);
+  if(round<1 || !previous.length) return null;
+  let registered=0,totalPoints=0,exact=0;
+  for(const game of previous){
+    const pick=ownPick(game.id_jogo);
+    if(pick) registered++;
+    if(pick && isScorableGame(game)){
+      totalPoints+=points(pick,game);
+      if(Number(pick.gols_casa)===Number(game.gols_casa) && Number(pick.gols_fora)===Number(game.gols_fora)) exact++;
+    }
+  }
+  return {round,total:previous.length,finished:previous.filter(isScorableGame).length,registered,points:totalPoints,exact,
+    partial:previous.some(game=>!isScorableGame(game) && gameStatusDisplay(game).key!=="cancelled")};
+}
+
+function renderHomePreviousRound(round){
+  const host=$("homePreviousRound");
+  if(!host) return;
+  const model=homePreviousRoundModel(round,state.games);
+  host.classList.toggle("hidden",!model);
+  if(!model){host.innerHTML="";return;}
+  host.innerHTML=`<header class="home-section-heading"><div><span class="eyebrow">SUA RODADA ANTERIOR</span><h2 id="homePreviousRoundTitle">Rodada ${model.round}</h2></div>${model.partial?'<small class="muted-note">Resultado parcial</small>':""}</header>
+    <div class="home-overview-grid">
+      <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="legacy-games" data-round="${model.round}" aria-label="Abrir jogos da Rodada ${model.round}"><span class="mini-card-icon" aria-hidden="true">📅</span><span>Rodada<br>anterior</span><b aria-hidden="true">›</b><strong>${model.round}</strong><small><b>${model.finished} de ${model.total}</b> jogos encerrados</small></article>
+      <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="legacy-games" data-round="${model.round}" aria-label="Conferir seus palpites da Rodada ${model.round}"><span class="mini-card-icon" aria-hidden="true">🎯</span><span>Seus<br>palpites</span><b aria-hidden="true">›</b><strong>${model.registered}/${model.total}</strong><small>Registrados na rodada</small></article>
+      <article class="home-mini-card card mini-tone-gold home-navigable-card" role="button" tabindex="0" data-home-action="round-highlights" data-round-highlights-round="${model.round}" aria-label="Ver destaques da Rodada ${model.round}"><span class="mini-card-icon" aria-hidden="true">⭐</span><span>Pontos<br>da rodada</span><b aria-hidden="true">›</b><strong>${model.points}</strong><small>Pontos confirmados · ${model.exact} ${model.exact===1?"placar exato":"placares exatos"}</small></article>
+    </div>`;
+}
+
 function renderHome(){
   if(!$("homeV2Tab")?.classList.contains("hidden")) renderHomeV2();
   if(!state.participant) return;
@@ -2950,6 +2981,7 @@ function renderHome(){
   const now=Date.now();
   const round=currentRoundNumber();
   const roundGames=homeRoundGames().sort((a,b)=>new Date(a.inicio)-new Date(b.inicio));
+  renderHomePreviousRound(round);
   const meIndex=state.ranking.findIndex(isCurrentRankingParticipant);
   const me=meIndex>=0?state.ranking[meIndex]:{total:0,exact:0,count:state.ownPicks.length,scored:0};
   const leader=state.ranking[0];
@@ -3116,9 +3148,11 @@ function renderHomeV2RoundLeader(entry,round,prefix="homeV2"){
 function renderHomeLeagueHighlights(context){
   const host=$("homeLeagueHighlights");
   if(!host)return;
-  if(!state.participant||state.leagueContextStatus!=="ready"){host.innerHTML="";return;}
+  const access=$("homeRoundHighlightsAccess");
+  if(!state.participant||state.leagueContextStatus!=="ready"){host.innerHTML="";if(access)access.innerHTML="";return;}
   const cards=buildHomeV2LeagueHighlights(publicPicksRefreshPending?null:homeV2FriendlyRankings());
-  host.innerHTML=homeV2LeagueHighlights(cards,"home",homeRoundHighlightsAccess(context));
+  host.innerHTML=homeV2LeagueHighlights(cards,"home");
+  if(access)access.innerHTML=homeRoundHighlightsAccess(context);
   const round=currentRoundNumber();
   renderHomeV2RoundLeader(roundHighlightsLoader.peek(roundHighlightsKey(round)),round,"home");
   if(roundHighlightsAvailable(round))queueMicrotask(()=>refreshRoundHighlightsViews());

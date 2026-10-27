@@ -12,13 +12,13 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.51.7">
-  <link rel="stylesheet" href="./css/styles.css?v=6.51.7">
-  <link rel="stylesheet" href="./css/home-v2.css?v=6.51.7">
-  <link rel="stylesheet" href="./css/components.css?v=6.51.7">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.51.7">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.51.7">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.51.7">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.51.8">
+  <link rel="stylesheet" href="./css/styles.css?v=6.51.8">
+  <link rel="stylesheet" href="./css/home-v2.css?v=6.51.8">
+  <link rel="stylesheet" href="./css/components.css?v=6.51.8">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.51.8">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.51.8">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.51.8">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
@@ -33,7 +33,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-      <p class="brand-version"><span id="appVersion" class="version-pill">v6.51.7</span></p>
+      <p class="brand-version"><span id="appVersion" class="version-pill">v6.51.8</span></p>
         <p id="headerLeagueName" class="brand-league hidden" aria-live="polite"></p>
       </div>
     </div>
@@ -154,6 +154,8 @@
           <button class="home-secondary-action home-refresh-action" type="button" data-home-action="refresh"><span aria-hidden="true">↻</span><span>Recarregar dados</span></button>
         </section>
         <section id="homeOverview" class="home-overview-grid"></section>
+        <section id="homePreviousRound" class="home-previous-round hidden" aria-labelledby="homePreviousRoundTitle"></section>
+        <div id="homeRoundHighlightsAccess"></div>
         <div id="homeLeagueHighlights" class="home-league-highlights"></div>
 
         <section id="homeLiveSection" class="home-content-section"></section>
@@ -940,6 +942,6 @@
     }
   </script>
 <script type="module" src="./js/startup-intro.js"></script>
-<script type="module" src="./js/app.js?v=6.51.7"></script>
+<script type="module" src="./js/app.js?v=6.51.8"></script>
 </body>
 </html>

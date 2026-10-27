@@ -188,14 +188,16 @@ context.state.leagueContextStatus='ready';
 context.roundHighlightsAvailable=round=>round===28;
 context.highlightsContext={round:28,mode:'recent'};
 vm.runInContext('renderHomeLeagueHighlights(highlightsContext)',context);
-assert.match(node('homeLeagueHighlights').innerHTML,/data-round-highlights-round="28"/);
+assert.match(node('homeRoundHighlightsAccess').innerHTML,/data-round-highlights-round="28"/);
+assert.doesNotMatch(node('homeLeagueHighlights').innerHTML,/data-round-highlights-round=/);
 assert.doesNotMatch(vm.runInContext('homeV2LeagueHighlights([],"home",homeRoundHighlightsAccess(highlightsContext))',context),/class="v2-league-highlights hidden"/,'acesso disponível mantém a seção mesmo sem cards');
-assert.ok(node('homeLeagueHighlights').innerHTML.indexOf('home-round-highlights-action')>node('homeLeagueHighlights').innerHTML.indexOf('v2-round-leader-slot'));
 assert.equal(vm.runInContext('homeRoundHighlightsAccess(null)',context),'');
 assert.equal(vm.runInContext('homeRoundHighlightsAccess({round:30})',context),'');
 context.roundHighlightsAvailable=()=>false;
 assert.doesNotMatch(source,/homeRoundLiveFacts|homeRoundHighlightsHtml/);
 const markup=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+assert.ok(markup.indexOf('id="homePreviousRound"')<markup.indexOf('id="homeRoundHighlightsAccess"'));
+assert.ok(markup.indexOf('id="homeRoundHighlightsAccess"')<markup.indexOf('id="homeLeagueHighlights"'));
 assert.ok(markup.indexOf('id="homeOverview"')<markup.indexOf('id="homeLeagueHighlights"'));
 assert.ok(markup.indexOf('id="homeLeagueHighlights"')<markup.indexOf('id="homeLiveSection"'));
 leaderContext.$=id=>({homeRoundLeaderSlot:leaderSlot,homeLeagueHighlightsSection:leaderSection,homeTab:leaderTab}[id]);
@@ -207,7 +209,7 @@ for(const name of ['navigateTo','applyNavigationState'])assert.match(extract(nam
 // Referência v6.51.2: retira apenas o bloco antigo de Destaques da rodada.
 const {createHash}=await import('node:crypto');
 const current=source.slice(source.indexOf('function renderHome(){'),source.indexOf('\nlet homeV2PicksRound='));
-const preserved=current.replace('  if(!$("homeV2Tab")?.classList.contains("hidden")) renderHomeV2();\n','').replace('  renderHomeLeagueHighlights(highlightsContext);\n','').trim();
+const preserved=current.replace('  if(!$("homeV2Tab")?.classList.contains("hidden")) renderHomeV2();\n','').replace('  renderHomeLeagueHighlights(highlightsContext);\n','').replace('  renderHomePreviousRound(round);\n','').trim();
 assert.equal(createHash('sha256').update(preserved).digest('hex'),'a5bf0d01608190e869031d8b254ad1a9b2780283ecacb5494a55831f45c8f72f','Demais blocos da Home preservados na v6.51.2');
 console.log('Home 2.0: estados, pontos, isolamento, Destaques e Home original aprovados.');
 

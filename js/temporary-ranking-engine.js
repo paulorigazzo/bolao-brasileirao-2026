@@ -28,7 +28,8 @@ export function temporaryRankingAvailability(games=[],round){
     if(state==="suspended" && hasScore(game)) counts.suspendedWithScore+=1;
   }
   const consolidated=counts.total>0 && counts.finished+counts.cancelled===counts.total;
-  return {...counts,round:Number(round),consolidated,available:counts.total>0 && !consolidated};
+  const started=counts.live+counts.suspended+counts.finished>0;
+  return {...counts,round:Number(round),consolidated,started,available:started && !consolidated};
 }
 
 export function buildTemporaryRankingModel({rows=[],officialRanking=[],games=[],round}){
