@@ -35,7 +35,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.51.10";
+const APP_VERSION = "6.52.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -5938,6 +5938,17 @@ function openPreviousRoundStatistics(round){
   }});
 }
 
+function openPushNotificationTarget(search=location.search){
+  const params=new URLSearchParams(search);
+  const round=Number(params.get("rodada"));
+  if(!Number.isInteger(round)||round<1||round>38||!$("roundSelect")?.querySelector(`option[value="${round}"]`)) return;
+  $("roundSelect").value=String(round);
+  renderGames();
+  navigateTo("games",{onReady:()=>{
+    if(params.get("notificacao")==="resumo" && !$("gamesTab")?.classList.contains("hidden")) openRoundHighlights(round);
+  }});
+}
+
 function navigateTo(tabName,{onReady}={}){
   if(tabName==="homeV2"&&!isAdminUser()) return;
   const target=$(tabName+"Tab");
@@ -6088,12 +6099,7 @@ async function initialize(session){
   const isAdmin=isAdminUser(); show("adminPanel",isAdmin); show("adminMenuShortcut",isAdmin);
   renderRounds(); renderGames(); renderRanking(); renderStats(); renderHome(); renderMyTeam(); startMatchClockRefresh(); startLiveScoreRefresh(); refreshLiveScoresSilently(); if(isAdmin){ renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminDiagnostic(); renderAdminExecutiveDashboard(); renderAdminAudit(); renderAdminRecoveryProtection(); }
   initializePushPreferences();
-  const pushRound=Number(new URLSearchParams(location.search).get("rodada"));
-  if(Number.isInteger(pushRound) && $("roundSelect")?.querySelector(`option[value="${pushRound}"]`)){
-    $("roundSelect").value=String(pushRound);
-    renderGames();
-    navigateTo("games");
-  }
+  openPushNotificationTarget();
 }
 
 

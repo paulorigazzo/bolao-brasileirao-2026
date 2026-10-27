@@ -1,5 +1,5 @@
-6.51.10
+6.52.0
 
-Variação de posição após a rodada anterior na Home.
+Notificações automáticas de pendências e resumo da rodada (ativação pendente).
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)
