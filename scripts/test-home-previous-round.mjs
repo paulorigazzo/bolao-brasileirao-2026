@@ -28,4 +28,13 @@ assert.equal(model(33,games).partial,true,"resultado sem placar válido não con
 picks.clear();result=model(33,games);assert.equal(result.registered,0);assert.equal(result.points,0);assert.equal(result.exact,0);
 assert.ok(html.indexOf('id="homeOverview"')<html.indexOf('id="homePreviousRound"'));
 assert.ok(html.indexOf('id="homePreviousRound"')<html.indexOf('id="homeLeagueHighlights"'));
+const host={innerHTML:"",classList:{toggle(){}}};
+sandbox.$=()=>host;sandbox.state={games};
+vm.runInContext(app.slice(app.indexOf("function renderHomePreviousRound("),app.indexOf("function renderHome(){")),sandbox);
+vm.runInContext("renderHomePreviousRound(33)",sandbox);
+assert.equal((host.innerHTML.match(/home-navigable-card/g)||[]).length,3);
+assert.equal((host.innerHTML.match(/role="button" tabindex="0"/g)||[]).length,3);
+assert.equal((host.innerHTML.match(/data-home-action="legacy-games" data-round="32"/g)||[]).length,2);
+assert.match(host.innerHTML,/data-home-action="round-highlights" data-round-highlights-round="32"/);
+assert.equal((host.innerHTML.match(/<b aria-hidden="true">›<\/b>/g)||[]).length,3);
 console.log("Rodada anterior: isolamento, pontos, exatos, parciais, reagendados e posição na Home aprovados.");

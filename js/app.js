@@ -2968,9 +2968,9 @@ function renderHomePreviousRound(round){
   if(!model){host.innerHTML="";return;}
   host.innerHTML=`<header class="home-section-heading"><div><span class="eyebrow">SUA RODADA ANTERIOR</span><h2 id="homePreviousRoundTitle">Rodada ${model.round}</h2></div>${model.partial?'<small class="muted-note">Resultado parcial</small>':""}</header>
     <div class="home-overview-grid">
-      <article class="home-mini-card card mini-tone-green"><span class="mini-card-icon" aria-hidden="true">📅</span><span>Rodada<br>anterior</span><strong>${model.round}</strong><small><b>${model.finished} de ${model.total}</b> jogos encerrados</small></article>
-      <article class="home-mini-card card mini-tone-green"><span class="mini-card-icon" aria-hidden="true">🎯</span><span>Seus<br>palpites</span><strong>${model.registered}/${model.total}</strong><small>Registrados na rodada</small></article>
-      <article class="home-mini-card card mini-tone-gold"><span class="mini-card-icon" aria-hidden="true">⭐</span><span>Pontos<br>da rodada</span><strong>${model.points}</strong><small>Pontos confirmados · ${model.exact} ${model.exact===1?"placar exato":"placares exatos"}</small></article>
+      <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="legacy-games" data-round="${model.round}" aria-label="Abrir jogos da Rodada ${model.round}"><span class="mini-card-icon" aria-hidden="true">📅</span><span>Rodada<br>anterior</span><b aria-hidden="true">›</b><strong>${model.round}</strong><small><b>${model.finished} de ${model.total}</b> jogos encerrados</small></article>
+      <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="legacy-games" data-round="${model.round}" aria-label="Conferir seus palpites da Rodada ${model.round}"><span class="mini-card-icon" aria-hidden="true">🎯</span><span>Seus<br>palpites</span><b aria-hidden="true">›</b><strong>${model.registered}/${model.total}</strong><small>Registrados na rodada</small></article>
+      <article class="home-mini-card card mini-tone-gold home-navigable-card" role="button" tabindex="0" data-home-action="round-highlights" data-round-highlights-round="${model.round}" aria-label="Ver destaques da Rodada ${model.round}"><span class="mini-card-icon" aria-hidden="true">⭐</span><span>Pontos<br>da rodada</span><b aria-hidden="true">›</b><strong>${model.points}</strong><small>Pontos confirmados · ${model.exact} ${model.exact===1?"placar exato":"placares exatos"}</small></article>
     </div>`;
 }
 
