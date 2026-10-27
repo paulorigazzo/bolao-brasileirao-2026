@@ -34,7 +34,22 @@ vm.runInContext(app.slice(app.indexOf("function renderHomePreviousRound("),app.i
 vm.runInContext("renderHomePreviousRound(33)",sandbox);
 assert.equal((host.innerHTML.match(/home-navigable-card/g)||[]).length,3);
 assert.equal((host.innerHTML.match(/role="button" tabindex="0"/g)||[]).length,3);
-assert.equal((host.innerHTML.match(/data-home-action="legacy-games" data-round="32"/g)||[]).length,2);
+assert.equal((host.innerHTML.match(/data-home-action="legacy-games" data-round="32"/g)||[]).length,1);
+assert.match(host.innerHTML,/data-home-action="previous-round-stats" data-round="32"/);
 assert.match(host.innerHTML,/data-home-action="round-highlights" data-round-highlights-round="32"/);
 assert.equal((host.innerHTML.match(/<b aria-hidden="true">›<\/b>/g)||[]).length,3);
 console.log("Rodada anterior: isolamento, pontos, exatos, parciais, reagendados e posição na Home aprovados.");
+
+const navigationSource=app.slice(app.indexOf("function openPreviousRoundStatistics("),app.indexOf("function navigateTo("));
+const interactions=[];
+let hasRow=true,reduced=false;
+const row={scrollIntoView:o=>interactions.push(["scroll",o.behavior]),focus:()=>interactions.push(["row-focus"]),classList:{add:c=>interactions.push(["add",c]),remove:c=>interactions.push(["remove",c])}};
+const title={scrollIntoView:()=>interactions.push(["title-scroll"]),focus:()=>interactions.push(["title-focus"])};
+const navContext={Number,navigateTo:(tab,{onReady})=>{assert.equal(tab,"stats");onReady();},$:id=>id==="statsTab"?{classList:{contains:()=>false}}:id==="statsEvolutionTitle"?title:{querySelector:selector=>{assert.equal(selector,'[data-stats-round-highlights="32"]');return hasRow?row:null;}},prefersReducedMotion:()=>reduced,document:{querySelectorAll:()=>[]},setTimeout:fn=>fn()};
+vm.createContext(navContext);vm.runInContext(navigationSource,navContext);
+navContext.openPreviousRoundStatistics(32);
+assert.deepEqual(interactions,[["scroll","smooth"],["row-focus"],["add","stats-round-target"],["remove","stats-round-target"]]);
+interactions.length=0;reduced=true;navContext.openPreviousRoundStatistics(32);assert.equal(interactions[0][1],"auto");
+interactions.length=0;hasRow=false;navContext.openPreviousRoundStatistics(32);assert.deepEqual(interactions,[["title-scroll"],["title-focus"]]);
+interactions.length=0;navContext.openPreviousRoundStatistics("inválida");assert.equal(interactions.length,0);
+console.log("Destino Estatísticas: rodada correta, destaque temporário, movimento reduzido e ausência de dados aprovados.");

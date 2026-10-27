@@ -1,5 +1,5 @@
-6.51.8
+6.51.9
 
-Resumo da rodada anterior na Home e projeção apenas após início da rodada.
+Card da rodada anterior abre a evolução em Estatísticas.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)
