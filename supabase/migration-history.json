@@ -28,6 +28,7 @@
     { "version": "20260913013447", "name": "add_league_ranking_movement", "status": "applied" },
     { "version": "20260914021749", "name": "add_round_live_highlights", "status": "applied" },
     { "version": "20260925173008", "name": "confirmar_datas_rodada_21_cbf", "status": "applied" },
-    { "version": "20261017125914", "name": "add_controlled_league_deletion", "status": "applied" }
+    { "version": "20261017125914", "name": "add_controlled_league_deletion", "status": "applied" },
+    { "version": "20261027172231", "name": "add_automatic_round_push", "status": "applied" }
   ]
 }

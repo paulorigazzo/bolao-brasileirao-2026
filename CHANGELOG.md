@@ -1,3 +1,11 @@
+# v6.52.0 — Notificações automáticas da rodada
+
+- Prepara lembretes personalizados 12h e 2h antes do primeiro jogo para palpites ainda pendentes e abertos, com tolerância de 15 minutos.
+- Prepara resumo genérico de pontos e exatos após a rodada completa, incluindo reagendados, sem restrição de horário e sem duplicação por liga.
+- Reutiliza o despertar da sincronização: verificação a cada 5 minutos, independente da consulta esportiva, sem novo cron ou consulta extra à API.
+- Controle aditivo com reservas, tentativas limitadas, revalidação e baseline contra resumos antigos. Envios desabilitados por padrão; migração remota aplicada e conciliada; ativação pendente.
+- Detalhes: [nota de implementação e operação](docs/releases/v6.52.0-notificacoes-automaticas.md).
+
 # v6.51.10 — Variação de posição na Home
 
 - Card central da rodada anterior destaca posições conquistadas ou perdidas, com seta verde ou vermelha; estabilidade usa indicação neutra.

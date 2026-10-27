@@ -2125,3 +2125,14 @@ O app mantém o fluxo completo quando afetado. A Central utiliza o deploy Git ex
 - Preservações: contas, autorizações globais, palpites, jogos, pontuação e outras ligas.
 - Consequência: exclusão não possui desfazer; rollback técnico desativa o recurso, mas recuperação de dados exige backup. Migração deve ser autorizada, aplicada e conciliada antes do merge.
 - Fonte: [nota v6.50.0](../releases/v6.50.0-exclusao-controlada-ligas.md).
+
+## DEC-2026-070 — Automação de lembretes e resumo por rodada
+
+- Data: 2026-10-27
+- Status: plano aprovado; implementação em revisão; migração aplicada e conciliada em 2026-10-27; ativação pendente.
+- Substitui: parcialmente DEC-2026-048 quanto ao envio exclusivamente manual e à ausência de controle persistente; preserva a ativação voluntária por aparelho e o envio manual.
+- Decisão: uma preferência única cobre lembretes 12h/2h antes do primeiro jogo, somente para pendências abertas, e resumo genérico após a rodada completa, sem restrição de horário. Sem notificações por liga ou escolha adicional ao tocar; o resumo abre os Destaques na liga selecionada.
+- Operação: reutilizar o despertar existente e verificar push a cada 5 minutos, independente da consulta esportiva. Não ampliar a janela ou o consumo da API de futebol. Lembretes aceitam até 15 minutos de atraso.
+- Controle: tabela operacional única com baseline, reserva e tentativas por temporada/rodada/aparelho; não registra mensagens nem histórico permanente de comunicação. Preservar marcadores durante a temporada para impedir reenvios e revisar na preparação de 2027.
+- Segurança: automação desabilitada por padrão, restrita ao contexto production e ao servidor. Migração remota, envios de teste reais e ativação dependem de autorização específica.
+- Fonte: [nota e operação v6.52.0](../releases/v6.52.0-notificacoes-automaticas.md).

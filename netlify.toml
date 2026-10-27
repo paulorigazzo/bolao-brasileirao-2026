@@ -5,4 +5,5 @@
 # A função desperta a cada minuto, mas consulta a API apenas em janela de jogo
 # (4h anteriores até 90 min futuros) ou na manutenção periódica de 6 horas.
 [functions."sincronizar-jogos-agendado"]
+  # O mesmo despertar verifica push a cada 5 minutos, somente quando habilitado em produção.
   schedule = "* * * * *"
