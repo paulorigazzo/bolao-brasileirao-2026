@@ -35,7 +35,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.51.8";
+const APP_VERSION = "6.51.9";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2956,7 +2956,8 @@ function homePreviousRoundModel(currentRound,games){
       if(Number(pick.gols_casa)===Number(game.gols_casa) && Number(pick.gols_fora)===Number(game.gols_fora)) exact++;
     }
   }
-  return {round,total:previous.length,finished:previous.filter(isScorableGame).length,registered,points:totalPoints,exact,
+  const finished=previous.filter(isScorableGame).length;
+  return {round,total:previous.length,finished,registered,points:totalPoints,exact,rate:finished?Math.round(totalPoints/(finished*10)*100):null,
     partial:previous.some(game=>!isScorableGame(game) && gameStatusDisplay(game).key!=="cancelled")};
 }
 
@@ -2968,8 +2969,8 @@ function renderHomePreviousRound(round){
   if(!model){host.innerHTML="";return;}
   host.innerHTML=`<header class="home-section-heading"><div><span class="eyebrow">SUA RODADA ANTERIOR</span><h2 id="homePreviousRoundTitle">Rodada ${model.round}</h2></div>${model.partial?'<small class="muted-note">Resultado parcial</small>':""}</header>
     <div class="home-overview-grid">
-      <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="legacy-games" data-round="${model.round}" aria-label="Abrir jogos da Rodada ${model.round}"><span class="mini-card-icon" aria-hidden="true">📅</span><span>Rodada<br>anterior</span><b aria-hidden="true">›</b><strong>${model.round}</strong><small><b>${model.finished} de ${model.total}</b> jogos encerrados</small></article>
-      <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="legacy-games" data-round="${model.round}" aria-label="Conferir seus palpites da Rodada ${model.round}"><span class="mini-card-icon" aria-hidden="true">🎯</span><span>Seus<br>palpites</span><b aria-hidden="true">›</b><strong>${model.registered}/${model.total}</strong><small>Registrados na rodada</small></article>
+      <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="previous-round-stats" data-round="${model.round}" aria-label="Ver pontuação da Rodada ${model.round} nas Estatísticas"><span class="mini-card-icon" aria-hidden="true">📅</span><span>Rodada<br>anterior</span><b aria-hidden="true">›</b><strong>${model.round}</strong><small><b>${model.finished} de ${model.total}</b> jogos encerrados</small></article>
+      <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="legacy-games" data-round="${model.round}" aria-label="Conferir jogos e aproveitamento da Rodada ${model.round}"><span class="mini-card-icon" aria-hidden="true">🎯</span><span>Aprovei&shy;tamento</span><b aria-hidden="true">›</b><strong>${model.rate===null?"—":`${model.rate}%`}</strong><small>${model.finished} ${model.finished===1?"jogo avaliado":"jogos avaliados"}</small></article>
       <article class="home-mini-card card mini-tone-gold home-navigable-card" role="button" tabindex="0" data-home-action="round-highlights" data-round-highlights-round="${model.round}" aria-label="Ver destaques da Rodada ${model.round}"><span class="mini-card-icon" aria-hidden="true">⭐</span><span>Pontos<br>da rodada</span><b aria-hidden="true">›</b><strong>${model.points}</strong><small>Pontos confirmados · ${model.exact} ${model.exact===1?"placar exato":"placares exatos"}</small></article>
     </div>`;
 }
@@ -5905,16 +5906,39 @@ function applyNavigationState(tabName){
   if(tabName==="home"&&state.user) schedulePushActivationPrompt();
 }
 
-function navigateTo(tabName){
+function openPreviousRoundStatistics(round){
+  const targetRound=Number(round);
+  if(!Number.isInteger(targetRound) || targetRound<1) return;
+  navigateTo("stats",{onReady:()=>{
+    if($("statsTab")?.classList.contains("hidden")) return;
+    const title=$("statsEvolutionTitle");
+    const row=$("roundHistory")?.querySelector(`[data-stats-round-highlights="${targetRound}"]`);
+    const target=row||title;
+    if(!target) return;
+    target.scrollIntoView({behavior:prefersReducedMotion()?"auto":"smooth",block:row?"center":"start"});
+    target.focus({preventScroll:true});
+    document.querySelectorAll(".stats-round-target").forEach(item=>item.classList.remove("stats-round-target"));
+    if(row){
+      row.classList.add("stats-round-target");
+      setTimeout(()=>row.classList.remove("stats-round-target"),3200);
+    }
+  }});
+}
+
+function navigateTo(tabName,{onReady}={}){
   if(tabName==="homeV2"&&!isAdminUser()) return;
   const target=$(tabName+"Tab");
   const current=document.querySelector(".tab-content:not(.hidden)");
   if(current===target){
     window.scrollTo({top:0,behavior:prefersReducedMotion()?"auto":"smooth"});
+    if(onReady) requestAnimationFrame(onReady);
     return;
   }
 
-  const mutate=()=>applyNavigationState(tabName);
+  const mutate=()=>{
+    applyNavigationState(tabName);
+    if(onReady) requestAnimationFrame(onReady);
+  };
   if(document.startViewTransition && !prefersReducedMotion()){
     document.startViewTransition(mutate);
   }else{
@@ -6435,6 +6459,7 @@ $("homeTab")?.addEventListener("click",async event=>{
   if(!target) return;
   const action=target.dataset.homeAction;
   if(action==="temporary-ranking"){ openTemporaryRanking(target); return; }
+  if(action==="previous-round-stats"){ openPreviousRoundStatistics(target.dataset.round); return; }
   if(action==="legacy-games"){
     if($("roundSelect")) $("roundSelect").value=target.dataset.round;
     navigateTo("games");renderGames();return;

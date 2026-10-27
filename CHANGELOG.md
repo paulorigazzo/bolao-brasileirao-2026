@@ -1,3 +1,11 @@
+# v6.51.9 — Acesso à evolução pela Home
+
+- Card Rodada anterior abre Estatísticas em Pontuação por rodada, destacando temporariamente a linha correspondente quando disponível.
+- Sem linha da rodada, posiciona no título da seção.
+- Card central da rodada anterior mostra aproveitamento percentual sobre os jogos avaliados, mantendo acesso aos jogos. Sem jogos avaliados, mostra —.
+- Preserva o botão de Destaques e as regras de pontuação.
+- Detalhes: [nota da versão](docs/releases/v6.51.9-home-acesso-evolucao.md).
+
 # v6.51.8 — Rodada anterior na Home
 
 - Adiciona três cards informativos da rodada imediatamente anterior entre Visão geral e Destaques do Bolão, com jogos encerrados, palpites, pontos confirmados e exatos daquela rodada.
