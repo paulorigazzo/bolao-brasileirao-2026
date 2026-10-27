@@ -1,6 +1,6 @@
 # v6.53.0 — Acompanhamento de notificações na ADM
 
-- Botão Notificações ao lado de Ordenar na Central de Atenção, com quebra de linha em telas estreitas.
+- Agrupa Enviar lembrete, Avisar por notificação e Acompanhar notificações no topo da Central de Atenção, antes dos filtros, com adaptação em telas estreitas.
 - Modal somente de leitura com resumo por aparelho, próximo lembrete previsto, última movimentação, filtros e paginação de participantes/avisos.
 - Agrupa aparelhos, separa baseline e distingue aceite pelo serviço de entrega ou leitura no celular.
 - Consulta administrativa pelo servidor sem exposição de endpoints, chaves, contatos ou identificadores técnicos; sem migração ou alteração dos disparos.

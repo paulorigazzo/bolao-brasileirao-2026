@@ -6315,7 +6315,7 @@ $("adminRoundContent")?.addEventListener("click",event=>{
   const push=event.target.closest("[data-admin-earlier-push]");
   if(push) previewEarlierRoundPush(Number(push.dataset.adminEarlierPush),push);
 });
-const adminNotificationsController=createAdminNotificationsController({document,isAdmin:isAdminUser,userId:()=>state.user?.id,getToken:sessionToken,escapeHtml});
+const adminNotificationsController=createAdminNotificationsController({document,isAdmin:isAdminUser,userId:()=>state.user?.id,getToken:sessionToken,escapeHtml,getCurrentRound:currentRoundNumber});
 $("adminNotificationsOpen")?.addEventListener("click",event=>adminNotificationsController.open(event.currentTarget));
 $("adminPushReminderClose")?.addEventListener("click",closeAdminPushReminder);
 $("adminPushReminderCancel")?.addEventListener("click",closeAdminPushReminder);

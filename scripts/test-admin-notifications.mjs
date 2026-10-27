@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import {notificationFilters,nextReminderWindow,buildAdminNotifications,readNotificationPages} from '../netlify/functions/_admin-notifications.mjs';
 import {createAdminNotificationsHandler,loadAdminNotifications} from '../netlify/functions/acompanhamento-notificacoes.mjs';
 import {adminNotificationsContent,createAdminNotificationsController} from '../js/admin-notifications.js';
+import {readFileSync} from 'node:fs';
+const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const attention=html.slice(html.indexOf('<article id="adminAttentionCard"'),html.indexOf('<article id="adminRoundCard"'));
+const actionGroup=attention.slice(attention.indexOf('class="admin-reminder-actions'),attention.indexOf('class="admin-pending-toolbar'));
+for(const id of ['adminAttentionAction','adminPushReminderAction','adminNotificationsOpen']){
+  assert.match(actionGroup,new RegExp(`id="${id}"`),'ações reunidas no topo, antes dos filtros');
+  assert.equal((html.match(new RegExp(`id="${id}"`,'g'))||[]).length,1,'mantém um único botão por ação');
+}
+assert.match(actionGroup,/id="adminAttentionAction" class="primary hidden"/);
+assert.match(actionGroup,/Acompanhar notificações/);
+assert.doesNotMatch(attention.slice(attention.indexOf('class="admin-card-footer"')),/id="admin(?:AttentionAction|PushReminderAction|NotificationsOpen)"/);
 const now=Date.parse('2026-10-27T18:24:00Z');
 const filters=notificationFilters(new URLSearchParams());
 assert.deepEqual(filters,{round:'all',type:'all',status:'all',page:1});
@@ -47,12 +58,12 @@ const client={from(table){const q={select(fields){selected.push([table,fields]);
 model=await loadAdminNotifications(client,filters,now);assert.equal(model.total,1207);
 assert.equal(selected.some(([,fields])=>/endpoint|p256dh|\bauth\b|email/.test(fields)),false,'não consulta chaves ou contatos');
 // Modal: resposta após fechamento ou logout não deve reaparecer; abrir sem ADM não consulta.
-const elements=new Map();let admin=true,user='one',fetches=0,resolveFetch;
+const elements=new Map();let admin=true,user='one',fetches=0,resolveFetch,activeRound=33,lastUrl;
 const doc={activeElement:null,body:{classList:{add(){},remove(){}}},querySelector:()=>null,addEventListener(){},getElementById(id){
  if(!elements.has(id)){const hidden=new Set(id==='adminNotificationsModal'?['hidden']:[]);elements.set(id,{value:'all',innerHTML:'',textContent:'',disabled:false,isConnected:true,classList:{add:x=>hidden.add(x),remove:x=>hidden.delete(x),contains:x=>hidden.has(x)},focus(){doc.activeElement=this;},addEventListener(){},querySelectorAll:()=>[]});}return elements.get(id);
 }};
-const ctrl=createAdminNotificationsController({document:doc,isAdmin:()=>admin,userId:()=>user,getToken:async()=>'synthetic',escapeHtml:escape,fetchImpl:async()=>{fetches++;return new Promise(resolve=>{resolveFetch=resolve;});}});
-ctrl.open();await new Promise(resolve=>setImmediate(resolve));assert.equal(fetches,1);ctrl.close();resolveFetch({ok:true,json:async()=>({ok:true,...model})});await new Promise(resolve=>setImmediate(resolve));assert.equal(elements.get('adminNotificationsContent').innerHTML,'');
+const ctrl=createAdminNotificationsController({document:doc,isAdmin:()=>admin,userId:()=>user,getToken:async()=>'synthetic',escapeHtml:escape,getCurrentRound:()=>activeRound,fetchImpl:async(url)=>{lastUrl=url;fetches++;return new Promise(resolve=>{resolveFetch=resolve;});}});
+ctrl.open();await new Promise(resolve=>setImmediate(resolve));assert.equal(fetches,1);assert.equal(new URL(lastUrl,'https://example.test').searchParams.get('round'),'33');assert.equal(elements.get('adminNotificationsType').value,'all');assert.equal(elements.get('adminNotificationsState').value,'all');ctrl.close();resolveFetch({ok:true,json:async()=>({ok:true,...model})});await new Promise(resolve=>setImmediate(resolve));assert.equal(elements.get('adminNotificationsContent').innerHTML,'');
 admin=false;ctrl.open();await new Promise(resolve=>setImmediate(resolve));assert.equal(fetches,1);
-admin=true;ctrl.open();await new Promise(resolve=>setImmediate(resolve));user='other';resolveFetch({ok:true,json:async()=>({ok:true,...model})});await new Promise(resolve=>setImmediate(resolve));assert.equal(elements.get('adminNotificationsContent').innerHTML,'');assert.equal(elements.get('adminNotificationsModal').classList.contains('hidden'),true);
+admin=true;activeRound=34;ctrl.open();await new Promise(resolve=>setImmediate(resolve));assert.equal(new URL(lastUrl,'https://example.test').searchParams.get('round'),'34');user='other';resolveFetch({ok:true,json:async()=>({ok:true,...model})});await new Promise(resolve=>setImmediate(resolve));assert.equal(elements.get('adminNotificationsContent').innerHTML,'');assert.equal(elements.get('adminNotificationsModal').classList.contains('hidden'),true);
 console.log('Acompanhamento ADM: somente leitura, autorização, privacidade, paginação >1000, filtros, agrupamento, agenda, XSS e respostas atrasadas aprovados.');

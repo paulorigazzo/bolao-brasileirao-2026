@@ -413,6 +413,11 @@
             </div>
             <div class="admin-card-header-actions"><span id="adminAttentionBadge" class="admin-status-badge">Atualizando…</span><button class="admin-card-toggle" type="button" data-admin-collapse="adminAttentionCard" aria-expanded="true" aria-label="Recolher Central de Atenção">⌃</button></div>
           </div>
+          <div class="admin-reminder-actions admin-attention-actions" role="group" aria-label="Ações da rodada">
+            <button id="adminAttentionAction" class="primary hidden" type="button">📲 Enviar lembrete</button>
+            <button id="adminPushReminderAction" class="secondary hidden" type="button">🔔 Avisar por notificação</button>
+            <button id="adminNotificationsOpen" class="secondary" type="button" aria-haspopup="dialog">🔔 Acompanhar notificações</button>
+          </div>
           <div class="admin-pending-toolbar" aria-label="Filtros de palpites da rodada">
             <div class="admin-pending-filters" role="group" aria-label="Filtrar participantes">
               <button class="admin-pending-filter active" type="button" data-admin-pending-filter="all" aria-pressed="true">Todos <span id="adminFilterAllCount">0</span></button>
@@ -421,16 +426,12 @@
             </div>
             <div id="adminPickDeadline" class="admin-pick-deadline" aria-live="polite"><span>Próximo fechamento</span><strong>Calculando…</strong></div>
           </div>
-          <div class="admin-pending-order"><label for="adminPendingSort">Ordenar</label><select id="adminPendingSort"><option value="name">Nome (A–Z)</option><option value="recent">Atualização mais recente</option><option value="oldest">Atualização mais antiga</option></select><button id="adminNotificationsOpen" class="secondary" type="button" aria-haspopup="dialog">🔔 Notificações</button></div>
+          <div class="admin-pending-order"><label for="adminPendingSort">Ordenar</label><select id="adminPendingSort"><option value="name">Nome (A–Z)</option><option value="recent">Atualização mais recente</option><option value="oldest">Atualização mais antiga</option></select></div>
           <div id="adminAttentionContent" class="admin-attention-content">
             <p class="muted-note">Consultando jogos e palpites dos participantes.</p>
           </div>
           <div class="admin-card-footer">
             <small id="adminDataFreshness">Dados ainda não carregados.</small>
-            <div class="admin-reminder-actions">
-              <button id="adminPushReminderAction" class="secondary hidden" type="button">🔔 Avisar por notificação</button>
-              <button id="adminAttentionAction" class="primary hidden" type="button">📲 Enviar lembrete</button>
-            </div>
           </div>
           <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
         </article>

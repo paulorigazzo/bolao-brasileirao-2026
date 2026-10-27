@@ -17,7 +17,9 @@
 @media(max-width:520px){.admin-control-center{padding:15px;border-radius:19px}.admin-control-center-head{align-items:flex-start}.admin-control-center-head p{font-size:.82rem}.admin-control-center-grid{gap:8px;margin:14px 0}.admin-control-metric{min-height:82px;padding:10px}.admin-control-center-footer{align-items:stretch;flex-direction:column}.admin-control-center-footer .primary{width:100%}}
 
 /* Acompanhamento somente de leitura das notificações automáticas. */
-#adminNotificationsOpen{min-height:44px;padding:6px 12px;font:inherit;white-space:nowrap}
+.admin-attention-actions{margin:14px 0;align-items:stretch}
+.admin-attention-actions button{min-height:44px;max-width:100%}
+@media(max-width:520px){.admin-attention-actions{grid-template-columns:minmax(0,1fr)}}
 .admin-notifications-modal{width:min(850px,100%);max-height:90dvh;overflow:auto;padding:22px;border-radius:22px;scrollbar-width:thin;scrollbar-color:rgba(112,236,165,.28) transparent}
 .admin-notifications-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .admin-notifications-heading h2{margin:5px 0;font-size:1.18rem}

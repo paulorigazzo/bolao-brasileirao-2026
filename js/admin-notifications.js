@@ -21,7 +21,7 @@ export function adminNotificationsContent(data,escapeHtml){
     <details class="admin-notification-baseline"><summary>Ativação e baseline</summary><p>${data.activationAt?`Ativação registrada em ${e(stamp(data.activationAt))}.`:'Ainda não há ativação registrada.'} ${Number(data.baselineRounds)} rodadas antigas protegidas contra resumos retroativos.</p><small>Este registro não é uma verificação em tempo real da configuração de ativação.</small></details>`;
 }
 
-export function createAdminNotificationsController({document,isAdmin,userId,getToken,escapeHtml,fetchImpl=fetch}){
+export function createAdminNotificationsController({document,isAdmin,userId,getToken,escapeHtml,getCurrentRound=()=>null,fetchImpl=fetch}){
   const $=id=>document.getElementById(id),modal=$('adminNotificationsModal');
   let requestId=0,controller=null,returnFocus=null,page=1;
   const current=(id,user)=>id===requestId&&!modal.classList.contains('hidden')&&isAdmin()&&userId()===user;
@@ -61,6 +61,11 @@ export function createAdminNotificationsController({document,isAdmin,userId,getT
     if(!isAdmin())return;
     returnFocus=trigger||document.activeElement;page=1;
     for(const id of ['adminNotificationsRound','adminNotificationsType','adminNotificationsState'])$(id).value='all';
+    const round=Number(getCurrentRound());
+    if(Number.isInteger(round)&&round>=1&&round<=38){
+      $('adminNotificationsRound').innerHTML=`<option value="all">Todas</option><option value="${round}">Rodada ${round}</option>`;
+      $('adminNotificationsRound').value=String(round);
+    }
     modal.classList.remove('hidden');document.body.classList.add('modal-open');$('adminNotificationsClose').focus();refresh();
   }
   $('adminNotificationsClose').addEventListener('click',()=>close());
