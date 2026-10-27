@@ -1,5 +1,5 @@
-6.52.0
+6.53.0
 
-Notificações automáticas de pendências e resumo da rodada (ativação pendente).
+Acompanhamento de notificações automáticas na Área ADM.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

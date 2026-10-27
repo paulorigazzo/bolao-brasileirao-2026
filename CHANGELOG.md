@@ -1,3 +1,11 @@
+# v6.53.0 — Acompanhamento de notificações na ADM
+
+- Agrupa Enviar lembrete, Avisar por notificação e Acompanhar notificações no topo da Central de Atenção, antes dos filtros, com adaptação em telas estreitas.
+- Modal somente de leitura com resumo por aparelho, próximo lembrete previsto, última movimentação, filtros e paginação de participantes/avisos.
+- Agrupa aparelhos, separa baseline e distingue aceite pelo serviço de entrega ou leitura no celular.
+- Consulta administrativa pelo servidor sem exposição de endpoints, chaves, contatos ou identificadores técnicos; sem migração ou alteração dos disparos.
+- Detalhes: [nota da versão](docs/releases/v6.53.0-adm-acompanhamento-notificacoes.md).
+
 # v6.52.0 — Notificações automáticas da rodada
 
 - Prepara lembretes personalizados 12h e 2h antes do primeiro jogo para palpites ainda pendentes e abertos, com tolerância de 15 minutos.

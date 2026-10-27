@@ -1,4 +1,5 @@
 import { loadLeaguePublicPicks } from "./league-public-picks.js";
+import { createAdminNotificationsController } from "./admin-notifications.js";
 import { buildHomeV2Model, buildHomeV2PersonalContext, buildHomeV2LeagueHighlights, buildHomeV2RoundLeader, buildHomeV2RoundRecord } from "./home-v2.js";
 import { finishStartupIntro } from "./startup-intro.js";
 import { buildTeamCampaign, campaignPositionTrend } from "./team-campaign.js";
@@ -35,7 +36,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.52.0";
+const APP_VERSION = "6.53.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -6314,6 +6315,8 @@ $("adminRoundContent")?.addEventListener("click",event=>{
   const push=event.target.closest("[data-admin-earlier-push]");
   if(push) previewEarlierRoundPush(Number(push.dataset.adminEarlierPush),push);
 });
+const adminNotificationsController=createAdminNotificationsController({document,isAdmin:isAdminUser,userId:()=>state.user?.id,getToken:sessionToken,escapeHtml,getCurrentRound:currentRoundNumber});
+$("adminNotificationsOpen")?.addEventListener("click",event=>adminNotificationsController.open(event.currentTarget));
 $("adminPushReminderClose")?.addEventListener("click",closeAdminPushReminder);
 $("adminPushReminderCancel")?.addEventListener("click",closeAdminPushReminder);
 $("adminPushReminderSend")?.addEventListener("click",confirmAdminPushReminder);
@@ -6565,7 +6568,7 @@ if(TEMPORARY_RANKING_SYNTHETIC_PREVIEW){
   try{ const {data:{session}}=await sb.auth.getSession(); if(session) await initialize(session); }
   catch(err){message(err.message||"Não foi possível iniciar o aplicativo.",true);}
   finally{finishStartupIntro();show("loading",false);}
-  sb.auth.onAuthStateChange(async (_event,session)=>{ if(session&&!state.user){try{await initialize(session);}catch(err){message(err.message||"Falha de autenticação.",true);}} });
+  sb.auth.onAuthStateChange(async (_event,session)=>{ if(_event==="SIGNED_OUT")adminNotificationsController.close({restoreFocus:false}); if(session&&!state.user){try{await initialize(session);}catch(err){message(err.message||"Falha de autenticação.",true);}} });
 }
 
 let gamesSpacingFrame=0;
