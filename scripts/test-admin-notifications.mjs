@@ -66,4 +66,15 @@ const ctrl=createAdminNotificationsController({document:doc,isAdmin:()=>admin,us
 ctrl.open();await new Promise(resolve=>setImmediate(resolve));assert.equal(fetches,1);assert.equal(new URL(lastUrl,'https://example.test').searchParams.get('round'),'33');assert.equal(elements.get('adminNotificationsType').value,'all');assert.equal(elements.get('adminNotificationsState').value,'all');ctrl.close();resolveFetch({ok:true,json:async()=>({ok:true,...model})});await new Promise(resolve=>setImmediate(resolve));assert.equal(elements.get('adminNotificationsContent').innerHTML,'');
 admin=false;ctrl.open();await new Promise(resolve=>setImmediate(resolve));assert.equal(fetches,1);
 admin=true;activeRound=34;ctrl.open();await new Promise(resolve=>setImmediate(resolve));assert.equal(new URL(lastUrl,'https://example.test').searchParams.get('round'),'34');user='other';resolveFetch({ok:true,json:async()=>({ok:true,...model})});await new Promise(resolve=>setImmediate(resolve));assert.equal(elements.get('adminNotificationsContent').innerHTML,'');assert.equal(elements.get('adminNotificationsModal').classList.contains('hidden'),true);
+ctrl.open(null,{round:33,type:'2h'});await new Promise(resolve=>setImmediate(resolve));
+assert.equal(new URL(lastUrl,'https://example.test').searchParams.get('round'),'33');
+assert.equal(new URL(lastUrl,'https://example.test').searchParams.get('type'),'2h');
+assert.equal(elements.get('adminNotificationsState').value,'all');
+resolveFetch({ok:true,json:async()=>({ok:true,...model})});await new Promise(resolve=>setImmediate(resolve));
+assert.equal(elements.get('adminNotificationsRound').value,'33');
+assert.equal(elements.get('adminNotificationsType').value,'2h');ctrl.close();
+ctrl.open();await new Promise(resolve=>setImmediate(resolve));
+assert.equal(new URL(lastUrl,'https://example.test').searchParams.get('round'),'34');
+assert.equal(new URL(lastUrl,'https://example.test').searchParams.get('type'),'all','abertura manual não herda filtro do aviso');
+ctrl.close();resolveFetch({ok:true,json:async()=>({ok:true,...model})});
 console.log('Acompanhamento ADM: somente leitura, autorização, privacidade, paginação >1000, filtros, agrupamento, agenda, XSS e respostas atrasadas aprovados.');

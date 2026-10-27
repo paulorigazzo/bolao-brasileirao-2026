@@ -3,6 +3,7 @@ import {randomUUID} from "node:crypto";
 import {serviceClient} from "./_api-helpers.mjs";
 import {SEASON_YEAR} from "./_constants.mjs";
 import {reminderMessage} from "./_web-push-reminder.mjs";
+import {runAdminConsolidations} from "./_admin-push-consolidation.mjs";
 
 export function automaticPushDue(now=Date.now(),env=name=>globalThis.Netlify?.env?.get?.(name)||process.env[name],deploymentContext){
   return deploymentContext==="production" && env("AUTOMATIC_ROUND_PUSH_ENABLED")==="true"
@@ -45,25 +46,35 @@ export async function runAutomaticRoundPush({now=Date.now(),env=name=>globalThis
     webpush.setVapidDetails(value("VAPID_SUBJECT"),value("VAPID_PUBLIC_KEY"),value("VAPID_PRIVATE_KEY"));
     send=(subscription,payload,options)=>webpush.sendNotification(subscription,payload,options);
   }
-  await rpc("preparar_push_automaticos",{p_temporada:season});
+  await rpc("preparar_push_automaticos_com_adm",{p_temporada:season});
   const jobs=await rpc("reservar_push_automaticos",{p_temporada:season,p_worker:worker,p_limite:100})||[];
+  // Limite menor nas RPCs administrativas preserva o orçamento da função agendada.
+  const adminRpc=async(name,args)=>{
+    const request=supabase.rpc(name,args);
+    const {data,error}=await (request.abortSignal?request.abortSignal(AbortSignal.timeout(1000)):request);
+    if(error)throw new Error('Consolidado administrativo indisponível.');
+    return data;
+  };
+  const adminTask=runAdminConsolidations({rpc:adminRpc,send,worker,season,classifyFailure:pushFailureResult});
   const results=await Promise.allSettled(jobs.map(async job=>{
     const content=await rpc("obter_conteudo_push_automatico",{p_id:job.id,p_worker:worker});
-    let result="skipped";
+    let result="skipped",attempted=false;
     if(content?.deferUntil) result="defer";
     else if(content && Number(content.ttl)>0){
       try{
         const payload=automaticPushPayload(job,content,season);
+        attempted=true;
         await send({endpoint:content.endpoint,keys:{p256dh:content.p256dh,auth:content.auth}},JSON.stringify(payload),
           {TTL:Math.min(Number(content.ttl),job.tipo==="summary"?3600:900),urgency:job.tipo==="summary"?"normal":"high",timeout:4000});
         result="sent";
       }catch(error){result=pushFailureResult(error);}
     }
-    const completed=await rpc("concluir_push_automatico",{p_id:job.id,p_worker:worker,p_resultado:result});
+    const completed=await rpc("concluir_push_automatico_com_adm",{p_id:job.id,p_worker:worker,p_resultado:result,p_tentado:attempted});
     if(!completed) throw new Error("Reserva de envio indisponível.");
     return result;
   }));
-  return {enabled:true,processed:jobs.length,
+  const admin=await adminTask;
+  return {enabled:true,processed:jobs.length,admin,
     accepted:results.filter(item=>item.status==="fulfilled"&&item.value==="sent").length,
     deferred:results.filter(item=>item.status==="rejected"||item.value==="retry"||item.value==="defer").length};
 }

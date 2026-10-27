@@ -2136,3 +2136,14 @@ O app mantém o fluxo completo quando afetado. A Central utiliza o deploy Git ex
 - Controle: tabela operacional única com baseline, reserva e tentativas por temporada/rodada/aparelho; não registra mensagens nem histórico permanente de comunicação. Preservar marcadores durante a temporada para impedir reenvios e revisar na preparação de 2027.
 - Segurança: automação desabilitada por padrão, restrita ao contexto production e ao servidor. Migração remota, envios de teste reais e ativação dependem de autorização específica.
 - Fonte: [nota e operação v6.52.0](../releases/v6.52.0-notificacoes-automaticas.md).
+
+## DEC-2026-071 — Consolidados administrativos separados dos envios aos participantes
+
+- Data: 2026-10-27
+- Status: aceita; migração aplicada, implementação em revisão
+- Responsáveis: mantenedor e Codex
+- Substitui: não se aplica; complementa DEC-2026-070
+- Decisão: avisar administradores ativos e aprovados sobre a conclusão de cada evento automático de rodada/tipo, com snapshot de contagens e destinatários por aparelho. Preservar preferência única e verificar autorização novamente antes do transporte.
+- Controle: separar os marcadores e trabalhos administrativos de push_automaticos, evitando inflação das contagens dos participantes e consolidação recursiva. Não gerar retroativos, avisos por execução/lote ou novo consolidado em retentativas. Preservar os marcadores durante a temporada.
+- Limites: consolidar somente trabalhos terminados e tentativas de transporte registradas; lembretes aguardam também o fim da janela de admissão. Inscrições posteriores não recebem eventos já consolidados. Aceite não comprova entrega/leitura e falhas de confirmação podem repetir transporte.
+- Fonte: [contrato, aplicação e mitigação v6.54.0](../releases/v6.54.0-consolidados-push-adm.md).
