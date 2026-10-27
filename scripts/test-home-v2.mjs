@@ -207,7 +207,7 @@ for(const name of ['navigateTo','applyNavigationState'])assert.match(extract(nam
 // Referência v6.51.2: retira apenas o bloco antigo de Destaques da rodada.
 const {createHash}=await import('node:crypto');
 const current=source.slice(source.indexOf('function renderHome(){'),source.indexOf('\nlet homeV2PicksRound='));
-const preserved=current.replace('  if(!$("homeV2Tab")?.classList.contains("hidden")) renderHomeV2();\n','').replace('  renderHomeLeagueHighlights(highlightsContext);\n','').trim();
+const preserved=current.replace('  if(!$("homeV2Tab")?.classList.contains("hidden")) renderHomeV2();\n','').replace('  renderHomeLeagueHighlights(highlightsContext);\n','').replace('  renderHomePreviousRound(round);\n','').trim();
 assert.equal(createHash('sha256').update(preserved).digest('hex'),'a5bf0d01608190e869031d8b254ad1a9b2780283ecacb5494a55831f45c8f72f','Demais blocos da Home preservados na v6.51.2');
 console.log('Home 2.0: estados, pontos, isolamento, Destaques e Home original aprovados.');
 

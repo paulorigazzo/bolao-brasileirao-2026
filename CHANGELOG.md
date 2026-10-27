@@ -1,3 +1,10 @@
+# v6.51.8 — Rodada anterior na Home
+
+- Adiciona três cards informativos da rodada imediatamente anterior entre Visão geral e Destaques do Bolão, com jogos encerrados, palpites, pontos confirmados e exatos daquela rodada.
+- Identifica resultados parciais e oculta o resumo na primeira rodada ou sem jogos anteriores.
+- Ranking Provisório exige rodada iniciada e não concluída; preserva intervalos entre partidas e reagendados anteriores ao vivo.
+- Detalhes: [nota da versão](docs/releases/v6.51.8-home-rodada-anterior.md).
+
 # v6.51.7 — Renovação da classificação na sessão
 
 - Renova a classificação ao abrir a tela com consulta anterior de uma hora ou mais e enquanto ela permanece visível.

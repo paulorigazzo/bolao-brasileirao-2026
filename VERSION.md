@@ -1,5 +1,5 @@
-6.51.7
+6.51.8
 
-Renovação automática da classificação após uma hora na sessão.
+Resumo da rodada anterior na Home e projeção apenas após início da rodada.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)
