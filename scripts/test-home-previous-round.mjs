@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import vm from "node:vm";
+import {analyzeRankingHistory} from "../js/statistics-engine.js";
 
 const app=readFileSync(new URL("../js/app.js",import.meta.url),"utf8");
 const html=readFileSync(new URL("../index.html",import.meta.url),"utf8");
@@ -33,16 +34,53 @@ assert.equal(model(33,[{...games[0],status:"adiado"}]).rate,null,"sem jogos aval
 assert.ok(html.indexOf('id="homeOverview"')<html.indexOf('id="homePreviousRound"'));
 assert.ok(html.indexOf('id="homePreviousRound"')<html.indexOf('id="homeLeagueHighlights"'));
 const host={innerHTML:"",classList:{toggle(){}}};
-sandbox.$=()=>host;sandbox.state={games};
+sandbox.$=()=>host;sandbox.state={games,leagueContextStatus:"ready",participant:{nome:"Ana"}};
+sandbox.publicPicksRefreshPending=false;
+let series=[{round:31,position:5},{round:32,position:2},{round:33,position:1}];
+sandbox.currentRankingHistory=name=>{assert.equal(name,"Ana");return {selectedSeries:series};};
+vm.runInContext(app.slice(app.indexOf("function homePreviousRoundMovement("),app.indexOf("function homePreviousRoundModel(")),sandbox);
 vm.runInContext(app.slice(app.indexOf("function renderHomePreviousRound("),app.indexOf("function renderHome(){")),sandbox);
 vm.runInContext("renderHomePreviousRound(33)",sandbox);
 assert.equal((host.innerHTML.match(/home-navigable-card/g)||[]).length,3);
 assert.equal((host.innerHTML.match(/role="button" tabindex="0"/g)||[]).length,3);
-assert.equal((host.innerHTML.match(/data-home-action="legacy-games" data-round="32"/g)||[]).length,1);
+assert.match(host.innerHTML,/data-home-action="ranking"/);
+assert.match(host.innerHTML,/home-round-movement up">↑ 3/);
+assert.match(host.innerHTML,/posições conquistadas/);
+assert.match(host.innerHTML,/home-round-rate">0% de aproveitamento/);
+assert.doesNotMatch(host.innerHTML,/data-home-action="legacy-games"/);
 assert.match(host.innerHTML,/data-home-action="previous-round-stats" data-round="32"/);
 assert.match(host.innerHTML,/data-home-action="round-highlights" data-round-highlights-round="32"/);
 assert.equal((host.innerHTML.match(/<b aria-hidden="true">›<\/b>/g)||[]).length,3);
 console.log("Rodada anterior: isolamento, pontos, exatos, parciais, reagendados e posição na Home aprovados.");
+
+for(const [positions,expected,label] of [
+  [[2,5],-3,'queda'],[[2,2],0,'estabilidade'],[[5,2],3,'subida'],
+]){
+  series=[{round:31,position:positions[0]},{round:32,position:positions[1]},{round:33,position:99}];
+  assert.equal(sandbox.homePreviousRoundMovement(32),expected,label);
+  sandbox.renderHomePreviousRound(33);
+  assert.match(host.innerHTML,new RegExp(`home-round-movement ${expected>0?'up':expected<0?'down':'flat'}`));
+}
+series=[{round:30,position:5},{round:32,position:2}];
+assert.equal(sandbox.homePreviousRoundMovement(32),null,'não substitui rodada ausente por outra rodada');
+sandbox.renderHomePreviousRound(33);assert.match(host.innerHTML,/Sem histórico comparável/);
+series=[{round:31,position:5},{round:32,position:2}];
+sandbox.publicPicksRefreshPending=true;assert.equal(sandbox.homePreviousRoundMovement(32),null);
+sandbox.publicPicksRefreshPending=false;sandbox.state.leagueContextStatus="loading";
+assert.equal(sandbox.homePreviousRoundMovement(32),null,'não usa contexto anterior durante troca de liga');
+sandbox.state.leagueContextStatus="ready";
+// Integração com o histórico canônico: pontuação, desempate e rodada atual isolados.
+const historicalGames=[31,32,33].map((round,index)=>({id_jogo:index+10,rodada:round,status:'encerrado',gols_casa:2,gols_fora:1}));
+const historicalPicks=[
+  {id_jogo:10,usuario:'Ana',gols_casa:0,gols_fora:1},{id_jogo:10,usuario:'Bia',gols_casa:1,gols_fora:0},
+  {id_jogo:11,usuario:'Ana',gols_casa:2,gols_fora:1},{id_jogo:11,usuario:'Bia',gols_casa:0,gols_fora:1},
+  {id_jogo:12,usuario:'Bia',gols_casa:2,gols_fora:1},
+];
+sandbox.currentRankingHistory=selectedParticipant=>analyzeRankingHistory({games:historicalGames,picks:historicalPicks,participantNames:['Ana','Bia'],selectedParticipant,isScorableGame:sandbox.isScorableGame,pointsForPick:sandbox.points});
+assert.equal(sandbox.homePreviousRoundMovement(32),1,'reutiliza cálculo histórico e ignora rodada 33');
+sandbox.currentRankingHistory=selectedParticipant=>analyzeRankingHistory({games:historicalGames,picks:historicalPicks.filter(p=>p.usuario==='Ana'),participantNames:['Ana'],selectedParticipant,isScorableGame:sandbox.isScorableGame,pointsForPick:sandbox.points});
+assert.equal(sandbox.homePreviousRoundMovement(32),0,'nova liga não herda posições da anterior');
+console.log('Variação: histórico canônico, subida, queda, estabilidade, dados ausentes, atualização e troca de liga aprovados.');
 
 const navigationSource=app.slice(app.indexOf("function openPreviousRoundStatistics("),app.indexOf("function navigateTo("));
 const interactions=[];

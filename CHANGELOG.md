@@ -1,3 +1,10 @@
+# v6.51.10 — Variação de posição na Home
+
+- Card central da rodada anterior destaca posições conquistadas ou perdidas, com seta verde ou vermelha; estabilidade usa indicação neutra.
+- Mantém o aproveitamento percentual abaixo, com menor destaque, e abre o Ranking da liga selecionada.
+- Compara o histórico acumulado nas rodadas imediatamente anterior e precedente, sem incluir a rodada atual. Sem histórico comparável ou durante atualização dos dados, mostra —.
+- Detalhes: [nota da versão](docs/releases/v6.51.10-home-variacao-rodada-anterior.md).
+
 # v6.51.9 — Acesso à evolução pela Home
 
 - Card Rodada anterior abre Estatísticas em Pontuação por rodada, destacando temporariamente a linha correspondente quando disponível.

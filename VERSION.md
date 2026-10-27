@@ -1,5 +1,5 @@
-6.51.9
+6.51.10
 
-Card da rodada anterior abre a evolução em Estatísticas.
+Variação de posição após a rodada anterior na Home.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

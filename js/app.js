@@ -35,7 +35,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.51.9";
+const APP_VERSION = "6.51.10";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2943,6 +2943,15 @@ function renderHomeFavoriteTeam(){
   if(!state.standings) loadStandings(false);
 }
 
+function homePreviousRoundMovement(round){
+  if(state.leagueContextStatus!=="ready" || publicPicksRefreshPending || !state.participant?.nome) return null;
+  const series=currentRankingHistory(state.participant.nome).selectedSeries;
+  const previous=series.find(item=>item.round===round-1);
+  const current=series.find(item=>item.round===round);
+  if(!previous || !current || !Number.isFinite(previous.position) || !Number.isFinite(current.position)) return null;
+  return previous.position-current.position;
+}
+
 function homePreviousRoundModel(currentRound,games){
   const round=Number(currentRound)-1;
   const previous=games.filter(game=>Number(game.rodada)===round);
@@ -2967,10 +2976,14 @@ function renderHomePreviousRound(round){
   const model=homePreviousRoundModel(round,state.games);
   host.classList.toggle("hidden",!model);
   if(!model){host.innerHTML="";return;}
+  const movement=homePreviousRoundMovement(model.round);
+  const direction=movement===null?'unavailable':movement>0?'up':movement<0?'down':'flat';
+  const movementValue=movement===null?'—':`${movement>0?'↑':movement<0?'↓':'↔'} ${Math.abs(movement)}`;
+  const movementLabel=movement===null?'Sem histórico comparável':movement===0?'Manteve a posição':`${Math.abs(movement)===1?'posição':'posições'} ${movement>0?'conquistadas':'perdidas'}`;
   host.innerHTML=`<header class="home-section-heading"><div><span class="eyebrow">SUA RODADA ANTERIOR</span><h2 id="homePreviousRoundTitle">Rodada ${model.round}</h2></div>${model.partial?'<small class="muted-note">Resultado parcial</small>':""}</header>
     <div class="home-overview-grid">
       <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="previous-round-stats" data-round="${model.round}" aria-label="Ver pontuação da Rodada ${model.round} nas Estatísticas"><span class="mini-card-icon" aria-hidden="true">📅</span><span>Rodada<br>anterior</span><b aria-hidden="true">›</b><strong>${model.round}</strong><small><b>${model.finished} de ${model.total}</b> jogos encerrados</small></article>
-      <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="legacy-games" data-round="${model.round}" aria-label="Conferir jogos e aproveitamento da Rodada ${model.round}"><span class="mini-card-icon" aria-hidden="true">🎯</span><span>Aprovei&shy;tamento</span><b aria-hidden="true">›</b><strong>${model.rate===null?"—":`${model.rate}%`}</strong><small>${model.finished} ${model.finished===1?"jogo avaliado":"jogos avaliados"}</small></article>
+      <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="ranking" aria-label="Ver Ranking da liga · Rodada ${model.round}: ${movement===null||movement===0?movementLabel:`${Math.abs(movement)} ${movementLabel}`}"><span class="mini-card-icon" aria-hidden="true">↕</span><span>Variação<br>no ranking</span><b aria-hidden="true">›</b><strong class="home-round-movement ${direction}">${movementValue}</strong><small>${movementLabel}<span class="home-round-rate">${model.rate===null?'—':`${model.rate}%`} de aproveitamento</span></small></article>
       <article class="home-mini-card card mini-tone-gold home-navigable-card" role="button" tabindex="0" data-home-action="round-highlights" data-round-highlights-round="${model.round}" aria-label="Ver destaques da Rodada ${model.round}"><span class="mini-card-icon" aria-hidden="true">⭐</span><span>Pontos<br>da rodada</span><b aria-hidden="true">›</b><strong>${model.points}</strong><small>Pontos confirmados · ${model.exact} ${model.exact===1?"placar exato":"placares exatos"}</small></article>
     </div>`;
 }
