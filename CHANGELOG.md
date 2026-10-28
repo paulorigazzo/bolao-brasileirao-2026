@@ -1,3 +1,10 @@
+# v6.55.0 — Destinatários no acompanhamento de notificações
+
+- Filtro Participantes/Administradores com fontes, contadores e última movimentação separados.
+- Preserva rodada vigente, entrada pelo aviso em Participantes e demais filtros; a troca do público reinicia a paginação.
+- Controles administrativos não contam como envios; a visão ADM explica o momento do consolidado sem usar a agenda dos participantes.
+- Sem migração ou alteração dos disparos. [Contrato e validação](docs/releases/v6.55.0-filtro-destinatario-notificacoes.md).
+
 # v6.54.0 — Consolidados dos disparos automáticos ao ADM
 
 - Um aviso consolidado por rodada e tipo aos aparelhos ativos dos administradores, após concluir os lotes e retentativas dos participantes.

@@ -1,5 +1,5 @@
-6.54.0
+6.55.0
 
-Avisos consolidados ao ADM sobre disparos automáticos.
+Filtro de destinatário no acompanhamento administrativo de notificações.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

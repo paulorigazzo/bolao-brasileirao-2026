@@ -7,18 +7,19 @@ const stamp=value=>{
 
 export function adminNotificationsContent(data,escapeHtml){
   const e=escapeHtml,next=data.nextReminder;
+  const isAdmins=data.audience==='admins',audience=isAdmins?'administradores':'participantes';
   const rows=data.rows.map(row=>`<details class="admin-notification-row">
     <summary><span class="admin-notification-time">${e(stamp(row.lastUpdate))}<small>Rodada ${Number(row.round)}</small></span><strong>${e(row.participant)}</strong><span>${e(TYPE_LABELS[row.type]||'Aviso')}</span><span class="admin-notification-status status-${Object.hasOwn(STATUS_LABELS,row.status)?row.status:'mixed'}">${e(STATUS_LABELS[row.status]||STATUS_LABELS.mixed)}</span></summary>
     <div class="admin-notification-details"><p>${Number(row.deviceCount)} ${row.deviceCount===1?'aparelho':'aparelhos'} · ${Number(row.attempts)} ${row.attempts===1?'tentativa registrada':'tentativas registradas'}</p>
     <dl>${Object.entries(row.counts).filter(([,count])=>count>0).map(([status,count])=>`<div><dt>${e(STATUS_LABELS[status]||'Outro estado')}</dt><dd>${Number(count)}</dd></div>`).join('')}</dl>
     ${row.nextAttempt?`<small>Agendamento registrado: ${e(stamp(row.nextAttempt))}. Sujeito à validade do aviso.</small>`:''}</div></details>`).join('');
-  return `<div class="admin-notification-metrics" aria-label="Resumo da temporada ${Number(data.season)}"><div><strong>${Number(data.summary.accepted)}</strong><span>Aceitos pelo serviço</span></div><div><strong>${Number(data.summary.waiting)}</strong><span title="Aguardando ou em processamento">Em andamento</span></div><div><strong>${Number(data.summary.failed)}</strong><span>Falhas</span></div></div>
-    <p class="admin-notification-caption">Contagens da temporada por aparelho e aviso, independentemente dos filtros.</p>
-    <div class="admin-notification-next"><strong>${next?(next.inWindow?'Janela atual de lembrete':'Próximo lembrete previsto'):'Sem próximo lembrete previsto'}</strong>${next?`<span>Rodada ${Number(next.round)} · ${e(TYPE_LABELS[next.type])} · ${e(stamp(next.scheduledAt))}</span><small>Somente se houver palpites pendentes e abertos.</small>`:''}</div>
-    <p class="admin-notification-caption">Última movimentação registrada: ${e(stamp(data.lastMovement))}. Horários de Brasília.</p>
+  return `<div class="admin-notification-metrics" aria-label="Resumo da temporada ${Number(data.season)} para ${audience}"><div><strong>${Number(data.summary.accepted)}</strong><span>Aceitos pelo serviço</span></div><div><strong>${Number(data.summary.waiting)}</strong><span title="Aguardando ou em processamento">Em andamento</span></div><div><strong>${Number(data.summary.failed)}</strong><span>Falhas</span></div></div>
+    <p class="admin-notification-caption">Contagens da temporada para ${audience}, por aparelho e aviso. Independem dos filtros de rodada, tipo e situação.</p>
+    <div class="admin-notification-next">${isAdmins?'<strong>Consolidados ao ADM</strong><small>Gerados após concluir os envios e as novas tentativas aos participantes. O horário varia conforme o processamento.</small>':`<strong>${next?(next.inWindow?'Janela atual de lembrete':'Próximo lembrete previsto'):'Sem próximo lembrete previsto'}</strong>${next?`<span>Rodada ${Number(next.round)} · ${e(TYPE_LABELS[next.type])} · ${e(stamp(next.scheduledAt))}</span><small>Somente se houver palpites pendentes e abertos.</small>`:''}`}</div>
+    <p class="admin-notification-caption">Última movimentação para ${audience}: ${e(stamp(data.lastMovement))}. Horários de Brasília.</p>
     <div class="admin-notification-list">${rows||'<p class="muted-note">Nenhum processamento encontrado com estes filtros.</p>'}</div>
     <nav class="admin-notification-pages" aria-label="Páginas do acompanhamento"><button class="secondary" type="button" data-admin-notifications-page="${Number(data.page)-1}" ${data.page<=1?'disabled':''}>Anterior</button><span>Página ${Number(data.page)} de ${Number(data.pages)} · ${Number(data.total)} registros</span><button class="secondary" type="button" data-admin-notifications-page="${Number(data.page)+1}" ${data.page>=data.pages?'disabled':''}>Próxima</button></nav>
-    <details class="admin-notification-baseline"><summary>Ativação e baseline</summary><p>${data.activationAt?`Ativação registrada em ${e(stamp(data.activationAt))}.`:'Ainda não há ativação registrada.'} ${Number(data.baselineRounds)} rodadas antigas protegidas contra resumos retroativos.</p><small>Este registro não é uma verificação em tempo real da configuração de ativação.</small></details>`;
+    <details class="admin-notification-baseline"><summary>${isAdmins?'Ativação dos consolidados ao ADM':'Ativação e baseline'}</summary><p>${data.activationAt?`Ativação registrada em ${e(stamp(data.activationAt))}.`:'Ainda não há ativação registrada.'}${isAdmins?'':` ${Number(data.baselineRounds)} rodadas antigas protegidas contra resumos retroativos.`}</p><small>Este registro não é uma verificação em tempo real da configuração de ativação.</small></details>`;
 }
 
 export function createAdminNotificationsController({document,isAdmin,userId,getToken,escapeHtml,getCurrentRound=()=>null,fetchImpl=fetch}){
@@ -36,7 +37,7 @@ export function createAdminNotificationsController({document,isAdmin,userId,getT
     if(!isAdmin()||modal.classList.contains('hidden'))return close({restoreFocus:false});
     controller?.abort();controller=new AbortController();
     const activeController=controller,id=++requestId,user=userId();
-    const filters={round:$('adminNotificationsRound').value,type:$('adminNotificationsType').value,status:$('adminNotificationsState').value,page};
+    const filters={audience:$('adminNotificationsAudience').value,round:$('adminNotificationsRound').value,type:$('adminNotificationsType').value,status:$('adminNotificationsState').value,page};
     $('adminNotificationsRefresh').disabled=true;$('adminNotificationsContent').innerHTML='';$('adminNotificationsStatus').textContent='Consultando registros…';
     const timer=setTimeout(()=>activeController.abort(),20000);
     try{
@@ -60,6 +61,7 @@ export function createAdminNotificationsController({document,isAdmin,userId,getT
   function open(trigger,{round:requestedRound,type:requestedType}={}){
     if(!isAdmin())return;
     returnFocus=trigger||document.activeElement;page=1;
+    $('adminNotificationsAudience').value='participants';
     for(const id of ['adminNotificationsRound','adminNotificationsType','adminNotificationsState'])$(id).value='all';
     const requested=Number(requestedRound);
     const round=Number(Number.isInteger(requested)&&requested>=1&&requested<=38?requested:getCurrentRound());
@@ -72,7 +74,7 @@ export function createAdminNotificationsController({document,isAdmin,userId,getT
   }
   $('adminNotificationsClose').addEventListener('click',()=>close());
   $('adminNotificationsRefresh').addEventListener('click',()=>refresh());
-  for(const id of ['adminNotificationsRound','adminNotificationsType','adminNotificationsState'])$(id).addEventListener('change',()=>{page=1;refresh();});
+  for(const id of ['adminNotificationsAudience','adminNotificationsRound','adminNotificationsType','adminNotificationsState'])$(id).addEventListener('change',()=>{page=1;refresh();});
   modal.addEventListener('click',event=>{if(event.target===modal)close();});
   $('adminNotificationsContent').addEventListener('click',event=>{
     const target=event.target.closest('[data-admin-notifications-page]');

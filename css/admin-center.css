@@ -23,10 +23,11 @@
 .admin-notifications-modal{width:min(850px,100%);max-height:90dvh;overflow:auto;padding:22px;border-radius:22px;scrollbar-width:thin;scrollbar-color:rgba(112,236,165,.28) transparent}
 .admin-notifications-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .admin-notifications-heading h2{margin:5px 0;font-size:1.18rem}
-.admin-notifications-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;align-items:end;gap:10px;margin:16px 0}
+.admin-notifications-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;align-items:end;gap:10px;margin:16px 0}
 .admin-notifications-filters label{display:grid;gap:5px;min-width:0;font-size:.75rem;color:var(--muted)}
 .admin-notifications-filters select{width:100%;min-width:0;min-height:44px;font-size:.78rem}
 .admin-notifications-filters button{min-height:44px}
+@media(max-width:880px){.admin-notifications-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-notifications-filters button{grid-column:1/-1}}
 .admin-notification-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
 .admin-notification-metrics>div{padding:12px 8px;border:1px solid var(--divider);border-radius:13px;text-align:center;background:rgba(255,255,255,.025)}
 .admin-notification-metrics strong{display:block;font-size:1.65rem;line-height:1.2;font-variant-numeric:tabular-nums}
@@ -64,6 +65,7 @@
   .admin-notification-metrics span{font-size:.65rem}
   .admin-notification-pages button{padding:8px}
 }
+@media(max-width:360px){.admin-notifications-filters{grid-template-columns:minmax(0,1fr)}}
 
 /* v6.2.1 — Pendências da Rodada */
 .admin-pending-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0 16px;padding:10px;border:1px solid var(--color-border,rgba(22,52,38,.12));border-radius:16px;background:color-mix(in srgb,var(--color-brand-50,#eef9f2) 68%,white)}

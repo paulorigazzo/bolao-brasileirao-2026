@@ -4,8 +4,9 @@ import {buildAdminNotifications,notificationFilters,readNotificationPages} from 
 
 export async function loadAdminNotifications(supabase,filters,now=Date.now()){
   const signal=AbortSignal.timeout(15000);
+  const table=filters.audience==='admins'?'push_consolidados_adm':'push_automaticos';
   const [records,games]=await Promise.all([
-    readNotificationPages(()=>supabase.from('push_automaticos')
+    readNotificationPages(()=>supabase.from(table)
       .select('id,rodada,tipo,estado,tentativas,subscription_id,proxima_tentativa,criado_em,atualizado_em,subscription:push_subscriptions(user_id)')
       .eq('temporada',Number(SEASON_YEAR)).order('id').abortSignal(signal)),
     readNotificationPages(()=>supabase.from('jogos').select('rodada,inicio,status')

@@ -4,12 +4,13 @@ const timestamp=value=>{const time=Date.parse(value);return Number.isFinite(time
 const iso=value=>timestamp(value)?new Date(timestamp(value)).toISOString():null;
 
 export function notificationFilters(searchParams){
+  const audience=searchParams.get('audience')||'participants';
   const round=searchParams.get('round')||'all',type=searchParams.get('type')||'all';
   const status=searchParams.get('status')||'all',page=Number(searchParams.get('page')||1);
-  if((round!=='all'&&(!/^\d+$/.test(round)||Number(round)<1||Number(round)>38))
+  if(!['participants','admins'].includes(audience)||(round!=='all'&&(!/^\d+$/.test(round)||Number(round)<1||Number(round)>38))
     ||(type!=='all'&&!TYPES.has(type))||(status!=='all'&&!STATES.includes(status))
     ||!Number.isInteger(page)||page<1||page>100000) return null;
-  return {round,type,status,page};
+  return {audience,round,type,status,page};
 }
 
 export function nextReminderWindow(games,now){
@@ -29,21 +30,25 @@ export function nextReminderWindow(games,now){
 }
 
 export function buildAdminNotifications({records=[],profiles=[],games=[],filters,now=Date.now(),season}){
-  const names=new Map(profiles.map(profile=>[String(profile.user_id),String(profile.nome||'Participante indisponível')]));
+  const audience=filters.audience==='admins'?'admins':'participants',isAdmins=audience==='admins';
+  const unavailable=isAdmins?'Administrador indisponível':'Participante indisponível';
+  const names=new Map(profiles.map(profile=>[String(profile.user_id),String(profile.nome||unavailable)]));
   const summary={accepted:0,waiting:0,failed:0};
   const groups=new Map(),baseline=new Set();let activationAt=null,lastMovement=null;
   for(const row of records){
-    if(timestamp(row.atualizado_em)>timestamp(lastMovement))lastMovement=iso(row.atualizado_em);
-    if(row.tipo==='baseline'){baseline.add(Number(row.rodada));continue;}
+    if(!isAdmins&&timestamp(row.atualizado_em)>timestamp(lastMovement))lastMovement=iso(row.atualizado_em);
+    if(row.tipo==='baseline'){if(!isAdmins)baseline.add(Number(row.rodada));continue;}
     if(row.tipo==='activation'){activationAt=iso(row.criado_em);continue;}
     if(!TYPES.has(row.tipo)||!STATES.includes(row.estado))continue;
+    if(isAdmins&&!row.subscription_id)continue;
+    if(timestamp(row.atualizado_em)>timestamp(lastMovement))lastMovement=iso(row.atualizado_em);
     if(row.estado==='sent')summary.accepted++;
     if(row.estado==='pending'||row.estado==='processing')summary.waiting++;
     if(row.estado==='failed')summary.failed++;
     const subscription=Array.isArray(row.subscription)?row.subscription[0]:row.subscription;
     const user=String(subscription?.user_id||row.subscription_id||row.id);
     const key=`${row.rodada}:${row.tipo}:${user}`;
-    if(!groups.has(key))groups.set(key,{participant:names.get(user)||'Participante indisponível',round:Number(row.rodada),
+    if(!groups.has(key))groups.set(key,{participant:names.get(user)||unavailable,round:Number(row.rodada),
       type:row.tipo,counts:Object.fromEntries(STATES.map(state=>[state,0])),deviceCount:0,attempts:0,lastUpdate:null,nextAttempt:null});
     const group=groups.get(key);
     group.counts[row.estado]++;group.deviceCount++;group.attempts+=Number(row.tentativas)||0;
@@ -56,8 +61,8 @@ export function buildAdminNotifications({records=[],profiles=[],games=[],filters
     .map(row=>({...row,status:STATES.filter(state=>row.counts[state]>0).length>1?'mixed':STATES.find(state=>row.counts[state]>0)}))
     .sort((a,b)=>timestamp(b.lastUpdate)-timestamp(a.lastUpdate)||a.participant.localeCompare(b.participant,'pt-BR')||b.round-a.round||a.type.localeCompare(b.type));
   const pageSize=25,total=rows.length,pages=Math.max(1,Math.ceil(total/pageSize)),page=Math.min(filters.page,pages);
-  return {season,queriedAt:new Date(now).toISOString(),summary,activationAt,baselineRounds:baseline.size,lastMovement,
-    nextReminder:nextReminderWindow(games,now),rounds:[...new Set([...games.map(game=>Number(game.rodada)),...records.map(row=>Number(row.rodada))])].filter(round=>round>=1&&round<=38).sort((a,b)=>b-a),
+  return {audience,season,queriedAt:new Date(now).toISOString(),summary,activationAt,baselineRounds:baseline.size,lastMovement,
+    nextReminder:isAdmins?null:nextReminderWindow(games,now),rounds:[...new Set([...games.map(game=>Number(game.rodada)),...records.map(row=>Number(row.rodada))])].filter(round=>round>=1&&round<=38).sort((a,b)=>b-a),
     page,pages,total,rows:rows.slice((page-1)*pageSize,page*pageSize)};
 }
 
