@@ -60,6 +60,41 @@ Saída: especificações por entrega, dependências, critérios e responsáveis 
 
 Saída: matriz revisável com objeto, ação, ordem, precondições, contagens esperadas e evidência. Não executar a limpeza nesta fase.
 
+### Notificações — complemento aprovado em 28/10/2026
+
+Incluir explicitamente os três conjuntos abaixo no inventário, backup, restauração e roteiro de tratamento. As novas tabelas não são apenas logs descartáveis: seus marcadores impedem reenvios durante a temporada.
+
+| Objeto | Papel e dependências | Tratamento a preparar para o corte |
+| --- | --- | --- |
+| `public.push_subscriptions` | Inscrições por aparelho, vinculadas ao usuário; referenciadas pelos dois controles de envio. | Preservar no backup privado e testar restauração; reinicializar inscrições conforme a nova adesão por aparelho, sem reutilizar automaticamente autorizações de 2026. |
+| `public.push_automaticos` | Marcadores de ativação e baseline, trabalhos por temporada/rodada/tipo/aparelho, tentativas, reservas e registro de tentativa de transporte (`envio_tentado_em`). FK para inscrições com exclusão em cascata. | Preservar os marcadores de 2026 até o backup e a limpeza especificamente autorizada; tratar filas e reservas em andamento e preparar controles próprios de 2027, sem resumos retroativos ou duplicidade. |
+| `public.push_consolidados_adm` | Controle separado dos avisos ao administrador, com ativação, eventos agregados e trabalhos por aparelho; FK para inscrições e autorreferência `evento_id`, ambas com exclusão em cascata. | Preservar eventos e trabalhos no backup, conferir vínculos e definir ordem de limpeza; inicializar o controle de 2027 sem reativar trabalhos ou eventos de 2026. |
+
+Fontes: [migração dos automáticos](../../supabase/migrations/20261027172231_add_automatic_round_push.sql), [migração dos consolidados](../../supabase/migrations/20261027232038_add_admin_push_consolidation.sql), [release dos automáticos](../releases/v6.52.0-notificacoes-automaticas.md) e [release dos consolidados](../releases/v6.54.0-consolidados-push-adm.md). Confirmar o estado efetivo no ambiente no inventário futuro; esta atualização usa somente o repositório e não consulta produção.
+
+### Matriz de consultas e limite de retorno
+
+Com 30 participantes e 380 jogos, o cenário de participação completa contém **11.400 palpites**, 380 por participante e 300 por rodada; ultrapassa 1.000 na quarta rodada. Ligas privadas compartilham os mesmos palpites, sem multiplicá-los. O limite padrão da API é por resposta, não por tabela nem por linhas examinadas internamente no PostgreSQL. Confirmar a configuração efetiva do projeto durante o inventário; não depender de aumento do limite para garantir completude. Referências oficiais: [consulta](https://supabase.com/docs/reference/javascript/select) e [paginação](https://supabase.com/docs/reference/javascript/range).
+
+| Consulta ou consumidor | Volume e proteção observada em 28/10/2026 | Atividade para 2027 |
+| --- | --- | --- |
+| Palpites encerrados por liga, estatísticas, duelos e disputas paralelas | Até 11.400; `loadLeaguePublicPicks` pagina de 500 em 500, ordena por jogo/usuário e confere total, duplicidade e páginas completas. | Preservar a proteção na entrada e atualização automática; homologar todo o campeonato e erros intermediários sem apresentar amostras como histórico completo. |
+| Ranking oficial, provisório, movimentação e contagem de palpites por liga | Agregações no banco retornam uma linha por participante, cerca de 30, embora processem milhares de palpites. | Comparar totais com referência independente; não confundir limite de resposta com limite do cálculo SQL. |
+| Meus palpites | Até 380 por participante na temporada; consulta sem paginação. | Confirmar isolamento anual e quantidade completa após o corte. |
+| Jogos, caches de eventos e detalhes | Até 380 linhas por conjunto no modelo de uma temporada; eventos e jogadores ficam dentro do conteúdo de cada jogo. | Conferir limpeza e escopo anual; reavaliar se passar a haver histórico de várias temporadas no mesmo conjunto. |
+| Progresso administrativo | Consulta sem paginação aos jogos da rodada atual e das rodadas pendentes anteriores; pode superar 1.000 com 34 jogos preenchidos por 30 participantes. | Revisar paginação ou divisão da consulta por conjuntos limitados antes da abertura; ensaiar muitas pendências sem omitir palpites nem criar falsas pendências. |
+| Acompanhamento de notificações dos participantes e do ADM | Ambas as fontes usam páginas de 500, ordenadas por ID, com falha explícita para volume excessivo. Com um aparelho por participante, os três tipos em 38 rodadas podem gerar até 3.420 trabalhos (30 × 38 × 3), além dos controles. | Validar totais completos e filtros com múltiplos aparelhos; aferir tempo de resposta, pois o servidor agrega o histórico antes de paginar a apresentação. |
+| Processamento de automáticos e consolidados | Seleção e cálculos no banco; reservas de até 100 trabalhos por execução. O histórico total pode superar 1.000 sem ser transferido integralmente ao processador. | Testar processamento de todos os lotes, concorrência, tentativas e continuidade; conferir a nova pontuação nos resumos. |
+| Designações de participantes às ligas | RPC sem paginação retorna também histórico; o limite de 30 ativos não limita o acúmulo de designações. | Medir projeção e tratar completude da consulta quando ultrapassar 1.000, sem depender apenas da quantidade de usuários. |
+| Inscrições e status de comunicação | Consultas sem paginação; número de aparelhos não equivale ao limite de participantes. Consultas cadastrais também podem acumular solicitações e inativos. | Conferir crescimento e prever leitura integral quando necessário, inclusive no envio manual; testar risco de inscrições ou cadastros omitidos. |
+| Lembrete manual por rodada | Palpites filtrados por membros/jogos, até 300 no cenário normal; inscrições consultadas sem paginação. Existe limite operacional próprio de 100 aparelhos por envio. | Preservar distinção entre limite intencional de envio e truncamento da consulta; testar completude da seleção antes de validar o limite. |
+| Modo legado de contingência | Desativado; `loadLegacyCompetitiveContext` lê palpites encerrados em uma única consulta sem paginação. | Não reativar para 2027 sem corrigir e homologar essa leitura; não tratá-lo como recuperação segura do histórico completo. |
+| Auditorias de ligas | RPCs limitam intencionalmente as listagens aos 100 registros recentes. | Documentar que a tela não é exportação integral e preservar todo o histórico pelo backup. |
+| Diagnóstico e recuperação | Contagens exatas e agregações no banco não exigem transferir todas as linhas; os logs recentes têm limite intencional. | Conferir resultados agregados e não usar essas telas como cópia integral dos registros. |
+| Backup e exportação | O procedimento completo ainda será definido; uma consulta REST única pode omitir registros de tabelas públicas e privadas. | Comprovar extração e restauração integrais com contagens por objeto, sem tratar o exportador sintético existente como backup. |
+
+Fontes do código: [palpites paginados](../../js/league-public-picks.js), [consumidores do app](../../js/app.js), [progresso ADM](../../js/admin-pick-progress.js), [paginação de notificações](../../netlify/functions/_admin-notifications.mjs) e [status de comunicação](../../netlify/functions/status-comunicacao-participantes.mjs). A [release v6.51.4](../releases/v6.51.4-palpites-encerrados-completos.md) registra a correção do histórico de palpites; preservar sua cobertura de regressão.
+
 ## Fase 3 — Preparar e testar a preservação de 2026
 
 - [ ] Definir pacote de backup: estrutura e dados, schemas privados, tratamento de Auth, Storage se utilizado, configurações necessárias, versão do código e referência de deploy.
@@ -67,6 +102,7 @@ Saída: matriz revisável com objeto, ação, ordem, precondições, contagens e
 - [ ] Preparar relatórios legíveis dos resultados e rankings finais das ligas, com critérios de desempate.
 - [ ] Restaurar uma cópia em ambiente isolado, sem sincronizações, notificações ou escritas no ambiente real.
 - [ ] Verificar contagens, relacionamentos, permissões, resultados, palpites e equivalência dos rankings; registrar tempo e limitações da recuperação.
+- [ ] Conferir extração integral de `push_subscriptions`, `push_automaticos` e `push_consolidados_adm`, incluindo marcadores, reservas e autorreferências; restaurar sem executar filas nem enviar notificações.
 - [ ] Preparar o procedimento do backup final após suspender escritas na janela de corte; definir sua verificação antes da limpeza.
 
 Portão: restauração comprovada. Snapshots competitivos, exportador sintético e existência de um arquivo de backup não substituem a restauração testada do pacote completo. Confirmar capacidades e limitações atuais do serviço antes de escolher ferramentas e comandos.
@@ -90,6 +126,7 @@ Saída: versão candidata homologável. Validar ferramentas e documentação ofi
 
 - [ ] Detalhar responsável, alvo, precondição, ação, resultado esperado, conferência e recuperação de cada etapa.
 - [ ] Preparar manutenção e bloqueio de escritas: cadastros, palpites, sincronizações manuais/agendadas, lembretes e demais produtores identificados.
+- [ ] Suspender também os processadores automáticos e de consolidados ADM; resolver ou invalidar reservas de trabalhos em andamento conforme roteiro ensaiado. Antes de remover inscrições, conferir os controles que seriam apagados pelas FKs em cascata e preservar suas evidências no backup.
 - [ ] Impedir que abas antigas, sessões existentes ou tarefas em andamento gravem durante o corte ou recuperem autorizações de 2026.
 - [ ] Definir reinicialização de Auth, sessões, autorizações, membros e inscrições push por procedimento suportado, testado e revisado especificamente.
 - [ ] Preparar procedimentos de limpeza e inicialização com alvos e precondições explícitos, conferência prévia de contagens, controle de repetição e comportamento em falhas parciais.
@@ -108,7 +145,10 @@ Saída: roteiro operacional revisado, ainda sem execução em produção. Autori
 - [ ] Executar `npm run check`, testes específicos de código e SQL e conferência de histórico de migrações quando aplicável.
 - [ ] Validar com `netlify dev`, celular e desktop, toque, teclado, foco e atualização de instalação existente; selecionar outros cenários conforme o impacto.
 - [ ] Validar estados vazios, ausência de liga, nenhuma partida, calendário incompleto, estatísticas insuficientes e indisponibilidade da fonte.
-- [ ] Registrar os critérios CA01–CA12 abaixo, resultados e pendências; corrigir impedimentos antes do corte.
+- [ ] Homologar cenário sintético com 30 participantes, 380 jogos e 11.400 palpites, comparando históricos e agregados com referência independente. Incluir fronteiras 999/1.000/1.001, falha de página intermediária, alterações entre páginas e troca de liga; resultados incompletos devem ser rejeitados.
+- [ ] Simular pelo menos 34 jogos no conjunto de progresso ADM, histórico de designações acima de 1.000 e múltiplos aparelhos nos dois controles de notificações; conferir contagens, desempenho e processamento de todos os lotes sem disparos reais.
+- [ ] Testar reinicialização de notificações para 2027: nenhuma retomada de trabalhos de 2026, nova adesão, ativação/baseline corretas, ausência de resumo retroativo, duplicidade ou aviso ao ADM sobre seu próprio consolidado e pontuação do resumo coerente com o novo regulamento.
+- [ ] Registrar os critérios CA01–CA14 abaixo, resultados e pendências; corrigir impedimentos antes do corte.
 
 Portão: ensaio aprovado pelo responsável, restauração comprovada e nenhuma pendência impeditiva.
 
@@ -163,10 +203,14 @@ Portão: ensaio aprovado pelo responsável, restauração comprovada e nenhuma p
 | CA10 | Endereço, cache, instalação e push coerentes | URL disponível confirmada, links e retorno OAuth testados, atualização de instalação antiga, rascunhos isolados e nova ativação por aparelho. |
 | CA11 | Corte e recuperação controlados | Ensaio completo com falha parcial, bloqueio de escritas antigas, backup final e roteiro com ordem, limites e responsáveis aprovados. |
 | CA12 | Primeira rodada validada operacionalmente | Conferência do fechamento, resultados, pontos, rankings, integração, notificações e recuperação, com ocorrências impeditivas resolvidas. |
+| CA13 | Histórico e operações completos acima de 1.000 registros | Cenário de 11.400 palpites com comparação independente; progresso ADM e designações acima do limite; notificações em múltiplos aparelhos, paginação, fronteiras, falhas intermediárias e tempos registrados, sem totais parciais apresentados como completos. |
+| CA14 | Controles de notificações preservados e reinicializados corretamente | Backup e restauração das três tabelas, conferência de FKs/autorreferência, suspensão de processadores e reservas, controles novos de 2027, nenhuma fila antiga retomada, duplicidade ou resumo retroativo, nova adesão por aparelho e pontos dos resumos equivalentes ao regulamento. |
 
 ## Arquivos potenciais e ações Git
 
 Esta entrega documental altera somente este arquivo, o trecho de 2027 do `ROADMAP.md` e a atualização da DEC-2026-066 em `docs/ai/DECISION_LOG.md`, na branch aprovada `docs/plano-temporada-2027`. Não muda versão, changelog ou release.
+
+O complemento aprovado em 28/10/2026 altera somente este plano, na branch `docs/notificacoes-plano-2027`, incluindo controles de notificações e completude das consultas. Preserva cronograma, decisões funcionais, roadmap e versão; não executa as correções, a limpeza ou a homologação futura aqui previstas. Validação documental: diff, consistência, links e verificações documentais do projeto. Commit, push e PR dependem de autorização específica para esta entrega.
 
 As futuras entregas podem envolver `js/config.js`, `js/app.js`, contexto de ligas, motores de cálculo, `netlify/functions/`, `src/sports-data/`, novas migrações/testes/registro canônico em `supabase/`, scripts, `index.html`, manifesto, service worker, ativos, Central e documentação. Esta lista é um mapa de investigação, não autorização ampla de alteração. Cada implementação partirá da main atualizada e proporá branch própria com prefixo adequado.
 
