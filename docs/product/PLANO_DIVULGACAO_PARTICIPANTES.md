@@ -1,6 +1,6 @@
 # Divulgação de novidades aos participantes
 
-Documento de trabalho para revisar temas, selecionar conteúdos e acompanhar produção, publicação na Central e divulgação aos participantes. Registrado em 11/10/2026; controle conciliado em 20/10/2026 com a Central publicada na v6.51.4, incluindo os commits `01bb53f`, `8617f17` e `7e469cb`.
+Documento de trabalho para revisar temas, selecionar conteúdos e acompanhar produção, publicação na Central e divulgação aos participantes. Registrado em 11/10/2026; controle conciliado em 28/10/2026 com as revisões da Central publicadas no commit `42b176a`, mantendo o app na v6.55.0.
 
 Título sugerido da campanha: **Veja o que ficou melhor no seu bolão**.
 
@@ -41,7 +41,7 @@ Decisão aprovada em 13/10/2026: todos os vídeos criados daqui em diante devem 
 | 09 | **Jogos com estatísticas e escalações.** Autores e minutos dos gols, estatísticas e escalações em Lista ou Campo, com camisas dos clubes e detalhes dos jogadores. | Vídeo expandindo um jogo, abrindo Estatísticas, mudando para Campo e tocando em uma camisa. | Alta — primeira leva de vídeos |
 | 10 | **Rodadas em uma faixa deslizante.** Consulte outras rodadas e retorne rapidamente à atual. | Vídeo curto deslizando a faixa, selecionando uma rodada e usando Rodada Atual. | Média |
 | 11 | **Jogos reagendados continuam acessíveis.** Partidas antigas pendentes têm acessos próprios, mantendo o foco na rodada atual. | Imagem ou vídeo de aviso real e abertura da partida reagendada. | Média — depende de exemplo disponível |
-| 12 | **Ativação de notificações.** Habilite seu aparelho para receber lembretes de palpites enviados pela administração. | Tutorial do convite Ativar notificações e da autorização do navegador. | Alta |
+| 12 | **Ativação de notificações.** Habilite seu aparelho para receber lembretes automáticos de pendências, o resumo da rodada e avisos manuais da administração. | Tutorial do convite Ativar notificações e da autorização do navegador. | Alta |
 | 13 | **Disputas Paralelas.** Conheça rankings recreativos que oferecem outras formas de comparar o desempenho dos participantes, usando os mesmos resultados, sem mudar a classificação oficial. | Vídeo: abrir Ranking → Ver disputas paralelas, explorar as opções e mostrar como consultar seu desempenho. Manter narração, legendas, toques destacados e vinhetas, em até 30 s. | Alta |
 | 14 | **Central do Participante.** Encontre guias, vídeos e respostas sobre o bolão. | Vídeo mostrando o acesso à Central pelo menu, a busca e os guias de onde tocar. | Publicado |
 | 15 | **Conheça o Bolão: apresentação do app.** Apresentar de forma leve as funcionalidades básicas e mais úteis, conectando cada recurso ao benefício para o participante. | Vídeo promocional com imagens e telas reais, navegação e animações fiéis ao app, narração descontraída e acabamento profissional. Briefing na ficha 15. | A definir |
@@ -54,11 +54,11 @@ Decisão aprovada em 13/10/2026: todos os vídeos criados daqui em diante devem 
 - **04 — Estatísticas:** variação compara a média de pontos por jogo com a rodada anterior disponível. O resumo mostra a média do histórico completo apenas sem tendência clara e com pelo menos três rodadas; nos demais casos, esse bloco fica oculto.
 - **05 — Prazo:** a regra continua sendo fechamento 30 minutos antes do jogo. Outras rodadas e jogos encerrados mantêm seu comportamento.
 - **06 — Ligas:** menu do usuário → Liga ativa é o caminho de troca. Ranking, Estatísticas, Destaques e Duelos acompanham a liga selecionada; jogos e palpites próprios permanecem os mesmos. Inclusão em outras ligas é feita pela administração; não anunciar criação ou entrada livre pelo participante.
-- **07 — Ranking provisório:** acesso disponível durante jogo oficialmente ao vivo com placar informado. Não apresentar projeção como pontuação oficial ou definitiva.
+- **07 — Ranking provisório:** acesso disponível após o início da rodada e enquanto ela não estiver consolidada, inclusive entre partidas. Não apresentar projeção como pontuação oficial ou definitiva.
 - **08 — Destaques:** identificar quando os dados são provisórios e quando estão consolidados.
 - **09 — Detalhes:** dependem da disponibilidade dos dados esportivos. Campo representa titulares da formação inicial; eventos de substitutos aparecem nos detalhes correspondentes. Não prometer cobertura completa de todas as rodadas.
 - **11 — Reagendados:** usar data e situação atuais. Nem toda partida antiga pendente está com palpites abertos.
-- **12 — Notificações:** ativação por aparelho, sujeita à compatibilidade e à permissão do navegador. Lembretes são enviados manualmente pela administração; não prometer disparos automáticos ou entrega garantida.
+- **12 — Notificações:** ativação por aparelho, sujeita à compatibilidade e à permissão do navegador. Lembretes automáticos previstos para 12h e 2h antes do primeiro jogo, somente com palpites pendentes e abertos; resumo pessoal após a rodada completa, incluindo reagendados, sem restrição de horário. Mantém avisos manuais e uma preferência por aparelho. Várias ligas não multiplicam os avisos. Não prometer entrega garantida.
 
 - **13 — Disputas Paralelas:** são rankings recreativos; não alteram pontuação ou classificação oficial. Conferir opções e critérios na versão em produção antes de escrever o roteiro, sem prometer prêmios.
 
@@ -76,27 +76,27 @@ Primeira leva sugerida: três vídeos curtos sobre Ranking provisório, Destaque
 
 | ID | Tema | Decisão | Produção | Central do Participante | Divulgação aos grupos | Material / revisão atual |
 | --- | --- | --- | --- | --- | --- | --- |
-| 01 | Meu time na Home | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#meu-time) | Não programada | Atualizado na v6.51.4: expansão do card, 31,13 s; commit `01bb53f` |
-| 02 | Visão Geral | A revisar | Não iniciada | Não publicado | Não programada | Tema ainda sem vídeo dedicado |
-| 03 | Campanha dos clubes | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#campanha) | Não programada | Atualizado na v6.51.4: expandir Meu Time antes de Ver campanha, 32,43 s; commit `01bb53f` |
+| 01 | Meu time na Home | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#meu-time) | Não programada | Publicado em 28/10/2026: 31,13 s; commit `42b176a` |
+| 02 | Visão Geral | Descartado como tutorial próprio | Não se aplica | Não publicado | Não programada | Decisão do usuário: não produzir tutorial dedicado |
+| 03 | Campanha dos clubes | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#campanha) | Não programada | Publicado em 28/10/2026: 33,92 s; commit `42b176a` |
 | 04 | Estatísticas | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#estatisticas) | Não programada | Versão atual com Antonio e vinheta Entrada em campo; duração indicada de 33 s |
 | 05 | Prazo dos palpites | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#palpites) | Não programada | Versão atual com vinheta Entrada em campo; duração indicada de 33 s |
 | 06 | Ligas | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#ligas) | Não programada | Ranking sem pódio na versão atual; commit `73e1476`, duração indicada de 34 s |
-| 07 | Ranking provisório | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#ranking) | Não programada | Versão atual de 32,8 s com vinhetas Entrada em campo; commit `8617f17` |
-| 08 | Destaques da rodada | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#destaques) | Não programada | Atualizado na v6.51.4: acesso abaixo de Destaques do Bolão, 30,87 s; commit `01bb53f` |
+| 07 | Ranking provisório | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#ranking) | Não programada | Publicado em 28/10/2026: 34,82 s; commit `42b176a` |
+| 08 | Destaques da rodada | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#destaques) | Não programada | Publicado em 28/10/2026: 45,82 s; commit `42b176a` |
 | 09 | Detalhes dos jogos e escalações | Selecionado | Aprovado — vídeo atual do tema | [Publicado](https://bolaorigazzo2026.netlify.app/central/#escalacoes) | Não programada | Escalações em Lista e Campo, commit `8888150`, duração indicada de 32 s. O vídeo original 09 é material anterior, não uma nova pendência de publicação |
 | 10 | Seletor de rodadas | A revisar | Não iniciada | Não publicado | Não programada | Tema ainda sem vídeo dedicado |
 | 11 | Jogos reagendados | A revisar | Não iniciada | Não publicado | Não programada | Depende de exemplo disponível |
-| 12 | Notificações | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#notificacoes) | Não programada | Versão atual com vinheta Entrada em campo; duração indicada de 32 s |
+| 12 | Notificações | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#notificacoes) | Não programada | Publicado em 28/10/2026: 44,82 s; commit `42b176a` |
 | 13 | Disputas Paralelas | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#disputas) | Não programada | Inclui Recordes por rodada e Ranking atual; commit `c9059ac`, duração indicada de 35 s |
-| 14 | Central do Participante | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#conheca-central) | Não programada | Versão com vinheta Entrada em campo; duração indicada de 33 s |
-| 15 | Apresentação promocional do app | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#conheca-bolao) | Não programada | Atualizado na v6.51.4: Home, Ranking sem pódio e Meu Time expansível; 59,5 s; commit `01bb53f` |
+| 14 | Central do Participante | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#conheca-central) | Não programada | Publicado em 28/10/2026: 32,40 s; commit `42b176a` |
+| 15 | Apresentação promocional do app | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#conheca-bolao) | Não programada | Publicado em 28/10/2026: 59,50 s; commit `42b176a` |
 | 16 | Instalar no Android | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#instalar-android) | Não programada | Menus ilustrados, tela real do bolão e Antonio; duração indicada de 42 s; commit `d3d9f42` |
 | 17 | Instalar no iPhone | Selecionado | Aprovado | [Publicado](https://bolaorigazzo2026.netlify.app/central/#instalar-iphone) | Não programada | Menus ilustrados, tela real do bolão e Antonio; duração indicada de 43 s; commit `d3d9f42` |
 
 As durações indicadas são as exibidas no catálogo quando não foi registrada a duração medida. A apresentação do app fica fora da lista de tutoriais, na abertura recolhível da Central. Não foi identificado registro de envio aos grupos; por isso, a divulgação permanece não programada.
 
-**Pendência de vídeo já produzido:** nenhuma. Os temas 02, 10 e 11 ainda não foram produzidos. Versões antigas, testes e vinhetas independentes são materiais de trabalho.
+**Pendência de vídeo já produzido:** nenhuma. As sete revisões foram aprovadas e publicadas em 28/10/2026. Os temas 10 e 11 ainda não foram produzidos. O tema 02 foi dispensado como tutorial próprio. Versões antigas, testes e vinhetas independentes são materiais de trabalho.
 
 ### Modelo de ficha por conteúdo
 
@@ -369,6 +369,28 @@ Publicada a organização dos guias e dos vídeos na mesma sequência, em cinco 
 
 - 17 temas registrados.
 - 14 temas com vídeos publicados: 12 tutoriais no catálogo e duas apresentações recolhíveis da Central.
-- Nenhum vídeo produzido aguardando publicação.
-- Três temas ainda não produzidos: 02 — Visão Geral; 10 — Seletor de rodadas; 11 — Jogos reagendados. Continuam em A revisar; este registro não os seleciona para produção.
+- Sete revisões aprovadas e publicadas em 28/10/2026; nenhum vídeo produzido aguardando publicação.
+- Dois temas ainda não produzidos: 10 — Seletor de rodadas; 11 — Jogos reagendados. Continuam em A revisar. O tema 02 — Visão Geral foi dispensado como tutorial próprio pelo usuário.
 - Divulgação aos grupos não programada: não há confirmação de envio registrada neste controle.
+
+## Atualização publicada — 28/10/2026, app v6.55.0
+
+As sete novas versões abaixo foram aprovadas e publicadas na Central no commit `42b176a`, substituindo as versões anteriores dos mesmos temas. O histórico anterior permanece registrado nas fichas.
+
+| Vídeo | Duração medida | Mudança |
+| --- | --- | --- |
+| notificacoes | 44,82 s | Lembretes automáticos de 12h e 2h, resumo pessoal, ativação por aparelho e orientação para iPhone. |
+| meu-time | 31,13 s | Capturas atuais de expansão, Últimos jogos e desempenho pessoal. |
+| campanha | 33,92 s | Entrada atual pela Home, seletor com escudos, troca e retorno ao favorito, rolagem até pontos e acumulado. |
+| destaques | 45,82 s | Sua rodada anterior, destinos dos três cards e novo local do botão de Destaques. |
+| ranking | 34,82 s | Disponibilidade após o início e até a consolidação, inclusive entre partidas; exemplo real anterior identificado. |
+| apresentacao-app | 59,50 s | Cenas atuais da Home, Meu Time e Central; áudio original preservado. |
+| apresentacao-central | 32,40 s | Navegação atual, grupos de assuntos, busca e guia visual; áudio original preservado. |
+
+- Voz Antônio e vinhetas Entrada em campo preservadas. Exportação H.264 Main 3.1, 20 fps, yuv420p, AAC e faststart; decodificação integral dos sete arquivos aprovada. Áudio das duas apresentações preservado sem recodificação, conferido por hash da trilha AAC.
+- Reprodução iniciada sem erro nos sete arquivos no Chrome, com avanço do tempo e vídeo 720 × 1280. Não houve novo teste físico em iPhone.
+- Guias, FAQs, legendas de onde tocar, imagens, capas, durações e referências de cache da Central revisados. Diferença entre setas de posição na Home e da média nas Estatísticas explicada.
+- Preservados os tutoriais sem mudança funcional: Palpites, Ligas, Estatísticas, Disputas Paralelas, Escalações e instalação.
+- Publicação confirmada na [Central do Participante](https://bolaorigazzo2026.netlify.app/central/) em 28/10/2026, às 14h20 (Brasília): deploy `6ae22ec3216c7a7350dc1944`, contexto production e estado ready, associado ao commit `42b176a68a217f06972500bc4de44f16c3095c10`.
+- Os sete MP4 em produção retornaram HTTP 200 e SHA-256 idêntico ao dos arquivos aprovados. HTML, JavaScript, catálogo e guias coincidem com o commit publicado. Reprodução parcial conferida com HTTP 206.
+- Divulgação via WhatsApp permanece não programada; a publicação não representa envio aos grupos. O app, banco e disparos não foram alterados.
