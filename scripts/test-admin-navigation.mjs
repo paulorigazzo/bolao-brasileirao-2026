@@ -19,11 +19,11 @@ const elements=Object.fromEntries(Object.entries(ids).map(([id,area])=>[id,{id,c
 const nav=['adminAttentionCard','adminParticipantsCard','adminLeaguesCard','adminDiagnosticCard'].map(id=>({dataset:{adminArea:ids[id]},classList:classes(),setAttribute(){},removeAttribute(){}}));
 let leagueLoads=0;
 const context={
-  $:id=>elements[id],document:{querySelectorAll:selector=>selector==='[data-admin-group]'?groups:nav},
+  $:id=>elements[id],document:{querySelectorAll:selector=>selector==='[data-admin-group]'?groups:nav,querySelector:()=>groups[0]},
   ADMIN_CARD_IDS:Object.keys(ids),localStorage:{setItem(){}},isAdminUser:()=>true,refreshAdminLeagues:()=>leagueLoads++,prefersReducedMotion:()=>true,
   setAdminCardCollapsed:(card,collapsed)=>card.classList.toggle('is-collapsed',collapsed),
 };
-const navigation=runInNewContext(`${['adminAreaForCard','setAdminQuickNavActive','showAdminArea','expandOnlyAdminCard','scrollToAdminSection'].map(source).join('\n')}; ({scrollToAdminSection,showAdminArea});`,context);
+const navigation=runInNewContext(`${['adminAreaForCard','setAdminQuickNavActive','showAdminArea','expandOnlyAdminCard','scrollToAdminSection'].map(source).join('\n')}; ({scrollToAdminSection,showAdminArea,expandOnlyAdminCard});`,context);
 for(const [id,area] of Object.entries(ids)){
   navigation.scrollToAdminSection(id);
   navigation.scrollToAdminSection(id);
@@ -41,6 +41,20 @@ for(const [id,area] of Object.entries(ids)){
   navigation.showAdminArea(id);
   assert.equal(elements[id].classList.contains('is-collapsed'),true,'Repetir menu recolhe novamente');
 }
+
+navigation.showAdminArea(null,{scroll:false});
+assert.equal(groups.filter(g=>!g.classList.contains('hidden')).length,4,'Sem filtro, todas as áreas ficam visíveis');
+assert.equal(nav.filter(b=>b.classList.contains('active')).length,0,'Sem seleção ativa ao limpar');
+for(const id of Object.keys(ids))assert.equal(elements[id].classList.contains('is-collapsed'),true);
+navigation.expandOnlyAdminCard('adminAuditCard',{filter:false});
+assert.equal(groups.filter(g=>!g.classList.contains('hidden')).length,4,'Abrir um card não aplica filtro');
+assert.equal(nav.filter(b=>b.classList.contains('active')).length,0);
+assert.equal(elements.adminAuditCard.classList.contains('is-collapsed'),false);
+navigation.showAdminArea('adminAttentionCard',{scroll:false});
+navigation.expandOnlyAdminCard('adminRoundCard',{filter:false});
+assert.equal(groups.filter(g=>!g.classList.contains('hidden')).length,1,'Abrir card mantém filtro atual');
+navigation.showAdminArea(null,{scroll:false});
+assert.equal(groups.filter(g=>!g.classList.contains('hidden')).length,4);
 
 assert.equal([...html.matchAll(/data-admin-area="/g)].length,4);
 assert.doesNotMatch(html,/id="adminSmartHeader"|id="adminQuickActionsCard"/);
@@ -116,9 +130,9 @@ assert.deepEqual(calls,['sync','projection','share','next','copy']);
 let anchorTop=100;
 const scrolls=[];
 const anchor={tagName:'H2',textContent:'Integridade',getBoundingClientRect:()=>({height:30,top:anchorTop}),getClientRects:()=>[{}]};
-const readingArea={dataset:{adminGroup:'system'},querySelectorAll:()=>[anchor]};
+const readingArea={dataset:{adminGroup:'system'},querySelectorAll:()=>[anchor],getBoundingClientRect:()=>({top:0,bottom:600})};
 const reading=runInNewContext(`let adminReadingRevision=0;${source('captureAdminReadingPosition')}\n${source('restoreAdminReadingPosition')};({captureAdminReadingPosition,restoreAdminReadingPosition,interact:()=>adminReadingRevision++});`,{
-  $:()=>({classList:{contains:()=>false}}),document:{querySelector:()=>readingArea},
+  $:()=>({classList:{contains:()=>false}}),document:{querySelectorAll:()=>[{dataset:{adminGroup:"round"},querySelectorAll:()=>[]},readingArea]},
   window:{innerHeight:800,scrollBy:options=>scrolls.push(options.top)},
 });
 const position=reading.captureAdminReadingPosition();anchorTop=160;

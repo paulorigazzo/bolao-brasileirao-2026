@@ -386,12 +386,13 @@
           </div>
         </section>
 
-        <nav id="adminQuickNav" class="admin-quick-nav admin-task-nav" aria-label="Áreas da administração">
-<button class="admin-quick-nav-button active" type="button" data-admin-target="adminAttentionCard" data-admin-area="round" aria-current="true">⚽ Rodada <b id="adminNavAttentionBadge" class="admin-nav-indicator hidden">0</b><b id="adminNavRoundBadge" class="admin-nav-indicator hidden" aria-label="Jogos ao vivo">0</b></button>
-<button class="admin-quick-nav-button" type="button" data-admin-target="adminParticipantsCard" data-admin-area="participants">👥 Participantes</button>
-<button class="admin-quick-nav-button" type="button" data-admin-target="adminLeaguesCard" data-admin-area="leagues">🏆 Ligas</button>
-<button class="admin-quick-nav-button" type="button" data-admin-target="adminDiagnosticCard" data-admin-area="system">🛠️ Sistema <b id="adminNavSystemBadge" class="admin-nav-indicator hidden">!</b></button>
+        <nav id="adminQuickNav" class="admin-quick-nav admin-task-nav" aria-label="Filtrar áreas da administração">
+<button class="admin-quick-nav-button" type="button" data-admin-target="adminAttentionCard" data-admin-area="round" aria-pressed="false">⚽ Rodada <b id="adminNavAttentionBadge" class="admin-nav-indicator hidden">0</b><b id="adminNavRoundBadge" class="admin-nav-indicator hidden" aria-label="Jogos ao vivo">0</b></button>
+<button class="admin-quick-nav-button" type="button" data-admin-target="adminParticipantsCard" data-admin-area="participants" aria-pressed="false">👥 Participantes</button>
+<button class="admin-quick-nav-button" type="button" data-admin-target="adminLeaguesCard" data-admin-area="leagues" aria-pressed="false">🏆 Ligas</button>
+<button class="admin-quick-nav-button" type="button" data-admin-target="adminDiagnosticCard" data-admin-area="system" aria-pressed="false">🛠️ Sistema <b id="adminNavSystemBadge" class="admin-nav-indicator hidden">!</b></button>
 </nav>
+<p id="adminFilterStatus" class="muted-note" role="status">Mostrando todas as áreas.</p>
 <div id="adminSystemSignals" class="admin-system-signals" role="status" aria-live="polite"></div>
 <section id="adminArea-round" class="admin-area" data-admin-group="round" aria-label="Rodada">
 <article id="adminAttentionCard" class="card admin-attention-card is-loading" aria-live="polite">
@@ -448,7 +449,7 @@
           <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
         </article>
 </section>
-<section id="adminArea-participants" class="admin-area hidden" data-admin-group="participants" aria-label="Participantes">
+<section id="adminArea-participants" class="admin-area" data-admin-group="participants" aria-label="Participantes">
 <article id="adminParticipantsCard" class="card admin-participants-card" aria-live="polite">
           <div class="admin-participants-header" data-admin-card-header>
             <div><span class="eyebrow">ACESSO AO BOLÃO</span><h2>👥 Participantes</h2><small class="admin-scope">Todo o bolão · acessos e cadastros</small></div>
@@ -479,7 +480,7 @@
           <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
         <small class="admin-quick-action-status" role="status"></small></article>
 </section>
-<section id="adminArea-leagues" class="admin-area hidden" data-admin-group="leagues" aria-label="Ligas">
+<section id="adminArea-leagues" class="admin-area" data-admin-group="leagues" aria-label="Ligas">
 <article id="adminLeaguesCard" class="card admin-leagues-card is-collapsed" aria-live="polite">
           <div class="admin-leagues-header" data-admin-card-header>
             <div><span class="eyebrow">GESTÃO CENTRALIZADA</span><h2>🏆 Administração de Ligas</h2><small class="admin-scope">Gestão central · todas as ligas</small></div>
@@ -492,7 +493,7 @@
           <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
         </article>
 </section>
-<section id="adminArea-system" class="admin-area hidden" data-admin-group="system" aria-label="Sistema">
+<section id="adminArea-system" class="admin-area" data-admin-group="system" aria-label="Sistema">
 <article id="adminDiagnosticCard" class="card admin-diagnostic-card" aria-live="polite">
           <div class="admin-diagnostic-header" data-admin-card-header>
             <div><span class="eyebrow">SAÚDE DO SISTEMA</span><h2>🩺 Central de Diagnóstico</h2><small class="admin-scope">Sistema · serviços e sincronização</small></div>

@@ -1,6 +1,6 @@
 # v6.57.0 — ADM por tarefa
 
-- Resumo operacional único e navegação por Rodada, Participantes, Ligas e Sistema; o menu apresenta os cards recolhidos, com status no topo à direita.
+- Resumo operacional único e navegação por Rodada, Participantes, Ligas e Sistema; a barra filtra as áreas, inicia sem seleção e apresenta cards recolhidos, com status no topo à direita.
 - Redistribui ações existentes e identifica o alcance dos indicadores; preserva os contadores da rodada.
 - Mantém alertas de Sistema acessíveis fora da área e preserva expansões durante atualizações.
 - Corrige a mensagem sem próximo jogo para partidas ao vivo ou adiadas.

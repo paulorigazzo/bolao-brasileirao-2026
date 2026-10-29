@@ -465,3 +465,5 @@
 #adminTab .admin-area>.card.is-collapsed [data-admin-card-header] .eyebrow{display:none}
 #adminTab .admin-area>.card.is-collapsed [data-admin-card-header] h2{margin-top:0}
 @media(max-width:600px){#adminTab .admin-area>.card.is-collapsed [data-admin-card-header] h2{font-size:1rem}#adminTab .admin-area>.card.is-collapsed .admin-scope{font-size:.65rem;line-height:1.35;margin-top:6px}}
+
+#adminTab .admin-area:not(.hidden)~.admin-area:not(.hidden){margin-top:var(--admin-card-gap)}
