@@ -1,5 +1,5 @@
-6.56.0
+6.57.0
 
-Simplificação visual da tela ADM, preservando indicadores e controles.
+Reorganização da ADM por tarefa, preservando ações e indicadores.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

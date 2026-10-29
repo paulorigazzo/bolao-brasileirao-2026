@@ -12,13 +12,13 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.56.0">
-  <link rel="stylesheet" href="./css/styles.css?v=6.56.0">
-  <link rel="stylesheet" href="./css/home-v2.css?v=6.56.0">
-  <link rel="stylesheet" href="./css/components.css?v=6.56.0">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.56.0">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.56.0">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.56.0">
+  <link rel="stylesheet" href="./css/design-system.css?v=6.57.0">
+  <link rel="stylesheet" href="./css/styles.css?v=6.57.0">
+  <link rel="stylesheet" href="./css/home-v2.css?v=6.57.0">
+  <link rel="stylesheet" href="./css/components.css?v=6.57.0">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.57.0">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.57.0">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.57.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
@@ -33,7 +33,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-      <p class="brand-version"><span id="appVersion" class="version-pill">v6.56.0</span></p>
+      <p class="brand-version"><span id="appVersion" class="version-pill">v6.57.0</span></p>
         <p id="headerLeagueName" class="brand-league hidden" aria-live="polite"></p>
       </div>
     </div>
@@ -351,65 +351,55 @@
             <p id="adminRoundContext" class="muted-note">Carregando a situação da rodada…</p>
           </div>
           <div class="admin-refresh-control">
-            <button id="adminHomeV2Button" class="secondary" type="button">Home 2.0</button>
             <button id="adminRefreshBtn" class="secondary admin-refresh-all" type="button" aria-describedby="adminRefreshFeedback"><span class="admin-refresh-icon" aria-hidden="true">🔄</span><span class="admin-refresh-label">Recarregar painel</span></button>
             <small id="adminRefreshFeedback" class="admin-refresh-feedback">Reconsulta os dados do bolão sem sincronizar a fonte esportiva</small>
           </div>
         </div>
 
-        <section id="adminSmartHeader" class="admin-smart-header" aria-label="Resumo rápido do painel">
-          <div><span>Rodada</span><strong id="adminSmartRound">—</strong></div>
-          <div><span>Palpites</span><strong id="adminSmartPicks">—</strong></div>
-          <div><span>Próximo jogo</span><strong id="adminSmartNext">—</strong></div>
-          <small id="adminAutoRefreshStatus">Atualização automática ativa</small>
-        </section>
-
         <section id="adminControlCenter" class="admin-control-center" aria-labelledby="adminControlCenterTitle" aria-live="polite">
           <div class="admin-control-center-head">
             <div>
               <span class="eyebrow">CENTRO DE CONTROLE</span>
-              <h2 id="adminControlCenterTitle">Visão operacional do bolão</h2>
+              <h2 id="adminControlCenterTitle">Resumo operacional</h2>
               <p id="adminControlCenterSummary">Reunindo os indicadores que exigem sua atenção.</p>
             </div>
             <span id="adminControlCenterBadge" class="admin-control-center-badge is-checking">Verificando</span>
           </div>
           <div class="admin-control-center-grid">
             <button type="button" class="admin-control-metric" data-admin-target="adminAttentionCard">
-              <span class="admin-control-icon" aria-hidden="true">🎯</span><span><small>Palpites da rodada</small><strong id="adminControlPicks">—</strong><em id="adminControlPicksHint">Carregando participantes</em></span>
+              <span class="admin-control-icon" aria-hidden="true">🎯</span><span><small>Palpites · liga selecionada</small><strong id="adminControlPicks">—</strong><em id="adminControlPicksHint">Carregando participantes</em></span>
             </button>
             <button type="button" class="admin-control-metric" data-admin-target="adminRoundCard">
               <span class="admin-control-icon" aria-hidden="true">⚽</span><span><small>Jogos</small><strong id="adminControlGames">—</strong><em id="adminControlGamesHint">Carregando rodada</em></span>
             </button>
             <button type="button" class="admin-control-metric" data-admin-target="adminParticipantsCard">
-              <span class="admin-control-icon" aria-hidden="true">👥</span><span><small>Participantes</small><strong id="adminControlParticipants">—</strong><em id="adminControlParticipantsHint">Verificando acessos</em></span>
+              <span class="admin-control-icon" aria-hidden="true">👥</span><span><small>Acessos · todo o bolão</small><strong id="adminControlParticipants">—</strong><em id="adminControlParticipantsHint">Verificando acessos</em></span>
             </button>
             <button type="button" class="admin-control-metric" data-admin-target="adminDiagnosticCard">
-              <span class="admin-control-icon" aria-hidden="true">🩺</span><span><small>Saúde do sistema</small><strong id="adminControlHealth">Verificando</strong><em id="adminControlHealthHint">API, banco e cache</em></span>
+              <span class="admin-control-icon" aria-hidden="true">🩺</span><span><small>Diagnóstico dos serviços</small><strong id="adminControlHealth">Verificando</strong><em id="adminControlHealthHint">API, banco e cache</em></span>
             </button>
           </div>
           <div class="admin-control-center-footer">
+            <div class="admin-operational-timing"><span>Próximo fechamento <strong id="adminControlDeadline">—</strong></span><span>Próximo jogo <strong id="adminSmartNext">—</strong></span><small id="adminAutoRefreshStatus">Atualização automática ativa</small></div>
             <small id="adminControlUpdatedAt">Aguardando atualização.</small>
             <button id="adminControlPrimaryAction" class="primary" type="button">Abrir pendências</button>
           </div>
         </section>
 
-        <nav id="adminQuickNav" class="admin-quick-nav" aria-label="Navegação rápida do painel administrativo">
-          <button class="admin-quick-nav-button active" type="button" data-admin-target="adminAttentionCard" aria-current="true"><span aria-hidden="true">🚦</span> Atenção <b id="adminNavAttentionBadge" class="admin-nav-indicator hidden">0</b></button>
-          <button class="admin-quick-nav-button" type="button" data-admin-target="adminRoundCard"><span aria-hidden="true">⚽</span> Rodada <b id="adminNavRoundBadge" class="admin-nav-indicator hidden">0</b></button>
-          <button class="admin-quick-nav-button" type="button" data-admin-target="adminQuickActionsCard"><span aria-hidden="true">⚡</span> Ações</button>
-          <button class="admin-quick-nav-button" type="button" data-admin-target="adminLeaguesCard"><span aria-hidden="true">🏆</span> Ligas</button>
-          <button class="admin-quick-nav-button" type="button" data-admin-target="adminParticipantsCard"><span aria-hidden="true">👥</span> Participantes</button>
-          <button class="admin-quick-nav-button" type="button" data-admin-target="adminDiagnosticCard"><span aria-hidden="true">🩺</span> Diagnóstico</button>
-          <button class="admin-quick-nav-button" type="button" data-admin-target="adminAuditCard"><span aria-hidden="true">🧪</span> Auditoria</button>
-          <button class="admin-quick-nav-button" type="button" data-admin-target="adminRecoveryCard"><span aria-hidden="true">🛟</span> Proteção</button>
-          <button class="admin-quick-nav-button" type="button" data-admin-target="adminExecutiveCard"><span aria-hidden="true">📊</span> Dashboard</button>
-        </nav>
-
-        <article id="adminAttentionCard" class="card admin-attention-card is-loading" aria-live="polite">
+        <nav id="adminQuickNav" class="admin-quick-nav admin-task-nav" aria-label="Filtrar áreas da administração">
+<button class="admin-quick-nav-button" type="button" data-admin-target="adminAttentionCard" data-admin-area="round" aria-pressed="false">⚽ Rodada <b id="adminNavAttentionBadge" class="admin-nav-indicator hidden">0</b><b id="adminNavRoundBadge" class="admin-nav-indicator hidden" aria-label="Jogos ao vivo">0</b></button>
+<button class="admin-quick-nav-button" type="button" data-admin-target="adminParticipantsCard" data-admin-area="participants" aria-pressed="false">👥 Participantes</button>
+<button class="admin-quick-nav-button" type="button" data-admin-target="adminLeaguesCard" data-admin-area="leagues" aria-pressed="false">🏆 Ligas</button>
+<button class="admin-quick-nav-button" type="button" data-admin-target="adminDiagnosticCard" data-admin-area="system" aria-pressed="false">🛠️ Sistema <b id="adminNavSystemBadge" class="admin-nav-indicator hidden">!</b></button>
+</nav>
+<p id="adminFilterStatus" class="muted-note" role="status">Mostrando todas as áreas.</p>
+<div id="adminSystemSignals" class="admin-system-signals" role="status" aria-live="polite"></div>
+<section id="adminArea-round" class="admin-area" data-admin-group="round" aria-label="Rodada">
+<article id="adminAttentionCard" class="card admin-attention-card is-loading" aria-live="polite">
           <div class="admin-attention-header" data-admin-card-header>
             <div>
               <span class="eyebrow">CENTRAL DE ATENÇÃO</span>
-              <h2>🚦 Situação da rodada</h2>
+              <h2>🚦 Situação da rodada</h2><small class="admin-scope">Liga selecionada · palpites da rodada</small>
             </div>
             <div class="admin-card-header-actions"><span id="adminAttentionBadge" class="admin-status-badge">Atualizando…</span><button class="admin-card-toggle" type="button" data-admin-collapse="adminAttentionCard" aria-expanded="true" aria-label="Recolher Central de Atenção">⌃</button></div>
           </div>
@@ -418,6 +408,13 @@
             <button id="adminPushReminderAction" class="secondary hidden" type="button">🔔 Avisar por notificação</button>
             <button id="adminNotificationsOpen" class="secondary" type="button" aria-haspopup="dialog">🔔 Acompanhar notificações</button>
           </div>
+          <div class="admin-context-actions"><button type="button" class="admin-quick-action" data-admin-quick-action="share-round">
+              <span class="admin-quick-action-icon">📤</span><span><strong>Compartilhar resumo da rodada</strong><small>Destaques e Top 3 revisáveis</small></span><i>›</i>
+            </button></div><details class="admin-secondary-details"><summary>Mais ações da rodada</summary><div class="admin-context-actions"><button type="button" class="admin-quick-action" data-admin-quick-action="temporary-ranking">
+              <span class="admin-quick-action-icon">◉</span><span><strong>Visualizar Ranking provisório</strong><small>Consultar a projeção da rodada atual</small></span><i>›</i>
+            </button><button type="button" class="admin-quick-action" data-admin-quick-action="next-round">
+              <span class="admin-quick-action-icon">📅</span><span><strong>Ver próxima rodada</strong><small>Ir para os próximos jogos</small></span><i>›</i>
+            </button></div></details><small id="adminQuickActionStatus" class="admin-quick-action-status" role="status"></small>
           <div class="admin-pending-toolbar" aria-label="Filtros de palpites da rodada">
             <div class="admin-pending-filters" role="group" aria-label="Filtrar participantes">
               <button class="admin-pending-filter active" type="button" data-admin-pending-filter="all" aria-pressed="true">Todos <span id="adminFilterAllCount">0</span></button>
@@ -435,71 +432,31 @@
           </div>
           <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
         </article>
-
-        <article id="adminRoundCard" class="card admin-round-card" aria-live="polite">
+<article id="adminRoundCard" class="card admin-round-card" aria-live="polite">
           <div class="admin-round-header" data-admin-card-header>
             <div>
               <span class="eyebrow">ACOMPANHAMENTO</span>
-              <h2>⚽ Situação dos jogos</h2>
+              <h2>⚽ Situação dos jogos</h2><small class="admin-scope">Campeonato · jogos compartilhados</small>
             </div>
             <div class="admin-card-header-actions"><span id="adminRoundBadge" class="admin-round-badge">Atualizando…</span><button class="admin-card-toggle" type="button" data-admin-collapse="adminRoundCard" aria-expanded="true" aria-label="Recolher Situação dos jogos">⌃</button></div>
           </div>
+          <div class="admin-context-actions"><button type="button" class="admin-quick-action" data-admin-quick-action="sync">
+              <span class="admin-quick-action-icon">🔄</span><span><strong>Sincronizar jogos</strong><small>Consultar a fonte esportiva oficial agora</small></span><i>›</i>
+            </button></div>
           <div id="adminRoundContent" class="admin-round-content">
             <p class="muted-note">Consultando os jogos da rodada.</p>
           </div>
           <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
         </article>
-
-        <article id="adminQuickActionsCard" class="card admin-quick-actions-card">
-          <div class="admin-quick-actions-header" data-admin-card-header>
-            <div>
-              <span class="eyebrow">CENTRAL DE AÇÕES</span>
-              <h2>⚡ Ações rápidas</h2>
-            </div>
-            <div class="admin-card-header-actions"><span class="admin-quick-actions-badge">Operações</span><button class="admin-card-toggle" type="button" data-admin-collapse="adminQuickActionsCard" aria-expanded="true" aria-label="Recolher Ações rápidas">⌃</button></div>
-          </div>
-          <p class="admin-quick-actions-intro">Execute as tarefas mais comuns da rodada sem sair do painel.</p>
-          <div id="adminQuickActions" class="admin-quick-actions-grid">
-            <button type="button" class="admin-quick-action" data-admin-quick-action="sync">
-              <span class="admin-quick-action-icon">🔄</span><span><strong>Sincronizar jogos</strong><small>Consultar a fonte esportiva oficial agora</small></span><i>›</i>
-            </button>
-            <button type="button" class="admin-quick-action" data-admin-quick-action="temporary-ranking">
-              <span class="admin-quick-action-icon">◉</span><span><strong>Visualizar Ranking provisório</strong><small>Consultar a projeção da rodada atual</small></span><i>›</i>
-            </button>
-            <button type="button" class="admin-quick-action" data-admin-quick-action="share-round">
-              <span class="admin-quick-action-icon">📤</span><span><strong>Compartilhar resumo da rodada</strong><small>Destaques e Top 3 revisáveis</small></span><i>›</i>
-            </button>
-            <button type="button" class="admin-quick-action" data-admin-quick-action="next-round">
-              <span class="admin-quick-action-icon">📅</span><span><strong>Ver próxima rodada</strong><small>Ir para os próximos jogos</small></span><i>›</i>
-            </button>
-            <button type="button" class="admin-quick-action" data-admin-quick-action="copy-pool-link">
-              <span class="admin-quick-action-icon">🔗</span><span><strong>Copiar link do bolão</strong><small>Copiar endereço para compartilhar</small></span><i>›</i>
-            </button>
-          </div>
-          <small id="adminQuickActionStatus" class="admin-quick-action-status">As ações respeitam as regras e os prazos já configurados no bolão.</small>
-          <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
-        </article>
-
-        <article id="adminLeaguesCard" class="card admin-leagues-card is-collapsed" aria-live="polite">
-          <div class="admin-leagues-header" data-admin-card-header>
-            <div><span class="eyebrow">GESTÃO CENTRALIZADA</span><h2>🏆 Administração de Ligas</h2></div>
-            <div class="admin-card-header-actions"><span id="adminLeaguesCount" class="admin-leagues-badge">Carregando…</span><button class="admin-card-toggle" type="button" data-admin-collapse="adminLeaguesCard" aria-expanded="false" aria-label="Expandir Administração de Ligas">⌃</button></div>
-          </div>
-          <p class="admin-leagues-intro">Crie ligas e administre membros sem alterar a liga que você está acompanhando.</p>
-          <div class="admin-leagues-toolbar"><button id="adminCreateLeagueButton" class="primary" type="button">＋ Criar nova liga</button><small>A Liga Standard permanece protegida.</small></div>
-          <div id="adminLeaguesList" class="admin-leagues-list"><p class="muted-note">Expanda o card para carregar as ligas.</p></div>
-          <p id="adminLeaguesStatus" class="league-selector-status" aria-live="polite"></p>
-          <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
-        </article>
-
-
-        <article id="adminParticipantsCard" class="card admin-participants-card" aria-live="polite">
+</section>
+<section id="adminArea-participants" class="admin-area" data-admin-group="participants" aria-label="Participantes">
+<article id="adminParticipantsCard" class="card admin-participants-card" aria-live="polite">
           <div class="admin-participants-header" data-admin-card-header>
-            <div><span class="eyebrow">ACESSO AO BOLÃO</span><h2>👥 Participantes</h2></div>
+            <div><span class="eyebrow">ACESSO AO BOLÃO</span><h2>👥 Participantes</h2><small class="admin-scope">Todo o bolão · acessos e cadastros</small></div>
             <div class="admin-card-header-actions"><span id="adminPendingRequestsBadge" class="admin-pending-requests-badge hidden" title="Solicitações pendentes">0</span><span id="adminParticipantsCount" class="admin-participants-badge">Carregando…</span><button class="admin-card-toggle" type="button" data-admin-collapse="adminParticipantsCard" aria-expanded="true" aria-label="Recolher Participantes">⌃</button></div>
           </div>
           <p class="admin-participants-intro">Autorize novas contas Google ou desative acessos sem apagar o histórico.</p>
-          <section class="admin-participant-limit" aria-labelledby="adminParticipantLimitTitle">
+          <details class="admin-secondary-details"><summary>Configurar limite de participantes</summary><section class="admin-participant-limit" aria-labelledby="adminParticipantLimitTitle">
             <div class="admin-participant-limit-copy">
               <strong id="adminParticipantLimitTitle">Limite de participantes ativos</strong>
               <small id="adminParticipantLimitStatus">Carregando configuração…</small>
@@ -510,60 +467,75 @@
               <button id="saveParticipantLimitBtn" class="secondary" type="submit">Salvar limite</button>
             </form>
           </section>
+          </details>
           <div id="adminParticipantsFeedback" class="admin-participants-feedback hidden" role="status" aria-live="assertive"></div>
           <div id="adminCommunicationSummary" class="admin-communication-summary" aria-live="polite">Verificando notificações e telefones…</div>
-          <div class="admin-participant-actions">
+          <div class="admin-participant-actions"><button type="button" class="admin-quick-action" data-admin-quick-action="copy-pool-link">
+              <span class="admin-quick-action-icon">🔗</span><span><strong>Copiar link do bolão</strong><small>Copiar endereço para compartilhar</small></span><i>›</i>
+            </button>
             <button id="copyRegistrationLinkBtn" class="primary admin-add-participant" type="button">🔗 Copiar link de cadastro</button>
             <button id="openParticipantManagerBtn" class="secondary admin-add-participant" type="button">➕ Adicionar manualmente</button>
           </div>
           <div id="adminParticipantsList" class="admin-participants-list"><p class="muted-note">Carregando participantes…</p></div>
           <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
+        <small class="admin-quick-action-status" role="status"></small></article>
+</section>
+<section id="adminArea-leagues" class="admin-area" data-admin-group="leagues" aria-label="Ligas">
+<article id="adminLeaguesCard" class="card admin-leagues-card is-collapsed" aria-live="polite">
+          <div class="admin-leagues-header" data-admin-card-header>
+            <div><span class="eyebrow">GESTÃO CENTRALIZADA</span><h2>🏆 Administração de Ligas</h2><small class="admin-scope">Gestão central · todas as ligas</small></div>
+            <div class="admin-card-header-actions"><span id="adminLeaguesCount" class="admin-leagues-badge">Carregando…</span><button class="admin-card-toggle" type="button" data-admin-collapse="adminLeaguesCard" aria-expanded="false" aria-label="Expandir Administração de Ligas">⌃</button></div>
+          </div>
+          <p class="admin-leagues-intro">Crie ligas e administre membros sem alterar a liga que você está acompanhando.</p>
+          <div class="admin-leagues-toolbar"><button id="adminCreateLeagueButton" class="primary" type="button">＋ Criar nova liga</button><small>A Liga Standard permanece protegida.</small></div>
+          <div id="adminLeaguesList" class="admin-leagues-list"><p class="muted-note">Expanda o card para carregar as ligas.</p></div>
+          <p id="adminLeaguesStatus" class="league-selector-status" aria-live="polite"></p>
+          <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
         </article>
-
-        <article id="adminDiagnosticCard" class="card admin-diagnostic-card" aria-live="polite">
+</section>
+<section id="adminArea-system" class="admin-area" data-admin-group="system" aria-label="Sistema">
+<article id="adminDiagnosticCard" class="card admin-diagnostic-card" aria-live="polite">
           <div class="admin-diagnostic-header" data-admin-card-header>
-            <div><span class="eyebrow">SAÚDE DO SISTEMA</span><h2>🩺 Central de Diagnóstico</h2></div>
+            <div><span class="eyebrow">SAÚDE DO SISTEMA</span><h2>🩺 Central de Diagnóstico</h2><small class="admin-scope">Sistema · serviços e sincronização</small></div>
             <div class="admin-card-header-actions"><span id="adminDiagnosticBadge" class="admin-diagnostic-badge">Verificando…</span><button class="admin-card-toggle" type="button" data-admin-collapse="adminDiagnosticCard" aria-expanded="true" aria-label="Recolher Central de Diagnóstico">⌃</button></div>
           </div>
           <p class="admin-diagnostic-intro">Acompanhe API, banco, cache, sincronizações e logs sem sair do bolão.</p>
           <div id="adminDiagnosticContent" class="admin-diagnostic-content"><p class="muted-note">Preparando o diagnóstico.</p></div>
           <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
         </article>
-
-        <article id="adminAuditCard" class="card admin-audit-card" aria-live="polite">
+<article id="adminAuditCard" class="card admin-audit-card" aria-live="polite">
           <div class="admin-audit-header" data-admin-card-header>
-            <div class="admin-card-title-block"><span class="eyebrow">QUALIDADE E CONSISTÊNCIA</span><h2><span class="admin-card-title-icon" aria-hidden="true">🛡️</span><span>Integridade dos Dados</span></h2></div>
+            <div class="admin-card-title-block"><span class="eyebrow">QUALIDADE E CONSISTÊNCIA</span><h2><span class="admin-card-title-icon" aria-hidden="true">🛡️</span><span>Integridade dos Dados</span></h2><small class="admin-scope">Dados carregados · liga selecionada</small></div>
             <div class="admin-card-header-actions"><span id="adminAuditBadge" class="admin-audit-badge">Verificando…</span><button class="admin-card-toggle" type="button" data-admin-collapse="adminAuditCard" aria-expanded="true" aria-label="Recolher Integridade dos Dados">⌃</button></div>
           </div>
           <p class="admin-audit-intro">Verificação objetiva de jogos, palpites, ranking e pontuação.</p>
           <div id="adminAuditContent" class="admin-audit-content"><p class="muted-note">Analisando jogos, palpites, ranking e pontuação.</p></div>
           <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
         </article>
-
-        <article id="adminRecoveryCard" class="card admin-recovery-card" aria-live="polite">
+<article id="adminRecoveryCard" class="card admin-recovery-card" aria-live="polite">
           <div class="admin-recovery-header" data-admin-card-header>
-            <div class="admin-card-title-block"><span class="eyebrow">RECUPERAÇÃO COMPETITIVA</span><h2><span class="admin-card-title-icon" aria-hidden="true">🛟</span><span>Proteção de recuperação</span></h2></div>
+            <div class="admin-card-title-block"><span class="eyebrow">RECUPERAÇÃO COMPETITIVA</span><h2><span class="admin-card-title-icon" aria-hidden="true">🛟</span><span>Proteção de recuperação</span></h2><small class="admin-scope">Todo o bolão · recuperação competitiva</small></div>
             <div class="admin-card-header-actions"><span id="adminRecoveryBadge" class="admin-recovery-badge">Verificando…</span><button class="admin-card-toggle" type="button" data-admin-collapse="adminRecoveryCard" aria-expanded="true" aria-label="Recolher Proteção de recuperação">⌃</button></div>
           </div>
           <p class="admin-recovery-intro">Dados essenciais preservados para reconstruir resultados, pontos e posições.</p>
           <div id="adminRecoveryContent" class="admin-recovery-content"><p class="muted-note">Consultando a última proteção realizada.</p></div>
           <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
         </article>
-
-        <article id="adminExecutiveCard" class="card admin-executive-card" aria-live="polite">
+<article id="adminExecutiveCard" class="card admin-executive-card" aria-live="polite">
           <div class="admin-executive-header" data-admin-card-header>
             <div>
               <span class="eyebrow">VISÃO GERAL</span>
-              <h2>📈 Dashboard executivo</h2>
+              <h2>📈 Indicadores gerais</h2><small class="admin-scope">Liga selecionada e campeonato · alcances indicados abaixo</small>
             </div>
-            <div class="admin-card-header-actions"><span class="admin-executive-badge">Indicadores</span><button class="admin-card-toggle" type="button" data-admin-collapse="adminExecutiveCard" aria-expanded="true" aria-label="Recolher Dashboard executivo">⌃</button></div>
+            <div class="admin-card-header-actions"><span class="admin-executive-badge">Indicadores</span><button class="admin-card-toggle" type="button" data-admin-collapse="adminExecutiveCard" aria-expanded="true" aria-label="Recolher Indicadores gerais">⌃</button></div>
           </div>
           <p class="admin-executive-intro">Os principais indicadores do bolão reunidos em uma única visão.</p>
           <div id="adminExecutiveContent" class="admin-executive-content">
             <p class="muted-note">Calculando os indicadores gerais do bolão.</p>
           </div>
           <button class="admin-back-to-nav" type="button" data-admin-back-to-nav>↑ Voltar ao menu ADM</button>
-        </article>
+        </article><details class="admin-secondary-details admin-experiments"><summary>Experimentos</summary><p class="muted-note">Prévia preservada para avaliação.</p><button id="adminHomeV2Button" class="secondary" type="button">Home 2.0</button></details>
+</section>
       </section>
 
       <section id="rulesTab" class="tab-content hidden">
@@ -954,6 +926,6 @@
     }
   </script>
 <script type="module" src="./js/startup-intro.js"></script>
-<script type="module" src="./js/app.js?v=6.56.0"></script>
+<script type="module" src="./js/app.js?v=6.57.0"></script>
 </body>
 </html>

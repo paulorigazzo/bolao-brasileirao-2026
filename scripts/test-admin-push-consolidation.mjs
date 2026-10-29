@@ -54,12 +54,12 @@ assert.doesNotMatch(JSON.stringify(result),/PRIVATE|endpoint|test/);
 // Destino real do app: valida ADM antes de navegar e novamente antes de abrir o modal.
 const app=readFileSync(new URL('../js/app.js',import.meta.url),'utf8');
 const source=app.slice(app.indexOf('function openPushNotificationTarget('),app.indexOf('function navigateTo('));
-let allowed=true,onReady;const navigations=[],opens=[];
+let allowed=true,onReady;const navigations=[],opens=[],areas=[];
 const context={URLSearchParams,Number,isAdminUser:()=>allowed,$:()=>({}),navigateTo:(tab,options)=>{navigations.push(tab);onReady=options.onReady;},
-  adminNotificationsController:{open:(trigger,filters)=>opens.push(filters)}};
+  expandOnlyAdminCard:id=>areas.push(id),adminNotificationsController:{open:(trigger,filters)=>opens.push(filters)}};
 vm.createContext(context);vm.runInContext(source,context);
 context.openPushNotificationTarget(payload.url.slice(1));assert.deepEqual(navigations,['admin']);assert.equal(opens.length,0);
-onReady();assert.equal(opens[0].round,33);assert.equal(opens[0].type,'2h');
+onReady();assert.deepEqual(areas,['adminAttentionCard'],'o modal retorna a uma origem visível na área Rodada');assert.equal(opens[0].round,33);assert.equal(opens[0].type,'2h');
 allowed=false;context.openPushNotificationTarget(payload.url.slice(1));assert.equal(navigations.length,1);
 allowed=true;context.openPushNotificationTarget(payload.url.slice(1));allowed=false;onReady();assert.equal(opens.length,1,'perda de permissão durante transição bloqueia modal');
 allowed=true;

@@ -90,18 +90,18 @@
 }
 
 /* Cards principais: uma única linguagem visual. */
-#adminTab>.card,
+#adminTab .admin-area>.card,
 .admin-control-center{
   background:linear-gradient(180deg,rgba(17,50,32,.96),rgba(10,34,21,.98));
   border:1px solid var(--admin-line);
   box-shadow:0 12px 30px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.025);
 }
-#adminTab>.card{padding:20px;border-radius:22px}
-#adminTab>.card [data-admin-card-header]{align-items:flex-start}
-#adminTab>.card [data-admin-card-header] h2{margin:5px 0 0;color:var(--color-text);line-height:1.2}
-#adminTab>.card .eyebrow{color:#80c79d;letter-spacing:.09em}
-#adminTab>.card p,
-#adminTab>.card .muted-note{color:var(--admin-muted)}
+#adminTab .admin-area>.card{padding:20px;border-radius:22px}
+#adminTab .admin-area>.card [data-admin-card-header]{align-items:flex-start}
+#adminTab .admin-area>.card [data-admin-card-header] h2{margin:5px 0 0;color:var(--color-text);line-height:1.2}
+#adminTab .admin-area>.card .eyebrow{color:#80c79d;letter-spacing:.09em}
+#adminTab .admin-area>.card p,
+#adminTab .admin-area>.card .muted-note{color:var(--admin-muted)}
 
 /* v6.19.3 — ritmo uniforme dos cards operacionais, da Central de Atenção em diante. */
 #adminTab{
@@ -109,32 +109,32 @@
   --admin-card-padding:20px;
   --admin-card-title-size:1.35rem;
 }
-#adminTab>#adminAttentionCard,
-#adminTab>#adminAttentionCard~.card{
+#adminTab .admin-area>#adminAttentionCard,
+#adminTab .admin-area>.card{
   box-sizing:border-box;
   width:100%;
   margin-inline:0;
   padding:var(--admin-card-padding);
   border-radius:22px;
 }
-#adminTab>#adminAttentionCard~.card{margin-top:var(--admin-card-gap)}
-#adminTab>#adminAttentionCard>[data-admin-card-header],
-#adminTab>#adminAttentionCard~.card>[data-admin-card-header]{
+#adminTab .admin-area>.card{margin-top:var(--admin-card-gap)}
+#adminTab .admin-area>#adminAttentionCard>[data-admin-card-header],
+#adminTab .admin-area>.card>[data-admin-card-header]{
   display:flex;
   align-items:flex-start;
   justify-content:space-between;
   gap:14px;
   min-width:0;
 }
-#adminTab>#adminAttentionCard>[data-admin-card-header] h2,
-#adminTab>#adminAttentionCard~.card>[data-admin-card-header] h2{
+#adminTab .admin-area>#adminAttentionCard>[data-admin-card-header] h2,
+#adminTab .admin-area>.card>[data-admin-card-header] h2{
   margin:5px 0 0;
   font-size:var(--admin-card-title-size);
   line-height:1.2;
 }
-#adminTab>#adminAttentionCard .admin-card-header-actions,
-#adminTab>#adminAttentionCard~.card .admin-card-header-actions{flex:0 0 auto;gap:8px}
-#adminTab>#adminAttentionCard~.card>:is(
+#adminTab .admin-area>#adminAttentionCard .admin-card-header-actions,
+#adminTab .admin-area>.card .admin-card-header-actions{flex:0 0 auto;gap:8px}
+#adminTab .admin-area>.card>:is(
   .admin-quick-actions-intro,
   .admin-participants-intro,
   .admin-diagnostic-intro,
@@ -142,10 +142,10 @@
   .admin-recovery-intro,
   .admin-executive-intro
 ){margin:12px 0 18px;line-height:1.5}
-#adminTab>#adminAttentionCard>.admin-back-to-nav,
-#adminTab>#adminAttentionCard~.card>.admin-back-to-nav{margin-top:18px}
-#adminTab>#adminAttentionCard.is-collapsed,
-#adminTab>#adminAttentionCard~.card.is-collapsed{padding-block:16px}
+#adminTab .admin-area>#adminAttentionCard>.admin-back-to-nav,
+#adminTab .admin-area>.card>.admin-back-to-nav{margin-top:18px}
+#adminTab .admin-area>#adminAttentionCard.is-collapsed,
+#adminTab .admin-area>.card.is-collapsed{padding-block:16px}
 
 /* Centro de Controle: remove brilho e gradiente excessivos. */
 .admin-control-center{overflow:hidden}
@@ -303,9 +303,9 @@
 
 @media(max-width:620px){
   #adminTab{--admin-card-gap:14px;--admin-card-padding:17px;--admin-card-title-size:1.12rem}
-  #adminTab>.card{padding:var(--admin-card-padding);border-radius:20px}
-  #adminTab>#adminAttentionCard,
-  #adminTab>#adminAttentionCard~.card{border-radius:20px}
+  #adminTab .admin-area>.card{padding:var(--admin-card-padding);border-radius:20px}
+  #adminTab .admin-area>#adminAttentionCard,
+  #adminTab .admin-area>.card{border-radius:20px}
   .admin-pending-toolbar{padding:10px}
   .admin-recovery-occurrence header{flex-direction:column}
 }
@@ -420,3 +420,61 @@
 #adminTab .admin-participant-summary strong{flex-shrink:0;color:var(--summary-accent);font-size:2rem;line-height:1.15;font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap}
 #adminTab .admin-participant-summary strong small{color:var(--admin-muted);font-size:1rem;font-weight:700}
 @media(max-width:360px){#adminTab .admin-participant-summary{gap:10px;padding:12px}#adminTab .admin-participant-summary strong{font-size:1.75rem}}
+
+/* Administração por tarefa: quatro áreas, um resumo operacional. */
+#adminTab .admin-area{min-width:0;display:grid;gap:var(--admin-card-gap)}
+#adminTab .admin-area.hidden{display:none}
+#adminTab .admin-area>.card{margin:0}
+#adminTab .admin-task-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow:visible;gap:6px}
+#adminTab .admin-task-nav .admin-quick-nav-button{min-width:0;min-height:44px;justify-content:center;white-space:normal;overflow-wrap:anywhere;padding:10px 8px}
+#adminTab .admin-scope{display:block;margin-top:8px;color:var(--admin-muted);font-size:.72rem;line-height:1.5}
+#adminTab .admin-context-actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+#adminTab .admin-context-actions .admin-quick-action{flex:1 1 220px;min-width:0;max-width:100%}
+#adminTab .admin-participant-actions .admin-quick-action{width:100%;min-width:0}
+#adminTab .admin-operational-timing{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;width:100%;font-size:.78rem;color:var(--admin-muted)}
+#adminTab .admin-operational-timing strong{display:block;color:var(--color-text);font-variant-numeric:tabular-nums;margin-top:4px;line-height:1.5}
+#adminTab .admin-operational-timing small{grid-column:1/-1}
+#adminTab .admin-control-center-footer{flex-wrap:wrap}
+#adminTab .admin-system-signals:empty{display:none}
+#adminTab .admin-system-signals{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+#adminTab .admin-system-signals button{min-height:44px;color:var(--admin-gold,#f3cb61);border:1px solid var(--admin-line);background:rgba(243,203,97,.06);border-radius:12px;padding:10px 12px;text-align:left}
+#adminTab .admin-experiments{margin-top:0}
+@media(max-width:600px){#adminTab .admin-task-nav{grid-template-columns:repeat(2,minmax(0,1fr))}#adminTab .admin-task-nav .admin-quick-nav-button{font-size:.78rem}#adminTab .admin-area [data-admin-card-header]{flex-wrap:wrap}#adminTab .admin-area .admin-card-header-actions{margin-left:auto}}
+
+#adminTab .admin-member-details{min-width:0;margin-top:8px}
+#adminTab .admin-member-details>summary{min-height:44px;align-content:center;cursor:pointer;color:var(--admin-active);font-size:.78rem;font-weight:700}
+#adminTab .admin-member-details>span{display:block;margin-top:6px;overflow-wrap:anywhere}
+#adminTab .admin-member-details .admin-member-actions{margin-top:10px}
+#adminTab summary:focus-visible{outline:2px solid var(--admin-active);outline-offset:3px;border-radius:4px}
+#adminTab .admin-member-copy{min-width:0}
+
+#adminTab .admin-area>.card{scroll-margin-top:100px}
+@media(max-width:600px){#adminTab .admin-area>.card{scroll-margin-top:150px}}
+
+#adminTab .admin-control-metric small,#adminTab .admin-control-metric em{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+#adminTab .admin-task-nav{background:#092619;backdrop-filter:none}
+
+/* Ao escolher uma área, os cabeçalhos compõem um índice compacto. */
+#adminTab .admin-area{scroll-margin-top:100px}
+#adminTab .admin-area>.card>[data-admin-card-header]{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:10px}
+#adminTab .admin-area>.card>[data-admin-card-header]>:first-child{min-width:0}
+#adminTab .admin-area>.card>[data-admin-card-header] .admin-card-header-actions{display:flex;align-items:flex-start;justify-content:flex-end;align-self:start;margin:0;gap:6px;max-width:150px;flex-wrap:wrap}
+#adminTab .admin-area [data-admin-card-header] .admin-card-header-actions>span{max-width:100%;white-space:normal;overflow-wrap:anywhere;text-align:right}
+@media(max-width:600px){#adminTab .admin-area{scroll-margin-top:150px}#adminTab .admin-area>.card>[data-admin-card-header]{grid-template-columns:minmax(0,1fr) minmax(80px,110px)}#adminTab .admin-area>.card>[data-admin-card-header] .admin-card-header-actions{max-width:110px}#adminTab .admin-area>.card>[data-admin-card-header] h2{font-size:1.1rem}}
+
+#adminTab .admin-area>.card.is-collapsed [data-admin-card-header] .eyebrow{display:none}
+#adminTab .admin-area>.card.is-collapsed [data-admin-card-header] h2{margin-top:0}
+@media(max-width:600px){#adminTab .admin-area>.card.is-collapsed [data-admin-card-header] h2{font-size:1rem}#adminTab .admin-area>.card.is-collapsed .admin-scope{font-size:.65rem;line-height:1.35;margin-top:6px}}
+
+#adminTab .admin-area:not(.hidden)~.admin-area:not(.hidden){margin-top:var(--admin-card-gap)}
+
+/* Cards recolhidos: altura compartilhada, seta fora do fluxo do cabeçalho. */
+#adminTab .admin-area>.card>[data-admin-card-header]{position:relative;padding-bottom:8px}
+#adminTab .admin-area>.card>[data-admin-card-header] .admin-card-toggle{position:absolute;right:0;bottom:-16px;width:44px;height:28px;min-height:28px;border:0;border-radius:5px;background:transparent;color:var(--admin-muted);font-size:.78rem;box-shadow:none}
+#adminTab .admin-area>.card>[data-admin-card-header] .admin-card-toggle:hover{background:rgba(100,217,148,.05);color:var(--admin-active)}
+#adminTab .admin-area>.card>[data-admin-card-header] .admin-card-toggle:focus-visible{outline:2px solid var(--admin-active);outline-offset:2px}
+#adminTab .admin-area>.card.is-collapsed{min-height:var(--admin-collapsed-height,0px)}
+#adminTab .admin-area>.card.is-collapsed>[data-admin-card-header]{min-height:calc(var(--admin-collapsed-height,0px) - 34px);box-sizing:border-box}
+
+#adminTab .admin-area>#adminAttentionCard.is-collapsed [data-admin-card-header] h2{margin-top:0}
+@media(max-width:600px){#adminTab .admin-area>#adminAttentionCard.is-collapsed [data-admin-card-header] h2{font-size:1rem}}
