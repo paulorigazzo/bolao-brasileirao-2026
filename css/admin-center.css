@@ -402,3 +402,13 @@
   .admin-push-participant{padding:12px}
   .admin-push-reminder-modal .admin-form-actions{display:grid;grid-template-columns:1fr 1fr}
 }
+
+/* ADM: detalhes secundários preservados sob expansão nativa. */
+#adminTab .admin-secondary-details{margin:12px 0;border:1px solid var(--admin-line);border-radius:14px;padding:0 14px;min-width:0}
+#adminTab .admin-secondary-details>summary{min-height:44px;display:list-item;align-content:center;padding:12px 0;cursor:pointer;color:var(--admin-muted);font-weight:700;overflow-wrap:anywhere}
+#adminTab .admin-secondary-details>summary:focus-visible{outline:2px solid var(--admin-green,#64d994);outline-offset:3px;border-radius:4px}
+#adminTab .admin-secondary-details[open]{padding-bottom:14px}
+#adminTab .admin-secondary-details .diagnostic-section{margin-top:14px}
+#adminTab .admin-round-metrics{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#adminTab .admin-round-metrics>div{padding:10px 6px}
+#adminTab .admin-round-progress{margin-top:10px}
