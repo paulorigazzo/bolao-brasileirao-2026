@@ -36,7 +36,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.56.0";
+const APP_VERSION = "6.57.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -4317,6 +4317,71 @@ function formatRemaining(ms){
   return `${minutes}min`;
 }
 
+const adminDetailStates=new WeakMap();
+let adminReadingRevision=0;
+
+function adminDetailKey(detail,index){
+  return detail.dataset.adminDetail || detail.id || `${detail.querySelector("summary")?.textContent.trim() || "detalhe"}:${index}`;
+}
+
+function setAdminContent(container,html){
+  if(!container) return;
+  const previous=adminDetailStates.get(container) || new Map();
+  [...container.querySelectorAll("details")].forEach((detail,index)=>previous.set(adminDetailKey(detail,index),detail.open));
+  const active=document.activeElement;
+  const hadFocus=active && container.contains(active);
+  const focusedDetail=hadFocus && active.tagName==="SUMMARY"?active.closest("details"):null;
+  const focusedDetailKey=focusedDetail?adminDetailKey(focusedDetail,[...container.querySelectorAll("details")].indexOf(focusedDetail)):null;
+  const identity=hadFocus?[...active.attributes].filter(item=>item.name==="id" || item.name.startsWith("data-")).map(item=>[item.name,item.value]):[];
+  container.innerHTML=html;
+  container.dataset.adminLoaded="true";
+  [...container.querySelectorAll("details")].forEach((detail,index)=>{
+    const key=adminDetailKey(detail,index);
+    if(previous.has(key)) detail.open=previous.get(key);
+  });
+  adminDetailStates.set(container,previous);
+  if(focusedDetailKey && document.activeElement===document.body){
+    [...container.querySelectorAll("details")].find((detail,index)=>adminDetailKey(detail,index)===focusedDetailKey)?.querySelector("summary")?.focus({preventScroll:true});
+  }else if(hadFocus && identity.length && document.activeElement===document.body){
+    const replacement=[...container.querySelectorAll(active.tagName)].find(item=>identity.every(([name,value])=>item.getAttribute(name)===value));
+    replacement?.focus({preventScroll:true});
+  }
+}
+
+function captureAdminReadingPosition(){
+  const area=document.querySelector("[data-admin-group]:not(.hidden)");
+  if(!area || $("adminTab")?.classList.contains("hidden")) return null;
+  const anchor=[...area.querySelectorAll("h2,h3,summary,[data-admin-participant-detail],.admin-member-copy strong")].find(item=>{
+    const rect=item.getBoundingClientRect();
+    return rect.height>0 && rect.top>=0 && rect.top<window.innerHeight;
+  });
+  return anchor?{area:area.dataset.adminGroup,text:anchor.textContent,tag:anchor.tagName,top:anchor.getBoundingClientRect().top,revision:adminReadingRevision}:null;
+}
+
+function restoreAdminReadingPosition(reading){
+  if(!reading || reading.revision!==adminReadingRevision || $("adminTab")?.classList.contains("hidden")) return;
+  const area=document.querySelector("[data-admin-group]:not(.hidden)");
+  if(area?.dataset.adminGroup!==reading.area) return;
+  const anchor=[...area.querySelectorAll(reading.tag)].find(item=>item.textContent===reading.text && item.getClientRects().length);
+  if(anchor) window.scrollBy({top:anchor.getBoundingClientRect().top-reading.top,behavior:"instant"});
+}
+
+function renderAdminSystemSignals(){
+  const signals=[
+    {value:state.adminDiagnosticSummary,target:"adminDiagnosticCard",name:"Diagnóstico"},
+    {value:state.adminAuditSignal,target:"adminAuditCard",name:"Integridade"},
+    {value:state.adminRecoverySignal,target:"adminRecoveryCard",name:"Recuperação"}
+  ];
+  const alerts=signals.filter(item=>item.value?.warning);
+  const box=$("adminSystemSignals"),badge=$("adminNavSystemBadge");
+  if(box) box.innerHTML=alerts.map(item=>`<button type="button" data-admin-target="${item.target}">⚠ ${item.name}: ${escapeHtml(item.value.label)}</button>`).join("");
+  if(badge){
+    badge.textContent=String(alerts.length);
+    badge.classList.toggle("hidden",alerts.length===0);
+    badge.setAttribute("aria-label",`${alerts.length} verificação(ões) do sistema requerem atenção`);
+  }
+}
+
 function buildAdminSnapshot(){
   const {round,games}=adminCurrentRound();
   const participantEntries=(state.participants||[]).map(profile=>({email:String(profile.email||"").toLowerCase(),name:profile.nome,userId:profile.user_id}));
@@ -4417,13 +4482,14 @@ function renderAdminControlCenter(snapshot=state.adminSnapshot || buildAdminSnap
   if(diagnostic){
     health.textContent=diagnostic.label;
     healthHint.textContent=`Autoteste ${diagnostic.score}/100`;
-    badge.textContent=diagnostic.score>=90?"Tudo operacional":diagnostic.score>=70?"Requer atenção":"Ação necessária";
-    badge.className=`admin-control-center-badge ${diagnostic.score>=90?"is-ok":diagnostic.score>=70?"is-warning":"is-error"}`;
+    badge.textContent=`Diagnóstico: ${diagnostic.label.toLowerCase()}`;
+    badge.className=`admin-control-center-badge ${diagnostic.score>=90 && diagnostic.label==="Saudável"?"is-ok":diagnostic.score>=70?"is-warning":"is-error"}`;
   }else{
     health.textContent="Verificando"; healthHint.textContent="API, banco e cache";
-    badge.textContent=pending?`${pending} pendência${pending===1?"":"s"}`:"Operação normal";
+    badge.textContent=pending?`${pending} pendência${pending===1?"":"s"} na liga`:"Diagnóstico em verificação";
     badge.className=`admin-control-center-badge ${pending?"is-warning":"is-checking"}`;
   }
+  $("adminControlDeadline").textContent=snapshot.closeAt?`${formatRemaining(snapshot.closeAt-Date.now())} · ${formatDate(snapshot.closeAt)}`:snapshot.roundClosed||snapshot.roundFinished?"Palpites encerrados":"Sem fechamento previsto";
   const view=adminState(snapshot);
   $("adminControlCenterSummary").textContent=view.title;
   $("adminControlUpdatedAt").textContent=`Atualizado às ${new Date(snapshot.updatedAt).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}`;
@@ -4466,7 +4532,7 @@ function renderAdminAttention(){
   const completedHtml=showComplete && inTime.length?`<section class="admin-progress-group admin-completed-group"><div class="admin-progress-group-title"><strong>🟢 Em dia nos jogos abertos</strong><span>${inTime.length}</span></div><div class="admin-pending-list">${inTime.map(participantCard).join("")}</div></section>`:"";
   const pendingHtml=showPending && pendingParticipants.length?`<section class="admin-progress-group admin-incomplete-group"><div class="admin-progress-group-title"><strong>🟡 Palpites ainda possíveis</strong><span>${pendingParticipants.length}</span></div><div class="admin-pending-list">${pendingParticipants.map(participantCard).join("")}</div></section>`:"";
   const emptyFilter=!completedHtml&&!pendingHtml?`<div class="admin-filter-empty">Nenhum participante neste filtro.</div>`:"";
-  $("adminAttentionContent").innerHTML=`<h3>${escapeHtml(view.title)}</h3><p>${escapeHtml(view.description)}</p>${participantSummary}<div class="admin-participant-groups">${pendingHtml}${completedHtml}${emptyFilter}</div>`;
+  setAdminContent($("adminAttentionContent"),`<h3>${escapeHtml(view.title)}</h3><p>${escapeHtml(view.description)}</p>${participantSummary}<div class="admin-participant-groups">${pendingHtml}${completedHtml}${emptyFilter}</div>`);
   setAnimatedText("adminFilterAllCount",snapshot.participants.length);
   setAnimatedText("adminFilterPendingCount",snapshot.actionablePending.length);
   setAnimatedText("adminFilterCompleteCount",inTime.length);
@@ -4501,7 +4567,10 @@ function renderAdminAttention(){
   renderAdminControlCenter(snapshot);
 }
 
-function renderAdminQuickActions(){}
+function renderAdminQuickActions(){
+  const button=document.querySelector('[data-admin-quick-action="share-round"] strong');
+  if(button){ const summary=currentAdminRoundSummary(); button.textContent=summary.available?`Compartilhar resumo · Rodada ${summary.round}`:"Compartilhar resumo da rodada"; }
+}
 
 function membershipStatusLabel(item){
   const status=item.status || (item.ativo===false?"inactive":"approved");
@@ -4565,14 +4634,18 @@ function renderAdminParticipants(){
   const approvedItems=items.filter(item=>(!item.status || item.status==="approved") && item.ativo!==false);
   const phonesAvailable=approvedItems.filter(item=>Boolean(normalizeBrazilPhone(item.celular))).length;
   $("adminParticipantsCount").textContent=pending?`${approved}/${limit} ativos • ${pending} pendente${pending===1?"":"s"}`:`${approved}/${limit} participante${approved===1?"":"s"} ativo${approved===1?"":"s"}`;
-  if($("adminParticipantLimitInput")) $("adminParticipantLimitInput").value=String(limit);
+  const limitInput=$("adminParticipantLimitInput");
+  if(limitInput && document.activeElement!==limitInput && (limitInput.dataset.adminRenderedLimit==null || limitInput.value===limitInput.dataset.adminRenderedLimit || limitInput.value===String(limit))){
+    limitInput.value=String(limit);
+    limitInput.dataset.adminRenderedLimit=String(limit);
+  }
   if($("adminParticipantLimitStatus")) $("adminParticipantLimitStatus").textContent=atLimit?`${approved} de ${limit} ativos — limite atingido`:`${approved} de ${limit} ativos — ${limit-approved} vaga${limit-approved===1?"":"s"} disponível${limit-approved===1?"":"is"}`;
   $("adminPendingRequestsBadge").textContent=String(pending);
   show("adminPendingRequestsBadge",pending>0);
   if($("adminCommunicationSummary")) $("adminCommunicationSummary").innerHTML=state.adminCommunicationStatus
     ? `<span>🔔 Notificações: <strong>${Number(state.adminCommunicationStatus.enabledParticipants)||0} de ${approved}</strong></span><span>📱 Celular: <strong>${phonesAvailable} de ${approved}</strong></span>`
     : '<span>⚠️ Status de notificações indisponível</span><span>📱 Celular: <strong>'+phonesAvailable+' de '+approved+'</strong></span>';
-  $("adminParticipantsList").innerHTML=items.length?items.map(item=>{
+  setAdminContent($("adminParticipantsList"),items.length?items.map(item=>{
     const status=item.status || (item.ativo===false?"inactive":"approved");
     const phone=item.celular?formatBrazilPhone(item.celular):"Celular não informado";
     const communication=communicationByParticipant.get(String(item.id));
@@ -4596,10 +4669,11 @@ function renderAdminParticipants(){
       `<div class="admin-member-actions">${whatsappButton}${assignments.length?`<button type="button" class="secondary" data-participant-league-approval="${escapeHtml(item.id)}">${escapeHtml(assignmentLabel)}</button>`:addLeagueButton}<button type="button" class="secondary admin-member-toggle" data-participant-id="${escapeHtml(item.id)}" data-participant-active="${item.ativo!==false}">${item.ativo===false?"Reativar":"Desativar"}</button><button type="button" class="danger admin-member-delete" data-participant-delete="${escapeHtml(item.id)}" data-participant-name="${escapeHtml(item.nome)}" ${canDelete?"":"disabled"}>Deletar</button></div>`;
     return `<div class="admin-member-row status-${escapeHtml(status)}">
       ${participantAvatar(item.nome,team,"admin-member-avatar")}
-      <div class="admin-member-copy"><strong>${escapeHtml(item.nome)}</strong><span class="admin-member-team${team?"":" is-unset"}">${escapeHtml(teamLabel)}</span><span>${escapeHtml(item.email)}</span><div class="admin-communication-badges"><span class="${notificationClass}">${activeDevices?'🔔':'🔕'} ${escapeHtml(notificationLabel)}</span><span class="${phoneClass}">${item.celular?'📱':'📵'} ${escapeHtml(phone)}</span></div>${requested&&status==="pending"?`<small>Solicitado em ${escapeHtml(requested)}</small>`:""}<small>${escapeHtml(journeyLabel||membershipStatusLabel(item))}</small></div>
-      ${pendingActions}
+      <div class="admin-member-copy"><strong>${escapeHtml(item.nome)}</strong><small>${escapeHtml(journeyLabel||membershipStatusLabel(item))}</small><div class="admin-communication-badges"><span class="${notificationClass}">${activeDevices?'🔔':'🔕'} ${escapeHtml(notificationLabel)}</span><span class="${phoneClass}">${item.celular?'📱 Celular informado':'📵 Celular não informado'}</span></div>
+      <details class="admin-member-details" data-admin-detail="participant-${escapeHtml(item.id)}"><summary>Dados e gestão do participante</summary><span class="admin-member-team${team?"":" is-unset"}">${escapeHtml(teamLabel)}</span><span>${escapeHtml(item.email)}</span><span>${escapeHtml(phone)}</span>${requested&&status==="pending"?`<small>Solicitado em ${escapeHtml(requested)}</small>`:""}${status==="pending"?"":pendingActions}</details></div>
+      ${status==="pending"?pendingActions:""}
     </div>`;
-  }).join(""):`<p class="muted-note">Nenhum participante cadastrado.</p>`;
+  }).join(""):`<p class="muted-note">Nenhum participante cadastrado.</p>`);
 }
 
 function renderParticipantLeagueApproval(){
@@ -4882,14 +4956,14 @@ function renderAdminRoundStatus(){
       <small class="admin-postponed-original">Programação original: ${escapeHtml(originalDate)} às ${escapeHtml(originalTime)}. Palpite preservado e pontuação pendente.</small>
     </article>`;
   }).join("");
-  const postponedHtml=postponed?`<details class="admin-postponed-games">
+  const postponedHtml=postponed?`<details class="admin-postponed-games" data-admin-detail="postponed">
     <summary>
       <span><span class="admin-next-label">JOGOS ADIADOS</span><strong>${postponed} partida${postponed===1?"":"s"} aguardando nova data</strong><small>Toque para ver partidas, datas, horários e locais.</small></span>
       <span class="admin-postponed-toggle" aria-hidden="true">⌄</span>
     </summary>
     <div class="admin-postponed-list">${postponedRows}</div>
   </details>`:"";
-  const nextHtml=next?`<section class="admin-next-game"><span class="admin-next-label">PRÓXIMO JOGO</span><div class="admin-next-match"><strong>${escapeHtml(teamDisplayName(next.time_casa))} <span>×</span> ${escapeHtml(teamDisplayName(next.time_fora))}</strong><small>${escapeHtml(formatDate(next.inicio))}${next.local?` • ${escapeHtml(next.local)}`:""}</small></div><span class="admin-next-countdown">${formatRemaining(new Date(next.inicio).getTime()-now)}</span></section>`:`<section class="admin-next-game is-empty"><strong>${total?"Todos os jogos da rodada foram concluídos.":"Nenhum jogo cadastrado para esta rodada."}</strong></section>`;
+  const nextHtml=next?`<section class="admin-next-game"><span class="admin-next-label">PRÓXIMO JOGO</span><div class="admin-next-match"><strong>${escapeHtml(teamDisplayName(next.time_casa))} <span>×</span> ${escapeHtml(teamDisplayName(next.time_fora))}</strong><small>${escapeHtml(formatDate(next.inicio))}${next.local?` • ${escapeHtml(next.local)}`:""}</small></div><span class="admin-next-countdown">${formatRemaining(new Date(next.inicio).getTime()-now)}</span></section>`:`<section class="admin-next-game is-empty"><strong>${!total?"Nenhum jogo cadastrado para esta rodada.":live?"Há jogos em andamento. Nenhum próximo jogo agendado.":postponed?"Há jogos adiados aguardando nova programação.":games.every(game=>isFinished(game)||isCancelled(game))?"Todos os jogos da rodada foram concluídos.":"Nenhum próximo jogo agendado."}</strong></section>`;
   const gameRows=games.map(game=>{
     const phase=adminGamePhase(game,now);
     const displayStatus=gameStatusDisplay(game);
@@ -4900,14 +4974,14 @@ function renderAdminRoundStatus(){
   }).join("");
   const earlierGames=pendingEarlierRounds().flatMap(round=>state.games.filter(game=>Number(game.rodada)===round && !isFinished(game) && !isCancelled(game)));
   const earlierOpen=earlierGames.filter(game=>!locked(game));
-  const earlierHtml=earlierGames.length?`<details class="admin-round-details"><summary>Jogos pendentes de rodadas anteriores <span>${earlierGames.length}</span></summary><div class="admin-round-games">${earlierGames.map(game=>{
+  const earlierHtml=earlierGames.length?`<details class="admin-round-details" data-admin-detail="earlier"><summary>Jogos pendentes de rodadas anteriores <span>${earlierGames.length}</span></summary><div class="admin-round-games">${earlierGames.map(game=>{
     const phase=gameStatusDisplay(game).key;
     const schedule=isUndatedPostponement(game)?"Nova data a definir":`${formatDate(game.inicio)}${game.situacao_agendamento==="provisorio"?" · data em verificação":""}`;
     const deadline=locked(game)?"Palpites fechados":`Palpites abertos até ${new Date(new Date(game.inicio).getTime()-CONFIG.lockMinutesBefore*60000).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}`;
     const missing=!locked(game)&&state.adminProgressAvailable?state.participants.filter(profile=>!state.adminPickProgress.some(pick=>Number(pick.id_jogo)===Number(game.id_jogo) && String(pick.user_id)===String(profile.user_id))).length:0;
     return `<article class="admin-round-game status-${adminGamePhase(game)}"><span class="admin-round-game-icon">${gameStatusDisplay(game).icon}</span><div class="admin-round-game-main"><strong>R${Number(game.rodada)} · ${escapeHtml(teamDisplayName(game.time_casa))} × ${escapeHtml(teamDisplayName(game.time_fora))}</strong><small>${escapeHtml(schedule)} · ${escapeHtml(deadline)}${!locked(game)&&state.adminProgressAvailable?` · ${missing} participante${missing===1?"":"s"} sem palpite`:""}</small></div></article>`;
   }).join("")}${earlierOpen.length?`<div class="diagnostic-actions"><button type="button" class="secondary" data-admin-earlier-manual="${Number(earlierOpen[0].rodada)}">Compartilhar lembrete · R${Number(earlierOpen[0].rodada)}</button><button type="button" class="secondary" data-admin-earlier-push="${Number(earlierOpen[0].rodada)}">Prévia de notificações · R${Number(earlierOpen[0].rodada)}</button></div>`:""}</div></details>`:"";
-  $("adminRoundContent").innerHTML=`${metrics}${progressHtml}${earlierHtml}${postponedHtml}${nextHtml}<details class="admin-round-details"><summary>Ver todos os jogos <span>${total}</span></summary><div class="admin-round-games">${gameRows||'<p class="muted-note">Nenhum jogo disponível.</p>'}</div></details>`;
+  setAdminContent($("adminRoundContent"),`${metrics}${progressHtml}${earlierHtml}${postponedHtml}${nextHtml}<details class="admin-round-details" data-admin-detail="all-games"><summary>Ver todos os jogos <span>${total}</span></summary><div class="admin-round-games">${gameRows||'<p class="muted-note">Nenhum jogo disponível.</p>'}</div></details>`);
 }
 
 function auditGameContext(game){
@@ -5002,9 +5076,11 @@ function renderAdminAudit(){
     badge.textContent=report.issues.length?`${report.issues.length} erro${report.issues.length===1?'':'s'}`:report.warnings.length?`${report.warnings.length} alerta${report.warnings.length===1?'':'s'}`:'Tudo consistente';
     badge.className=`admin-audit-badge ${report.issues.length?'has-errors':report.warnings.length?'has-warnings':'is-ok'}`;
   }
+  state.adminAuditSignal={warning:report.issues.length+report.warnings.length>0,label:report.issues.length?`${report.issues.length} erro(s) de integridade`:report.warnings.length?`${report.warnings.length} alerta(s) de integridade`:"Integridade sem ocorrências"};
+  renderAdminSystemSignals();
   const s=report.summary;
   const rows=[...report.issues.map(item=>({...item,type:'error',icon:'❌'})),...report.warnings.map(item=>({...item,type:'warning',icon:'⚠️'}))];
-  target.innerHTML=`
+  setAdminContent(target,`
     <details class="admin-secondary-details"><summary>Totais e critérios da verificação</summary><div class="admin-audit-summary">
       <article><span>Jogos</span><strong>${s.games}</strong><small>${s.scoredGames} finalizados válidos</small></article>
       <article><span>Ao vivo</span><strong>${s.liveGames}</strong><small>${s.liveGamesWithScore} com placar parcial • não pontuam</small></article>
@@ -5014,7 +5090,7 @@ function renderAdminAudit(){
     <div class="admin-audit-rule"><strong>Regra crítica aplicada:</strong> somente partidas oficialmente finalizadas, não canceladas e com placar válido geram pontos e estatísticas. Placar parcial em jogo ao vivo é uma condição normal e não gera alerta.</div></details>
     ${state.lastSyncReport?.repairedCount?`<div class="admin-audit-ok">🔧 Última sincronização corrigiu automaticamente <strong>${state.lastSyncReport.repairedCount}</strong> registro${state.lastSyncReport.repairedCount===1?'':'s'}. ${escapeHtml((state.lastSyncReport.repairs||[]).slice(0,4).map(item=>`Jogo ${item.id_jogo}: ${item.reason}`).join(' • '))}</div>`:''}
     ${rows.length?`<div class="admin-audit-list">${rows.map(auditFindingHtml).join('')}</div>`:`<div class="admin-audit-ok">✅ Nenhuma inconsistência estrutural encontrada nos dados carregados.</div>`}
-    <small class="muted-note">Auditoria executada com os dados atuais do Supabase. Status e placar são atualizados juntos; partidas futuras, adiadas ou canceladas não conservam placares incompatíveis após a sincronização.</small>`;
+    <small class="muted-note">Auditoria executada com os dados atuais do Supabase. Status e placar são atualizados juntos; partidas futuras, adiadas ou canceladas não conservam placares incompatíveis após a sincronização.</small>`);
 }
 
 function recoveryDate(value){
@@ -5065,24 +5141,28 @@ async function renderAdminRecoveryProtection(){
   if(!isAdminUser()) return;
   const content=$("adminRecoveryContent"),badge=$("adminRecoveryBadge");
   if(!content) return;
-  content.innerHTML='<p class="muted-note">Consultando a última proteção realizada…</p>';
+  if(!content.dataset.adminLoaded) content.innerHTML='<p class="muted-note">Consultando a última proteção realizada…</p>';
   if(badge){badge.textContent="Verificando…";badge.className="admin-recovery-badge";}
   try{
     const {data,error}=await sb.rpc("obter_detalhes_protecao_recuperacao");
     if(error) throw error;
     const model=buildRecoveryProtectionModel(data);
+    state.adminRecoverySignal={warning:model.pending>0,label:model.pending?`${model.pending} pendência(s) de recuperação`:"Recuperação sem pendências"};
+    renderAdminSystemSignals();
     if(badge){badge.textContent=model.label;badge.className=`admin-recovery-badge is-${model.tone}`;}
     const checkpoint=data.checkpoint_tipo==="rodada"?`Rodada ${data.checkpoint_rodada}`:"Baseline inicial";
     const statusIcon=model.tone==="warning"?"⚠️":model.tone==="info"?"ℹ️":"✅";
     const occurrences=model.occurrences.length?model.occurrences.map(renderRecoveryOccurrence).join(""):'<p class="muted-note">Nenhuma ocorrência registrada.</p>';
-    content.innerHTML=`<div class="admin-recovery-status is-${model.tone}"><strong>${statusIcon} ${escapeHtml(model.title)}</strong><p>${escapeHtml(model.detail)}</p></div>
+    setAdminContent(content,`<div class="admin-recovery-status is-${model.tone}"><strong>${statusIcon} ${escapeHtml(model.title)}</strong><p>${escapeHtml(model.detail)}</p></div>
       <div class="admin-recovery-metrics"><article><span>Última captura</span><strong>${recoveryDate(data.ultima_captura)}</strong><small>${escapeHtml(recoveryOriginLabel(data.ultima_origem))}${data.ultima_rodada?` • rodada ${Number(data.ultima_rodada)}`:""}</small></article><article><span>Cobertura</span><strong>${Number(data.jogos_preservados)||0} jogos</strong><small>${Number(data.palpites_preservados)||0} palpites preservados</small></article><article><span>Último checkpoint</span><strong>${escapeHtml(checkpoint)}</strong><small>${recoveryDate(data.checkpoint_criado_em)}</small></article><article><span>Integridade</span><strong>${model.pending} pendência(s)</strong><small>${model.informational} alteração(ões) registrada(s) · ${model.checked} conferida(s)</small></article></div>
-      <details class="admin-recovery-details"><summary>Ver detalhes da proteção</summary><div class="admin-recovery-occurrences">${occurrences}</div><p><strong>Alterações registradas no histórico:</strong> ${Number(data.alteracoes_registradas)||0}</p><p><strong>Próxima captura:</strong> após a finalização do próximo jogo.</p><p>Esta proteção não substitui o backup integral do Supabase. A restauração permanece manual e revisada.</p></details>`;
+      <details class="admin-recovery-details"><summary>Ver detalhes da proteção</summary><div class="admin-recovery-occurrences">${occurrences}</div><p><strong>Alterações registradas no histórico:</strong> ${Number(data.alteracoes_registradas)||0}</p><p><strong>Próxima captura:</strong> após a finalização do próximo jogo.</p><p>Esta proteção não substitui o backup integral do Supabase. A restauração permanece manual e revisada.</p></details>`);
     content.querySelectorAll("[data-recovery-check]").forEach(button=>button.addEventListener("click",()=>markRecoveryOccurrenceChecked(button)));
   }catch(error){
     const model=buildRecoveryProtectionModel(null);
+    state.adminRecoverySignal={warning:true,label:"Proteção de recuperação indisponível"};
+    renderAdminSystemSignals();
     if(badge){badge.textContent=model.label;badge.className="admin-recovery-badge is-error";}
-    content.innerHTML=`<div class="admin-recovery-status is-error"><strong>🔴 ${escapeHtml(model.title)}</strong><p>${escapeHtml(error.message||model.detail)}</p><button id="adminRecoveryRetryBtn" class="secondary" type="button">Tentar novamente</button></div>`;
+    setAdminContent(content,`<div class="admin-recovery-status is-error"><strong>🔴 ${escapeHtml(model.title)}</strong><p>${escapeHtml(error.message||model.detail)}</p><button id="adminRecoveryRetryBtn" class="secondary" type="button">Tentar novamente</button></div>`);
     $("adminRecoveryRetryBtn")?.addEventListener("click",renderAdminRecoveryProtection);
   }
 }
@@ -5107,14 +5187,14 @@ function renderAdminExecutiveDashboard(){
   const leaderText=leader?`${escapeHtml(leader.name)}<small>${Number(leader.total)||0} ponto${Number(leader.total)===1?'':'s'}</small>`:'—<small>Sem pontuação</small>';
   const exactText=exactLeader&&Number(exactLeader.exact)>0?`${escapeHtml(exactLeader.name)}<small>${Number(exactLeader.exact)} placar${Number(exactLeader.exact)===1?'':'es'} exato${Number(exactLeader.exact)===1?'':'s'}</small>`:'—<small>Aguardando resultados</small>';
 
-  $('adminExecutiveContent').innerHTML=`
+  setAdminContent($('adminExecutiveContent'),`
     <details class="admin-secondary-details"><summary>Ver indicadores do bolão</summary><div class="admin-executive-metrics">
-      <article><span class="admin-executive-icon">👥</span><div><small>Participantes</small><strong>${participants}</strong><em>${snapshot.participants.length-snapshot.actionablePending.length}/${snapshot.participants.length || participants} em dia nos jogos abertos</em></div></article>
+      <article><span class="admin-executive-icon">👥</span><div><small>Participantes · liga selecionada</small><strong>${participants}</strong><em>${snapshot.participants.length-snapshot.actionablePending.length}/${snapshot.participants.length || participants} em dia nos jogos abertos</em></div></article>
       <article><span class="admin-executive-icon">⚽</span><div><small>Rodada atual</small><strong>${snapshot.round || '—'}<b>/38</b></strong><em>${seasonProgress}% da temporada</em></div></article>
-      <article><span class="admin-executive-icon">🎯</span><div><small>Palpites registrados</small><strong>${totalPicks}</strong><em>em toda a competição</em></div></article>
-      <article><span class="admin-executive-icon">🏟️</span><div><small>Jogos encerrados</small><strong>${finishedGames}<b>/${totalGames}</b></strong><em>com resultado disponível</em></div></article>
-      <article><span class="admin-executive-icon">📊</span><div><small>Média do grupo</small><strong>${groupAverage.toFixed(1)}</strong><em>pontos por jogo pontuado</em></div></article>
-      <article class="is-leader"><span class="admin-executive-icon">🥇</span><div><small>Líder atual</small><strong>${leaderText}</strong></div></article>
+      <article><span class="admin-executive-icon">🎯</span><div><small>Palpites · liga selecionada</small><strong>${totalPicks}</strong><em>em todas as rodadas</em></div></article>
+      <article><span class="admin-executive-icon">🏟️</span><div><small>Jogos · campeonato</small><strong>${finishedGames}<b>/${totalGames}</b></strong><em>com resultado disponível</em></div></article>
+      <article><span class="admin-executive-icon">📊</span><div><small>Média · liga selecionada</small><strong>${groupAverage.toFixed(1)}</strong><em>pontos por jogo pontuado</em></div></article>
+      <article class="is-leader"><span class="admin-executive-icon">🥇</span><div><small>Líder · liga selecionada</small><strong>${leaderText}</strong></div></article>
     </div>
     <div class="admin-round-integrity tone-${roundLifecycleView.tone}"><div><small>Integridade da rodada</small><strong>${roundLifecycleView.label}</strong><span>${roundLifecycle.concluded}/${roundLifecycle.total} jogos concluídos · ${roundLifecycle.completion}%</span></div><b>${roundLifecycle.isProvisional?"PONTUAÇÃO PROVISÓRIA":"STATUS CONSOLIDADO"}</b></div>
     <div class="admin-executive-health">
@@ -5122,7 +5202,7 @@ function renderAdminExecutiveDashboard(){
       <div class="admin-executive-health-track"><i style="width:${completion}%"></i></div>
       <p>${snapshot.actionablePending.length?`${snapshot.actionablePending.length} participante${snapshot.actionablePending.length===1?'':'s'} ainda ${snapshot.actionablePending.length===1?'precisa':'precisam'} palpitar nos jogos abertos.`:'Todos os jogos abertos têm palpites.'}</p>
     </div>
-    <div class="admin-executive-highlight"><span>🔥 Destaque de precisão</span><strong>${exactText}</strong></div></details>`;
+    <div class="admin-executive-highlight"><span>🔥 Destaque de precisão</span><strong>${exactText}</strong></div></details>`);
 }
 
 function openAdminParticipantDetail(email){
@@ -5467,7 +5547,7 @@ async function renderAdminDiagnostic(){
   if(!isAdminUser()) return;
   const content=$("adminDiagnosticContent"), badge=$("adminDiagnosticBadge");
   if(!content) return;
-  content.innerHTML='<p class="muted-note">Consultando a saúde do sistema…</p>';
+  if(!content.dataset.adminLoaded) content.innerHTML='<p class="muted-note">Consultando a saúde do sistema…</p>';
   if(badge){ badge.textContent="Verificando…"; badge.className="admin-diagnostic-badge"; }
   try{
     const d=await fetchAdminDiagnostic();
@@ -5480,7 +5560,7 @@ async function renderAdminDiagnostic(){
     const earlierSchedule=pendingEarlierRounds().flatMap(round=>state.games.filter(game=>Number(game.rodada)===round && !isFinished(game) && !isCancelled(game)));
     const awaitingDate=earlierSchedule.filter(isUndatedPostponement).length;
     const provisionalDates=earlierSchedule.filter(game=>game.situacao_agendamento==="provisorio").length;
-    content.innerHTML=`
+    setAdminContent(content,`
       <div class="diagnostic-health-grid">${services.map(([name,item])=>{const [icon,label]=diagnosticServiceLabel(item);return `<article><span>${escapeHtml(name)}</span><strong>${icon} ${label}</strong></article>`}).join("")}</div>
       <small class="diagnostic-note">A API-Football é a fonte esportiva oficial exclusiva.</small>
       <div class="diagnostic-section"><h3>Agenda de rodadas anteriores</h3><p class="muted-note">Saúde da API e confirmação do calendário são verificações diferentes. ${earlierSchedule.length} jogo${earlierSchedule.length===1?"":"s"} pendente${earlierSchedule.length===1?"":"s"}; ${provisionalDates} data${provisionalDates===1?"":"s"} em verificação; ${awaitingDate} sem nova data.</p></div>
@@ -5507,11 +5587,12 @@ async function renderAdminDiagnostic(){
       <div class="diagnostic-section"><h3>Logs recentes</h3><div class="diagnostic-log-list">${d.logs.slice(0,8).map(log=>`<div><span>${diagnosticDate(log.criado_em)}</span><strong>${log.sucesso?"🟢":"🔴"} ${escapeHtml(log.origem||"sincronização")}</strong><small>${escapeHtml(diagnosticProviderName(log?.detalhes?.provider))} • ${log.sucesso?`${log.jogos_atualizados??0} jogos • ${diagnosticDuration(log.duracao_ms)}`:escapeHtml(log.erro||"Falha sem detalhes")}</small></div>`).join("")||'<p class="muted-note">Nenhum log disponível.</p>'}</div></div>
       </details>
       <div class="diagnostic-actions"><button id="diagnosticRefreshBtn" class="secondary" type="button">🔄 Refazer diagnóstico</button><button id="diagnosticSyncBtn" class="primary" type="button">⚽ Sincronizar jogos</button><button id="diagnosticExportBtn" class="secondary" type="button">📥 Exportar logs</button></div>
-      <small class="diagnostic-note">A disponibilidade da fonte oficial é inferida apenas por seus próprios logs para não consumir cota; a atualidade do conteúdo é verificada separadamente nos jogos armazenados.</small>`;
+      <small class="diagnostic-note">A disponibilidade da fonte oficial é inferida apenas por seus próprios logs para não consumir cota; a atualidade do conteúdo é verificada separadamente nos jogos armazenados.</small>`);
     const sportsDelayed=d.sportsData?.status==="delayed";
-    state.adminDiagnosticSummary={score:Number(d.autotest.score)||0,label:sportsDelayed?"Dados atrasados":d.autotest.score>=90?"Saudável":d.autotest.score>=70?"Atenção":"Problemas"};
+    state.adminDiagnosticSummary={score:Number(d.autotest.score)||0,label:sportsDelayed?"Dados atrasados":d.cache.lookup==="latest-fallback"?"Cache em verificação":d.autotest.score>=90?"Saudável":d.autotest.score>=70?"Atenção":"Problemas",warning:sportsDelayed||Number(d.autotest.score)<90||d.cache.lookup==="latest-fallback"};
     renderAdminControlCenter();
-    if(badge){ badge.textContent=sportsDelayed?"Dados esportivos atrasados":d.autotest.score>=90?"Sistema saudável":d.autotest.score>=70?"Atenção":"Problemas"; badge.className=`admin-diagnostic-badge ${sportsDelayed||d.autotest.score>=70&&d.autotest.score<90?"is-warning":d.autotest.score>=90?"is-ok":"is-error"}`; }
+    renderAdminSystemSignals();
+    if(badge){ badge.textContent=state.adminDiagnosticSummary.label; badge.className=`admin-diagnostic-badge ${d.autotest.score<70?"is-error":state.adminDiagnosticSummary.warning?"is-warning":"is-ok"}`; }
     $("diagnosticRefreshBtn")?.addEventListener("click",renderAdminDiagnostic);
     $("diagnosticSyncBtn")?.addEventListener("click",async e=>{await syncGames(e.currentTarget); await renderAdminDiagnostic();});
     $("diagnosticExportBtn")?.addEventListener("click",()=>{
@@ -5519,9 +5600,10 @@ async function renderAdminDiagnostic(){
       const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`bolao-diagnostico-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
     });
   }catch(error){
-    content.innerHTML=`<div class="diagnostic-error"><strong>🔴 Não foi possível concluir o diagnóstico</strong><p>${escapeHtml(error.message||"Erro desconhecido")}</p><button id="diagnosticRetryBtn" class="secondary" type="button">Tentar novamente</button></div>`;
-    state.adminDiagnosticSummary={score:0,label:"Indisponível"};
+    setAdminContent(content,`<div class="diagnostic-error"><strong>🔴 Não foi possível concluir o diagnóstico</strong><p>${escapeHtml(error.message||"Erro desconhecido")}</p><button id="diagnosticRetryBtn" class="secondary" type="button">Tentar novamente</button></div>`);
+    state.adminDiagnosticSummary={score:0,label:"Indisponível",warning:true};
     renderAdminControlCenter();
+    renderAdminSystemSignals();
     if(badge){badge.textContent="Indisponível";badge.className="admin-diagnostic-badge is-error";}
     $("diagnosticRetryBtn")?.addEventListener("click",renderAdminDiagnostic);
   }
@@ -5531,7 +5613,7 @@ async function handleAdminQuickAction(event){
   const button=event.target.closest("[data-admin-quick-action]");
   if(!button || button.disabled) return;
   const action=button.dataset.adminQuickAction;
-  const status=$("adminQuickActionStatus");
+  const status=button.closest(".admin-area")?.querySelector(".admin-quick-action-status") || $("adminQuickActionStatus");
   try{
     button.classList.add("is-busy");
     button.disabled=true;
@@ -5588,6 +5670,7 @@ async function refreshAllAdminData(){
   if(feedback) feedback.textContent="Consultando jogos, palpites, ranking, estatísticas e participantes…";
 
   const modules=[];
+  const reading=captureAdminReadingPosition();
   try{
     await loadData();
     const renderers=[
@@ -5603,10 +5686,11 @@ async function refreshAllAdminData(){
       ["Proteção de recuperação",renderAdminRecoveryProtection]
     ];
     for(const [name,renderer] of renderers){
-      try{ renderer(); }
+      try{ await renderer(); }
       catch(err){ modules.push(name); console.warn(`Falha ao atualizar ${name}.`,err); }
     }
     updateAdminExperience(state.adminSnapshot || buildAdminSnapshot());
+    restoreAdminReadingPosition(reading);
     adminLastBackgroundRefresh=Date.now();
     const time=new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
     const autoStatus=$("adminAutoRefreshStatus");
@@ -5684,8 +5768,6 @@ function updateAdminExperience(snapshot=state.adminSnapshot || buildAdminSnapsho
   const nextGame=[...snapshot.games]
     .filter(game=>!isFinished(game) && new Date(game.inicio).getTime()>now)
     .sort((a,b)=>new Date(a.inicio)-new Date(b.inicio))[0];
-  setAnimatedText("adminSmartRound",snapshot.round || "—");
-  setAnimatedText("adminSmartPicks",`${snapshot.participants.length-snapshot.actionablePending.length}/${snapshot.participants.length} em dia`);
   setAnimatedText("adminSmartNext",nextGame?formatRemaining(new Date(nextGame.inicio).getTime()-now):(snapshot.roundFinished?"Rodada encerrada":"Sem jogo agendado"));
 
   const attentionBadge=$("adminNavAttentionBadge");
@@ -5703,7 +5785,7 @@ function updateAdminExperience(snapshot=state.adminSnapshot || buildAdminSnapsho
   }
 }
 
-const ADMIN_CARD_IDS=["adminAttentionCard","adminRoundCard","adminQuickActionsCard","adminLeaguesCard","adminParticipantsCard","adminDiagnosticCard","adminAuditCard","adminRecoveryCard","adminExecutiveCard"];
+const ADMIN_CARD_IDS=["adminAttentionCard","adminRoundCard","adminLeaguesCard","adminParticipantsCard","adminDiagnosticCard","adminAuditCard","adminRecoveryCard","adminExecutiveCard"];
 
 function setAdminCardCollapsed(card,collapsed,{animate=true}={}){
   if(!card) return;
@@ -5754,25 +5836,27 @@ function setAdminCardCollapsed(card,collapsed,{animate=true}={}){
   }
 }
 
+function adminAreaForCard(targetId){
+  return $(targetId)?.closest("[data-admin-group]")?.dataset.adminGroup || "round";
+}
+
 function expandOnlyAdminCard(targetId,{scroll=false,animate=true}={}){
-  const target=$(targetId) || $(ADMIN_CARD_IDS[0]);
+  const target=$(targetId) || $("adminAttentionCard");
   if(!target) return;
-  ADMIN_CARD_IDS.forEach(id=>setAdminCardCollapsed($(id),id!==target.id,{animate}));
+  const area=adminAreaForCard(target.id);
+  const wasVisible=!target.closest("[data-admin-group]")?.classList.contains("hidden") && !target.classList.contains("is-collapsed");
+  document.querySelectorAll("[data-admin-group]").forEach(group=>group.classList.toggle("hidden",group.dataset.adminGroup!==area));
+  setAdminCardCollapsed(target,false,{animate});
   setAdminQuickNavActive(target.id);
   try{ localStorage.setItem("bolao-admin-active-card",target.id); }catch(_err){}
-  if(scroll){
-    target.scrollIntoView({behavior:"smooth",block:"start"});
-    target.classList.remove("admin-card-nav-highlight");
-    requestAnimationFrame(()=>target.classList.add("admin-card-nav-highlight"));
-    setTimeout(()=>target.classList.remove("admin-card-nav-highlight"),850);
-  }
+  if(target.id==="adminLeaguesCard" && !wasVisible && isAdminUser()) refreshAdminLeagues();
+  if(scroll) target.scrollIntoView({behavior:prefersReducedMotion()?"auto":"smooth",block:"start"});
 }
 
 function collapseAdminCard(card,{animate=true}={}){
   if(!card || card.classList.contains("is-collapsed")) return;
   setAdminCardCollapsed(card,true,{animate});
-  setAdminQuickNavActive(null);
-  try{ localStorage.removeItem("bolao-admin-active-card"); }catch(_err){}
+  // Collapsing a card does not change the selected task area.
 }
 
 function toggleAdminCard(card,{scroll=true}={}){
@@ -5787,6 +5871,7 @@ function setupAdminCollapsibleCards(){
     const saved=localStorage.getItem("bolao-admin-active-card");
     if(ADMIN_CARD_IDS.includes(saved)) initialCard=saved;
   }catch(_err){}
+  ADMIN_CARD_IDS.forEach(id=>setAdminCardCollapsed($(id),!["adminAttentionCard","adminRoundCard","adminParticipantsCard","adminLeaguesCard"].includes(id),{animate:false}));
   expandOnlyAdminCard(initialCard,{animate:false});
   document.querySelectorAll("[data-admin-collapse]").forEach(toggle=>{
     const card=$(toggle.dataset.adminCollapse);
@@ -5806,10 +5891,13 @@ async function refreshAdminSilently(reason="automática"){
   if(!isAdminUser() || document.hidden || $("adminTab")?.classList.contains("hidden")) return;
   const status=$("adminAutoRefreshStatus");
   if(status) status.textContent="Atualizando dados…";
+  const reading=captureAdminReadingPosition();
   try{
     await loadData();
     renderGames(); renderRanking(); renderStats(); renderHome();
-    renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminDiagnostic(); renderAdminExecutiveDashboard(); renderAdminAudit(); renderAdminRecoveryProtection();
+    renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminExecutiveDashboard(); renderAdminAudit();
+    await Promise.allSettled([renderAdminDiagnostic(),renderAdminRecoveryProtection()]);
+    restoreAdminReadingPosition(reading);
     adminLastBackgroundRefresh=Date.now();
     if(status) status.textContent=`Atualizado automaticamente às ${new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}`;
   }catch(err){
@@ -5831,20 +5919,20 @@ function stopAdminAutoRefresh(){
 let adminNavObserver=null;
 
 function setAdminQuickNavActive(targetId){
-  document.querySelectorAll("[data-admin-target]").forEach(button=>{
-    const active=button.dataset.adminTarget===targetId;
+  const area=adminAreaForCard(targetId);
+  document.querySelectorAll("#adminQuickNav [data-admin-area]").forEach(button=>{
+    const active=button.dataset.adminArea===area;
     button.classList.toggle("active",active);
     if(active) button.setAttribute("aria-current","true"); else button.removeAttribute("aria-current");
   });
 }
 
 function scrollToAdminSection(targetId){
-  const card=$(targetId);
-  if(card && !card.classList.contains("is-collapsed")) collapseAdminCard(card);
-  else expandOnlyAdminCard(targetId,{scroll:true});
+  expandOnlyAdminCard(targetId,{scroll:true});
 }
 
 function setupAdminQuickNavigation(){
+  ["wheel","touchstart","pointerdown","keydown"].forEach(type=>document.addEventListener(type,()=>{adminReadingRevision++;},{passive:true,capture:true}));
   const nav=$("adminQuickNav");
   if(!nav) return;
   const handleTargetClick=event=>{
@@ -5853,6 +5941,7 @@ function setupAdminQuickNavigation(){
   };
   nav.onclick=handleTargetClick;
   if($("adminControlCenter")) $("adminControlCenter").onclick=handleTargetClick;
+  if($("adminSystemSignals")) $("adminSystemSignals").onclick=handleTargetClick;
   document.querySelectorAll("[data-admin-back-to-nav]").forEach(button=>{
     button.onclick=()=>{
       const topAnchor=$("adminTopAnchor") || $("adminTab") || nav;
@@ -5952,7 +6041,10 @@ function openPushNotificationTarget(search=location.search){
     const type=params.get("tipo");
     if(!isAdminUser()||!Number.isInteger(round)||round<1||round>38||!["12h","2h","summary"].includes(type))return;
     navigateTo("admin",{onReady:()=>{
-      if(isAdminUser())adminNotificationsController.open($("adminNotificationsOpen"),{round,type});
+      if(isAdminUser()){
+        expandOnlyAdminCard("adminAttentionCard",{animate:false});
+        adminNotificationsController.open($("adminNotificationsOpen"),{round,type});
+      }
     }});
     return;
   }
@@ -6340,7 +6432,7 @@ $("adminPushSelectAll")?.addEventListener("change",event=>{
   document.querySelectorAll('[data-admin-push-user]:not(:disabled)').forEach(input=>{input.checked=event.target.checked;});
   updateAdminPushSelection();
 });
-$("adminQuickActions")?.addEventListener("click",handleAdminQuickAction);
+$("adminTab")?.addEventListener("click",handleAdminQuickAction);
 $("openParticipantManagerBtn")?.addEventListener("click",openParticipantManager);
 $("adminParticipantManagerClose")?.addEventListener("click",closeParticipantManager);
 $("cancelParticipantBtn")?.addEventListener("click",closeParticipantManager);

@@ -1,3 +1,11 @@
+# v6.57.0 — ADM por tarefa
+
+- Resumo operacional único e navegação por Rodada, Participantes, Ligas e Sistema.
+- Redistribui ações existentes e identifica o alcance dos indicadores; preserva os contadores da rodada.
+- Mantém alertas de Sistema acessíveis fora da área e preserva expansões durante atualizações.
+- Corrige a mensagem sem próximo jogo para partidas ao vivo ou adiadas.
+- Sem alteração de consultas, permissões, automações ou cálculos. [Escopo e validação](docs/releases/v6.57.0-reorganizacao-adm.md).
+
 # v6.56.0 — Simplificação visual da ADM
 
 - Destaca o resumo de participantes em dia nos jogos abertos com a identidade visual da ADM e compacta o acompanhamento dos jogos.
