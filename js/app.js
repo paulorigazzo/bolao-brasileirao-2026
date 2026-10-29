@@ -4443,6 +4443,8 @@ function renderAdminAttention(){
   $("adminAttentionBadge").textContent=view.label;
   $("adminRoundContext").textContent=`${activeLeagueName(state.activeLeague)} • Rodada ${snapshot.round} • ${snapshot.games.length} jogo${snapshot.games.length===1?"":"s"}`;
 
+  const completedCount=snapshot.participants.length-snapshot.actionablePending.length;
+  const participantSummary=`<div class="admin-participant-summary ${snapshot.actionablePending.length?'has-pending':'is-complete'}"><span class="admin-participant-summary-label">Em dia nos jogos abertos</span><strong aria-label="${completedCount} de ${snapshot.participants.length} participantes em dia">${completedCount}<small>/${snapshot.participants.length}</small></strong></div>`;
   const participantCard=item=>{
     const pct=item.total?Math.min(100,Math.round(item.count/item.total*100)):0;
     const isComplete=!snapshot.actionablePending.includes(item);
@@ -4464,7 +4466,7 @@ function renderAdminAttention(){
   const completedHtml=showComplete && inTime.length?`<section class="admin-progress-group admin-completed-group"><div class="admin-progress-group-title"><strong>🟢 Em dia nos jogos abertos</strong><span>${inTime.length}</span></div><div class="admin-pending-list">${inTime.map(participantCard).join("")}</div></section>`:"";
   const pendingHtml=showPending && pendingParticipants.length?`<section class="admin-progress-group admin-incomplete-group"><div class="admin-progress-group-title"><strong>🟡 Palpites ainda possíveis</strong><span>${pendingParticipants.length}</span></div><div class="admin-pending-list">${pendingParticipants.map(participantCard).join("")}</div></section>`:"";
   const emptyFilter=!completedHtml&&!pendingHtml?`<div class="admin-filter-empty">Nenhum participante neste filtro.</div>`:"";
-  $("adminAttentionContent").innerHTML=`<h3>${escapeHtml(view.title)}</h3><p>${escapeHtml(view.description)}</p><div class="admin-participant-groups">${pendingHtml}${completedHtml}${emptyFilter}</div>`;
+  $("adminAttentionContent").innerHTML=`<h3>${escapeHtml(view.title)}</h3><p>${escapeHtml(view.description)}</p>${participantSummary}<div class="admin-participant-groups">${pendingHtml}${completedHtml}${emptyFilter}</div>`;
   setAnimatedText("adminFilterAllCount",snapshot.participants.length);
   setAnimatedText("adminFilterPendingCount",snapshot.actionablePending.length);
   setAnimatedText("adminFilterCompleteCount",inTime.length);
