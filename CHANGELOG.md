@@ -1,3 +1,10 @@
+# v6.56.0 — Simplificação visual da ADM
+
+- Destaca o resumo de participantes em dia nos jogos abertos com a identidade visual da ADM e compacta o acompanhamento dos jogos.
+- Mantém saúde, sincronização e alertas visíveis; recolhe detalhes técnicos, totais de integridade e indicadores executivos.
+- Preserva dados, ações, regras, notificações e controles de recuperação.
+- [Escopo e validação](docs/releases/v6.56.0-simplificacao-interface-adm.md).
+
 # v6.55.0 — Destinatários no acompanhamento de notificações
 
 - Filtro Participantes/Administradores com fontes, contadores e última movimentação separados.

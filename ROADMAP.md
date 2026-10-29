@@ -4,7 +4,8 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.55.0`.
+- Versão funcional: `v6.56.0`.
+- Simplificação visual da ADM: em revisão, preservando fontes, indicadores e controles. [Nota v6.56.0](docs/releases/v6.56.0-simplificacao-interface-adm.md).
 - Notificações automáticas: ativas em produção desde 2026-10-27; migração aplicada e conciliada. [Plano e operação](docs/releases/v6.52.0-notificacoes-automaticas.md).
 - Acompanhamento das notificações na ADM: entregue. [Nota v6.53.0](docs/releases/v6.53.0-adm-acompanhamento-notificacoes.md).
 - Consolidados de disparos ao ADM: entregues, migração aplicada e conciliada. [Nota v6.54.0](docs/releases/v6.54.0-consolidados-push-adm.md).

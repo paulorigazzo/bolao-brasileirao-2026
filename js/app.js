@@ -36,7 +36,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.55.0";
+const APP_VERSION = "6.56.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -4442,8 +4442,9 @@ function renderAdminAttention(){
   card.className=`card admin-attention-card state-${view.key}${wasCollapsed?" is-collapsed":""}`;
   $("adminAttentionBadge").textContent=view.label;
   $("adminRoundContext").textContent=`${activeLeagueName(state.activeLeague)} • Rodada ${snapshot.round} • ${snapshot.games.length} jogo${snapshot.games.length===1?"":"s"}`;
+
   const completedCount=snapshot.participants.length-snapshot.actionablePending.length;
-  const participantSummary=`<div class="admin-participant-summary"><span>Jogos abertos</span><strong>${completedCount}/${snapshot.participants.length} em dia</strong></div>`;
+  const participantSummary=`<div class="admin-participant-summary ${snapshot.actionablePending.length?'has-pending':'is-complete'}"><span class="admin-participant-summary-label">Em dia nos jogos abertos</span><strong aria-label="${completedCount} de ${snapshot.participants.length} participantes em dia">${completedCount}<small>/${snapshot.participants.length}</small></strong></div>`;
   const participantCard=item=>{
     const pct=item.total?Math.min(100,Math.round(item.count/item.total*100)):0;
     const isComplete=!snapshot.actionablePending.includes(item);
@@ -4850,8 +4851,6 @@ function renderAdminRoundStatus(){
   $("adminRoundBadge").className=`admin-round-badge ${live?"is-live":postponed?"is-postponed":finished===total&&total?"is-finished":"is-scheduled"}`;
 
   const metrics=`<div class="admin-round-metrics">
-    <div><strong>${total}</strong><span>Total</span></div>
-    <div><strong>${finished}</strong><span>Finalizados</span></div>
     <div><strong>${live}</strong><span>Em andamento</span></div>
     <div><strong>${upcoming}</strong><span>Próximos</span></div>
     <div><strong>${postponed}</strong><span>Adiados</span></div>
@@ -5006,13 +5005,13 @@ function renderAdminAudit(){
   const s=report.summary;
   const rows=[...report.issues.map(item=>({...item,type:'error',icon:'❌'})),...report.warnings.map(item=>({...item,type:'warning',icon:'⚠️'}))];
   target.innerHTML=`
-    <div class="admin-audit-summary">
+    <details class="admin-secondary-details"><summary>Totais e critérios da verificação</summary><div class="admin-audit-summary">
       <article><span>Jogos</span><strong>${s.games}</strong><small>${s.scoredGames} finalizados válidos</small></article>
       <article><span>Ao vivo</span><strong>${s.liveGames}</strong><small>${s.liveGamesWithScore} com placar parcial • não pontuam</small></article>
       <article><span>Palpites registrados</span><strong>${s.picks}</strong><small>total da competição · ${s.participants} participantes</small></article>
       <article><span>Pontos</span><strong>${s.rankedPoints}</strong><small>soma geral calculada</small></article>
     </div>
-    <div class="admin-audit-rule"><strong>Regra crítica aplicada:</strong> somente partidas oficialmente finalizadas, não canceladas e com placar válido geram pontos e estatísticas. Placar parcial em jogo ao vivo é uma condição normal e não gera alerta.</div>
+    <div class="admin-audit-rule"><strong>Regra crítica aplicada:</strong> somente partidas oficialmente finalizadas, não canceladas e com placar válido geram pontos e estatísticas. Placar parcial em jogo ao vivo é uma condição normal e não gera alerta.</div></details>
     ${state.lastSyncReport?.repairedCount?`<div class="admin-audit-ok">🔧 Última sincronização corrigiu automaticamente <strong>${state.lastSyncReport.repairedCount}</strong> registro${state.lastSyncReport.repairedCount===1?'':'s'}. ${escapeHtml((state.lastSyncReport.repairs||[]).slice(0,4).map(item=>`Jogo ${item.id_jogo}: ${item.reason}`).join(' • '))}</div>`:''}
     ${rows.length?`<div class="admin-audit-list">${rows.map(auditFindingHtml).join('')}</div>`:`<div class="admin-audit-ok">✅ Nenhuma inconsistência estrutural encontrada nos dados carregados.</div>`}
     <small class="muted-note">Auditoria executada com os dados atuais do Supabase. Status e placar são atualizados juntos; partidas futuras, adiadas ou canceladas não conservam placares incompatíveis após a sincronização.</small>`;
@@ -5109,7 +5108,7 @@ function renderAdminExecutiveDashboard(){
   const exactText=exactLeader&&Number(exactLeader.exact)>0?`${escapeHtml(exactLeader.name)}<small>${Number(exactLeader.exact)} placar${Number(exactLeader.exact)===1?'':'es'} exato${Number(exactLeader.exact)===1?'':'s'}</small>`:'—<small>Aguardando resultados</small>';
 
   $('adminExecutiveContent').innerHTML=`
-    <div class="admin-executive-metrics">
+    <details class="admin-secondary-details"><summary>Ver indicadores do bolão</summary><div class="admin-executive-metrics">
       <article><span class="admin-executive-icon">👥</span><div><small>Participantes</small><strong>${participants}</strong><em>${snapshot.participants.length-snapshot.actionablePending.length}/${snapshot.participants.length || participants} em dia nos jogos abertos</em></div></article>
       <article><span class="admin-executive-icon">⚽</span><div><small>Rodada atual</small><strong>${snapshot.round || '—'}<b>/38</b></strong><em>${seasonProgress}% da temporada</em></div></article>
       <article><span class="admin-executive-icon">🎯</span><div><small>Palpites registrados</small><strong>${totalPicks}</strong><em>em toda a competição</em></div></article>
@@ -5123,7 +5122,7 @@ function renderAdminExecutiveDashboard(){
       <div class="admin-executive-health-track"><i style="width:${completion}%"></i></div>
       <p>${snapshot.actionablePending.length?`${snapshot.actionablePending.length} participante${snapshot.actionablePending.length===1?'':'s'} ainda ${snapshot.actionablePending.length===1?'precisa':'precisam'} palpitar nos jogos abertos.`:'Todos os jogos abertos têm palpites.'}</p>
     </div>
-    <div class="admin-executive-highlight"><span>🔥 Destaque de precisão</span><strong>${exactText}</strong></div>`;
+    <div class="admin-executive-highlight"><span>🔥 Destaque de precisão</span><strong>${exactText}</strong></div></details>`;
 }
 
 function openAdminParticipantDetail(email){
@@ -5487,19 +5486,26 @@ async function renderAdminDiagnostic(){
       <div class="diagnostic-section"><h3>Agenda de rodadas anteriores</h3><p class="muted-note">Saúde da API e confirmação do calendário são verificações diferentes. ${earlierSchedule.length} jogo${earlierSchedule.length===1?"":"s"} pendente${earlierSchedule.length===1?"":"s"}; ${provisionalDates} data${provisionalDates===1?"":"s"} em verificação; ${awaitingDate} sem nova data.</p></div>
       ${d.sportsData?.status==="delayed"?`<div class="diagnostic-data-alert" role="alert"><strong>⚠ Dados esportivos aguardando atualização</strong><p>${Number(d.sportsData.delayedCount)||0} jogo(s) permanecem agendados mais de ${Number(d.sportsData.thresholdMinutes)||30} minutos após o início informado. A API pode estar online sem ter publicado o conteúdo atual.</p><ul>${(d.sportsData.delayedGames||[]).slice(0,6).map(game=>`<li>${escapeHtml(teamDisplayName(game.home))} × ${escapeHtml(teamDisplayName(game.away))} · ${diagnosticDate(game.kickoff)}</li>`).join("")}</ul></div>`:""}
       <div class="diagnostic-section"><h3>Sincronização</h3><div class="diagnostic-metrics">
-        <div><span>Última execução</span><strong>${diagnosticDate(last?.criado_em)}</strong></div><div><span>Resultado</span><strong>${last?(last.sucesso?"🟢 Sucesso":"🔴 Erro"):"—"}</strong></div>
-        <div><span>Duração</span><strong>${diagnosticDuration(last?.duracao_ms)}</strong></div><div><span>Jogos atualizados</span><strong>${last?.jogos_atualizados??"—"}</strong></div>
-        <div><span>Chamadas nesta execução</span><strong>${last?.chamadas_api??"—"} / 8</strong></div><div><span>Próxima verificação</span><strong>${diagnosticDate(d.sync.nextScheduledCheck)}</strong></div>${quotaHtml}
+        <div><span>Última execução</span><strong>${diagnosticDate(last?.criado_em)}</strong></div>
+        <div><span>Resultado</span><strong>${last?(last.sucesso?"🟢 Sucesso":"🔴 Erro"):"—"}</strong></div>
+        <div><span>Próxima verificação</span><strong>${diagnosticDate(d.sync.nextScheduledCheck)}</strong></div>
       </div><small>${escapeHtml(d.sync.scheduleMode)}</small></div>
+      ${d.cache.lookup==="latest-fallback"?`<small class="diagnostic-cache-warning">⚠ Cache localizado pelo registro mais recente; o identificador esperado para ${escapeHtml(providerView.activeName)} é ${escapeHtml(d.cache.expectedId||"—")}.</small>`:""}
+      <details class="admin-secondary-details"><summary>Detalhes técnicos</summary>
+      <div class="diagnostic-section"><h3>Detalhes da última sincronização</h3><div class="diagnostic-metrics">
+        <div><span>Duração</span><strong>${diagnosticDuration(last?.duracao_ms)}</strong></div><div><span>Jogos atualizados</span><strong>${last?.jogos_atualizados??"—"}</strong></div>
+        <div><span>Chamadas nesta execução</span><strong>${last?.chamadas_api??"—"} / 8</strong></div>
+      ${quotaHtml}</div></div>
       <div class="diagnostic-section"><h3>Banco e cache</h3><div class="diagnostic-metrics">
         <div><span>Jogos cadastrados</span><strong>${d.database.jogos.count??"—"}</strong></div><div><span>Palpites registrados</span><strong>${d.database.palpites.count??"—"}</strong></div>
         <div><span>Participantes</span><strong>${d.database.participantes.count??"—"}</strong></div><div><span>Cache da tabela</span><strong>${cacheIcon} ${cacheLabel}</strong></div>
         <div><span>Atualização do cache</span><strong>${diagnosticDate(d.cache.updatedAt)}</strong></div><div><span>Idade do cache</span><strong>${diagnosticAge(d.cache.ageMs)}</strong></div>
         <div><span>Clubes no cache</span><strong>${d.cache.clubs??"—"}</strong></div><div><span>Rodada atual do Bolão</span><strong>${state.games.length?currentRoundNumber():"—"}</strong></div>
         <div><span>Identificador</span><strong>${escapeHtml(d.cache.id||"—")}</strong></div><div><span>Origem</span><strong>${escapeHtml(d.cache.source||"—")}</strong></div>
-      </div>${d.cache.lookup==="latest-fallback"?`<small class="diagnostic-cache-warning">⚠ Cache localizado pelo registro mais recente; o identificador esperado para ${escapeHtml(providerView.activeName)} é ${escapeHtml(d.cache.expectedId||"—")}.</small>`:""}</div>
+      </div></div>
       <div class="diagnostic-section"><div class="diagnostic-autotest-head"><h3>Autoteste detalhado</h3><strong>${d.autotest.score}/100</strong></div><div class="diagnostic-checks">${d.autotest.checks.map(c=>`<div class="${c.ok?"ok":"fail"}"><span>${c.ok?"✔":"✕"}</span><span>${escapeHtml(c.label)}${diagnosticCheckDetail(c)}</span></div>`).join("")}</div></div>
       <div class="diagnostic-section"><h3>Logs recentes</h3><div class="diagnostic-log-list">${d.logs.slice(0,8).map(log=>`<div><span>${diagnosticDate(log.criado_em)}</span><strong>${log.sucesso?"🟢":"🔴"} ${escapeHtml(log.origem||"sincronização")}</strong><small>${escapeHtml(diagnosticProviderName(log?.detalhes?.provider))} • ${log.sucesso?`${log.jogos_atualizados??0} jogos • ${diagnosticDuration(log.duracao_ms)}`:escapeHtml(log.erro||"Falha sem detalhes")}</small></div>`).join("")||'<p class="muted-note">Nenhum log disponível.</p>'}</div></div>
+      </details>
       <div class="diagnostic-actions"><button id="diagnosticRefreshBtn" class="secondary" type="button">🔄 Refazer diagnóstico</button><button id="diagnosticSyncBtn" class="primary" type="button">⚽ Sincronizar jogos</button><button id="diagnosticExportBtn" class="secondary" type="button">📥 Exportar logs</button></div>
       <small class="diagnostic-note">A disponibilidade da fonte oficial é inferida apenas por seus próprios logs para não consumir cota; a atualidade do conteúdo é verificada separadamente nos jogos armazenados.</small>`;
     const sportsDelayed=d.sportsData?.status==="delayed";

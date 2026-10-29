@@ -1,5 +1,5 @@
-6.55.0
+6.56.0
 
-Filtro de destinatário no acompanhamento administrativo de notificações.
+Simplificação visual da tela ADM, preservando indicadores e controles.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)
