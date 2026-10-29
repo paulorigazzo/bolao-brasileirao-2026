@@ -453,3 +453,15 @@
 
 #adminTab .admin-control-metric small,#adminTab .admin-control-metric em{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
 #adminTab .admin-task-nav{background:#092619;backdrop-filter:none}
+
+/* Ao escolher uma área, os cabeçalhos compõem um índice compacto. */
+#adminTab .admin-area{scroll-margin-top:100px}
+#adminTab .admin-area>.card>[data-admin-card-header]{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:10px}
+#adminTab .admin-area>.card>[data-admin-card-header]>:first-child{min-width:0}
+#adminTab .admin-area>.card>[data-admin-card-header] .admin-card-header-actions{display:flex;align-items:flex-start;justify-content:flex-end;align-self:start;margin:0;gap:6px;max-width:150px;flex-wrap:wrap}
+#adminTab .admin-area [data-admin-card-header] .admin-card-header-actions>span{max-width:100%;white-space:normal;overflow-wrap:anywhere;text-align:right}
+@media(max-width:600px){#adminTab .admin-area{scroll-margin-top:150px}#adminTab .admin-area>.card>[data-admin-card-header]{grid-template-columns:minmax(0,1fr) minmax(80px,110px)}#adminTab .admin-area>.card>[data-admin-card-header] .admin-card-header-actions{max-width:110px}#adminTab .admin-area>.card>[data-admin-card-header] h2{font-size:1.1rem}}
+
+#adminTab .admin-area>.card.is-collapsed [data-admin-card-header] .eyebrow{display:none}
+#adminTab .admin-area>.card.is-collapsed [data-admin-card-header] h2{margin-top:0}
+@media(max-width:600px){#adminTab .admin-area>.card.is-collapsed [data-admin-card-header] h2{font-size:1rem}#adminTab .admin-area>.card.is-collapsed .admin-scope{font-size:.65rem;line-height:1.35;margin-top:6px}}

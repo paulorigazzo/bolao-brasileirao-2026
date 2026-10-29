@@ -13,17 +13,17 @@ const classes=()=>{
   const values=new Set();
   return {contains:key=>values.has(key),toggle(key,on){if(on)values.add(key);else values.delete(key);}};
 };
-const groups=['round','participants','leagues','system'].map(area=>({dataset:{adminGroup:area},classList:classes()}));
+const groups=['round','participants','leagues','system'].map(area=>({dataset:{adminGroup:area},classList:classes(),querySelectorAll:()=>[],scrollIntoView(){this.scrolled=true;}}));
 const ids={adminAttentionCard:'round',adminRoundCard:'round',adminParticipantsCard:'participants',adminLeaguesCard:'leagues',adminDiagnosticCard:'system',adminAuditCard:'system',adminRecoveryCard:'system',adminExecutiveCard:'system'};
 const elements=Object.fromEntries(Object.entries(ids).map(([id,area])=>[id,{id,classList:classes(),closest:()=>groups.find(g=>g.dataset.adminGroup===area),scrollIntoView(options){this.scrolled=options.behavior;}}]));
 const nav=['adminAttentionCard','adminParticipantsCard','adminLeaguesCard','adminDiagnosticCard'].map(id=>({dataset:{adminArea:ids[id]},classList:classes(),setAttribute(){},removeAttribute(){}}));
 let leagueLoads=0;
 const context={
   $:id=>elements[id],document:{querySelectorAll:selector=>selector==='[data-admin-group]'?groups:nav},
-  localStorage:{setItem(){}},isAdminUser:()=>true,refreshAdminLeagues:()=>leagueLoads++,prefersReducedMotion:()=>true,
+  ADMIN_CARD_IDS:Object.keys(ids),localStorage:{setItem(){}},isAdminUser:()=>true,refreshAdminLeagues:()=>leagueLoads++,prefersReducedMotion:()=>true,
   setAdminCardCollapsed:(card,collapsed)=>card.classList.toggle('is-collapsed',collapsed),
 };
-const navigation=runInNewContext(`${['adminAreaForCard','setAdminQuickNavActive','expandOnlyAdminCard','scrollToAdminSection'].map(source).join('\n')}; ({scrollToAdminSection});`,context);
+const navigation=runInNewContext(`${['adminAreaForCard','setAdminQuickNavActive','showAdminArea','expandOnlyAdminCard','scrollToAdminSection'].map(source).join('\n')}; ({scrollToAdminSection,showAdminArea});`,context);
 for(const [id,area] of Object.entries(ids)){
   navigation.scrollToAdminSection(id);
   navigation.scrollToAdminSection(id);
@@ -33,6 +33,15 @@ for(const [id,area] of Object.entries(ids)){
   assert.equal(elements[id].scrolled,'auto','Navegação respeita redução de movimento');
 }
 assert.equal(leagueLoads,1,'Repetir a área Ligas já visível não repete sua consulta');
+for(const [id,area] of Object.entries(ids)){
+  navigation.showAdminArea(id);
+  for(const [cardId,cardArea] of Object.entries(ids))if(cardArea===area)assert.equal(elements[cardId].classList.contains('is-collapsed'),true,'Menu apresenta todos os cards da área fechados');
+  navigation.scrollToAdminSection(id);
+  assert.equal(elements[id].classList.contains('is-collapsed'),false,'Atalho específico abre o card');
+  navigation.showAdminArea(id);
+  assert.equal(elements[id].classList.contains('is-collapsed'),true,'Repetir menu recolhe novamente');
+}
+
 assert.equal([...html.matchAll(/data-admin-area="/g)].length,4);
 assert.doesNotMatch(html,/id="adminSmartHeader"|id="adminQuickActionsCard"/);
 for(const action of ['sync','temporary-ranking','share-round','next-round','copy-pool-link'])assert.equal([...html.matchAll(new RegExp(`data-admin-quick-action="${action}"`,'g'))].length,1);

@@ -5840,6 +5840,18 @@ function adminAreaForCard(targetId){
   return $(targetId)?.closest("[data-admin-group]")?.dataset.adminGroup || "round";
 }
 
+function showAdminArea(targetId,{scroll=true}={}){
+  const target=$(targetId) || $("adminAttentionCard");
+  const group=target?.closest("[data-admin-group]");
+  if(!group) return;
+  document.querySelectorAll("[data-admin-group]").forEach(item=>item.classList.toggle("hidden",item!==group));
+  ADMIN_CARD_IDS.filter(id=>adminAreaForCard(id)===group.dataset.adminGroup).forEach(id=>setAdminCardCollapsed($(id),true,{animate:false}));
+  group.querySelectorAll(":scope > details").forEach(detail=>{detail.open=false;});
+  setAdminQuickNavActive(target.id);
+  try{localStorage.setItem("bolao-admin-active-card",target.id);}catch(_err){}
+  if(scroll) group.scrollIntoView({behavior:prefersReducedMotion()?"auto":"smooth",block:"start"});
+}
+
 function expandOnlyAdminCard(targetId,{scroll=false,animate=true}={}){
   const target=$(targetId) || $("adminAttentionCard");
   if(!target) return;
@@ -5871,8 +5883,8 @@ function setupAdminCollapsibleCards(){
     const saved=localStorage.getItem("bolao-admin-active-card");
     if(ADMIN_CARD_IDS.includes(saved)) initialCard=saved;
   }catch(_err){}
-  ADMIN_CARD_IDS.forEach(id=>setAdminCardCollapsed($(id),!["adminAttentionCard","adminRoundCard","adminParticipantsCard","adminLeaguesCard"].includes(id),{animate:false}));
-  expandOnlyAdminCard(initialCard,{animate:false});
+  ADMIN_CARD_IDS.forEach(id=>setAdminCardCollapsed($(id),true,{animate:false}));
+  showAdminArea(initialCard,{scroll:false});
   document.querySelectorAll("[data-admin-collapse]").forEach(toggle=>{
     const card=$(toggle.dataset.adminCollapse);
     if(!card) return;
@@ -5937,7 +5949,10 @@ function setupAdminQuickNavigation(){
   if(!nav) return;
   const handleTargetClick=event=>{
     const button=event.target.closest("[data-admin-target]");
-    if(button) scrollToAdminSection(button.dataset.adminTarget);
+    if(button){
+      if(button.dataset.adminArea) showAdminArea(button.dataset.adminTarget);
+      else scrollToAdminSection(button.dataset.adminTarget);
+    }
   };
   nav.onclick=handleTargetClick;
   if($("adminControlCenter")) $("adminControlCenter").onclick=handleTargetClick;
@@ -6007,7 +6022,7 @@ function applyNavigationState(tabName){
   if(tabName==="ranking") renderRanking();
   if(tabName==="standings") loadStandings();
   if(tabName==="stats") renderStats();
-  if(tabName==="admin"){ renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminDiagnostic(); renderAdminExecutiveDashboard(); renderAdminAudit(); renderAdminRecoveryProtection(); updateAdminExperience(); startAdminAutoRefresh(); }
+  if(tabName==="admin"){ showAdminArea(document.querySelector("#adminQuickNav .active")?.dataset.adminTarget || "adminAttentionCard",{scroll:false}); renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminDiagnostic(); renderAdminExecutiveDashboard(); renderAdminAudit(); renderAdminRecoveryProtection(); updateAdminExperience(); startAdminAutoRefresh(); }
   else stopAdminAutoRefresh();
   if(!primaryTabs.includes(tabName)) document.querySelectorAll(".bottom-nav-item").forEach(item=>item.classList.remove("active"));
   updateBottomNavigationMotion(tabName);
