@@ -467,3 +467,14 @@
 @media(max-width:600px){#adminTab .admin-area>.card.is-collapsed [data-admin-card-header] h2{font-size:1rem}#adminTab .admin-area>.card.is-collapsed .admin-scope{font-size:.65rem;line-height:1.35;margin-top:6px}}
 
 #adminTab .admin-area:not(.hidden)~.admin-area:not(.hidden){margin-top:var(--admin-card-gap)}
+
+/* Cards recolhidos: altura compartilhada, seta fora do fluxo do cabeçalho. */
+#adminTab .admin-area>.card>[data-admin-card-header]{position:relative;padding-bottom:8px}
+#adminTab .admin-area>.card>[data-admin-card-header] .admin-card-toggle{position:absolute;right:0;bottom:-16px;width:44px;height:28px;min-height:28px;border:0;border-radius:5px;background:transparent;color:var(--admin-muted);font-size:.78rem;box-shadow:none}
+#adminTab .admin-area>.card>[data-admin-card-header] .admin-card-toggle:hover{background:rgba(100,217,148,.05);color:var(--admin-active)}
+#adminTab .admin-area>.card>[data-admin-card-header] .admin-card-toggle:focus-visible{outline:2px solid var(--admin-active);outline-offset:2px}
+#adminTab .admin-area>.card.is-collapsed{min-height:var(--admin-collapsed-height,0px)}
+#adminTab .admin-area>.card.is-collapsed>[data-admin-card-header]{min-height:calc(var(--admin-collapsed-height,0px) - 34px);box-sizing:border-box}
+
+#adminTab .admin-area>#adminAttentionCard.is-collapsed [data-admin-card-header] h2{margin-top:0}
+@media(max-width:600px){#adminTab .admin-area>#adminAttentionCard.is-collapsed [data-admin-card-header] h2{font-size:1rem}}

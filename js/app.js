@@ -5878,7 +5878,45 @@ function toggleAdminCard(card,{scroll=true}={}){
   else collapseAdminCard(card);
 }
 
+function setupAdminCollapsedSizing(){
+  const root=$("adminTab");
+  if(!root) return;
+  let queued=false,lastWidth=0;
+  const update=()=>{
+    queued=false;
+    const width=root.getBoundingClientRect().width;
+    if(!width) return;
+    const measure=document.createElement("div");
+    measure.className="admin-area";
+    measure.setAttribute("aria-hidden","true");
+    measure.inert=true;
+    Object.assign(measure.style,{position:"absolute",visibility:"hidden",pointerEvents:"none",width:`${width}px`,left:"0",top:"0"});
+    for(const id of ADMIN_CARD_IDS){
+      const card=$(id),header=card?.querySelector("[data-admin-card-header]");
+      if(!header) continue;
+      const copy=card.cloneNode(false);
+      copy.removeAttribute("id");
+      copy.classList.add("is-collapsed");
+      Object.assign(copy.style,{height:"auto",minHeight:"0",overflow:"visible"});
+      const heading=header.cloneNode(true);
+      heading.style.minHeight="0";
+      heading.querySelectorAll("[id]").forEach(item=>item.removeAttribute("id"));
+      copy.append(heading);measure.append(copy);
+    }
+    root.append(measure);
+    const height=Math.ceil(Math.max(0,...[...measure.children].map(card=>card.getBoundingClientRect().height)));
+    measure.remove();
+    if(height && root.style.getPropertyValue("--admin-collapsed-height")!==`${height}px`)root.style.setProperty("--admin-collapsed-height",`${height}px`);
+  };
+  const schedule=()=>{if(!queued){queued=true;requestAnimationFrame(update);}};
+  new MutationObserver(records=>{if(records.some(record=>record.target.closest?.("[data-admin-card-header]") || record.type==="attributes" && record.target.matches?.("[data-admin-group],.card")))schedule();}).observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["class"]});
+  new ResizeObserver(entries=>{const width=entries[0]?.contentRect.width;if(width!==lastWidth){lastWidth=width;schedule();}}).observe(root);
+  document.fonts?.ready.then(schedule);
+  schedule();
+}
+
 function setupAdminCollapsibleCards(){
+  setupAdminCollapsedSizing();
   showAdminArea(null,{scroll:false});
   document.querySelectorAll("[data-admin-collapse]").forEach(toggle=>{
     const card=$(toggle.dataset.adminCollapse);

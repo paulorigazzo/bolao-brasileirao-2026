@@ -2,6 +2,7 @@
 
 - Resumo operacional único e navegação por Rodada, Participantes, Ligas e Sistema; a barra filtra as áreas, inicia sem seleção e apresenta cards recolhidos, com status no topo à direita.
 - Redistribui ações existentes e identifica o alcance dos indicadores; preserva os contadores da rodada.
+- Uniformiza a altura dos cards recolhidos e usa seta discreta no canto inferior direito.
 - Mantém alertas de Sistema acessíveis fora da área e preserva expansões durante atualizações.
 - Corrige a mensagem sem próximo jogo para partidas ao vivo ou adiadas.
 - Sem alteração de consultas, permissões, automações ou cálculos. [Escopo e validação](docs/releases/v6.57.0-reorganizacao-adm.md).
