@@ -36,7 +36,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.58.0";
+const APP_VERSION = "6.58.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -3000,7 +3000,7 @@ function homeCurrentRoundPoints(round,games=state.games,picks=state.ownPicks){
 
 function homeCurrentRoundPointsCard(model){
   const label=model.projected?`Abrir estatísticas. Projeção de ${model.total} pontos na rodada: ${model.confirmed} confirmados e ${model.provisional} provisórios.`:"Abrir estatísticas";
-  return `<article class="home-mini-card card mini-tone-gold home-navigable-card" role="button" tabindex="0" data-home-action="stats" aria-label="${label}"><span class="mini-card-icon">⭐</span><span>Pontos<br>da rodada</span><b aria-hidden="true">›</b><strong${model.projected?' class="home-round-projected-total"':''}>${model.total}${model.projected?'<span class="home-round-projection-label">Projeção</span>':''}</strong><small${model.projected?' class="home-round-points-split"':''}>${model.projected?`<span>${model.confirmed} confirmados</span> · <span>${model.provisional} provisórios</span>`:'Pontos confirmados'}</small></article>`;
+  return `<article class="home-mini-card card mini-tone-gold home-navigable-card" role="button" tabindex="0" data-home-action="stats" aria-label="${label}"><span class="mini-card-icon">⭐</span><span>Pontos<br>da rodada</span><b aria-hidden="true">›</b><strong${model.projected?' class="home-round-projected-total"':''}>${model.total}${model.projected?'<span class="home-round-projection-label">Projeção</span>':''}</strong><small${model.projected?' class="home-round-points-split"':''}>${model.projected?`<span><b>${model.confirmed}</b> confirmados</span> · <span><b>${model.provisional}</b> provisórios</span>`:'Pontos confirmados'}</small></article>`;
 }
 
 function renderHome(){

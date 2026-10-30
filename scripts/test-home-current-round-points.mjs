@@ -30,7 +30,8 @@ assert.deepEqual(plain(model()),{confirmed:23,provisional:8,total:31,projected:t
 assert.equal(JSON.stringify({baseGames,picks}),before,'Não modifica placares nem palpites');
 const render=games=>context.homeCurrentRoundPointsCard(model(games));
 assert.match(render(baseGames),/<strong[^>]*>31<span[^>]*>Projeção/);
-assert.match(render(baseGames),/23 confirmados/);assert.match(render(baseGames),/8 provisórios/);
+assert.match(render(baseGames),/<span><b>23<\/b> confirmados<\/span>/);assert.match(render(baseGames),/<span><b>8<\/b> provisórios<\/span>/);
+assert.doesNotMatch(render(baseGames),/<b>[^<]*(?:confirmados|provisórios)/,"Somente os números recebem negrito");
 assert.match(render(baseGames),/role="button" tabindex="0" data-home-action="stats"/);
 
 let games=baseGames.map(g=>({...g}));
