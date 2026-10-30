@@ -1,3 +1,10 @@
+# v6.58.0 — Pontos projetados na Home
+
+- Card da rodada atual mostra confirmados mais provisórios, com indicação de Projeção e discriminação dos valores.
+- Sem palpite associado a placar provisório válido, mantém pontos confirmados e apresentação anterior.
+- Reutiliza pontuação e classificação de estados existentes, sem consultas ou gravações adicionais.
+- Preserva demais cards, Home 2.0 e destino Estatísticas. [Escopo e validação](docs/releases/v6.58.0-home-pontos-projetados.md).
+
 # v6.57.0 — ADM por tarefa
 
 - Resumo operacional único e navegação por Rodada, Participantes, Ligas e Sistema; a barra filtra as áreas, inicia sem seleção e apresenta cards recolhidos, com status no topo à direita.
