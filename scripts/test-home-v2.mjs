@@ -209,7 +209,11 @@ for(const name of ['navigateTo','applyNavigationState'])assert.match(extract(nam
 // Referência v6.51.2: retira apenas o bloco antigo de Destaques da rodada.
 const {createHash}=await import('node:crypto');
 const current=source.slice(source.indexOf('function renderHome(){'),source.indexOf('\nlet homeV2PicksRound='));
-const preserved=current.replace('  if(!$("homeV2Tab")?.classList.contains("hidden")) renderHomeV2();\n','').replace('  renderHomeLeagueHighlights(highlightsContext);\n','').replace('  renderHomePreviousRound(round);\n','').trim();
+// v6.58.0: normalize somente as duas substituições aprovadas do card de pontos.
+assert.ok(current.includes('const roundPointModel=homeCurrentRoundPoints(round,roundGames,state.ownPicks);'));
+assert.ok(current.includes('${homeCurrentRoundPointsCard(roundPointModel)}'));
+const comparable=current.replace('  const roundPointModel=homeCurrentRoundPoints(round,roundGames,state.ownPicks);',"  const roundPoints=state.ownPicks.reduce((sum,pick)=>{\n    const game=roundGames.find(item=>Number(item.id_jogo)===Number(pick.id_jogo));\n    return sum+points(pick,game);\n  },0);").replace('${homeCurrentRoundPointsCard(roundPointModel)}',"<article class=\"home-mini-card card mini-tone-gold home-navigable-card\" role=\"button\" tabindex=\"0\" data-home-action=\"stats\" aria-label=\"Abrir estatísticas\"><span class=\"mini-card-icon\">⭐</span><span>Pontos<br>da rodada</span><b aria-hidden=\"true\">›</b><strong>${roundPoints}</strong><small>Pontos confirmados</small></article>");
+const preserved=comparable.replace('  if(!$("homeV2Tab")?.classList.contains("hidden")) renderHomeV2();\n','').replace('  renderHomeLeagueHighlights(highlightsContext);\n','').replace('  renderHomePreviousRound(round);\n','').trim();
 assert.equal(createHash('sha256').update(preserved).digest('hex'),'a5bf0d01608190e869031d8b254ad1a9b2780283ecacb5494a55831f45c8f72f','Demais blocos da Home preservados na v6.51.2');
 console.log('Home 2.0: estados, pontos, isolamento, Destaques e Home original aprovados.');
 
@@ -271,7 +275,7 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')closeFriendl
     const overview={innerHTML:''};
     const overviewStart=source.indexOf('$("homeOverview").innerHTML=');
     const overviewEnd=source.indexOf(';',overviewStart)+1;
-    vm.runInNewContext(source.slice(overviewStart,overviewEnd),{$:()=>overview,round:29,roundGames:Array(10),finished:Array(2),completedPicks:10,pending:[],roundPoints:5});
+    vm.runInNewContext(source.slice(overviewStart,overviewEnd),{$:()=>overview,round:29,roundGames:Array(10),finished:Array(2),completedPicks:10,pending:[],roundPointModel:{confirmed:5,provisional:0,total:5,projected:false},homeCurrentRoundPointsCard:vm.runInNewContext("("+extract("homeCurrentRoundPointsCard")+")")});
     const cards=buildHomeV2LeagueHighlights(vm.runInContext('homeV2FriendlyRankings()',context));
     context.fixtureCards=cards;
     context.roundHighlightsAvailable=()=>true;

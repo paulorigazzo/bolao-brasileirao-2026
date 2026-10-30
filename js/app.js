@@ -16,7 +16,7 @@ import { buildRecoveryProtectionModel, recoveryOccurrenceModel, recoveryOriginLa
 import { appendPoolLinkToWhatsAppMessage, normalizeParticipantEmail, resolveAttentionWhatsAppParticipant } from "./admin-whatsapp.js";
 import { hasNewlyRevealablePublicPicks, shouldRefreshGameDetails, shouldRefreshGamesFromSupabase } from "./live-game-refresh-policy.js";
 import { buildParticipantDirectory, isAdministrator, membershipStatus } from "./access-control.js";
-import { buildTemporaryRankingModel, temporaryRankingAvailability } from "./temporary-ranking-engine.js";
+import { buildTemporaryRankingModel, temporaryRankingAvailability, temporaryRankingGameState } from "./temporary-ranking-engine.js";
 import { buildTemporaryRankingSyntheticFixture, isTemporaryRankingSyntheticPreview } from "./temporary-ranking-preview.js";
 import { buildRankingMovementFromHistory, buildRankingMovementFromRows, rankingMovementKey } from "./ranking-movement-engine.js";
 import { buildGamesProgressModel } from "./games-progress.js";
@@ -36,7 +36,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.57.0";
+const APP_VERSION = "6.58.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2989,6 +2989,20 @@ function renderHomePreviousRound(round){
     </div>`;
 }
 
+function homeCurrentRoundPoints(round,games=state.games,picks=state.ownPicks){
+  const selected=games.filter(game=>Number(game.rodada)===Number(round));
+  const provisionalGames=selected.filter(game=>["live","suspended"].includes(temporaryRankingGameState(game)) && hasValidScore(game));
+  const confirmed=picks.reduce((sum,pick)=>sum+points(pick,selected.find(game=>Number(game.id_jogo)===Number(pick.id_jogo))),0);
+  const provisional=picks.reduce((sum,pick)=>sum+calculatePredictionPoints(pick,provisionalGames.find(game=>Number(game.id_jogo)===Number(pick.id_jogo))),0);
+  const projected=provisionalGames.some(game=>picks.some(pick=>Number(pick.id_jogo)===Number(game.id_jogo)));
+  return {confirmed,provisional,total:confirmed+provisional,projected};
+}
+
+function homeCurrentRoundPointsCard(model){
+  const label=model.projected?`Abrir estatísticas. Projeção de ${model.total} pontos na rodada: ${model.confirmed} confirmados e ${model.provisional} provisórios.`:"Abrir estatísticas";
+  return `<article class="home-mini-card card mini-tone-gold home-navigable-card" role="button" tabindex="0" data-home-action="stats" aria-label="${label}"><span class="mini-card-icon">⭐</span><span>Pontos<br>da rodada</span><b aria-hidden="true">›</b><strong${model.projected?' class="home-round-projected-total"':''}>${model.total}${model.projected?'<span class="home-round-projection-label">Projeção</span>':''}</strong><small${model.projected?' class="home-round-points-split"':''}>${model.projected?`<span>${model.confirmed} confirmados</span> · <span>${model.provisional} provisórios</span>`:'Pontos confirmados'}</small></article>`;
+}
+
 function renderHome(){
   if(!$("homeV2Tab")?.classList.contains("hidden")) renderHomeV2();
   if(!state.participant) return;
@@ -3068,15 +3082,12 @@ function renderHome(){
   $("homePriority").innerHTML="";
 
   const completedPicks=roundGames.filter(game=>ownPick(game.id_jogo)).length;
-  const roundPoints=state.ownPicks.reduce((sum,pick)=>{
-    const game=roundGames.find(item=>Number(item.id_jogo)===Number(pick.id_jogo));
-    return sum+points(pick,game);
-  },0);
+  const roundPointModel=homeCurrentRoundPoints(round,roundGames,state.ownPicks);
 
   $("homeOverview").innerHTML=`
     <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="games" aria-label="Abrir jogos da rodada"><span class="mini-card-icon">📅</span><span>Rodada<br>atual</span><b aria-hidden="true">›</b><strong>${round||"—"}</strong><small><b>${finished.length} de ${roundGames.length}</b> jogos encerrados</small></article>
     <article class="home-mini-card card mini-tone-green home-navigable-card" role="button" tabindex="0" data-home-action="games" aria-label="Abrir seus palpites"><span class="mini-card-icon">🎯</span><span>Seus<br>palpites</span><b aria-hidden="true">›</b><strong>${completedPicks}/${roundGames.length}</strong><small class="${pending.length?"overview-pending":roundGames.length?"overview-complete":""}">${pending.length?`${pending.length} ${pending.length===1?"palpite pendente":"palpites pendentes"}`:roundGames.length?"✓ Palpites completos":"Aguardando jogos"}</small></article>
-    <article class="home-mini-card card mini-tone-gold home-navigable-card" role="button" tabindex="0" data-home-action="stats" aria-label="Abrir estatísticas"><span class="mini-card-icon">⭐</span><span>Pontos<br>da rodada</span><b aria-hidden="true">›</b><strong>${roundPoints}</strong><small>Pontos confirmados</small></article>`;
+    ${homeCurrentRoundPointsCard(roundPointModel)}`;
 
   if(displayedLive.length){
     $("homeLiveSection").innerHTML=`<article class="premium-feature-card premium-live-card" aria-label="Partidas ao vivo"><header class="premium-card-header"><div><span class="premium-kicker"><i>●</i> AO VIVO</span><h2>Partidas em andamento</h2></div><button class="premium-inline-action" type="button" data-home-action="games">Ver jogos <b aria-hidden="true">›</b></button></header><div class="home-live-list">${displayedLive.slice(0,3).map(game=>{const estimated=isScheduledLiveEstimate(game,now);const minute=estimated?"":liveMatchMinute(game);const title=estimated?' title="Início e minuto estimados pelo horário programado; aguardando confirmação da fonte"':minute.startsWith("~")?' title="Minuto estimado; a fonte não informou o relógio oficial"':"";const score=!estimated&&hasValidScore(game)?[Number(game.gols_casa),Number(game.gols_fora)]:["–","–"];const label=estimated?scheduledLiveLabel(game,now):`AO VIVO${minute?` • ${minute}'`:""}`;return `<button class="home-live-card${estimated?" is-estimated":""}" type="button" data-home-live-game="${Number(game.id_jogo)}" aria-label="Abrir ${escapeHtml(teamDisplayName(game.time_casa))} × ${escapeHtml(teamDisplayName(game.time_fora))} na Rodada ${Number(game.rodada)}"><span class="live-dot"></span><span class="home-live-match"><strong>${escapeHtml(teamAbbreviation(game.time_casa))} ${score[0]} × ${score[1]} ${escapeHtml(teamAbbreviation(game.time_fora))}</strong><small>${escapeHtml(teamDisplayName(game.time_casa))} × ${escapeHtml(teamDisplayName(game.time_fora))}</small></span><b${title}>${label}</b></button>`;}).join("")}</div></article>`;

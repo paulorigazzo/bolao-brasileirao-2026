@@ -1,5 +1,5 @@
-6.57.0
+6.58.0
 
-Reorganização da ADM por tarefa, preservando ações e indicadores.
+Pontos confirmados e provisórios no card da rodada atual da Home.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

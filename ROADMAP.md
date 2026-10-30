@@ -4,7 +4,8 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.57.0`.
+- Versão funcional: `v6.58.0`.
+- Pontos projetados no card da rodada atual da Home: em revisão. [Nota v6.58.0](docs/releases/v6.58.0-home-pontos-projetados.md).
 - ADM por tarefa: em revisão, quatro áreas e preservação do contexto de leitura. [Nota v6.57.0](docs/releases/v6.57.0-reorganizacao-adm.md).
 - Simplificação visual da ADM: em revisão, preservando fontes, indicadores e controles. [Nota v6.56.0](docs/releases/v6.56.0-simplificacao-interface-adm.md).
 - Notificações automáticas: ativas em produção desde 2026-10-27; migração aplicada e conciliada. [Plano e operação](docs/releases/v6.52.0-notificacoes-automaticas.md).

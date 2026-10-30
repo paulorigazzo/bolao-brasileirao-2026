@@ -4649,3 +4649,8 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 .home-previous-round .home-section-heading{margin:0}
 .home-previous-round .home-mini-card{background:linear-gradient(145deg,rgba(255,255,255,.025),rgba(255,255,255,.008))}
 .home-previous-round .mini-card-icon{opacity:.8}
+
+/* Somente pontos da rodada atual: identificação da projeção no intervalo existente. */
+#homeOverview .home-round-projected-total{position:relative}
+#homeOverview .home-round-projection-label{position:absolute;top:100%;left:0;width:100%;margin-top:1px;font-size:.58rem;line-height:1;letter-spacing:.02em;font-weight:700;color:var(--premium-gold)}
+#homeOverview .home-round-points-split>span{display:inline-block;white-space:nowrap}
