@@ -1,3 +1,9 @@
+# v6.58.1 — Destaque dos números no card de pontos
+
+- Confirmados e provisórios destacam somente os números, com rótulos em cor secundária e peso normal.
+- Preserva total principal, indicação de Projeção, cálculos, layout e destino Estatísticas.
+- [Escopo e validação](docs/releases/v6.58.1-destaque-numeros-home.md).
+
 # v6.58.0 — Pontos projetados na Home
 
 - Card da rodada atual mostra confirmados mais provisórios, com indicação de Projeção e discriminação dos valores.

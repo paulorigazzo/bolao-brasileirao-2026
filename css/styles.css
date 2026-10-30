@@ -4654,3 +4654,5 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 #homeOverview .home-round-projected-total{position:relative}
 #homeOverview .home-round-projection-label{position:absolute;top:100%;left:0;width:100%;margin-top:1px;font-size:.58rem;line-height:1;letter-spacing:.02em;font-weight:700;color:var(--premium-gold)}
 #homeOverview .home-round-points-split>span{display:inline-block;white-space:nowrap}
+
+#homeOverview .home-round-points-split{font-weight:400}

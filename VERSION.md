@@ -1,5 +1,5 @@
-6.58.0
+6.58.1
 
-Pontos confirmados e provisórios no card da rodada atual da Home.
+Destaque apenas nos números da composição de pontos da Home.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)
