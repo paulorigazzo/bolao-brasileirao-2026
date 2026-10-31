@@ -25,6 +25,7 @@ import { isScheduledLiveEstimate, scheduledLiveLabel } from "./scheduled-live-es
 import { buildFriendlyRankingsModel } from "./friendly-rankings-engine.js";
 import { adminRoundGameIds, loadAdminPickProgress } from "./admin-pick-progress.js";
 import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js";
+import { buildMyTeamStatistics, renderMyTeamStatistics } from "./my-team-statistics.js";
 import { activeLeagueName, chooseActiveLeague, createLeagueRequestGate, filterProfilesByMembers, persistActiveLeague } from "./league-context.js";
 import { createPushSubscription, currentPushSubscription, subscriptionRow, supportsWebPush } from "./web-push.js";
 import { isPushActivationPromptPreview, nextPushActivationPromptDate, PUSH_ACTIVATION_PROMPT_DELAY_MS, shouldOfferPushActivation } from "./push-activation-prompt.js";
@@ -36,7 +37,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.58.1";
+const APP_VERSION = "6.59.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2818,6 +2819,11 @@ function favoriteSynergyLabel(value){
   return 'Em fase de ajuste';
 }
 
+let myTeamStatisticsScope="all";
+function myTeamClubStatistics(team,detailsOpen=false){
+  return renderMyTeamStatistics(buildMyTeamStatistics({team,games:state.games,projections:state.gameDetailProjections,scope:myTeamStatisticsScope,normalizeTeamKey,isScorableGame}),{detailsOpen});
+}
+
 function renderMyTeam(){
   const host=$("myTeamContent");
   if(!host || !state.participant) return;
@@ -2827,6 +2833,7 @@ function renderMyTeam(){
     return;
   }
   const context=favoriteTeamContext(team);
+  const statisticsDetailsOpen=Boolean(host.querySelector('.club-stat-details')?.open);
   const {row,next,stats,profile,synergy,achievements,moment}=context;
   const teamName=teamDisplayName(team.name);
   const crest=team.logo?`<img src="${escapeHtml(team.logo)}" alt="Escudo do ${escapeHtml(teamName)}">`:`<span>${escapeHtml(initials(teamName).slice(0,3))}</span>`;
@@ -2876,7 +2883,8 @@ function renderMyTeam(){
 
     <section class="my-team-section"><div class="my-team-section-heading"><div><span class="eyebrow">HISTÓRIA DA TEMPORADA</span><h2>Momentos com o seu time</h2></div></div><article class="card my-team-moment-card"><span class="my-team-moment-icon" aria-hidden="true">${moment.icon}</span><div class="my-team-moment-copy"><strong>${escapeHtml(moment.title)}</strong><p>${escapeHtml(moment.text)}</p><div class="my-team-moment-indicators">${moment.indicators.map(item=>`<span>${escapeHtml(item)}</span>`).join('')}</div></div></article></section>
 
-    <section class="my-team-section"><div class="my-team-section-heading"><div><span class="eyebrow">CONQUISTAS</span><h2>Marcos do Meu Time</h2></div></div><div class="my-team-achievements">${achievements.map(item=>`<article class="card my-team-achievement-card ${item.unlocked?'is-unlocked':'is-progress'}"><span aria-hidden="true">${item.icon}</span><div><div class="my-team-achievement-heading"><strong>${escapeHtml(item.title)}</strong><small>${item.unlocked?'Conquistado':escapeHtml(item.progressLabel)}</small></div><p>${escapeHtml(item.text)}</p><div class="my-team-achievement-progress" role="progressbar" aria-label="${escapeHtml(`${item.title}: ${item.unlocked?'conquistado':item.progressLabel}`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${item.progress}"><i style="width:${item.progress}%"></i></div></div></article>`).join('')}</div></section>`;
+    <section class="my-team-section"><div class="my-team-section-heading"><div><span class="eyebrow">CONQUISTAS</span><h2>Marcos do Meu Time</h2></div></div><div class="my-team-achievements">${achievements.map(item=>`<article class="card my-team-achievement-card ${item.unlocked?'is-unlocked':'is-progress'}"><span aria-hidden="true">${item.icon}</span><div><div class="my-team-achievement-heading"><strong>${escapeHtml(item.title)}</strong><small>${item.unlocked?'Conquistado':escapeHtml(item.progressLabel)}</small></div><p>${escapeHtml(item.text)}</p><div class="my-team-achievement-progress" role="progressbar" aria-label="${escapeHtml(`${item.title}: ${item.unlocked?'conquistado':item.progressLabel}`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${item.progress}"><i style="width:${item.progress}%"></i></div></div></article>`).join('')}</div></section>
+    ${myTeamClubStatistics(team,statisticsDetailsOpen)}`;
 }
 
 let homeFavoriteExpanded=false;
@@ -6674,6 +6682,17 @@ $("homeTab")?.addEventListener("keydown",event=>{
 });
 
 $("myTeamTab")?.addEventListener("click",event=>{
+  const filter=event.target.closest("[data-club-stat-scope]");
+  if(filter){
+    const team=findTeam(state.participant?.time_favorito);
+    const section=$("myTeamContent")?.querySelector('.club-statistics');
+    if(!team || !section) return;
+    myTeamStatisticsScope=filter.dataset.clubStatScope;
+    const detailsOpen=Boolean(section.querySelector('.club-stat-details')?.open);
+    section.outerHTML=myTeamClubStatistics(team,detailsOpen);
+    $("myTeamContent").querySelector(`[data-club-stat-scope="${myTeamStatisticsScope}"]`)?.focus({preventScroll:true});
+    return;
+  }
   const target=event.target.closest("[data-my-team-action]");
   if(!target) return;
   const action=target.dataset.myTeamAction;
