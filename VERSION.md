@@ -1,5 +1,5 @@
-6.58.1
+6.59.0
 
-Destaque apenas nos números da composição de pontos da Home.
+Estatísticas do clube na tela Meu Time: ataque, defesa, disciplina e evolução recente.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

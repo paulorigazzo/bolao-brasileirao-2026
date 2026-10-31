@@ -4,7 +4,8 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.58.1`.
+- Versão funcional: `v6.59.0`.
+- Estatísticas do clube em Meu Time: em revisão, com validação autenticada de dados reais prevista no Deploy Preview da PR em Draft. [Nota v6.59.0](docs/releases/v6.59.0-meu-time-estatisticas.md).
 - Destaque dos números na composição de pontos da Home: em revisão. [Nota v6.58.1](docs/releases/v6.58.1-destaque-numeros-home.md).
 - Pontos projetados no card da rodada atual da Home: em revisão. [Nota v6.58.0](docs/releases/v6.58.0-home-pontos-projetados.md).
 - ADM por tarefa: em revisão, quatro áreas e preservação do contexto de leitura. [Nota v6.57.0](docs/releases/v6.57.0-reorganizacao-adm.md).

@@ -1,3 +1,10 @@
+# v6.59.0 — Estatísticas do clube no Meu Time
+
+- Acrescenta ataque, defesa, disciplina e evolução recente com números destacados e gráficos compactos.
+- Filtros Geral, Em casa e Fora; posse e escanteios em detalhes expansíveis.
+- Amostras por indicador, taxas pelos totais e comparação dos dez jogos mais recentes somente com dados válidos.
+- Reaproveita dados carregados, sem novas consultas, migrações ou alterações na pontuação. [Escopo e validação](docs/releases/v6.59.0-meu-time-estatisticas.md).
+
 # v6.58.1 — Destaque dos números no card de pontos
 
 - Confirmados e provisórios destacam somente os números, com rótulos em cor secundária e peso normal.
