@@ -25,7 +25,7 @@ import { isScheduledLiveEstimate, scheduledLiveLabel } from "./scheduled-live-es
 import { buildFriendlyRankingsModel } from "./friendly-rankings-engine.js";
 import { adminRoundGameIds, loadAdminPickProgress } from "./admin-pick-progress.js";
 import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js";
-import { renderMyTeamParticipant, renderMyTeamCampaignSummary, renderMyTeamAchievements } from "./my-team-view.js";
+import { renderMyTeamParticipant, renderMyTeamCampaignSummary, renderMyTeamAchievements, renderMyTeamStandings } from "./my-team-view.js";
 import { buildMyTeamStatistics, renderMyTeamStatistics } from "./my-team-statistics.js";
 import { activeLeagueName, chooseActiveLeague, createLeagueRequestGate, filterProfilesByMembers, persistActiveLeague } from "./league-context.js";
 import { createPushSubscription, currentPushSubscription, subscriptionRow, supportsWebPush } from "./web-push.js";
@@ -2848,11 +2848,7 @@ function renderMyTeam(){
     <article class="my-team-hero card">
       <div class="my-team-hero-overview">
         <div class="my-team-hero-main"><span class="my-team-crest">${crest}</span><div><span class="eyebrow">MEU TIME</span><h1 id="myTeamPageTitle">${escapeHtml(teamName)}</h1><p>Brasileirão 2026</p></div></div>
-        <button class="my-team-standing-summary" type="button" data-my-team-action="standings" aria-label="${escapeHtml(`Abrir classificação completa${row?`. ${teamName} está em ${row.position}º lugar com ${row.points} pontos`:''}`)}">
-          ${row?`<span><strong>${row.position}º</strong><small>posição</small></span><span><strong>${row.points}</strong><small>pontos</small></span><em>${Number(row.goalDifference)>0?'+':''}${row.goalDifference} saldo</em>`:'<span class="my-team-standing-unavailable"><strong>—</strong><small>Classificação em atualização</small></span>'}
-          <i aria-hidden="true">›</i>
-          <span class="my-team-standing-caption">Ver classificação</span>
-        </button>
+        ${renderMyTeamStandings(row)}
       </div>
       <button class="secondary my-team-campaign-action" type="button" data-my-team-action="campaign">Ver campanha do ${escapeHtml(teamName)} <span aria-hidden="true">›</span></button>
       <div class="my-team-hero-context">

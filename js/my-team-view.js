@@ -2,6 +2,21 @@ import { renderMyTeamNumberCard } from "./my-team-statistics.js";
 
 const escapeText = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character]));
 
+export function renderMyTeamStandings(row) {
+  const difference = row?.goalDifference;
+  const hasDifference = difference != null && String(difference).trim() !== "" && Number.isFinite(Number(difference));
+  const balance = hasDifference ? `${Number(difference) > 0 ? "+" : ""}${difference}` : "—";
+  return `<div class="my-team-standing-cards my-team-number-cards">
+    <div class="club-stat-values is-pair">
+      ${renderMyTeamNumberCard({label:"Posição do clube no campeonato",title:"Posição",icon:"🏆",value:row?.position == null ? null : `${row.position}º`,unit:"no campeonato"})}
+      ${renderMyTeamNumberCard({label:"Pontos do clube no campeonato",title:"Pontos",icon:"⭐",value:row?.points,unit:"no campeonato",gold:true})}
+    </div>
+    <p class="my-team-standing-balance">Saldo de gols: <b>${escapeText(balance)}</b></p>
+    ${row ? "" : '<p class="my-team-context-line">Classificação em atualização.</p>'}
+    <button class="secondary my-team-standings-action" type="button" data-my-team-action="standings">Ver classificação <span aria-hidden="true">›</span></button>
+  </div>`;
+}
+
 export function renderMyTeamParticipant(context, teamName, synergyLabel) {
   const { stats, profile, synergy, confidence, moment } = context;
   const analyzed = `${stats.games} ${stats.games === 1 ? "palpite concluído" : "palpites concluídos"} com o clube`;

@@ -10,13 +10,14 @@ assert.ok(renderStart>=0 && renderEnd>renderStart,"renderMyTeam deve permanecer 
 const render=app.slice(renderStart,renderEnd);
 
 assert.match(render,/class="my-team-hero card"/);
-assert.match(render,/class="my-team-standing-summary"[^>]*data-my-team-action="standings"/);
+assert.match(render,/renderMyTeamStandings\(row\)/);
 assert.match(render,/class="my-team-hero-next"/);
 assert.match(render,/data-my-team-action="games"/);
 assert.match(render,/renderMyTeamParticipant\(context,teamName,favoriteSynergyLabel\(synergy\)\)/);
 assert.match(render,/renderMyTeamCampaignSummary\(row\)/);
 assert.match(render,/renderMyTeamAchievements\(achievements,achievementsOpen\)/);
-assert.equal((render.match(/data-my-team-action="standings"/g)||[]).length,1);
+const view=readFileSync(new URL("../js/my-team-view.js",import.meta.url),"utf8");
+assert.equal((view.match(/data-my-team-action="standings"/g)||[]).length,1);
 assert.doesNotMatch(render,/my-team-grid-synergy|my-team-profile-card|my-team-moment-indicators/);
 assert.doesNotMatch(render,/class="card my-team-next-card"/);
 
@@ -24,6 +25,6 @@ assert.match(styles,/\.my-team-hero-overview\{[^}]*grid-template-columns:/);
 assert.match(styles,/\.my-team-hero-context\{[^}]*grid-template-columns:/);
 assert.match(styles,/\.my-team-grid-synergy\{grid-template-columns:1fr\}/);
 assert.match(styles,/@media\(max-width:760px\)\{[^}]*\.my-team-hero-overview\{grid-template-columns:1fr\}/);
-assert.match(styles,/\.my-team-standing-summary:focus-visible/);
+assert.match(styles,/\.my-team-standings-action:focus-visible/);
 
 console.log("Hero híbrido de Meu Time verificado com sucesso.");

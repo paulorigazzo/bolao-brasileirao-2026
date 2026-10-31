@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import vm from "node:vm";
 import { readFileSync } from "node:fs";
-import { renderMyTeamParticipant, renderMyTeamCampaignSummary, renderMyTeamAchievements } from "../js/my-team-view.js";
+import { renderMyTeamParticipant, renderMyTeamCampaignSummary, renderMyTeamAchievements, renderMyTeamStandings } from "../js/my-team-view.js";
 import { buildMyTeamAchievements, buildMyTeamMoment } from "../js/my-team-moments.js";
 import { renderMyTeamNumberCard } from "../js/my-team-statistics.js";
 
@@ -22,6 +22,17 @@ assert.doesNotMatch(featured,/my-team-moment-indicators/);
 assert.match(renderMyTeamParticipant({...context,stats:{games:0,points:0,hits:0,exact:0}},"Clube","Em construção"),/de 0 possíveis/);
 assert.doesNotMatch(renderMyTeamParticipant({...context,stats:{games:0,points:0,hits:0,exact:0}},"Clube","Em construção"),/NaN|Infinity|undefined|62<em/);
 const campaign=renderMyTeamCampaignSummary(context.row);
+const standings=renderMyTeamStandings(context.row);
+assert.equal((standings.match(/home-mini-card club-stat/g)||[]).length,2);
+assert.match(standings,/<strong>8º<\/strong>/);
+assert.match(standings,/<strong>40<\/strong>/);
+assert.match(standings,/Saldo de gols: <b>\+2<\/b>/);
+assert.equal((standings.match(/data-my-team-action="standings"/g)||[]).length,1);
+assert.match(renderMyTeamStandings({...context.row,points:0,goalDifference:-3}),/<strong>0<\/strong>/);
+assert.match(renderMyTeamStandings({...context.row,goalDifference:0}),/Saldo de gols: <b>0<\/b>/);
+assert.match(renderMyTeamStandings({...context.row,goalDifference:-3}),/Saldo de gols: <b>-3<\/b>/);
+assert.match(renderMyTeamStandings(null),/Classificação em atualização/);
+assert.equal((renderMyTeamStandings(null).match(/<strong>—<\/strong>/g)||[]).length,2);
 assert.equal((campaign.match(/home-mini-card club-stat/g)||[]).length,6);
 assert.match(campaign,/TEMPORADA COMPLETA/);
 assert.doesNotMatch(campaign,/data-my-team-action|Pontos conquistados/);
@@ -35,7 +46,7 @@ assert.doesNotMatch(renderMyTeamNumberCard({label:'<script>',value:'<img>',unit:
 const source=readFileSync(new URL("../js/app.js",import.meta.url),"utf8");
 const start=source.indexOf("function renderMyTeam(){"),end=source.indexOf("let homeFavoriteExpanded=",start);
 const host={innerHTML:"",querySelector:()=>({open:true})};
-const scope={state:{participant:{time_favorito:"Clube"}},$:()=>host,findTeam:()=>({name:"Clube",key:"clube"}),favoriteTeamContext:()=>context,teamDisplayName:x=>String(x||""),escapeHtml:x=>String(x??""),initials:()=>"CL",normalizeTeamKey:x=>String(x||"").toLowerCase(),favoriteTeamResult:()=>"V",favoriteFormMarkup:()=>"",favoriteSynergyLabel:()=>"Boa leitura",renderMyTeamParticipant,renderMyTeamCampaignSummary,renderMyTeamAchievements,myTeamClubStatistics:()=>'<section class="club-statistics">Estatísticas por partida</section>'};
+const scope={state:{participant:{time_favorito:"Clube"}},$:()=>host,findTeam:()=>({name:"Clube",key:"clube"}),favoriteTeamContext:()=>context,teamDisplayName:x=>String(x||""),escapeHtml:x=>String(x??""),initials:()=>"CL",normalizeTeamKey:x=>String(x||"").toLowerCase(),favoriteTeamResult:()=>"V",favoriteFormMarkup:()=>"",favoriteSynergyLabel:()=>"Boa leitura",renderMyTeamParticipant,renderMyTeamCampaignSummary,renderMyTeamAchievements,renderMyTeamStandings,myTeamClubStatistics:()=>'<section class="club-statistics">Estatísticas por partida</section>'};
 vm.createContext(scope);
 vm.runInContext(source.slice(start,end),scope);
 vm.runInContext("renderMyTeam()",scope);
