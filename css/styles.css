@@ -4706,9 +4706,6 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 :is(.club-statistics,.my-team-number-cards) .club-stat-trend-empty{padding:12px 0}
 :is(.club-statistics,.my-team-number-cards) .club-stat-trend-empty p{text-align:left}
 :is(.club-statistics,.my-team-number-cards) .club-stat-period{text-align:center;margin:16px 0 0}
-:is(.club-statistics,.my-team-number-cards) .club-stat-details{margin-top:16px;border:1px solid var(--border);border-radius:15px;padding:0 18px;background:var(--color-surface)}
-:is(.club-statistics,.my-team-number-cards) .club-stat-details summary{padding:15px 0;min-height:44px;cursor:pointer;font-size:.85rem;color:var(--text)}
-:is(.club-statistics,.my-team-number-cards) .club-stat-details .club-stat-values{padding:8px 0 18px}
 :is(.club-statistics,.my-team-number-cards) .club-stat-footnote{margin:12px 0 0}
 @media(max-width:680px){
   :is(.club-statistics,.my-team-number-cards) .club-stat-values{gap:8px}

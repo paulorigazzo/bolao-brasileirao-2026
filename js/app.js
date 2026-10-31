@@ -38,7 +38,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.60.0";
+const APP_VERSION = "6.60.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2821,8 +2821,8 @@ function favoriteSynergyLabel(value){
 }
 
 let myTeamStatisticsScope="all";
-function myTeamClubStatistics(team,detailsOpen=false){
-  return renderMyTeamStatistics(buildMyTeamStatistics({team,games:state.games,projections:state.gameDetailProjections,scope:myTeamStatisticsScope,normalizeTeamKey,isScorableGame}),{detailsOpen,title:"Estatísticas por partida"});
+function myTeamClubStatistics(team){
+  return renderMyTeamStatistics(buildMyTeamStatistics({team,games:state.games,projections:state.gameDetailProjections,scope:myTeamStatisticsScope,normalizeTeamKey,isScorableGame}),{title:"Estatísticas por partida"});
 }
 
 function renderMyTeam(){
@@ -2834,7 +2834,6 @@ function renderMyTeam(){
     return;
   }
   const context=favoriteTeamContext(team);
-  const statisticsDetailsOpen=Boolean(host.querySelector('.club-stat-details')?.open);
   const {row,next,synergy,achievements}=context;
   const achievementsOpen=Boolean(host.querySelector('.my-team-achievements-details')?.open);
   const teamName=teamDisplayName(team.name);
@@ -2865,7 +2864,7 @@ function renderMyTeam(){
     <section class="my-team-section" aria-labelledby="myTeamClubNumbersTitle">
       <div class="my-team-section-heading"><h2 id="myTeamClubNumbersTitle">Seu time em números</h2></div>
       ${renderMyTeamCampaignSummary(row)}
-      ${myTeamClubStatistics(team,statisticsDetailsOpen)}
+      ${myTeamClubStatistics(team)}
     </section>`;
 
 }
@@ -6671,8 +6670,7 @@ $("myTeamTab")?.addEventListener("click",event=>{
     const section=$("myTeamContent")?.querySelector('.club-statistics');
     if(!team || !section) return;
     myTeamStatisticsScope=filter.dataset.clubStatScope;
-    const detailsOpen=Boolean(section.querySelector('.club-stat-details')?.open);
-    section.outerHTML=myTeamClubStatistics(team,detailsOpen);
+    section.outerHTML=myTeamClubStatistics(team);
     $("myTeamContent").querySelector(`[data-club-stat-scope="${myTeamStatisticsScope}"]`)?.focus({preventScroll:true});
     return;
   }

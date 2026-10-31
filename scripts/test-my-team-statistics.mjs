@@ -131,23 +131,31 @@ assert.match(html, /<span>Finalizações<\/span><strong>12,5<\/strong><small>/);
 assert.match(html, /aria-label="Faltas \/ jogo"/);
 assert.match(renderMyTeamStatistics(build({ scope: "away" })), /fora de casa/);
 assert.match(renderMyTeamStatistics(gapModel), /Comparação disponível/);
-assert.match(renderMyTeamStatistics(model, { detailsOpen: true }), /class="club-stat-details" open/);
+assert.doesNotMatch(html, /<details|<summary|club-stat-details/, "estatísticas ficam sempre visíveis");
+const possessionHtml=html.match(/<section class="club-stat-panel is-possession"[\s\S]*?<\/section>/)[0];
+assert.equal((possessionHtml.match(/home-mini-card club-stat/g)||[]).length,3);
+assert.match(possessionHtml,/aria-label="Posse média"/);
+assert.match(possessionHtml,/aria-label="Escanteios a favor \/ jogo"/);
+assert.match(possessionHtml,/aria-label="Escanteios contra \/ jogo"/);
+assert.ok(html.indexOf('id="clubDisciplineTitle"')<html.indexOf('id="clubPossessionTitle"'));
+assert.ok(html.indexOf('id="clubPossessionTitle"')<html.indexOf('id="clubEvolutionTitle"'));
 assert.doesNotMatch(renderMyTeamStatistics(build({ games: [] })), /NaN|Infinity|undefined/);
 assert.doesNotMatch(html, /<details[^>]*>\s*<summary>.*Disciplina/);
 const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
-assert.match(app, /myTeamClubStatistics\(team,statisticsDetailsOpen\)/);
-assert.match(app, /section\.outerHTML=myTeamClubStatistics\(team,detailsOpen\)/);
+assert.match(app, /myTeamClubStatistics\(team\)/);
+assert.match(app, /section\.outerHTML=myTeamClubStatistics\(team\)/);
+assert.doesNotMatch(app,/club-stat-details|statisticsDetailsOpen/);
 assert.match(app, /focus\(\{preventScroll:true\}\)/);
 assert.doesNotMatch(readFileSync(new URL("../js/my-team-statistics.js", import.meta.url), "utf8"), /fetch\(|\.from\(|\.rpc\(/);
-// Exercise the actual delegated app handler, including focus and expanded details.
+// Exercise the actual delegated app handler, including filter focus.
 let clickHandler, focused = false, navigation = null;
-const section = { outerHTML: "", querySelector: () => ({ open: true }) };
+const section = { outerHTML: "" };
 const host = { querySelector: selector => selector === ".club-statistics" ? section : { focus: options => { focused = options.preventScroll; } } };
 const context = {
   state: { participant: { time_favorito: "Clube" } },
   myTeamStatisticsScope: "all",
   findTeam: name => ({ name }),
-  myTeamClubStatistics: (selectedTeam, open) => `${selectedTeam.name}:${open}`,
+  myTeamClubStatistics: selectedTeam => selectedTeam.name,
   navigateTo: action => { navigation = action; },
   $: id => id === "myTeamTab" ? { addEventListener: (_type, handler) => { clickHandler = handler; } } : host,
 };
@@ -157,7 +165,7 @@ const handlerEnd = app.indexOf('$("myTeamTab")?.addEventListener("keydown"', han
 vm.runInContext(app.slice(handlerStart, handlerEnd), context);
 clickHandler({ target: { closest: selector => selector === "[data-club-stat-scope]" ? { dataset: { clubStatScope: "away" } } : null } });
 assert.equal(context.myTeamStatisticsScope, "away");
-assert.equal(section.outerHTML, "Clube:true");
+assert.equal(section.outerHTML, "Clube");
 assert.equal(focused, true);
 clickHandler({ target: { closest: selector => selector === "[data-my-team-action]" ? { dataset: { myTeamAction: "games" } } : null } });
 assert.equal(navigation, "games", "destinos existentes preservados");

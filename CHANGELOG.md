@@ -1,3 +1,9 @@
+# v6.60.1 — Posse e escanteios visível
+
+- Mostra os três cards de Posse e escanteios permanentemente, após Disciplina e antes de Evolução recente.
+- Remove somente a estrutura expansível, seu estado de abertura e estilos específicos. Preserva cálculos, amostras, filtros, identidade dos cards e Conquistas expansíveis.
+- [Escopo e validação](docs/releases/v6.60.1-meu-time-posse-escanteios.md).
+
 # v6.60.0 — Meu Time simplificado
 
 - Concentra pontos, resultados certos e exatos em Meu desempenho; reúne Perfil e Sintonia sem repetir leitura correta.

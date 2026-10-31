@@ -1,5 +1,5 @@
-6.60.0
+6.60.1
 
-Meu Time simplificado: perfil integrado, menos repetições e cards numéricos uniformes.
+Posse e escanteios sempre visível em Meu Time, após Disciplina e antes de Evolução recente.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)
