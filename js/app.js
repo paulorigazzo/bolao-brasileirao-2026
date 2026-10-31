@@ -2861,12 +2861,12 @@ function renderMyTeam(){
     </article>
 
     ${renderMyTeamParticipant(context,teamName,favoriteSynergyLabel(synergy))}
+    ${renderMyTeamAchievements(achievements,achievementsOpen)}
     <section class="my-team-section" aria-labelledby="myTeamClubNumbersTitle">
       <div class="my-team-section-heading"><h2 id="myTeamClubNumbersTitle">Seu time em números</h2></div>
       ${renderMyTeamCampaignSummary(row)}
       ${myTeamClubStatistics(team,statisticsDetailsOpen)}
-    </section>
-    ${renderMyTeamAchievements(achievements,achievementsOpen)}`;
+    </section>`;
 
 }
 
