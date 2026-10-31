@@ -83,6 +83,8 @@ assert.match(html, /Faltas \/ jogo/);
 assert.match(html, /Vermelhos no período/);
 assert.match(html, /aria-pressed="true"/);
 assert.match(html, /Sem variação/);
+assert.equal((html.match(/24 jogos com dados/g)||[]).length,4,"amostras iguais aparecem uma vez por grupo");
+assert.match(renderMyTeamStatistics(build({projections:missing})),/23 jogos com dados/,"amostras distintas continuam explícitas");
 assert.equal((html.match(/class="home-mini-card club-stat/g) || []).length, 12, "cada indicador reutiliza o card da Home");
 assert.equal((html.match(/class="mini-card-icon" aria-hidden="true"/g) || []).length, 12);
 assert.doesNotMatch(html, /home-navigable-card|data-home-action|role="button"/, "cards numéricos são informativos");

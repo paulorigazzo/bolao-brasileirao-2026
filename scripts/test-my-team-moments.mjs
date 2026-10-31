@@ -4,11 +4,13 @@ import { buildMyTeamAchievements, buildMyTeamMoment } from "../js/my-team-moment
 
 const opening=buildMyTeamMoment({teamName:"São Paulo"});
 assert.equal(opening.title,"Uma história para começar");
+assert.equal(opening.featured,false);
 assert.deepEqual(opening.indicators,["0 jogos analisados","0% de confiança","0 pontos"]);
 
 const optimisticFanInput={teamName:"São Paulo",games:4,points:0,hits:0,exact:0,accuracy:0,confidence:75,predictedWins:3,recentClubPoints:2,recentClubGames:5,nextPickLabel:"1 × 0"};
 const optimisticFan=buildMyTeamMoment({...optimisticFanInput,referenceRound:24});
 assert.equal(optimisticFan.title,"Sintonia em fase de ajuste");
+assert.equal(optimisticFan.featured,false,"frase genérica não aparece como acontecimento novo");
 assert.match(optimisticFan.text,/3 dos últimos 4 jogos analisados/);
 assert.match(optimisticFan.text,/1 × 0/);
 assert.deepEqual(optimisticFan.indicators,["4 jogos analisados","75% de confiança","0 pontos"]);
@@ -34,9 +36,11 @@ const unlocked=buildMyTeamAchievements({teamName:"São Paulo",games:7,exact:2,be
 assert.ok(unlocked.every(item=>item.unlocked && item.progress===100));
 
 const app=readFileSync(new URL("../js/app.js",import.meta.url),"utf8");
-assert.match(app,/Momentos com o seu time/);
-assert.match(app,/my-team-moment-card/);
-assert.match(app,/my-team-achievement-progress/);
+const view=readFileSync(new URL("../js/my-team-view.js",import.meta.url),"utf8");
+assert.match(view,/moment\?\.featured/);
+assert.match(view,/my-team-moment-card/);
+assert.match(view,/my-team-achievement-progress/);
+for(const input of [{games:2,latestExact:true},{games:4,currentSequence:3},{games:3,hits:1,latestEarned:5}])assert.equal(buildMyTeamMoment(input).featured,true);
 assert.doesNotMatch(app,/my-team-timeline-round/);
 
 console.log("Momentos e marcos ativos de Meu Time verificados com sucesso.");

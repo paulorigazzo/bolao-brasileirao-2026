@@ -1,3 +1,10 @@
+# v6.60.0 — Meu Time simplificado
+
+- Concentra pontos, resultados certos e exatos em Meu desempenho; reúne Perfil e Sintonia sem repetir leitura correta.
+- Mostra Momentos apenas para acontecimentos concretos, sem repetir os indicadores; recolhe Conquistas inicialmente, preservando seus critérios e progressos.
+- Campanha e estatísticas ficam juntas em Seu time em números, com os cards da Home e um único acesso à classificação no cabeçalho.
+- Amostras iguais aparecem uma vez por grupo; diferenças de cobertura continuam explícitas. Preserva filtros esportivos, gráficos, fontes e fórmulas. [Escopo e validação](docs/releases/v6.60.0-meu-time-simplificacao.md).
+
 # v6.59.0 — Estatísticas do clube no Meu Time
 
 - Acrescenta ataque, defesa, disciplina e evolução recente com números destacados e gráficos compactos.

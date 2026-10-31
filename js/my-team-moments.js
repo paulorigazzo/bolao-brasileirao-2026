@@ -42,7 +42,8 @@ export function buildMyTeamMoment({
     text=choose([`Entre palpites e resultados, sua história com o ${teamName} já soma ${plural(totalPoints,"ponto")}. Cada rodada traz uma nova leitura.`,`Sua parceria com o ${teamName} continua em construção: ${plural(totalPoints,"ponto")} e assunto garantido para a próxima rodada.`]);
   }
 
-  return {icon,title,text,indicators:[plural(analyzed,"jogo analisado","jogos analisados"),`${trust}% de confiança`,plural(totalPoints,"ponto")]};
+  const featured=analyzed>0 && (latestExact || streak>=3 || (correct===1 && Number(latestEarned)>0));
+  return {icon,title,text,featured,indicators:[plural(analyzed,"jogo analisado","jogos analisados"),`${trust}% de confiança`,plural(totalPoints,"ponto")]};
 }
 
 export function buildMyTeamAchievements({teamName="seu time",games=0,exact=0,bestSequence=0,accuracy=0}={}){

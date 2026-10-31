@@ -13,7 +13,11 @@ assert.match(render,/class="my-team-hero card"/);
 assert.match(render,/class="my-team-standing-summary"[^>]*data-my-team-action="standings"/);
 assert.match(render,/class="my-team-hero-next"/);
 assert.match(render,/data-my-team-action="games"/);
-assert.match(render,/my-team-grid-synergy/);
+assert.match(render,/renderMyTeamParticipant\(context,teamName,favoriteSynergyLabel\(synergy\)\)/);
+assert.match(render,/renderMyTeamCampaignSummary\(row\)/);
+assert.match(render,/renderMyTeamAchievements\(achievements,achievementsOpen\)/);
+assert.equal((render.match(/data-my-team-action="standings"/g)||[]).length,1);
+assert.doesNotMatch(render,/my-team-grid-synergy|my-team-profile-card|my-team-moment-indicators/);
 assert.doesNotMatch(render,/class="card my-team-next-card"/);
 
 assert.match(styles,/\.my-team-hero-overview\{[^}]*grid-template-columns:/);
