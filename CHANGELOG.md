@@ -4,7 +4,8 @@
 - Mostra Momentos apenas para acontecimentos concretos, sem repetir os indicadores; recolhe Conquistas inicialmente, preservando seus critérios e progressos.
 - Campanha e estatísticas ficam juntas em Seu time em números, com os cards da Home e um único acesso à classificação no cabeçalho.
 - Posição, pontos oficiais e saldo de gols ganham três cards no cabeçalho, com botão único Ver classificação abaixo.
-- Amostras iguais aparecem uma vez por grupo; diferenças de cobertura continuam explícitas. Preserva filtros esportivos, gráficos, fontes e fórmulas. [Escopo e validação](docs/releases/v6.60.0-meu-time-simplificacao.md).
+- Amostras iguais aparecem uma vez por grupo; diferenças de cobertura continuam explícitas. Preserva filtros esportivos, fontes e regras de pontuação. [Escopo e validação](docs/releases/v6.60.0-meu-time-simplificacao.md).
+- Evolução recente adapta a comparação a 5×5 ou 3×3 jogos; com 3 a 5 jogos mostra médias, e com menos dados informa a cobertura. Não preenche lacunas com jogos antigos.
 
 # v6.59.0 — Estatísticas do clube no Meu Time
 

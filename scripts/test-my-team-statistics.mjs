@@ -26,7 +26,9 @@ assert.equal(model.metrics.accuracy.value, 24 / 300 * 100, "taxa deve usar somas
 assert.equal(model.metrics.conversion.value, 24 / 300 * 100);
 assert.equal(model.metrics.redCards.value, 0, "zero é dado válido");
 assert.equal(model.metrics.clean.value, 24);
-assert.deepEqual(model.trends.attack, { before: 1, recent: 1, delta: 0 });
+const comparisonValues=({before,recent,delta})=>({before,recent,delta});
+assert.deepEqual(comparisonValues(model.trends.attack), { before: 1, recent: 1, delta: 0 });
+assert.equal(model.trends.attack.size,5);
 assert.equal(build({ scope: "home" }).metrics.shots.value, 12);
 assert.equal(build({ scope: "away" }).metrics.shots.value, 13);
 assert.equal(build({ scope: "invalid" }).scope, "all");
@@ -57,8 +59,8 @@ const zeros = projections.map(projection => ({ ...projection, estatisticas: { ho
 assert.equal(build({ projections: zeros }).metrics.accuracy.value, null, "denominador zero não produz porcentagem");
 assert.equal(build({ projections: zeros }).metrics.shots.value, 0);
 
-assert.equal(build({ games: games.slice(-9) }).trends.attack, null);
-assert.equal(build({ games: games.slice(-10), scope: "home" }).trends.attack, null);
+assert.equal(build({ games: games.slice(-9) }).trends.attack.size,3);
+assert.equal(build({ games: games.slice(-10), scope: "home" }).trends.attack.mode,"average");
 const gap = structuredClone(projections);
 delete gap.at(-1).estatisticas.away.yellowCards;
 const gapModel = build({ projections: gap });
@@ -73,9 +75,46 @@ for (const projection of changing.slice(-5)) {
   own.yellowCards = 0;
 }
 const changingModel = build({ games: reordered, projections: changing });
-assert.deepEqual(changingModel.trends.attack, { before: 1, recent: 3, delta: 2 });
+assert.deepEqual(comparisonValues(changingModel.trends.attack), { before: 1, recent: 3, delta: 2 });
 assert.deepEqual(changingModel.trends.discipline, { before: 2, recent: 0, delta: -2 });
 assert.equal(JSON.stringify(input), untouched, "modelo não modifica entradas");
+
+const evolutionHtml=model=>renderMyTeamStatistics(model).match(/<section class="card club-stat-panel club-stat-evolution"[\s\S]*?<\/section>/)[0];
+for(let count=0;count<=10;count++){
+  const partial=projections.map((item,index)=>index<24-count?{...item,estatisticas:null}:item);
+  const current=build({projections:partial});
+  const item=current.trends.attack;
+  assert.equal(item.available,count);
+  assert.equal(item.consecutive,count);
+  assert.equal(item.mode,count>=6?"comparison":count>=3?"average":"insufficient");
+  if(count>=6){
+    const size=count===10?5:3;
+    assert.equal(item.size,size);
+    assert.equal(item.games,size*2);
+    assert.match(evolutionHtml(current),new RegExp(`Últimos ${size} jogos × ${size} imediatamente anteriores`));
+  }else if(count>=3){
+    assert.equal(item.average,1);
+    assert.equal(item.games,count);
+    assert.match(evolutionHtml(current),new RegExp(`Média nos últimos ${count} jogos`));
+    assert.doesNotMatch(evolutionHtml(current),/club-stat-bars|↑|↓|Sem variação/);
+  }else assert.match(evolutionHtml(current),new RegExp(`${count} jogo`));
+  if(count<10)assert.equal(current.trends.discipline,null,"comparação disciplinar mantém regra anterior");
+}
+const internalGap=structuredClone(projections);
+delete internalGap.at(-4).estatisticas.home.shotsOnTarget;
+const internalGapModel=build({projections:internalGap});
+assert.equal(internalGapModel.trends.attack.mode,"average");
+assert.equal(internalGapModel.trends.attack.games,3,"não preencher lacuna com partidas antigas");
+const lastGap=structuredClone(projections);
+delete lastGap.at(-1).estatisticas.away.shotsOnTarget;
+const lastGapModel=build({projections:lastGap});
+assert.equal(lastGapModel.trends.attack.mode,"insufficient");
+assert.equal(lastGapModel.trends.attack.available,9,"informa cobertura real mesmo com último jogo ausente");
+assert.equal(lastGapModel.trends.defense.size,5,"cobertura avaliada independentemente por indicador");
+assert.match(evolutionHtml(lastGapModel),/Dados em 9 de 10 jogos recentes/);
+assert.equal(build({games:games.slice(-12),scope:"home"}).trends.attack.size,3);
+assert.equal(build({games:games.slice(-3)}).trends.attack.games,3);
+assert.equal(build({projections:zeros}).trends.attack.recent,0,"zero é medição válida para evolução");
 
 const html = renderMyTeamStatistics(model);
 assert.match(html, /Disciplina/);

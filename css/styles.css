@@ -4695,6 +4695,8 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 :is(.club-statistics,.my-team-number-cards) .club-stat-column-track b{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding-bottom:5px;font-size:.8rem;font-style:normal;font-variant-numeric:tabular-nums;color:var(--text)}
 :is(.club-statistics,.my-team-number-cards) .club-stat-column>span{display:block;margin-top:7px;font-size:.6875rem;white-space:nowrap;color:var(--muted)}
 :is(.club-statistics,.my-team-number-cards) .club-stat-trend>p{margin:12px 0 0;font-size:.75rem;color:var(--muted);line-height:1.5;text-align:center}
+:is(.club-statistics,.my-team-number-cards) .club-stat-average{text-align:center}
+:is(.club-statistics,.my-team-number-cards) .club-stat-average>strong{display:block;margin:20px 0 8px;font-size:2.1rem;font-weight:800;line-height:1.1;color:var(--text);font-variant-numeric:tabular-nums}
 :is(.club-statistics,.my-team-number-cards) .is-horizontal{margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
 :is(.club-statistics,.my-team-number-cards) .is-horizontal .club-stat-bars{display:grid;gap:12px;justify-content:stretch}
 :is(.club-statistics,.my-team-number-cards) .club-stat-horizontal{display:grid;grid-template-columns:76px minmax(0,1fr) 32px;align-items:center;gap:9px;font-size:.75rem;color:var(--muted)}
