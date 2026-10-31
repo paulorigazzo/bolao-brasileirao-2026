@@ -1,3 +1,9 @@
+# v6.61.0 — Cards de Estatísticas
+
+- Destaca pontos, palpites avaliados e participação em Meu desempenho; preserva o círculo de eficiência.
+- Padroniza situação competitiva e recordes; concentra pontos e comparação com a média no cabeçalho, sem duplicar pontuação.
+- Preserva cálculos, gráficos, filtros e demais telas. [Escopo e validação](docs/releases/v6.61.0-estatisticas-cards.md).
+
 # v6.60.1 — Posse e escanteios visível
 
 - Mostra os três cards de Posse e escanteios permanentemente, após Disciplina e antes de Evolução recente.

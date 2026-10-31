@@ -1,5 +1,5 @@
-6.60.1
+6.61.0
 
-Posse e escanteios sempre visível em Meu Time, após Disciplina e antes de Evolução recente.
+Cards numéricos de Estatísticas alinhados à identidade da Home, preservando o círculo de eficiência.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

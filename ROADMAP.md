@@ -4,7 +4,8 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.60.1`.
+- Versão funcional: `v6.61.0`.
+- Cards de Estatísticas: implementados e validados localmente; aguardando revisão humana. [Nota v6.61.0](docs/releases/v6.61.0-estatisticas-cards.md).
 - Posse e escanteios sempre visível em Meu Time: em revisão na PR em Draft. [Nota v6.60.1](docs/releases/v6.60.1-meu-time-posse-escanteios.md).
 - Simplificação de Meu Time: em revisão na PR em Draft; validação autenticada com dados reais pendente no Deploy Preview. [Nota v6.60.0](docs/releases/v6.60.0-meu-time-simplificacao.md).
 - Estatísticas do clube em Meu Time: em revisão, com validação autenticada de dados reais prevista no Deploy Preview da PR em Draft. [Nota v6.59.0](docs/releases/v6.59.0-meu-time-estatisticas.md).

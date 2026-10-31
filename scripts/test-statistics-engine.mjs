@@ -191,3 +191,36 @@ assert.equal(nodes.statsMomentBadge.textContent,dashboardModel.dynamicTitle.icon
 assert.equal(nodes.statsMomentDescription.textContent,dashboardModel.dynamicTitle.description);
 assert.equal(hero.className,"stats-hero card tone-positive");
 console.log("Visibilidade do momento e Título atual preservado verificados.");
+// Renderização real: preservação de valores, estados e comparação movida.
+const renderFunction=name=>{
+  const start=appSource.indexOf('function '+name+'(');
+  return appSource.slice(start,appSource.indexOf('\n}',start)+2);
+};
+const viewNodes={statsPersonalNumbers:{},statsAdvancedComparison:{},statsRecords:{}};
+const viewContext={$:id=>viewNodes[id],escapeHtml:value=>String(value).replaceAll('<','&lt;')};
+const views=runInNewContext(['statsNumberCard','renderStatsPersonal','renderStatsExecutive','renderStatsRecords'].map(renderFunction).join('\n')+';({renderStatsPersonal,renderStatsExecutive,renderStatsRecords,statsNumberCard})',viewContext);
+const executive={available:true,position:2,participantCount:10,relationToAverage:-12,nearestGap:{label:'Até o líder',value:5,detail:'pontos de distância'},consistency:{stars:3,value:60,label:'Regular'}};
+views.renderStatsPersonal({finished:120,totalPoints:543,progress:{completedEligible:150,completedWithPick:120,participationRate:80},executive});
+assert.match(viewNodes.statsPersonalNumbers.innerHTML,/>543</);
+assert.match(viewNodes.statsPersonalNumbers.innerHTML,/>120</);
+assert.match(viewNodes.statsPersonalNumbers.innerHTML,/>80%</);
+assert.match(viewNodes.statsPersonalNumbers.innerHTML,/12 pts abaixo da média/);
+views.renderStatsExecutive({executive});
+assert.equal((viewNodes.statsAdvancedComparison.innerHTML.match(/stats-number-card/g)||[]).length,3);
+assert.doesNotMatch(viewNodes.statsAdvancedComparison.innerHTML,/Pontuação|média do grupo/);
+assert.match(viewNodes.statsAdvancedComparison.innerHTML,/★★★☆☆/);
+views.renderStatsRecords({records:{bestRound:{round:31,points:53,exact:3},bestScoringStreak:8,bestExactStreak:2,hits:60,evaluated:120}},120);
+assert.equal((viewNodes.statsRecords.innerHTML.match(/stats-number-card/g)||[]).length,4);
+assert.match(viewNodes.statsRecords.innerHTML,/53 pontos · 3 exatos/);
+views.renderStatsPersonal({finished:0,totalPoints:0,progress:{completedEligible:0},executive:{available:false}});
+assert.match(viewNodes.statsPersonalNumbers.innerHTML,/Sem jogos encerrados/);
+assert.doesNotMatch(viewNodes.statsPersonalNumbers.innerHTML,/undefined|NaN/);
+views.renderStatsExecutive({executive:{available:false}});
+assert.match(viewNodes.statsAdvancedComparison.innerHTML,/Visão geral em formação/);
+views.renderStatsRecords({records:{}},0);
+assert.match(viewNodes.statsRecords.innerHTML,/Recordes em formação/);
+assert.doesNotMatch(views.statsNumberCard('x','<teste>',0,'zero'),/role="button"|tabindex|<teste>/);
+const statsHtml=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+assert.match(statsHtml,/id="statsOverallRing"/);
+assert.match(statsHtml,/id="statsPersonalNumbers"/);
+console.log('Cards de Estatísticas: valores, comparação sem duplicação, estrelas, círculo e estados vazios preservados.');

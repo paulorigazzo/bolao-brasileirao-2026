@@ -4743,3 +4743,29 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 @media(max-width:680px){.my-team-standing-cards{margin:12px 8px}}
 .my-team-standings-action{width:100%;min-height:44px}
 .my-team-standings-action:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+
+/* Estatísticas: identidade da Home com dimensões próprias. */
+#statsTab .stats-personal-numbers{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+#statsTab .stats-executive-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+#statsTab .stats-number-card{min-width:0;min-height:170px;padding:16px;display:grid;grid-template-columns:36px minmax(0,1fr);grid-template-rows:44px auto 1fr;gap:12px 8px;border-radius:20px;background:linear-gradient(145deg,rgba(15,55,34,.96),rgba(7,31,20,.96));border:1px solid var(--divider)}
+#statsTab .stats-number-card>.mini-card-icon{grid-column:1;grid-row:1;width:36px;height:36px;font-size:1.05rem;letter-spacing:0}
+#statsTab .stats-number-card>span:not(.mini-card-icon){grid-column:2;grid-row:1;align-self:center;font-size:.76rem;line-height:1.25;text-transform:none;letter-spacing:0;color:var(--text);overflow-wrap:anywhere}
+#statsTab .stats-number-card>strong{grid-column:1/-1;grid-row:2;margin:0;text-align:center;font-size:2rem;line-height:1.15;letter-spacing:-.025em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+#statsTab .stats-number-card>small{grid-column:1/-1;grid-row:3;margin:0;min-height:2.8em;text-align:center;font-size:.72rem;line-height:1.4}
+#statsTab .stats-number-card.mini-tone-gold>strong{color:var(--premium-gold)}
+#statsTab .stats-number-card.is-stars>strong{font-size:1.4rem;letter-spacing:.02em}
+@media(max-width:680px){
+  #statsTab .stats-executive-grid,#statsTab .stats-records-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  #statsTab .stats-executive-grid>.stats-number-card:last-child{grid-column:1/-1}
+  #statsTab .stats-number-card{min-height:150px;padding:13px;gap:10px 7px;grid-template-columns:30px minmax(0,1fr)}
+  #statsTab .stats-number-card>.mini-card-icon{width:30px;height:30px;font-size:.9rem}
+  #statsTab .stats-number-card>strong{font-size:1.75rem}
+  #statsTab .stats-number-card>span:not(.mini-card-icon){font-size:.7rem}
+  #statsTab .stats-number-card>small{font-size:.68rem}
+  #statsTab .stats-personal-numbers{gap:7px}
+  #statsTab .stats-personal-numbers>.stats-number-card{grid-template-columns:minmax(0,1fr);grid-template-rows:58px auto 1fr;column-gap:0;padding:12px 7px}
+  #statsTab .stats-personal-numbers .mini-card-icon{width:20px;height:20px;font-size:.68rem;justify-self:center;align-self:start}
+  #statsTab .stats-personal-numbers>.stats-number-card>span:not(.mini-card-icon){grid-column:1;align-self:end;text-align:center;font-size:.6rem;line-height:1.25;overflow-wrap:normal}
+  #statsTab .stats-personal-numbers>.stats-number-card>strong{font-size:1.6rem}
+  #statsTab .stats-personal-numbers>.stats-number-card>small{font-size:.63rem;line-height:1.4}
+}
