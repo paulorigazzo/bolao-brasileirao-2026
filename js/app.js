@@ -38,7 +38,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.60.1";
+const APP_VERSION = "6.61.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -3819,6 +3819,22 @@ function renderStatsInsights(model){
   panel.innerHTML=model.insights.map(item=>`<article class="stats-insight-card ${item.tone||""}"><span class="stats-insight-icon">${item.icon}</span><div><small>${item.eyebrow}</small><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.text)}</p></div></article>`).join("");
 }
 
+function statsNumberCard(icon,label,value,detail,{gold=false,stars=false}={}){
+  return `<article class="home-mini-card stats-number-card${gold?' mini-tone-gold':''}${stars?' is-stars':''}"><span class="mini-card-icon" aria-hidden="true">${icon}</span><span>${escapeHtml(label)}</span><strong>${escapeHtml(String(value))}</strong><small>${escapeHtml(detail)}</small></article>`;
+}
+
+function renderStatsPersonal({finished,totalPoints,progress,executive}){
+  const panel=$("statsPersonalNumbers");
+  if(!panel) return;
+  const relation=executive.available?executive.relationToAverage:null;
+  const comparison=relation==null?'Nos palpites avaliados':`${Math.abs(relation).toFixed(0)} pts ${relation>=0?'acima':'abaixo'} da média do grupo`;
+  panel.innerHTML=[
+    statsNumberCard('⭐','Pontos conquistados',totalPoints,comparison,{gold:true}),
+    statsNumberCard('📝','Palpites avaliados',finished,'Palpites em jogos encerrados'),
+    statsNumberCard('📅','Participação',progress.completedEligible?`${progress.participationRate}%`:'—',progress.completedEligible?`${progress.completedWithPick} de ${progress.completedEligible} jogos encerrados com palpite`:'Sem jogos encerrados')
+  ].join('');
+}
+
 function renderStatsRecords(model,finished){
   const panel=$("statsRecords");
   if(!panel) return;
@@ -3827,10 +3843,10 @@ function renderStatsRecords(model,finished){
   panel.innerHTML=finished?`
     <div class="stats-dashboard-head"><div><span class="eyebrow">RECORDES PESSOAIS</span><h2>Suas melhores marcas</h2></div><span class="stats-profile-chip">temporada atual</span></div>
     <div class="stats-records-grid">
-      <article><span>Melhor rodada</span><strong>${best?`R${best.round}`:"—"}</strong><small>${best?`${best.points} pontos · ${best.exact} exato${best.exact===1?"":"s"}`:"Sem dados"}</small></article>
-      <article><span>Sequência pontuando</span><strong>${records.bestScoringStreak||0}</strong><small>jogos consecutivos</small></article>
-      <article><span>Sequência de exatos</span><strong>${records.bestExactStreak||0}</strong><small>placares consecutivos</small></article>
-      <article><span>Palpites com pontos</span><strong>${records.hits||0}</strong><small>de ${records.evaluated||0} avaliados</small></article>
+      ${statsNumberCard('🏆','Melhor rodada',best?`R${best.round}`:'—',best?`${best.points} pontos · ${best.exact} exato${best.exact===1?'':'s'}`:'Sem dados',{gold:true})}
+      ${statsNumberCard('🔥','Sequência pontuando',records.bestScoringStreak||0,'jogos consecutivos')}
+      ${statsNumberCard('🎯','Sequência de exatos',records.bestExactStreak||0,'placares consecutivos')}
+      ${statsNumberCard('✅','Palpites com pontos',records.hits||0,`de ${records.evaluated||0} avaliados`)}
     </div>`:'<div class="stats-empty-state"><span aria-hidden="true">🥇</span><strong>Recordes em formação</strong><p>Suas melhores marcas aparecerão após os primeiros resultados.</p></div>';
 }
 
@@ -3849,15 +3865,12 @@ function renderStatsExecutive(model){
     panel.innerHTML='<div class="stats-empty-state"><span aria-hidden="true">👥</span><strong>Visão geral em formação</strong><p>Os indicadores serão liberados quando a classificação possuir dados válidos.</p></div>';
     return;
   }
-  const relation=executive.relationToAverage;
   const gap=executive.nearestGap;
-  const trend=executive.trend;
-  panel.innerHTML=`<div class="stats-dashboard-head"><div><span class="eyebrow">VISÃO GERAL</span><h2>Como você está no bolão</h2><p>Os quatro indicadores mais úteis para entender sua situação atual.</p></div><span class="stats-profile-chip">${executive.position}º de ${executive.participantCount}</span></div>
+  panel.innerHTML=`<div class="stats-dashboard-head"><div><span class="eyebrow">VISÃO GERAL</span><h2>Como você está no bolão</h2><p>Sua posição, distância no ranking e regularidade.</p></div><span class="stats-profile-chip">${executive.position}º de ${executive.participantCount}</span></div>
     <div class="stats-executive-grid">
-      <article><span>Posição</span><strong>${executive.position}º</strong><small>${executive.position===1?'Você está na liderança':`entre ${executive.participantCount} participantes`}</small></article>
-      <article><span>Pontuação</span><strong>${executive.totalPoints} pts</strong><small>${relation==null?'média do grupo indisponível':`${Math.abs(relation).toFixed(0)} pts ${relation>=0?'acima':'abaixo'} da média`}</small></article>
-      <article><span>${gap.label}</span><strong>${gap.value}</strong><small>${escapeHtml(gap.detail)}</small></article>
-      <article class="trend-${trend.key}"><span>Regularidade</span><strong>${"★".repeat(executive.consistency.stars)}${"☆".repeat(5-executive.consistency.stars)}</strong><small>${executive.consistency.label}${executive.consistency.value==null?"":` · ${executive.consistency.value}%`}</small></article>
+      ${statsNumberCard('🏅','Posição',`${executive.position}º`,executive.position===1?'Você está na liderança':`entre ${executive.participantCount} participantes`)}
+      ${statsNumberCard('↔️',gap.label,gap.value,gap.detail)}
+      ${statsNumberCard('⭐','Regularidade',"★".repeat(executive.consistency.stars)+"☆".repeat(5-executive.consistency.stars),executive.consistency.label+(executive.consistency.value==null?'':` · ${executive.consistency.value}%`),{gold:true,stars:true})}
     </div>`;
 }
 
@@ -3933,8 +3946,9 @@ function renderStats(){
     ring.setAttribute("aria-label",finished?`Eficiência de ${overallRate}% nos palpites avaliados`:"Eficiência ainda indisponível");
   }
 
+  renderStatsPersonal({finished,totalPoints,progress,executive:dashboardModel.executive});
   if($("statsSummaryText")) $("statsSummaryText").textContent=finished
-    ? `${totalPoints} pontos em ${finished} palpites avaliados · participação de ${progress.participationRate}% nos jogos encerrados.${lifecycle.isProvisional?" Dados provisórios até a conclusão dos jogos pendentes.":""}`
+    ? lifecycle.isProvisional?"Dados provisórios até a conclusão dos jogos pendentes.":"Acompanhe sua evolução no bolão."
     : progress.completedEligible
       ? `Ainda não há palpites avaliados. ${progress.missedCompleted} jogo${progress.missedCompleted===1?" foi encerrado":"s foram encerrados"} sem palpite.`
       : "Suas estatísticas aparecerão assim que houver jogos finalizados.";
