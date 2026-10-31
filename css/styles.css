@@ -4658,69 +4658,91 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 #homeOverview .home-round-points-split{font-weight:400}
 
 /* Estatísticas do clube: escopo exclusivo de Meu Time. */
-.club-statistics .club-stat-filters{display:flex;gap:4px;padding:4px;background:var(--color-surface-2);border-radius:13px;max-width:460px;margin:16px 0 10px}
-.club-statistics .club-stat-filters button{flex:1;min-height:44px;padding:8px 12px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-weight:700}
-.club-statistics .club-stat-filters button[aria-pressed="true"]{background:var(--green);color:var(--color-text-inverse)}
-.club-statistics :focus-visible{outline:2px solid var(--green);outline-offset:3px}
-.club-statistics .club-stat-coverage,.club-statistics .club-stat-footnote,.club-statistics .club-stat-period{font-size:.75rem;color:var(--muted);line-height:1.5}
-.club-statistics .club-stat-panels{display:grid;grid-template-columns:minmax(0,1fr);gap:24px}
-.club-statistics .club-stat-panel{min-width:0;margin:0}
-.club-statistics .club-stat-evolution{padding:20px;background:linear-gradient(145deg,var(--color-surface-2),var(--color-surface))}
-.club-statistics .club-stat-panel h3{display:flex;align-items:center;gap:9px;margin:0 0 18px;font-size:.9rem;color:var(--green2)}
-.club-statistics .club-stat-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.club-statistics .club-stat{min-width:0;grid-template-columns:44px minmax(0,1fr) 14px;grid-template-rows:48px auto 1fr;gap:12px 9px;align-items:start}
-.club-statistics .club-stat>.mini-card-icon{grid-row:1;grid-column:1;align-self:center}
-.club-statistics .club-stat>span:not(.mini-card-icon){grid-row:1;grid-column:2/-1;align-self:center;min-width:0;line-height:1.2;overflow-wrap:anywhere}
-.club-statistics .club-stat>strong{grid-row:2;grid-column:1/-1;align-self:start;margin:3px 0 0;font-size:2.1rem;text-align:center;line-height:1;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
-.club-statistics .club-stat.mini-tone-gold>strong{color:var(--premium-gold)}
-.club-statistics .club-stat>strong em{font-size:.8rem;letter-spacing:0;font-style:normal;margin-left:2px}
-.club-statistics .club-stat>small{grid-row:3;grid-column:1/-1;align-self:start;min-height:4.2em;margin:0;text-align:center;line-height:1.4;color:var(--muted)}
-.club-statistics .club-stat>small>span{display:block}
-.club-statistics .club-stat .club-stat-unit{min-height:2.8em}
-.club-statistics .club-stat-meter{margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
-.club-statistics .club-stat-meter>div:first-child{display:flex;justify-content:space-between;gap:8px;font-size:.75rem;margin-bottom:9px;color:var(--muted)}
-.club-statistics .club-stat-meter b{color:var(--text);white-space:nowrap}
-.club-statistics .club-stat-meter small{display:block;font-size:.6875rem;color:var(--muted);margin-top:6px}
-.club-statistics .club-stat-track{height:8px;border-radius:6px;background:var(--color-surface-3);overflow:hidden;min-width:0}
-.club-statistics .club-stat-track i{display:block;height:100%;border-radius:6px;background:var(--green)}
-.club-statistics .is-defense .club-stat-track i{background:var(--color-gold)}
-.club-statistics .club-stat-trends{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-.club-statistics .club-stat-trend{margin:0;min-width:0}
-.club-statistics .club-stat-trend figcaption,.club-statistics .club-stat-trend h4{margin:0 0 12px;color:var(--muted);font-size:.75rem;font-weight:500;line-height:1.4}
-.club-statistics .club-stat-bars{display:flex;align-items:end;justify-content:center;gap:14px}
-.club-statistics .club-stat-column{min-width:0;flex:1;text-align:center;max-width:76px}
-.club-statistics .club-stat-column-track{height:112px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid var(--border)}
-.club-statistics .club-stat-column-track i{position:relative;display:block;width:34px;max-width:90%;background:var(--color-neutral-500);border-radius:5px 5px 0 0;min-height:1px}
-.club-statistics .club-stat-column-track i.is-recent{background:var(--green)}
-.club-statistics .club-stat-column-track b{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding-bottom:5px;font-size:.8rem;font-style:normal;font-variant-numeric:tabular-nums;color:var(--text)}
-.club-statistics .club-stat-column>span{display:block;margin-top:7px;font-size:.6875rem;white-space:nowrap;color:var(--muted)}
-.club-statistics .club-stat-trend>p{margin:12px 0 0;font-size:.75rem;color:var(--muted);line-height:1.5;text-align:center}
-.club-statistics .is-horizontal{margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
-.club-statistics .is-horizontal .club-stat-bars{display:grid;gap:12px;justify-content:stretch}
-.club-statistics .club-stat-horizontal{display:grid;grid-template-columns:76px minmax(0,1fr) 32px;align-items:center;gap:9px;font-size:.75rem;color:var(--muted)}
-.club-statistics .club-stat-horizontal b{text-align:right;color:var(--text);font-variant-numeric:tabular-nums}
-.club-statistics .club-stat-horizontal i{background:var(--color-neutral-500)}
-.club-statistics .club-stat-horizontal i.is-recent{background:var(--color-gold)}
-.club-statistics .club-stat-trend-empty{padding:12px 0}
-.club-statistics .club-stat-trend-empty p{text-align:left}
-.club-statistics .club-stat-period{text-align:center;margin:16px 0 0}
-.club-statistics .club-stat-details{margin-top:16px;border:1px solid var(--border);border-radius:15px;padding:0 18px;background:var(--color-surface)}
-.club-statistics .club-stat-details summary{padding:15px 0;min-height:44px;cursor:pointer;font-size:.85rem;color:var(--text)}
-.club-statistics .club-stat-details .club-stat-values{padding:8px 0 18px}
-.club-statistics .club-stat-footnote{margin:12px 0 0}
+:is(.club-statistics,.my-team-number-cards) .club-stat-filters{display:flex;gap:4px;padding:4px;background:var(--color-surface-2);border-radius:13px;max-width:460px;margin:16px 0 10px}
+:is(.club-statistics,.my-team-number-cards) .club-stat-filters button{flex:1;min-height:44px;padding:8px 12px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-weight:700}
+:is(.club-statistics,.my-team-number-cards) .club-stat-filters button[aria-pressed="true"]{background:var(--green);color:var(--color-text-inverse)}
+:is(.club-statistics,.my-team-number-cards) :focus-visible{outline:2px solid var(--green);outline-offset:3px}
+:is(.club-statistics,.my-team-number-cards) .club-stat-coverage,:is(.club-statistics,.my-team-number-cards) .club-stat-footnote,:is(.club-statistics,.my-team-number-cards) .club-stat-period{font-size:.75rem;color:var(--muted);line-height:1.5}
+:is(.club-statistics,.my-team-number-cards) .club-stat-panels{display:grid;grid-template-columns:minmax(0,1fr);gap:24px}
+:is(.club-statistics,.my-team-number-cards) .club-stat-panel{min-width:0;margin:0}
+:is(.club-statistics,.my-team-number-cards) .club-stat-evolution{padding:20px;background:linear-gradient(145deg,var(--color-surface-2),var(--color-surface))}
+:is(.club-statistics,.my-team-number-cards) .club-stat-panel h3{display:flex;align-items:center;gap:9px;margin:0 0 18px;font-size:.9rem;color:var(--green2)}
+:is(.club-statistics,.my-team-number-cards) .club-stat-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+:is(.club-statistics,.my-team-number-cards) .club-stat{min-width:0;grid-template-columns:44px minmax(0,1fr) 14px;grid-template-rows:48px auto 1fr;gap:12px 9px;align-items:start}
+:is(.club-statistics,.my-team-number-cards) .club-stat>.mini-card-icon{grid-row:1;grid-column:1;align-self:center}
+:is(.club-statistics,.my-team-number-cards) .club-stat>span:not(.mini-card-icon){grid-row:1;grid-column:2/-1;align-self:center;min-width:0;line-height:1.2;overflow-wrap:anywhere}
+:is(.club-statistics,.my-team-number-cards) .club-stat>strong{grid-row:2;grid-column:1/-1;align-self:start;margin:3px 0 0;font-size:2.1rem;text-align:center;line-height:1;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+:is(.club-statistics,.my-team-number-cards) .club-stat.mini-tone-gold>strong{color:var(--premium-gold)}
+:is(.club-statistics,.my-team-number-cards) .club-stat>strong em{font-size:.8rem;letter-spacing:0;font-style:normal;margin-left:2px}
+:is(.club-statistics,.my-team-number-cards) .club-stat>small{grid-row:3;grid-column:1/-1;align-self:start;min-height:4.2em;margin:0;text-align:center;line-height:1.4;color:var(--muted)}
+:is(.club-statistics,.my-team-number-cards) .club-stat>small>span{display:block}
+:is(.club-statistics,.my-team-number-cards) .club-stat .club-stat-unit{min-height:2.8em}
+:is(.club-statistics,.my-team-number-cards) .club-stat-meter{margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
+:is(.club-statistics,.my-team-number-cards) .club-stat-meter>div:first-child{display:flex;justify-content:space-between;gap:8px;font-size:.75rem;margin-bottom:9px;color:var(--muted)}
+:is(.club-statistics,.my-team-number-cards) .club-stat-meter b{color:var(--text);white-space:nowrap}
+:is(.club-statistics,.my-team-number-cards) .club-stat-meter small{display:block;font-size:.6875rem;color:var(--muted);margin-top:6px}
+:is(.club-statistics,.my-team-number-cards) .club-stat-track{height:8px;border-radius:6px;background:var(--color-surface-3);overflow:hidden;min-width:0}
+:is(.club-statistics,.my-team-number-cards) .club-stat-track i{display:block;height:100%;border-radius:6px;background:var(--green)}
+:is(.club-statistics,.my-team-number-cards) .is-defense .club-stat-track i{background:var(--color-gold)}
+:is(.club-statistics,.my-team-number-cards) .club-stat-trends{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+:is(.club-statistics,.my-team-number-cards) .club-stat-trend{margin:0;min-width:0}
+:is(.club-statistics,.my-team-number-cards) .club-stat-trend figcaption,:is(.club-statistics,.my-team-number-cards) .club-stat-trend h4{margin:0 0 12px;color:var(--muted);font-size:.75rem;font-weight:500;line-height:1.4}
+:is(.club-statistics,.my-team-number-cards) .club-stat-bars{display:flex;align-items:end;justify-content:center;gap:14px}
+:is(.club-statistics,.my-team-number-cards) .club-stat-column{min-width:0;flex:1;text-align:center;max-width:76px}
+:is(.club-statistics,.my-team-number-cards) .club-stat-column-track{height:112px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid var(--border)}
+:is(.club-statistics,.my-team-number-cards) .club-stat-column-track i{position:relative;display:block;width:34px;max-width:90%;background:var(--color-neutral-500);border-radius:5px 5px 0 0;min-height:1px}
+:is(.club-statistics,.my-team-number-cards) .club-stat-column-track i.is-recent{background:var(--green)}
+:is(.club-statistics,.my-team-number-cards) .club-stat-column-track b{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding-bottom:5px;font-size:.8rem;font-style:normal;font-variant-numeric:tabular-nums;color:var(--text)}
+:is(.club-statistics,.my-team-number-cards) .club-stat-column>span{display:block;margin-top:7px;font-size:.6875rem;white-space:nowrap;color:var(--muted)}
+:is(.club-statistics,.my-team-number-cards) .club-stat-trend>p{margin:12px 0 0;font-size:.75rem;color:var(--muted);line-height:1.5;text-align:center}
+:is(.club-statistics,.my-team-number-cards) .club-stat-average{text-align:center}
+:is(.club-statistics,.my-team-number-cards) .club-stat-average>strong{display:block;margin:20px 0 8px;font-size:2.1rem;font-weight:800;line-height:1.1;color:var(--text);font-variant-numeric:tabular-nums}
+:is(.club-statistics,.my-team-number-cards) .is-horizontal{margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
+:is(.club-statistics,.my-team-number-cards) .is-horizontal .club-stat-bars{display:grid;gap:12px;justify-content:stretch}
+:is(.club-statistics,.my-team-number-cards) .club-stat-horizontal{display:grid;grid-template-columns:76px minmax(0,1fr) 32px;align-items:center;gap:9px;font-size:.75rem;color:var(--muted)}
+:is(.club-statistics,.my-team-number-cards) .club-stat-horizontal b{text-align:right;color:var(--text);font-variant-numeric:tabular-nums}
+:is(.club-statistics,.my-team-number-cards) .club-stat-horizontal i{background:var(--color-neutral-500)}
+:is(.club-statistics,.my-team-number-cards) .club-stat-horizontal i.is-recent{background:var(--color-gold)}
+:is(.club-statistics,.my-team-number-cards) .club-stat-trend-empty{padding:12px 0}
+:is(.club-statistics,.my-team-number-cards) .club-stat-trend-empty p{text-align:left}
+:is(.club-statistics,.my-team-number-cards) .club-stat-period{text-align:center;margin:16px 0 0}
+:is(.club-statistics,.my-team-number-cards) .club-stat-details{margin-top:16px;border:1px solid var(--border);border-radius:15px;padding:0 18px;background:var(--color-surface)}
+:is(.club-statistics,.my-team-number-cards) .club-stat-details summary{padding:15px 0;min-height:44px;cursor:pointer;font-size:.85rem;color:var(--text)}
+:is(.club-statistics,.my-team-number-cards) .club-stat-details .club-stat-values{padding:8px 0 18px}
+:is(.club-statistics,.my-team-number-cards) .club-stat-footnote{margin:12px 0 0}
 @media(max-width:680px){
-  .club-statistics .club-stat-values{gap:8px}
-  .club-statistics .club-stat{grid-template-columns:28px minmax(0,1fr) 9px;grid-template-rows:38px auto 1fr;gap:10px 5px;padding:12px 9px}
-  .club-statistics .club-stat>.mini-card-icon{width:28px;height:28px;font-size:.8rem}
-  .club-statistics .club-stat>span:not(.mini-card-icon){font-size:.64rem}
-  .club-statistics .club-stat>strong{font-size:1.75rem}
-  .club-statistics .club-stat>small{font-size:.66rem}
+  :is(.club-statistics,.my-team-number-cards) .club-stat-values{gap:8px}
+  :is(.club-statistics,.my-team-number-cards) .club-stat{grid-template-columns:28px minmax(0,1fr) 9px;grid-template-rows:38px auto 1fr;gap:10px 5px;padding:12px 9px}
+  :is(.club-statistics,.my-team-number-cards) .club-stat>.mini-card-icon{width:28px;height:28px;font-size:.8rem}
+  :is(.club-statistics,.my-team-number-cards) .club-stat>span:not(.mini-card-icon){font-size:.64rem}
+  :is(.club-statistics,.my-team-number-cards) .club-stat>strong{font-size:1.75rem}
+  :is(.club-statistics,.my-team-number-cards) .club-stat>small{font-size:.66rem}
 }
 @media(max-width:360px){
-  .club-statistics .club-stat{grid-template-columns:20px minmax(0,1fr) 8px;column-gap:3px;padding-inline:7px}
-  .club-statistics .club-stat>.mini-card-icon{width:20px;height:20px;font-size:.68rem}
-  .club-statistics .club-stat>span:not(.mini-card-icon){font-size:.58rem}
-  .club-statistics .club-stat>strong{font-size:1.5rem}
-  .club-statistics .club-stat>small{font-size:.6rem}
+  :is(.club-statistics,.my-team-number-cards) .club-stat{grid-template-columns:20px minmax(0,1fr) 8px;column-gap:3px;padding-inline:7px}
+  :is(.club-statistics,.my-team-number-cards) .club-stat>.mini-card-icon{width:20px;height:20px;font-size:.68rem}
+  :is(.club-statistics,.my-team-number-cards) .club-stat>span:not(.mini-card-icon){font-size:.58rem}
+  :is(.club-statistics,.my-team-number-cards) .club-stat>strong{font-size:1.5rem}
+  :is(.club-statistics,.my-team-number-cards) .club-stat>small{font-size:.6rem}
 }
-@media(max-width:380px){.club-statistics .club-stat-trends{grid-template-columns:1fr;gap:24px}}
+@media(max-width:380px){:is(.club-statistics,.my-team-number-cards) .club-stat-trends{grid-template-columns:1fr;gap:24px}}
+
+/* Meu Time: números do participante e campanha usam os mesmos cards da Home. */
+.my-team-number-cards .club-stat-values.is-pair{grid-template-columns:repeat(2,minmax(0,1fr))}
+.my-team-context-line,.my-team-profile-description{margin:0;color:var(--muted);font-size:.8rem;line-height:1.5}
+.my-team-profile-description b{color:var(--text)}
+.my-team-profile-summary{gap:12px}
+.my-team-moment-inline{margin:0;border-left:3px solid var(--green);border-radius:0 12px 12px 0;padding:12px;background:var(--color-surface)}
+.my-team-moment-inline .my-team-moment-icon{width:32px;height:32px;font-size:1.1rem;border-radius:10px}
+.my-team-moment-inline .my-team-moment-copy>strong{font-size:.85rem}
+.my-team-moment-inline .my-team-moment-copy p{font-size:.78rem}
+.my-team-achievements-details{border:1px solid var(--border);border-radius:16px;padding:0 16px;background:var(--color-surface)}
+.my-team-achievements-details>summary{min-height:48px;padding:15px 0;cursor:pointer;font-size:.9rem;font-weight:700}
+.my-team-achievements-details .my-team-achievements{padding:0 0 16px}
+.my-team-achievements-details:focus-within{outline-color:var(--green)}
+.my-team-standing-cards{min-width:0;margin:16px;display:grid;gap:10px;align-content:center}
+#myTeamContent .my-team-hero-overview{grid-template-columns:minmax(0,1fr) minmax(440px,1.15fr)}
+@media(max-width:900px){#myTeamContent .my-team-hero-overview{grid-template-columns:1fr}}
+@media(max-width:680px){.my-team-standing-cards{margin:12px 8px}}
+.my-team-standings-action{width:100%;min-height:44px}
+.my-team-standings-action:focus-visible{outline:2px solid var(--green);outline-offset:3px}

@@ -25,6 +25,7 @@ import { isScheduledLiveEstimate, scheduledLiveLabel } from "./scheduled-live-es
 import { buildFriendlyRankingsModel } from "./friendly-rankings-engine.js";
 import { adminRoundGameIds, loadAdminPickProgress } from "./admin-pick-progress.js";
 import { buildMyTeamAchievements, buildMyTeamMoment } from "./my-team-moments.js";
+import { renderMyTeamParticipant, renderMyTeamCampaignSummary, renderMyTeamAchievements, renderMyTeamStandings } from "./my-team-view.js";
 import { buildMyTeamStatistics, renderMyTeamStatistics } from "./my-team-statistics.js";
 import { activeLeagueName, chooseActiveLeague, createLeagueRequestGate, filterProfilesByMembers, persistActiveLeague } from "./league-context.js";
 import { createPushSubscription, currentPushSubscription, subscriptionRow, supportsWebPush } from "./web-push.js";
@@ -37,7 +38,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.59.0";
+const APP_VERSION = "6.60.0";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -2792,11 +2793,11 @@ function favoriteTeamContext(team){
   const trendScore=recent.reduce((sum,game)=>sum+({V:3,E:1,D:0}[favoriteTeamResult(game,team)]||0),0);
   const formScore=recent.length?Math.round(trendScore/(recent.length*3)*100):50;
   const synergy=Math.max(0,Math.min(100,Math.round(accuracy*.55+exactRate*.2+formScore*.15+(bestSequence?Math.min(bestSequence*10,100):0)*.1)));
-  let profile={icon:'⚖️',name:'O Equilibrado',text:'Você combina emoção e leitura do momento do clube.'};
-  if(stats.games>=3 && stats.rate>=70) profile={icon:'🎯',name:'O Especialista',text:`Seus melhores palpites aparecem com frequência nos jogos do ${displayName}.`};
-  else if(confidence>=80 && accuracy<60) profile={icon:'❤️',name:'O Apaixonado',text:'Você acredita no seu time até quando o cenário pede cautela.'};
-  else if(accuracy>=65 && confidence<80) profile={icon:'🧠',name:'O Estratégico',text:'Você ajusta os palpites de acordo com a fase da equipe.'};
-  else if(confidence>=70) profile={icon:'🔥',name:'O Confiante',text:'Você mantém a confiança no seu time ao longo da temporada.'};
+  let profile={icon:'⚖️',name:'O Equilibrado',text:'Seu perfil considera os palpites concluídos com o clube.'};
+  if(stats.games>=3 && stats.rate>=70) profile={icon:'🎯',name:'O Especialista',text:`Você conquistou pelo menos 70% dos pontos possíveis nos jogos analisados com o ${displayName}.`};
+  else if(confidence>=80 && accuracy<60) profile={icon:'❤️',name:'O Apaixonado',text:'A frequência dos seus palpites de vitória supera a de resultados certos.'};
+  else if(accuracy>=65 && confidence<80) profile={icon:'🧠',name:'O Estratégico',text:'Você acertou o resultado em pelo menos 65% dos jogos analisados.'};
+  else if(confidence>=70) profile={icon:'🔥',name:'O Confiante',text:'Predominam os seus palpites de vitória para o clube.'};
   const recentClubPoints=recent.reduce((sum,game)=>sum+({V:3,E:1,D:0}[favoriteTeamResult(game,team)]||0),0);
   const nextPick=next?state.ownPicks.find(pick=>Number(pick.id_jogo)===Number(next.id_jogo)):null;
   const nextPickLabel=nextPick?`${Number(nextPick.gols_casa)} × ${Number(nextPick.gols_fora)}`:"";
@@ -2821,7 +2822,7 @@ function favoriteSynergyLabel(value){
 
 let myTeamStatisticsScope="all";
 function myTeamClubStatistics(team,detailsOpen=false){
-  return renderMyTeamStatistics(buildMyTeamStatistics({team,games:state.games,projections:state.gameDetailProjections,scope:myTeamStatisticsScope,normalizeTeamKey,isScorableGame}),{detailsOpen});
+  return renderMyTeamStatistics(buildMyTeamStatistics({team,games:state.games,projections:state.gameDetailProjections,scope:myTeamStatisticsScope,normalizeTeamKey,isScorableGame}),{detailsOpen,title:"Estatísticas por partida"});
 }
 
 function renderMyTeam(){
@@ -2834,24 +2835,20 @@ function renderMyTeam(){
   }
   const context=favoriteTeamContext(team);
   const statisticsDetailsOpen=Boolean(host.querySelector('.club-stat-details')?.open);
-  const {row,next,stats,profile,synergy,achievements,moment}=context;
+  const {row,next,synergy,achievements}=context;
+  const achievementsOpen=Boolean(host.querySelector('.my-team-achievements-details')?.open);
   const teamName=teamDisplayName(team.name);
   const crest=team.logo?`<img src="${escapeHtml(team.logo)}" alt="Escudo do ${escapeHtml(teamName)}">`:`<span>${escapeHtml(initials(teamName).slice(0,3))}</span>`;
   const nextOpponent=next?(normalizeTeamKey(next.time_casa)===team.key?next.time_fora:next.time_casa):null;
   const nextOpponentName=teamDisplayName(nextOpponent);
   const nextVenue=next?(normalizeTeamKey(next.time_casa)===team.key?'Casa':'Fora'):'';
   const nextDate=next?new Date(next.inicio):null;
-  const maxPoints=Math.max(1,stats.games*10);
-  const stars=Math.max(1,Math.min(5,Math.round(synergy/20)));
   const formPoints=context.recent.reduce((sum,game)=>sum+({V:3,E:1,D:0}[favoriteTeamResult(game,team)]||0),0);
   host.innerHTML=`
     <article class="my-team-hero card">
       <div class="my-team-hero-overview">
         <div class="my-team-hero-main"><span class="my-team-crest">${crest}</span><div><span class="eyebrow">MEU TIME</span><h1 id="myTeamPageTitle">${escapeHtml(teamName)}</h1><p>Brasileirão 2026</p></div></div>
-        <button class="my-team-standing-summary" type="button" data-my-team-action="standings" aria-label="${escapeHtml(`Abrir classificação completa${row?`. ${teamName} está em ${row.position}º lugar com ${row.points} pontos`:''}`)}">
-          ${row?`<span><strong>${row.position}º</strong><small>posição</small></span><span><strong>${row.points}</strong><small>pontos</small></span><em>${Number(row.goalDifference)>0?'+':''}${row.goalDifference} saldo</em>`:'<span class="my-team-standing-unavailable"><strong>—</strong><small>Classificação em atualização</small></span>'}
-          <i aria-hidden="true">›</i>
-        </button>
+        ${renderMyTeamStandings(row)}
       </div>
       <button class="secondary my-team-campaign-action" type="button" data-my-team-action="campaign">Ver campanha do ${escapeHtml(teamName)} <span aria-hidden="true">›</span></button>
       <div class="my-team-hero-context">
@@ -2863,28 +2860,14 @@ function renderMyTeam(){
       </div>
     </article>
 
-    <section class="my-team-grid my-team-grid-primary my-team-grid-synergy">
-      <article class="card my-team-synergy-card"><span class="eyebrow">ÍNDICE DE SINTONIA</span><div class="my-team-synergy-score"><strong>${synergy}%</strong><span>${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</span></div><h2>${favoriteSynergyLabel(synergy)}</h2><p>Mede sua leitura dos resultados, placares exatos, regularidade e o momento recente do clube.</p><div class="my-team-progress"><i style="width:${synergy}%"></i></div></article>
-    </section>
+    ${renderMyTeamParticipant(context,teamName,favoriteSynergyLabel(synergy))}
+    ${renderMyTeamAchievements(achievements,achievementsOpen)}
+    <section class="my-team-section" aria-labelledby="myTeamClubNumbersTitle">
+      <div class="my-team-section-heading"><h2 id="myTeamClubNumbersTitle">Seu time em números</h2></div>
+      ${renderMyTeamCampaignSummary(row)}
+      ${myTeamClubStatistics(team,statisticsDetailsOpen)}
+    </section>`;
 
-    <section class="my-team-section"><div class="my-team-section-heading"><div><span class="eyebrow">VOCÊ E O CLUBE</span><h2>Meu desempenho com o ${escapeHtml(teamName)}</h2></div></div>
-      <div class="my-team-metrics">
-        <article class="card"><span>Jogos analisados</span><strong>${stats.games}</strong><small>palpites concluídos</small></article>
-        <article class="card"><span>Resultados certos</span><strong>${stats.hits}</strong><small>${stats.games?Math.round(stats.hits/stats.games*100):0}% dos jogos</small></article>
-        <article class="card"><span>Placares exatos</span><strong>${stats.exact}</strong><small>10 pontos cada</small></article>
-        <article class="card"><span>Pontos conquistados</span><strong>${stats.points}</strong><small>de ${maxPoints} possíveis</small></article>
-      </div>
-    </section>
-
-    <section class="my-team-grid">
-      <article class="card my-team-profile-card"><span class="eyebrow">PERFIL DO TORCEDOR</span><div class="my-team-profile-icon">${profile.icon}</div><h2>${profile.name}</h2><p>${escapeHtml(profile.text)}</p><div class="my-team-profile-stats"><span><b>${context.confidence}%</b> confiança</span><span><b>${context.accuracy}%</b> leitura correta</span></div></article>
-      <article class="card my-team-club-card"><span class="eyebrow">DESEMPENHO DO CLUBE</span><div class="my-team-club-stats">${row?`<span><b>${row.playedGames}</b> jogos</span><span><b>${row.won}</b> vitórias</span><span><b>${row.draw}</b> empates</span><span><b>${row.lost}</b> derrotas</span><span><b>${row.goalsFor}</b> gols pró</span><span><b>${row.goalsAgainst}</b> gols contra</span>`:'<p>Classificação oficial em atualização.</p>'}</div><button class="secondary" type="button" data-my-team-action="standings">Ver tabela completa</button></article>
-    </section>
-
-    <section class="my-team-section"><div class="my-team-section-heading"><div><span class="eyebrow">HISTÓRIA DA TEMPORADA</span><h2>Momentos com o seu time</h2></div></div><article class="card my-team-moment-card"><span class="my-team-moment-icon" aria-hidden="true">${moment.icon}</span><div class="my-team-moment-copy"><strong>${escapeHtml(moment.title)}</strong><p>${escapeHtml(moment.text)}</p><div class="my-team-moment-indicators">${moment.indicators.map(item=>`<span>${escapeHtml(item)}</span>`).join('')}</div></div></article></section>
-
-    <section class="my-team-section"><div class="my-team-section-heading"><div><span class="eyebrow">CONQUISTAS</span><h2>Marcos do Meu Time</h2></div></div><div class="my-team-achievements">${achievements.map(item=>`<article class="card my-team-achievement-card ${item.unlocked?'is-unlocked':'is-progress'}"><span aria-hidden="true">${item.icon}</span><div><div class="my-team-achievement-heading"><strong>${escapeHtml(item.title)}</strong><small>${item.unlocked?'Conquistado':escapeHtml(item.progressLabel)}</small></div><p>${escapeHtml(item.text)}</p><div class="my-team-achievement-progress" role="progressbar" aria-label="${escapeHtml(`${item.title}: ${item.unlocked?'conquistado':item.progressLabel}`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${item.progress}"><i style="width:${item.progress}%"></i></div></div></article>`).join('')}</div></section>
-    ${myTeamClubStatistics(team,statisticsDetailsOpen)}`;
 }
 
 let homeFavoriteExpanded=false;

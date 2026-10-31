@@ -1,5 +1,5 @@
-6.59.0
+6.60.0
 
-Estatísticas do clube na tela Meu Time: ataque, defesa, disciplina e evolução recente.
+Meu Time simplificado: perfil integrado, menos repetições e cards numéricos uniformes.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)
