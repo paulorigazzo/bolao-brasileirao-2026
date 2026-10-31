@@ -204,14 +204,15 @@ views.renderStatsPersonal({finished:120,totalPoints:543,progress:{completedEligi
 assert.match(viewNodes.statsPersonalNumbers.innerHTML,/>543</);
 assert.match(viewNodes.statsPersonalNumbers.innerHTML,/>120</);
 assert.match(viewNodes.statsPersonalNumbers.innerHTML,/>80%</);
-assert.match(viewNodes.statsPersonalNumbers.innerHTML,/12 pts abaixo da média/);
+assert.match(viewNodes.statsPersonalNumbers.innerHTML,/<b>12<\/b> pts abaixo da média/);
+assert.match(viewNodes.statsPersonalNumbers.innerHTML,/<b>120<\/b> de <b>150<\/b> jogos encerrados/);
 views.renderStatsExecutive({executive});
 assert.equal((viewNodes.statsAdvancedComparison.innerHTML.match(/stats-number-card/g)||[]).length,3);
 assert.doesNotMatch(viewNodes.statsAdvancedComparison.innerHTML,/Pontuação|média do grupo/);
 assert.match(viewNodes.statsAdvancedComparison.innerHTML,/★★★☆☆/);
 views.renderStatsRecords({records:{bestRound:{round:31,points:53,exact:3},bestScoringStreak:8,bestExactStreak:2,hits:60,evaluated:120}},120);
 assert.equal((viewNodes.statsRecords.innerHTML.match(/stats-number-card/g)||[]).length,4);
-assert.match(viewNodes.statsRecords.innerHTML,/53 pontos · 3 exatos/);
+assert.match(viewNodes.statsRecords.innerHTML,/<b>53<\/b> pontos · <b>3<\/b> exatos/);
 views.renderStatsPersonal({finished:0,totalPoints:0,progress:{completedEligible:0},executive:{available:false}});
 assert.match(viewNodes.statsPersonalNumbers.innerHTML,/Sem jogos encerrados/);
 assert.doesNotMatch(viewNodes.statsPersonalNumbers.innerHTML,/undefined|NaN/);
@@ -220,6 +221,10 @@ assert.match(viewNodes.statsAdvancedComparison.innerHTML,/Visão geral em forma�
 views.renderStatsRecords({records:{}},0);
 assert.match(viewNodes.statsRecords.innerHTML,/Recordes em formação/);
 assert.doesNotMatch(views.statsNumberCard('x','<teste>',0,'zero'),/role="button"|tabindex|<teste>/);
+assert.match(views.statsNumberCard('x','teste',0,'Regular · 82,5%'),/<small>Regular · <b>82,5%<\/b><\/small>/);
+assert.match(views.statsNumberCard('x','teste',0,'0 pontos'),/<small><b>0<\/b> pontos<\/small>/);
+assert.doesNotMatch(views.statsNumberCard('x','teste',0,'Sem dados'),/<b>/);
+assert.doesNotMatch(views.statsNumberCard('x','teste',0,'<img src=x> 3'),/<img/);
 const statsHtml=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 assert.match(statsHtml,/id="statsOverallRing"/);
 assert.match(statsHtml,/id="statsPersonalNumbers"/);
