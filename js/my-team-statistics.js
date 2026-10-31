@@ -64,7 +64,22 @@ export function buildMyTeamStatistics({ team, games = [], projections = [], scop
 
 function stat(label, item, { percent = false, signed = false, whole = false } = {}) {
   const value = item.value == null ? "—" : `${signed && item.value > 0 ? "+" : ""}${whole ? integer(item.value) : fmt(item.value)}`;
-  return `<div class="club-stat"><strong>${value}${percent && item.value != null ? '<em>%</em>' : ""}</strong><span>${label}</span><small>${sample(item.games)} com dados</small></div>`;
+  const headings = {
+    "Finalizações / jogo": ["Finalizações", "⚽", "por jogo"],
+    "No gol / jogo": ["No gol", "🎯", "por jogo"],
+    "Chutes que viram gols": ["Conversão", "🥅", "chutes que viram gols"],
+    "Finalizações sofridas / jogo": ["Chutes sofridos", "🛡️", "por jogo", true],
+    "No gol sofridas / jogo": ["No gol sofridos", "🧤", "por jogo", true],
+    "Saldo de finalizações / jogo": ["Saldo de chutes", "↔️", "por jogo", true],
+    "Faltas / jogo": ["Faltas", "🚩", "por jogo", true],
+    "Amarelos / jogo": ["Amarelos", "🟨", "por jogo", true],
+    "Vermelhos no período": ["Vermelhos", "🟥", "no período", true],
+    "Posse média": ["Posse média", "⚽", "média por jogo"],
+    "Escanteios a favor / jogo": ["Escanteios a favor", "🚩", "por jogo"],
+    "Escanteios contra / jogo": ["Escanteios contra", "🛡️", "por jogo", true],
+  };
+  const [title, icon, unit, gold] = headings[label];
+  return `<article class="home-mini-card club-stat${gold ? " mini-tone-gold" : ""}" aria-label="${label}"><span class="mini-card-icon" aria-hidden="true">${icon}</span><span>${title}</span><strong>${value}${percent && item.value != null ? '<em>%</em>' : ""}</strong><small><span class="club-stat-unit">${unit}</span><span>${sample(item.games)} com dados</span></small></article>`;
 }
 
 function meter(label, item, percentage, display) {
@@ -90,9 +105,9 @@ export function renderMyTeamStatistics(model, { detailsOpen = false } = {}) {
     <div class="club-stat-filters" role="group" aria-label="Filtrar estatísticas por mando">${Object.entries(SCOPES).map(([key, label]) => `<button type="button" data-club-stat-scope="${key}" aria-pressed="${model.scope === key}">${label}</button>`).join("")}</div>
     <p class="club-stat-coverage" role="status">${count}</p>
     <div class="club-stat-panels">
-      <section class="card club-stat-panel" aria-labelledby="clubAttackTitle"><h3 id="clubAttackTitle"><span aria-hidden="true">🎯</span> Ataque</h3><div class="club-stat-values">${stat("Finalizações / jogo", m.shots)}${stat("No gol / jogo", m.shotsOnTarget)}${stat("Chutes que viram gols", m.conversion, { percent: true })}</div>${meter("Pontaria · chutes no gol", m.accuracy, m.accuracy.value, m.accuracy.value == null ? "—" : `${fmt(m.accuracy.value)}%`)}</section>
-      <section class="card club-stat-panel is-defense" aria-labelledby="clubDefenseTitle"><h3 id="clubDefenseTitle"><span aria-hidden="true">🛡️</span> Defesa</h3><div class="club-stat-values">${stat("Finalizações sofridas / jogo", m.against)}${stat("No gol sofridas / jogo", m.againstTarget)}${stat("Saldo de finalizações / jogo", m.balance, { signed: true })}</div>${meter("Jogos sem sofrer gols", m.clean, m.clean.games ? m.clean.value / m.clean.games * 100 : null, m.clean.games ? `${m.clean.value} de ${m.clean.games}` : "—")}</section>
-      <section class="card club-stat-panel is-discipline" aria-labelledby="clubDisciplineTitle"><h3 id="clubDisciplineTitle"><span aria-hidden="true">🟨</span> Disciplina</h3><div class="club-stat-values">${stat("Faltas / jogo", m.fouls)}${stat("Amarelos / jogo", m.yellowCards)}${stat("Vermelhos no período", m.redCards, { whole: true })}</div>${trend("Amarelos por jogo", model.trends.discipline, "clubYellowTrend", true)}</section>
+      <section class="club-stat-panel" aria-labelledby="clubAttackTitle"><h3 id="clubAttackTitle"><span aria-hidden="true">🎯</span> Ataque</h3><div class="club-stat-values">${stat("Finalizações / jogo", m.shots)}${stat("No gol / jogo", m.shotsOnTarget)}${stat("Chutes que viram gols", m.conversion, { percent: true })}</div>${meter("Pontaria · chutes no gol", m.accuracy, m.accuracy.value, m.accuracy.value == null ? "—" : `${fmt(m.accuracy.value)}%`)}</section>
+      <section class="club-stat-panel is-defense" aria-labelledby="clubDefenseTitle"><h3 id="clubDefenseTitle"><span aria-hidden="true">🛡️</span> Defesa</h3><div class="club-stat-values">${stat("Finalizações sofridas / jogo", m.against)}${stat("No gol sofridas / jogo", m.againstTarget)}${stat("Saldo de finalizações / jogo", m.balance, { signed: true })}</div>${meter("Jogos sem sofrer gols", m.clean, m.clean.games ? m.clean.value / m.clean.games * 100 : null, m.clean.games ? `${m.clean.value} de ${m.clean.games}` : "—")}</section>
+      <section class="club-stat-panel is-discipline" aria-labelledby="clubDisciplineTitle"><h3 id="clubDisciplineTitle"><span aria-hidden="true">🟨</span> Disciplina</h3><div class="club-stat-values">${stat("Faltas / jogo", m.fouls)}${stat("Amarelos / jogo", m.yellowCards)}${stat("Vermelhos no período", m.redCards, { whole: true })}</div>${trend("Amarelos por jogo", model.trends.discipline, "clubYellowTrend", true)}</section>
       <section class="card club-stat-panel club-stat-evolution" aria-labelledby="clubEvolutionTitle"><h3 id="clubEvolutionTitle"><span aria-hidden="true">📊</span> Evolução recente</h3><div class="club-stat-trends">${trend("Chutes no gol / jogo", model.trends.attack, "clubAttackTrend")}${trend("No gol sofridos / jogo", model.trends.defense, "clubDefenseTrend")}</div><p class="club-stat-period">Últimos 5 jogos × 5 imediatamente anteriores · ${scopeLabel}</p></section>
     </div>
     <details class="club-stat-details"${detailsOpen ? " open" : ""}><summary>Posse e escanteios</summary><div class="club-stat-values">${stat("Posse média", m.possession, { percent: true })}${stat("Escanteios a favor / jogo", m.corners)}${stat("Escanteios contra / jogo", m.againstCorners)}</div></details>
