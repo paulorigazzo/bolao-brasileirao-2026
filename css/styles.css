@@ -4739,7 +4739,8 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 .my-team-achievements-details .my-team-achievements{padding:0 0 16px}
 .my-team-achievements-details:focus-within{outline-color:var(--green)}
 .my-team-standing-cards{min-width:0;margin:16px;display:grid;gap:10px;align-content:center}
-.my-team-standing-balance{margin:0;color:var(--muted);font-size:.78rem;text-align:center}
-.my-team-standing-balance b{color:var(--text)}
+#myTeamContent .my-team-hero-overview{grid-template-columns:minmax(0,1fr) minmax(440px,1.15fr)}
+@media(max-width:900px){#myTeamContent .my-team-hero-overview{grid-template-columns:1fr}}
+@media(max-width:680px){.my-team-standing-cards{margin:12px 8px}}
 .my-team-standings-action{width:100%;min-height:44px}
 .my-team-standings-action:focus-visible{outline:2px solid var(--green);outline-offset:3px}
