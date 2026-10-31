@@ -38,7 +38,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.61.0";
+const APP_VERSION = "6.61.1";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -3820,7 +3820,8 @@ function renderStatsInsights(model){
 }
 
 function statsNumberCard(icon,label,value,detail,{gold=false,stars=false}={}){
-  return `<article class="home-mini-card stats-number-card${gold?' mini-tone-gold':''}${stars?' is-stars':''}"><span class="mini-card-icon" aria-hidden="true">${icon}</span><span>${escapeHtml(label)}</span><strong>${escapeHtml(String(value))}</strong><small>${escapeHtml(detail)}</small></article>`;
+  const secondary=String(detail).split(/(\d+(?:[.,]\d+)*%?)/g).map((part,index)=>index%2?`<b>${escapeHtml(part)}</b>`:escapeHtml(part)).join('');
+  return `<article class="home-mini-card stats-number-card${gold?' mini-tone-gold':''}${stars?' is-stars':''}"><span class="mini-card-icon" aria-hidden="true">${icon}</span><span>${escapeHtml(label)}</span><strong>${escapeHtml(String(value))}</strong><small>${secondary}</small></article>`;
 }
 
 function renderStatsPersonal({finished,totalPoints,progress,executive}){

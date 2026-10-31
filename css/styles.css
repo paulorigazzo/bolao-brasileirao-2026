@@ -4752,6 +4752,7 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 #statsTab .stats-number-card>span:not(.mini-card-icon){grid-column:2;grid-row:1;align-self:center;font-size:.76rem;line-height:1.25;text-transform:none;letter-spacing:0;color:var(--text);overflow-wrap:anywhere}
 #statsTab .stats-number-card>strong{grid-column:1/-1;grid-row:2;margin:0;text-align:center;font-size:2rem;line-height:1.15;letter-spacing:-.025em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 #statsTab .stats-number-card>small{grid-column:1/-1;grid-row:3;margin:0;min-height:2.8em;text-align:center;font-size:.72rem;line-height:1.4}
+#statsTab .stats-number-card>small b{font-weight:750;color:var(--text)}
 #statsTab .stats-number-card.mini-tone-gold>strong{color:var(--premium-gold)}
 #statsTab .stats-number-card.is-stars>strong{font-size:1.4rem;letter-spacing:.02em}
 @media(max-width:680px){

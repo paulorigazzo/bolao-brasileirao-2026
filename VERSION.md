@@ -1,5 +1,5 @@
-6.61.0
+6.61.1
 
-Cards numéricos de Estatísticas alinhados à identidade da Home, preservando o círculo de eficiência.
+Números secundários dos cards de Estatísticas em negrito, seguindo o padrão da Home.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

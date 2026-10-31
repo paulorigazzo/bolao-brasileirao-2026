@@ -1,3 +1,7 @@
+# v6.61.1 — Destaque dos números secundários
+
+- Aplica negrito somente aos números dos complementos dos dez novos cards de Estatísticas; preserva cálculos, textos, layout e círculo de eficiência. [Escopo e validação](docs/releases/v6.61.1-estatisticas-numeros-secundarios.md).
+
 # v6.61.0 — Cards de Estatísticas
 
 - Destaca pontos, palpites avaliados e participação em Meu desempenho; preserva o círculo de eficiência.

@@ -4,7 +4,8 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.61.0`.
+- Versão funcional: `v6.61.1`.
+- Números secundários de Estatísticas em negrito: validados localmente, aguardando revisão. [Nota v6.61.1](docs/releases/v6.61.1-estatisticas-numeros-secundarios.md).
 - Cards de Estatísticas: implementados e validados localmente; aguardando revisão humana. [Nota v6.61.0](docs/releases/v6.61.0-estatisticas-cards.md).
 - Posse e escanteios sempre visível em Meu Time: em revisão na PR em Draft. [Nota v6.60.1](docs/releases/v6.60.1-meu-time-posse-escanteios.md).
 - Simplificação de Meu Time: em revisão na PR em Draft; validação autenticada com dados reais pendente no Deploy Preview. [Nota v6.60.0](docs/releases/v6.60.0-meu-time-simplificacao.md).
