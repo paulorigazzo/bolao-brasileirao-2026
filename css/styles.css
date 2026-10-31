@@ -4755,11 +4755,17 @@ button.whatsapp:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
 #statsTab .stats-number-card.mini-tone-gold>strong{color:var(--premium-gold)}
 #statsTab .stats-number-card.is-stars>strong{font-size:1.4rem;letter-spacing:.02em}
 @media(max-width:680px){
-  #statsTab .stats-personal-numbers,#statsTab .stats-executive-grid,#statsTab .stats-records-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-  #statsTab .stats-personal-numbers>.stats-number-card:last-child,#statsTab .stats-executive-grid>.stats-number-card:last-child{grid-column:1/-1}
+  #statsTab .stats-executive-grid,#statsTab .stats-records-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  #statsTab .stats-executive-grid>.stats-number-card:last-child{grid-column:1/-1}
   #statsTab .stats-number-card{min-height:150px;padding:13px;gap:10px 7px;grid-template-columns:30px minmax(0,1fr)}
   #statsTab .stats-number-card>.mini-card-icon{width:30px;height:30px;font-size:.9rem}
   #statsTab .stats-number-card>strong{font-size:1.75rem}
   #statsTab .stats-number-card>span:not(.mini-card-icon){font-size:.7rem}
   #statsTab .stats-number-card>small{font-size:.68rem}
+  #statsTab .stats-personal-numbers{gap:7px}
+  #statsTab .stats-personal-numbers>.stats-number-card{grid-template-columns:minmax(0,1fr);grid-template-rows:58px auto 1fr;column-gap:0;padding:12px 7px}
+  #statsTab .stats-personal-numbers .mini-card-icon{width:20px;height:20px;font-size:.68rem;justify-self:center;align-self:start}
+  #statsTab .stats-personal-numbers>.stats-number-card>span:not(.mini-card-icon){grid-column:1;align-self:end;text-align:center;font-size:.6rem;line-height:1.25;overflow-wrap:normal}
+  #statsTab .stats-personal-numbers>.stats-number-card>strong{font-size:1.6rem}
+  #statsTab .stats-personal-numbers>.stats-number-card>small{font-size:.63rem;line-height:1.4}
 }
