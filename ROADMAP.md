@@ -5,22 +5,23 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 ## Referência atual
 
 - Versão funcional: `v6.61.1`.
-- Números secundários de Estatísticas em negrito: validados localmente, aguardando revisão. [Nota v6.61.1](docs/releases/v6.61.1-estatisticas-numeros-secundarios.md).
-- Cards de Estatísticas: implementados e validados localmente; aguardando revisão humana. [Nota v6.61.0](docs/releases/v6.61.0-estatisticas-cards.md).
-- Posse e escanteios sempre visível em Meu Time: em revisão na PR em Draft. [Nota v6.60.1](docs/releases/v6.60.1-meu-time-posse-escanteios.md).
-- Simplificação de Meu Time: em revisão na PR em Draft; validação autenticada com dados reais pendente no Deploy Preview. [Nota v6.60.0](docs/releases/v6.60.0-meu-time-simplificacao.md).
-- Estatísticas do clube em Meu Time: em revisão, com validação autenticada de dados reais prevista no Deploy Preview da PR em Draft. [Nota v6.59.0](docs/releases/v6.59.0-meu-time-estatisticas.md).
-- Destaque dos números na composição de pontos da Home: em revisão. [Nota v6.58.1](docs/releases/v6.58.1-destaque-numeros-home.md).
-- Pontos projetados no card da rodada atual da Home: em revisão. [Nota v6.58.0](docs/releases/v6.58.0-home-pontos-projetados.md).
-- ADM por tarefa: em revisão, quatro áreas e preservação do contexto de leitura. [Nota v6.57.0](docs/releases/v6.57.0-reorganizacao-adm.md).
-- Simplificação visual da ADM: em revisão, preservando fontes, indicadores e controles. [Nota v6.56.0](docs/releases/v6.56.0-simplificacao-interface-adm.md).
+- Checagem operacional autenticada de 12/11/2026: diagnóstico 100/100, integridade consistente e zero falhas de notificações registradas. [Evidências e limites](docs/process/CHECAGEM_OPERACIONAL_2026-11-12.md).
+- Números secundários de Estatísticas em negrito: entregue na v6.61.1 (PR #288). [Nota v6.61.1](docs/releases/v6.61.1-estatisticas-numeros-secundarios.md).
+- Cards de Estatísticas: entregues na v6.61.0 (PR #287). [Nota v6.61.0](docs/releases/v6.61.0-estatisticas-cards.md).
+- Posse e escanteios sempre visível em Meu Time: entregue na v6.60.1 (PR #286). [Nota v6.60.1](docs/releases/v6.60.1-meu-time-posse-escanteios.md).
+- Simplificação de Meu Time: entregue na v6.60.0 (PR #285). [Nota v6.60.0](docs/releases/v6.60.0-meu-time-simplificacao.md).
+- Estatísticas do clube em Meu Time: entregues na v6.59.0 (PR #284). [Nota v6.59.0](docs/releases/v6.59.0-meu-time-estatisticas.md).
+- Destaque dos números na composição de pontos da Home: entregue na v6.58.1 (PR #283). [Nota v6.58.1](docs/releases/v6.58.1-destaque-numeros-home.md).
+- Pontos projetados no card da rodada atual da Home: entregues na v6.58.0 (PR #282). [Nota v6.58.0](docs/releases/v6.58.0-home-pontos-projetados.md).
+- ADM por tarefa: entregue na v6.57.0 (PR #281). [Nota v6.57.0](docs/releases/v6.57.0-reorganizacao-adm.md).
+- Simplificação visual da ADM: entregue na v6.56.0 (PR #280). [Nota v6.56.0](docs/releases/v6.56.0-simplificacao-interface-adm.md).
 - Notificações automáticas: ativas em produção desde 2026-10-27; migração aplicada e conciliada. [Plano e operação](docs/releases/v6.52.0-notificacoes-automaticas.md).
 - Acompanhamento das notificações na ADM: entregue. [Nota v6.53.0](docs/releases/v6.53.0-adm-acompanhamento-notificacoes.md).
 - Consolidados de disparos ao ADM: entregues, migração aplicada e conciliada. [Nota v6.54.0](docs/releases/v6.54.0-consolidados-push-adm.md).
-- Filtro de destinatário no acompanhamento: em revisão. [Nota v6.55.0](docs/releases/v6.55.0-filtro-destinatario-notificacoes.md).
+- Filtro de destinatário no acompanhamento: entregue na v6.55.0 (PR #277). [Nota v6.55.0](docs/releases/v6.55.0-filtro-destinatario-notificacoes.md).
 - Prioridade: **manter o Bolão 2026 estável e evoluí-lo incrementalmente para múltiplas ligas com palpites compartilhados**.
 - Próxima etapa coordenada: monitoramento normal da API-Football nas próximas rodadas; o Rigazzo permanece congelado como histórico e possível laboratório.
-- Jogos reagendados da Rodada 21: contexto e comunicação no app preparados na v6.44.2; confirmação oficial das duas datas aplicada no Supabase, com validação visual autenticada ainda pendente.
+- Jogos reagendados da Rodada 21: contexto e comunicação entregues na v6.44.2. Em 12/11/2026, a Home autenticada mostrou um jogo com palpites abertos e o diagnóstico indicou uma data de rodada anterior em verificação. Identificação da partida e confirmação oficial do calendário seguem pendentes. [Registro da checagem](docs/process/CHECAGEM_OPERACIONAL_2026-11-12.md).
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Administração de ligas
