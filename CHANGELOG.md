@@ -1,3 +1,7 @@
+# v6.61.2 — Terceiro card dos Destaques do Bolão
+
+- Mostra o Recorde por rodada enquanto a projeção carrega ou não há líder com pontuação positiva. [Nota da entrega](docs/releases/v6.61.2-terceiro-card-destaques.md).
+
 # v6.61.1 — Destaque dos números secundários
 
 - Aplica negrito somente aos números dos complementos dos dez novos cards de Estatísticas; preserva cálculos, textos, layout e círculo de eficiência. [Escopo e validação](docs/releases/v6.61.1-estatisticas-numeros-secundarios.md).

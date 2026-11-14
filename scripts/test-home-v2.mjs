@@ -159,6 +159,26 @@ leaderContext.entry={data:{...leaderPayload,leagueId:'b'}};vm.runInContext('rend
 leaderContext.entry={data:leaderPayload,error:true};vm.runInContext('renderHomeV2RoundLeader(entry,29)',leaderContext);assert.equal(leaderSlot.innerHTML,'');
 leaderContext.entry={data:{...leaderPayload,round:28}};vm.runInContext('renderHomeV2RoundLeader(entry,29)',leaderContext);assert.equal(leaderSlot.innerHTML,'');
 
+// Com placar ao vivo, o recorde cobre a espera e uma projeção zerada.
+leaderSlot.button=null;
+leaderContext.homeV2FriendlyRankings=()=>({records:{ranking:[{position:1,name:'Recordista',points:56,round:28}]}});
+leaderContext.state.games=[{rodada:29}];
+leaderContext.gameStatusDisplay=()=>({key:'live'});
+leaderContext.hasValidScore=()=>true;
+leaderContext.entry=null;
+vm.runInContext('renderHomeV2RoundLeader(entry,29)',leaderContext);
+assert.match(leaderSlot.innerHTML,/Recorde por rodada/);
+leaderContext.entry={data:leaderPayload};
+vm.runInContext('renderHomeV2RoundLeader(entry,29)',leaderContext);
+assert.match(leaderSlot.innerHTML,/Líder da rodada/);
+leaderContext.entry={data:{...leaderPayload,ranking:leaderPayload.ranking.map(row=>({...row,total:0,confirmed:0,provisional:0}))}};
+vm.runInContext('renderHomeV2RoundLeader(entry,29)',leaderContext);
+assert.match(leaderSlot.innerHTML,/Recorde por rodada/);
+leaderContext.publicPicksRefreshPending=true;
+vm.runInContext('renderHomeV2RoundLeader(entry,29)',leaderContext);
+assert.equal(leaderSlot.innerHTML,'','recorde aguarda a atualização dos palpites públicos');
+leaderContext.publicPicksRefreshPending=false;
+
 // A consulta compartilhada só ganha a rodada atual enquanto a Home 2.0 está visível.
 let roundLoads=0,roundRenders=0,releaseRound,delayRound=false,hiddenV2=false;
 const refreshContext={document:{hidden:false},$:id=>id==='homeV2Tab'?{classList:{contains:()=>hiddenV2}}:null,isAdminUser:()=>true,state:{user:{id:'me'},activeLeague:{liga_id:'a'},leagueContextStatus:'ready'},currentRoundNumber:()=>29,roundHighlightsAvailable:()=>true,roundHighlightsSelection:null,roundHighlightsSession:0,roundHighlightsKey:()=>refreshContext.state.activeLeague.liga_id,roundHighlightsLoader:{load:async()=>{roundLoads++;if(delayRound)return new Promise(resolve=>{releaseRound=resolve;});return {data:leaderPayload};}},renderHomeV2RoundLeader:()=>{roundRenders++;}};
@@ -297,7 +317,7 @@ vm.runInContext('renderHomeV2RoundLeader(entry,29,"home")',leaderContext);
 assert.match(leaderSlot.innerHTML,/Recorde por rodada/);assert.match(leaderSlot.innerHTML,/data-view="records"/);assert.doesNotMatch(leaderSlot.innerHTML,/data-round=/);
 leaderContext.entry={data:leaderPayload};vm.runInContext('renderHomeV2RoundLeader(entry,29,"home")',leaderContext);assert.match(leaderSlot.innerHTML,/Líder da rodada/);
 leaderContext.entry=null;leaderContext.isScorableGame=()=>true;leaderContext.state.games=[{rodada:29}];
-vm.runInContext('renderHomeV2RoundLeader(entry,29,"home")',leaderContext);assert.equal(leaderSlot.innerHTML,'');
+vm.runInContext('renderHomeV2RoundLeader(entry,29,"home")',leaderContext);assert.match(leaderSlot.innerHTML,/Recorde por rodada/);
 context.clickLeague({target:{closest:()=>({dataset:{v2Action:'parallel',view:'records'}})}});assert.equal(context.friendlyRankingsView,'records');
 
 leaderContext.state.games=[];leaderContext.publicPicksRefreshPending=true;
