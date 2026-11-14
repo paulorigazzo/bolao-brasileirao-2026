@@ -38,7 +38,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.61.1";
+const APP_VERSION = "6.61.2";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -3150,9 +3150,9 @@ function renderHomeV2RoundLeader(entry,round,prefix="homeV2"){
   if(!slot||!section||!tab||tab.classList.contains("hidden")||(prefix==="homeV2"&&!isAdminUser())||state.leagueContextStatus!=="ready"||round!==currentRoundNumber())return;
   const valid=entry?.data&&!entry.error&&String(entry.data.leagueId)===String(state.activeLeague?.liga_id)&&entry.data.round===round;
   const model=valid?buildRoundLiveHighlightsModel(entry.data,state.user?.id):null;
-  const localResults=state.games.some(game=>Number(game.rodada)===round&&(isScorableGame(game)||(['live','suspended'].includes(gameStatusDisplay(game).key)&&hasValidScore(game))));
-  const card=model?.hasResults?buildHomeV2RoundLeader(model,round,state.user?.id)
-    :!localResults&&!publicPicksRefreshPending?buildHomeV2RoundRecord(homeV2FriendlyRankings()):null;
+  const leader=buildHomeV2RoundLeader(model,round,state.user?.id);
+  const record=()=>publicPicksRefreshPending?null:buildHomeV2RoundRecord(homeV2FriendlyRankings());
+  const card=leader??record();
   const button=slot.querySelector('button');
   if(card){
     const content=homeV2LeagueMetricContent(card);

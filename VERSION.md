@@ -1,5 +1,5 @@
-6.61.1
+6.61.2
 
-Números secundários dos cards de Estatísticas em negrito, seguindo o padrão da Home.
+O Recorde por rodada ocupa o terceiro card dos Destaques até haver um líder com pontuação positiva.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)
