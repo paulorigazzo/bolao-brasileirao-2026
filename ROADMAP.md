@@ -21,7 +21,7 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 - Filtro de destinatário no acompanhamento: entregue na v6.55.0 (PR #277). [Nota v6.55.0](docs/releases/v6.55.0-filtro-destinatario-notificacoes.md).
 - Prioridade: **manter o Bolão 2026 estável e evoluí-lo incrementalmente para múltiplas ligas com palpites compartilhados**.
 - Próxima etapa coordenada: monitoramento normal da API-Football nas próximas rodadas; o Rigazzo permanece congelado como histórico e possível laboratório.
-- Jogos reagendados da Rodada 21: contexto e comunicação entregues na v6.44.2. Em 12/11/2026, a Home autenticada mostrou um jogo com palpites abertos e o diagnóstico indicou uma data de rodada anterior em verificação. Identificação da partida e confirmação oficial do calendário seguem pendentes. [Registro da checagem](docs/process/CHECAGEM_OPERACIONAL_2026-11-12.md).
+- Jogos reagendados da Rodada 21: contexto e comunicação entregues na v6.44.2. Em 12/11/2026, a Home autenticada mostrou um jogo com palpites abertos e o diagnóstico indicou uma data de rodada anterior em verificação. Chapecoense × Vasco confirmado pela CBF para 14/11 às 20h30, com a confirmação registrada no banco e fechamento dos palpites às 20h. [Registro da checagem](docs/process/CHECAGEM_OPERACIONAL_2026-11-12.md).
 - Tela de Jogos: congelada para evolução ampla, salvo correção crítica ou tarefa explícita.
 
 ## Administração de ligas
