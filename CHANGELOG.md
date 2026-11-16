@@ -1,3 +1,7 @@
+# v6.61.3 — Palpites em aberto na ADM
+
+- Os cards da Situação da rodada mostram quantos jogos abertos ainda precisam de palpite. [Nota da entrega](docs/releases/v6.61.3-adm-palpites-por-palpitar.md).
+
 # v6.61.2 — Terceiro card dos Destaques do Bolão
 
 - Mostra o Recorde por rodada enquanto a projeção carrega ou não há líder com pontuação positiva. [Nota da entrega](docs/releases/v6.61.2-terceiro-card-destaques.md).
