@@ -478,3 +478,5 @@
 
 #adminTab .admin-area>#adminAttentionCard.is-collapsed [data-admin-card-header] h2{margin-top:0}
 @media(max-width:600px){#adminTab .admin-area>#adminAttentionCard.is-collapsed [data-admin-card-header] h2{font-size:1rem}}
+
+#adminAttentionCard .admin-pending-meta{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

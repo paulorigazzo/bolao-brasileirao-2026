@@ -1,5 +1,5 @@
-6.61.2
+6.61.3
 
-O Recorde por rodada ocupa o terceiro card dos Destaques até haver um líder com pontuação positiva.
+Situação da rodada mostra quantos palpites ainda podem ser feitos por participante.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

@@ -38,7 +38,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.61.2";
+const APP_VERSION = "6.61.3";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -4532,7 +4532,8 @@ function renderAdminAttention(){
   const participantCard=item=>{
     const pct=item.total?Math.min(100,Math.round(item.count/item.total*100)):0;
     const isComplete=!snapshot.actionablePending.includes(item);
-    const status=isComplete?"Em dia nos jogos abertos":item.status==="not-started"?"Nenhum palpite":"Parcial";
+    const remaining=snapshot.openGames.filter(game=>!item.pickedGameIds.includes(Number(game.id_jogo))).length;
+    const status=isComplete?"Em dia nos jogos abertos":`${remaining} por palpitar`;
     const icon=isComplete?"✅":item.status==="not-started"?"🔴":"🟡";
     const updated=item.lastUpdate?new Date(item.lastUpdate).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"Sem registro";
     const participant=resolveAttentionWhatsAppParticipant(item,state.authorizedParticipants);
@@ -4541,7 +4542,7 @@ function renderAdminAttention(){
     const pushEnabled=!isComplete && Number(communication?.activeDevices)>0 && Boolean(pushUser?.user_id);
     const pushTitle=isComplete?"Participante sem palpites pendentes":pushEnabled?"Enviar notificação individual":"Participante sem notificações ativas";
     const pushButton=`<button type="button" class="secondary admin-attention-push" data-attention-push-user="${escapeHtml(pushUser?.user_id||"")}" ${pushEnabled?"":"disabled"} title="${pushTitle}" aria-label="${pushTitle}">🔔 <span>Notificação</span></button>`;
-    return `<article class="admin-pending-person status-${item.status}"><button class="admin-pending-detail" type="button" data-admin-participant-detail="${escapeHtml(item.email)}" aria-label="Ver detalhes dos palpites de ${escapeHtml(item.name)}"><div class="admin-person-row"><strong>${icon} ${escapeHtml(item.name)}</strong><span>${item.count}/${item.total}</span></div><div class="admin-progress-track"><i style="width:${pct}%"></i></div><small>${status} • última atualização: ${updated}</small></button><div class="admin-pending-actions">${adminWhatsAppButton(participant,"admin-attention-whatsapp")}${pushButton}<button class="admin-person-detail-hint" type="button" data-admin-participant-detail="${escapeHtml(item.email)}" aria-label="Ver jogos e palpites de ${escapeHtml(item.name)}">Ver jogos <span aria-hidden="true">›</span></button></div></article>`;
+    return `<article class="admin-pending-person status-${item.status}"><button class="admin-pending-detail" type="button" data-admin-participant-detail="${escapeHtml(item.email)}" aria-label="Ver detalhes dos palpites de ${escapeHtml(item.name)}"><div class="admin-person-row"><strong>${icon} ${escapeHtml(item.name)}</strong><span>${item.count}/${item.total}</span></div><div class="admin-progress-track"><i style="width:${pct}%"></i></div><small class="admin-pending-meta"><span>${status}</span><span> · ${item.lastUpdate?`Atualizado ${updated}`:updated}</span></small></button><div class="admin-pending-actions">${adminWhatsAppButton(participant,"admin-attention-whatsapp")}${pushButton}<button class="admin-person-detail-hint" type="button" data-admin-participant-detail="${escapeHtml(item.email)}" aria-label="Ver jogos e palpites de ${escapeHtml(item.name)}">Ver jogos <span aria-hidden="true">›</span></button></div></article>`;
   };
   const showComplete=adminPendingFilter==="all" || adminPendingFilter==="complete";
   const showPending=adminPendingFilter==="all" || adminPendingFilter==="pending";
