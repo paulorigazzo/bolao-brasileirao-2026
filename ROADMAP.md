@@ -4,7 +4,8 @@ Este é o roadmap oficial e a fonte única para status e prioridade do produto. 
 
 ## Referência atual
 
-- Versão funcional: `v6.61.3`.
+- Versão funcional: `v6.61.4`.
+- Logo permanente RIGAZZO, ícones e abertura atualizados. [Nota v6.61.4](docs/releases/v6.61.4-logo-rigazzo.md).
 - Situação da rodada mostra a quantidade por palpitar nos cards de participantes. [Nota v6.61.3](docs/releases/v6.61.3-adm-palpites-por-palpitar.md).
 - Terceiro card dos Destaques do Bolão: recorde por rodada quando a liderança ainda não pode ser exibida. [Nota v6.61.2](docs/releases/v6.61.2-terceiro-card-destaques.md).
 - Checagem operacional autenticada de 12/11/2026: diagnóstico 100/100, integridade consistente e zero falhas de notificações registradas. [Evidências e limites](docs/process/CHECAGEM_OPERACIONAL_2026-11-12.md).

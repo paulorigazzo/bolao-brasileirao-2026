@@ -4,8 +4,8 @@ self.addEventListener("push",event=>{
   const title=payload.title||"Bolão Brasileirão 2026";
   event.waitUntil(self.registration.showNotification(title,{
     body:payload.body||"Você ainda tem palpites pendentes.",
-    icon:"/assets/brand/jarvis-approved.png",
-    badge:"/assets/favicon.png",
+    icon:"/assets/brand/jarvis-approved.png?v=rigazzo-1",
+    badge:"/assets/favicon.png?v=rigazzo-1",
     tag:payload.tag||"lembrete-palpites",
     data:{url:payload.url||"/"},
   }));

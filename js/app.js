@@ -38,7 +38,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.61.3";
+const APP_VERSION = "6.61.4";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
