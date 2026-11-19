@@ -1,3 +1,7 @@
+# v6.61.4 — Logo permanente RIGAZZO
+
+- Atualiza logo, ícones, compartilhamento, Central e vinheta de abertura, mantendo a temporada 2026. [Escopo e validação](docs/releases/v6.61.4-logo-rigazzo.md).
+
 # v6.61.3 — Palpites em aberto na ADM
 
 - Os cards da Situação da rodada mostram quantos jogos abertos ainda precisam de palpite. [Nota da entrega](docs/releases/v6.61.3-adm-palpites-por-palpitar.md).

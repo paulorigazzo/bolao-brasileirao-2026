@@ -1,30 +1,25 @@
-# Diretrizes da marca — Projeto JARVIS
+# Diretrizes da marca — Bolão Brasileirão Rigazzo
 
-## Identidade
+## Identidade vigente — v6.61.4
 
-**JARVIS** é o codinome da identidade visual oficial do Bolão Brasileirão 2026. Não representa um assistente ou recurso de inteligência artificial.
+A marca permanente é o escudo aprovado com **BOLÃO BRASILEIRÃO RIGAZZO**, sem ano. A temporada continua identificada separadamente nos textos do aplicativo. JARVIS é apenas o codinome histórico dos arquivos, não um recurso de inteligência artificial.
 
-## Base visual
+## Matriz e derivados
 
-Série 4.1: escudo verde-escuro, contorno branco e verde, estrela dourada, tipografia de alto contraste e bola com detalhe vermelho.
+- `assets/brand/jarvis-logo-hd.png`: matriz PNG com transparência externa real e interior escuro preservado, derivada da versão RIGAZZO em maiúsculas aprovada pelo responsável.
+- `jarvis-approved.png` e ampliações `@2x`, `@3x`, `@4x`: cabeçalho, apresentação, carregamento e produção audiovisual.
+- `jarvis-192.png` e `jarvis-512.png`: ícones PWA, com fundo e margem que preservam o escudo dentro da área segura circular de ícones maskable.
+- `apple-touch-icon.png`, `favicon-32.png`, `favicon-48.png` e `assets/favicon.png`: instalação e navegador.
+- `jarvis-social.png`: compartilhamento; `central/logo.png`: Central do Participante.
 
-## Ativos
-
-- `jarvis-approved.png`: fonte temporária oficial da marca, usada no cabeçalho, carregamento e apresentação;
-- `jarvis-approved@2x.png`, `@3x.png` e `@4x.png`: ampliações técnicas do mesmo PNG, sem redesenho;
-- `jarvis-192.png` e `jarvis-512.png`: ícones PWA derivados da imagem aprovada;
-- `jarvis-192.png` e `jarvis-512.png`: instalação PWA;
-- `jarvis-social.png`: compartilhamento.
+Todos os derivados rasterizados vigentes usam a mesma matriz. Os SVGs históricos não são fontes da marca atual e não devem ser reintroduzidos na interface.
 
 ## Regras
 
-Preservar proporções, contraste e área de respiro. Não distorcer, recolorir parcialmente, aplicar rotação ou substituir a tipografia interna.
+Preservar proporções, contraste, cores, tipografia e área de respiro. Não redesenhar a marca. A remoção do fundo externo da versão aprovada foi feita com a ferramenta de edição de imagem; os tamanhos de distribuição são derivados técnicos dessa matriz.
 
+A vinheta de abertura mantém duração, animação e som originais, usando o novo logo. No app a reprodução continua silenciosa e respeita redução de movimento. Vídeos tutoriais e capturas existentes permanecem históricos até uma atualização própria.
 
-## Fonte temporária oficial — v6.6.0
+## Histórico
 
-Até a conclusão do SVG mestre, o arquivo `assets/brand/jarvis-approved.png` é a única fonte visual autorizada da marca JARVIS. Ele corresponde exatamente ao PNG aprovado e fornecido pelo responsável do projeto. Nenhuma reconstrução, estilização ou geração por IA deve substituir este arquivo.
-
-## Ativo oficial temporário — PNG HD
-
-A v6.6.0 utiliza `assets/brand/jarvis-logo-hd.png`, reconstruído diretamente do arquivo aprovado **Escudo Bolão 2026.png**. O fundo quadriculado incorporado ao arquivo de origem foi removido tecnicamente para gerar transparência real, sem redesenhar a marca. Todos os ativos rasterizados da aplicação derivam desta mesma matriz.
+A matriz anterior da v6.6.0 derivava de **Escudo Bolão 2026.png**. Sua substituição pela marca sem ano foi explicitamente aprovada. O histórico Git preserva os ativos anteriores para consulta e reversão.

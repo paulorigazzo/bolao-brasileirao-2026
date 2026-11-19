@@ -1,5 +1,5 @@
-6.61.3
+6.61.4
 
-Situação da rodada mostra quantos palpites ainda podem ser feitos por participante.
+Logo permanente RIGAZZO nos recursos visuais do app e na abertura.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)

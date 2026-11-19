@@ -2147,3 +2147,7 @@ O app mantém o fluxo completo quando afetado. A Central utiliza o deploy Git ex
 - Controle: separar os marcadores e trabalhos administrativos de push_automaticos, evitando inflação das contagens dos participantes e consolidação recursiva. Não gerar retroativos, avisos por execução/lote ou novo consolidado em retentativas. Preservar os marcadores durante a temporada.
 - Limites: consolidar somente trabalhos terminados e tentativas de transporte registradas; lembretes aguardam também o fim da janela de admissão. Inscrições posteriores não recebem eventos já consolidados. Aceite não comprova entrega/leitura e falhas de confirmação podem repetir transporte.
 - Fonte: [contrato, aplicação e mitigação v6.54.0](../releases/v6.54.0-consolidados-push-adm.md).
+
+## 2026-11-18 — Marca permanente RIGAZZO
+
+Decisão aprovada: usar o escudo sem ano, com RIGAZZO em maiúsculas, mantendo a temporada nos textos do app. A primeira etapa abrange imagens, ícones, Central e abertura do aplicativo. Os vídeos existentes terão atualização própria. A fonte vigente e os derivados estão definidos em [Diretrizes da marca](../BRAND_GUIDELINES.md). Não antecipa a virada dos dados para 2027.
