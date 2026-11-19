@@ -38,7 +38,7 @@ import { lineupShirtTheme } from "./lineup-shirt-themes.js";
 import { buildLineupMatchEventsModel } from "./lineup-match-events.js";
 import { competitionRound, legacyPendingRounds } from "./round-context.js";
 
-const APP_VERSION = "6.61.4";
+const APP_VERSION = "6.61.5";
 installMotionTokens();
 installMotionInteractions();
 installFirstVisitTips();
@@ -1064,9 +1064,7 @@ async function loadLegacyCompetitiveContext(league){
   state.activeLeague=league;state.leagueContextStatus="legacy";applyCanonicalParticipantNames();renderLeagueContext();
 }
 
-async function loadData(){
-  const {data:games,error:gErr}=await sb.from("jogos").select("*").order("rodada").order("inicio");
-  if(gErr) throw gErr;
+async function fetchMatchProjections(games){
   const gameIds=(games||[]).map(game=>game.id_jogo);
   const [{data:eventProjections,error:eventProjectionsErr},{data:detailProjections,error:detailProjectionsErr}]=gameIds.length
     ? await Promise.all([
@@ -1076,6 +1074,50 @@ async function loadData(){
     : [{data:[],error:null},{data:[],error:null}];
   if(eventProjectionsErr) console.warn("Os detalhes dos gols não puderam ser carregados.",eventProjectionsErr);
   if(detailProjectionsErr) console.warn("As estatísticas e escalações não puderam ser carregadas.",detailProjectionsErr);
+  return {events:eventProjections||[],details:detailProjections||[],failed:Boolean(eventProjectionsErr||detailProjectionsErr)};
+}
+
+let startupMatchDetails=null;
+
+function showMatchDetailsStatus(text){
+  for(const tab of ["games","myTeam"]){
+    $(tab+"MatchDetailsStatus").textContent=text;
+    show(tab+"MatchDetailsStatus",Boolean(text));
+  }
+}
+
+function loadStartupMatchDetails(){
+  const pending=startupMatchDetails;
+  if(!pending||pending.request) return;
+  showMatchDetailsStatus("Carregando detalhes das partidas…");
+  pending.request=fetchMatchProjections(state.games).then(({events,details,failed})=>{
+    if(startupMatchDetails!==pending||state.user?.id!==pending.userId) return;
+    // Keep projections that arrived through live updates while this request ran.
+    const merge=(loaded,current)=>{
+      const byGame=new Map(loaded.map(item=>[Number(item.id_jogo),item]));
+      for(const item of current) byGame.set(Number(item.id_jogo),item);
+      return [...byGame.values()];
+    };
+    state.gameEventProjections=merge(events,state.gameEventProjections);
+    state.gameDetailProjections=merge(details,state.gameDetailProjections);
+    if(!failed) startupMatchDetails=null;
+    showMatchDetailsStatus(failed?"Detalhes indisponíveis. Abra a tela novamente para tentar.":"");
+    if(!$("gamesTab").classList.contains("hidden")) renderGames();
+    if(!$("myTeamTab").classList.contains("hidden")) renderMyTeam();
+  }).catch(error=>{
+    if(startupMatchDetails===pending){
+      showMatchDetailsStatus("Detalhes indisponíveis. Abra a tela novamente para tentar.");
+      console.warn("Não foi possível carregar os detalhes das partidas.",error);
+    }
+  }).finally(()=>{pending.request=null;});
+}
+
+async function loadData({deferMatchDetails=false}={}){
+  const {data:games,error:gErr}=await sb.from("jogos").select("*").order("rodada").order("inicio");
+  if(gErr) throw gErr;
+  const {events,details}=deferMatchDetails
+    ? {events:[],details:[]}
+    : await fetchMatchProjections(games);
   const mainRound=currentRoundNumber(games);
   const earlierRounds=legacyPendingRounds(games,mainRound,Date.now(),game=>gameStatusDisplay(game).key);
   const adminGameIds=[...new Set([adminRoundGameIds(games,mainRound),...earlierRounds.map(round=>adminRoundGameIds(games,round))].flat())];
@@ -1100,7 +1142,9 @@ async function loadData(){
   if(leagueAssignmentsErr) console.warn("As designações pendentes não puderam ser carregadas.",leagueAssignmentsErr);
   if(participantSituationsErr) console.warn("As situações de ligas dos participantes não puderam ser carregadas.",participantSituationsErr);
   if(communicationResult.error) console.warn("O status de comunicação dos participantes não pôde ser carregado.",communicationResult.error);
-  state.games=games||[]; state.gameEventProjections=eventProjections||[]; state.gameDetailProjections=detailProjections||[]; state.ownPicks=picks||[]; state.leagues=leagues||[]; state.adminPickProgress=adminProgress||[]; state.authorizedParticipants=authorized||[]; state.adminCommunicationStatus=communicationResult.data; state.participantLimit=Math.max(1,Number(participantLimit)||10); state.leagueManager=leagueManager===true; state.leagueAssignments=leagueAssignments||[]; state.participantSituations=participantSituations||[];
+  startupMatchDetails=deferMatchDetails?{userId:state.user.id,request:null}:null;
+  showMatchDetailsStatus("");
+  state.games=games||[]; state.gameEventProjections=events; state.gameDetailProjections=details; state.ownPicks=picks||[]; state.leagues=leagues||[]; state.adminPickProgress=adminProgress||[]; state.authorizedParticipants=authorized||[]; state.adminCommunicationStatus=communicationResult.data; state.participantLimit=Math.max(1,Number(participantLimit)||10); state.leagueManager=leagueManager===true; state.leagueAssignments=leagueAssignments||[]; state.participantSituations=participantSituations||[];
   if(GAME_GOAL_EVENTS_PREVIEW){
     const previews=buildGameGoalEventsRoundPreview(state.games,26);
     const previewIds=new Set(previews.map(item=>Number(item.id_jogo)));
@@ -6068,7 +6112,11 @@ function applyNavigationState(tabName){
     if(active) item.setAttribute("aria-current","page"); else item.removeAttribute("aria-current");
   });
   ["home","homeV2","games","myTeam","ranking","standings","stats","admin","rules","profile"].forEach(name=>show(`${name}Tab`,name===tabName));
-  if(tabName==="games") requestAnimationFrame(()=>centerSelectedRoundInStrip($("roundNumberStrip")));
+  if(tabName==="games"){
+    renderGames();
+    requestAnimationFrame(()=>centerSelectedRoundInStrip($("roundNumberStrip")));
+  }
+  if(tabName==="games"||tabName==="myTeam") loadStartupMatchDetails();
   if(tabName==="home") renderHome();
   if(tabName==="homeV2") renderHomeV2();
   if(tabName==="myTeam") renderMyTeam();
@@ -6114,14 +6162,14 @@ function openPushNotificationTarget(search=location.search){
         adminNotificationsController.open($("adminNotificationsOpen"),{round,type});
       }
     }});
-    return;
+    return true;
   }
   if(!Number.isInteger(round)||round<1||round>38||!$("roundSelect")?.querySelector(`option[value="${round}"]`)) return;
   $("roundSelect").value=String(round);
-  renderGames();
   navigateTo("games",{onReady:()=>{
     if(params.get("notificacao")==="resumo" && !$("gamesTab")?.classList.contains("hidden")) openRoundHighlights(round);
   }});
+  return true;
 }
 
 function navigateTo(tabName,{onReady}={}){
@@ -6225,11 +6273,11 @@ async function refreshLiveScoresSilently(){
       }
       state.games=data;
       renderSyncStatus();
-      renderGames();
-      renderRanking();
-      renderMyTeam();
-      renderStats();
-      renderHome();
+      if(!$("gamesTab").classList.contains("hidden")) renderGames();
+      if(!$("rankingTab").classList.contains("hidden")) renderRanking();
+      if(!$("myTeamTab").classList.contains("hidden")) renderMyTeam();
+      if(!$("statsTab").classList.contains("hidden")) renderStats();
+      if(!$("homeTab").classList.contains("hidden")||!$("homeV2Tab").classList.contains("hidden")) renderHome();
       if(!$('rankingPicksModal')?.classList.contains('hidden')&&rankingPicksModalView==="picks") renderRankingParticipantPicks();
       if(!$('temporaryRankingModal')?.classList.contains('hidden')) await refreshTemporaryRankingModal({silent:true});
       if(!$("adminTab")?.classList.contains("hidden")) renderAdminRoundStatus();
@@ -6264,7 +6312,7 @@ async function initialize(session){
   }
   sessionStorage.removeItem("bolaoRegistrationIntent");
   try{const {error}=await sb.rpc("processar_minhas_designacoes_liga");if(error)throw error;}catch(error){renderActivationFailure(error);return;}
-  const hasLeague=await loadData();
+  const hasLeague=await loadData({deferMatchDetails:true});
   if(!hasLeague){show("welcome",false);show("app",false);show("noLeagueStatus",true);$("noLeagueStatusEmail").textContent=state.user.email||"";return;}
   show("noLeagueStatus",false);show("activationFailureStatus",false);stopMembershipStatusPolling();
   renderEditableProfile();
@@ -6272,9 +6320,13 @@ async function initialize(session){
   renderFavoriteTeamSelector();
   show("welcome",false); show("app",true); show("loginBtn",false); show("headerUser",true);
   const isAdmin=isAdminUser(); show("adminPanel",isAdmin); show("adminMenuShortcut",isAdmin);
-  renderRounds(); renderGames(); renderRanking(); renderStats(); renderHome(); renderMyTeam(); startMatchClockRefresh(); startLiveScoreRefresh(); refreshLiveScoresSilently(); if(isAdmin){ renderAdminAttention(); renderAdminRoundStatus(); renderAdminQuickActions(); renderAdminParticipants(); renderAdminDiagnostic(); renderAdminExecutiveDashboard(); renderAdminAudit(); renderAdminRecoveryProtection(); }
+  renderRounds();
+  if(!openPushNotificationTarget()) renderHome();
+  startMatchClockRefresh();
+  startLiveScoreRefresh();
+  // Leave the first paint available to the selected screen before refreshing.
+  requestAnimationFrame(()=>requestAnimationFrame(()=>refreshLiveScoresSilently()));
   initializePushPreferences();
-  openPushNotificationTarget();
 }
 
 

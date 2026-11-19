@@ -1,3 +1,7 @@
+# v6.61.5 — Abertura mais leve
+
+- Prioriza a tela de destino e carrega os detalhes das partidas conforme o uso. [Nota da entrega](docs/releases/v6.61.5-abertura-mais-leve.md).
+
 # v6.61.4 — Logo permanente RIGAZZO
 
 - Atualiza logo, ícones, compartilhamento, Central e vinheta de abertura, mantendo a temporada 2026. [Escopo e validação](docs/releases/v6.61.4-logo-rigazzo.md).

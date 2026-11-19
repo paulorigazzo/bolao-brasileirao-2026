@@ -63,10 +63,10 @@ assert.equal(events.length,0,'sincronização demorada preserva limite de execu�
 const app=readFileSync(new URL('../js/app.js',import.meta.url),'utf8');
 const navSource=app.slice(app.indexOf('function openPushNotificationTarget('),app.indexOf('function navigateTo('));
 const navCalls=[];const select={value:'',querySelector:()=>true};
-const context={URLSearchParams,Number,$:id=>id==='roundSelect'?select:{classList:{contains:()=>false}},renderGames:()=>navCalls.push('games'),navigateTo:(tab,{onReady})=>{navCalls.push(tab);onReady();},openRoundHighlights:round=>navCalls.push(round)};
+const context={URLSearchParams,Number,$:id=>id==='roundSelect'?select:{classList:{contains:()=>false}},navigateTo:(tab,{onReady})=>{navCalls.push([tab,select.value]);onReady();},openRoundHighlights:round=>navCalls.push(round)};
 vm.createContext(context);vm.runInContext(navSource,context);
-context.openPushNotificationTarget('?rodada=34&notificacao=resumo');assert.deepEqual(navCalls,['games','games',34]);assert.equal(select.value,'34');
-navCalls.length=0;context.openPushNotificationTarget('?rodada=34');assert.deepEqual(navCalls,['games','games']);
+context.openPushNotificationTarget('?rodada=34&notificacao=resumo');assert.deepEqual(navCalls,[['games','34'],34]);assert.equal(select.value,'34');
+navCalls.length=0;context.openPushNotificationTarget('?rodada=34');assert.deepEqual(navCalls,[['games','34']]);
 navCalls.length=0;context.openPushNotificationTarget('?rodada=999&notificacao=resumo');assert.equal(navCalls.length,0);
 const sql=readFileSync(new URL('../supabase/migrations/20261027172231_add_automatic_round_push.sql',import.meta.url),'utf8');
 assert.match(sql,/for update skip locked/i);assert.match(sql,/on conflict do nothing/i);

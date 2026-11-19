@@ -1,5 +1,5 @@
-6.61.4
+6.61.5
 
-Logo permanente RIGAZZO nos recursos visuais do app e na abertura.
+A abertura prioriza o escudo, a vinheta e a tela de destino.
 
 - Histórico: [CHANGELOG.md](CHANGELOG.md)
