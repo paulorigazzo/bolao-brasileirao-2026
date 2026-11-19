@@ -67,5 +67,6 @@ for(const query of ['?notificacao=adm-disparo&rodada=39&tipo=2h','?notificacao=a
   context.openPushNotificationTarget(query);
 }
 assert.equal(navigations.length,2,'parâmetros inválidos não abrem ADM');
-assert(app.indexOf('openPushNotificationTarget();')>app.indexOf('await loadData();'),'destino é resolvido após login e carga de autorização');
+const initializeSource=app.slice(app.indexOf('async function initialize(session)'),app.indexOf('async function animateStandingsPanel'));
+assert.match(initializeSource,/await loadData\([^)]*\)[\s\S]*openPushNotificationTarget\(\)/,'destino é resolvido após login e carga de autorização');
 console.log('Consolidados ADM: transporte simulado, falhas, independência, contagens, tags e destino autorizado após login aprovados.');

@@ -12,14 +12,15 @@
   <meta property="og:description" content="Palpites, ranking e emoção rodada a rodada.">
   <meta property="og:image" content="./assets/brand/jarvis-social.png?v=rigazzo-1">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./css/design-system.css?v=6.61.4">
-  <link rel="stylesheet" href="./css/styles.css?v=6.61.4">
-  <link rel="stylesheet" href="./css/home-v2.css?v=6.61.4">
-  <link rel="stylesheet" href="./css/components.css?v=6.61.4">
-  <link rel="stylesheet" href="./css/identity-premium.css?v=6.61.4">
-  <link rel="stylesheet" href="./css/fan-theme.css?v=6.61.4">
-  <link rel="stylesheet" href="./css/admin-center.css?v=6.61.4">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
+  <link rel="stylesheet" href="./css/design-system.css?v=6.61.5">
+  <link rel="stylesheet" href="./css/styles.css?v=6.61.5">
+  <link rel="stylesheet" href="./css/home-v2.css?v=6.61.5">
+  <link rel="stylesheet" href="./css/components.css?v=6.61.5">
+  <link rel="stylesheet" href="./css/identity-premium.css?v=6.61.5">
+  <link rel="stylesheet" href="./css/fan-theme.css?v=6.61.5">
+  <link rel="stylesheet" href="./css/admin-center.css?v=6.61.5">
+  <script type="module" src="./js/startup-intro.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 </head>
 <body>
   <div id="loading" class="loading-screen" role="status" aria-live="polite" aria-label="Carregando o bolão">
@@ -33,7 +34,7 @@
       <span class="brand-mark"><img src="./assets/brand/jarvis-approved.png?v=rigazzo-1" alt=""></span>
       <div>
         <h1>Bolão Brasileirão 2026</h1>
-      <p class="brand-version"><span id="appVersion" class="version-pill">v6.61.4</span></p>
+      <p class="brand-version"><span id="appVersion" class="version-pill">v6.61.5</span></p>
         <p id="headerLeagueName" class="brand-league hidden" aria-live="polite"></p>
       </div>
     </div>
@@ -194,6 +195,7 @@
 
         <div id="roundProgress" class="round-progress card games-premium-progress"></div>
         <div class="games-list-heading"><div><span class="eyebrow">★ PRÓXIMOS JOGOS</span><h2>Partidas da rodada</h2></div><span>Ordenado por data</span></div>
+        <p id="gamesMatchDetailsStatus" class="muted-note hidden" role="status"></p>
         <div id="gamesList" class="games-premium-list"></div>
         <div id="gamesSaveDock" class="games-save-dock hidden">
           <div><strong id="gamesSaveProgress">0 de 0 palpites feitos</strong><div class="games-save-track"><span id="gamesSaveBar"></span></div></div>
@@ -203,6 +205,7 @@
       </section>
 
       <section id="myTeamTab" class="tab-content hidden my-team-tab" aria-labelledby="myTeamPageTitle">
+        <p id="myTeamMatchDetailsStatus" class="muted-note hidden" role="status"></p>
         <section id="myTeamContent" aria-live="polite"></section>
         <footer class="participant-center-footer"><a class="participant-help-link" href="/central/" target="_blank" rel="noopener noreferrer" aria-label="Central do Participante (abre em nova aba)">Central do Participante →</a></footer>
       </section>
@@ -926,7 +929,6 @@
       if(heroButton) heroButton.textContent="Entrar com Google e enviar cadastro";
     }
   </script>
-<script type="module" src="./js/startup-intro.js"></script>
-<script type="module" src="./js/app.js?v=6.61.4"></script>
+<script type="module" src="./js/app.js?v=6.61.5"></script>
 </body>
 </html>
